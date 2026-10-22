@@ -1,6 +1,6 @@
 {
  "v": 1,
- "updated": "2026-10-22T14:45:04.382Z",
+ "updated": "2026-10-22T16:09:59.331Z",
  "notice": "",
  "sets": {
   "ner": [
@@ -8,7 +8,7 @@
     "id": "ner-0",
     "a": "12:00",
     "b": "13:00",
-    "n": "Girls on Decks",
+    "n": "Girls on Decks + Carnada",
     "t": 1,
     "sub": ""
    },
