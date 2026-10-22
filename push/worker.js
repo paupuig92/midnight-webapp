@@ -144,6 +144,7 @@ async function everyMinute(env, now) {
     : sendBatch(env, c)));
   const sum = results.reduce((s, r) => ({ ok: s.ok + (r.ok || 0), ko: s.ko + (r.ko || 0), gone: s.gone + (r.gone || 0) }), { ok: 0, ko: 0, gone: 0 });
   console.log('avisos', new Date(now).toISOString(), 'enviats', sum.ok, 'errors', sum.ko, 'caducats', sum.gone, 'de', targets.length);
+  await callStore(env, '/sent', { at: new Date(now).toISOString(), ...sum, of: targets.length });
 }
 
 // Emmagatzematge (Durable Object amb SQLite): un sol lloc i coherent, sense curses entre peticions
@@ -202,6 +203,9 @@ export class Store {
     if (url.pathname === '/gone') { for (const id of b.ids || []) this.sql.exec('DELETE FROM subs WHERE id = ?', id); return json({ ok: true }); }
     if (url.pathname === '/endpoint') { const r = this.row(b.id); return json({ endpoint: r ? r.endpoint : null }); }
     if (url.pathname === '/count') return json({ n: this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n });
+    if (url.pathname === '/debug') return json({ last: this.get('last'), sets: (this.get('sets') || {}).stamp || null, sent: this.get('sent'),
+      subs: this.sql.exec('SELECT id, before, changes, at, favs FROM subs').toArray() });
+    if (url.pathname === '/sent') { this.put('sent', b); return json({ ok: true }); }
 
     // Horari vigent: el fresc si n'hi ha; si no, l'últim bo; si no, el cartell
     const current = fresh => {
@@ -287,6 +291,10 @@ export default {
         return json(await callStore(env, '/now', { id, now: Date.now() }), 200, origin);
       }
       // Estat: quants mòbils hi ha registrats (només el número, cap dada)
+      if (url.pathname === '/debug') {
+        if (!env.SEND_KEY || req.headers.get('x-send-key') !== env.SEND_KEY) return json({ error: 'forbidden' }, 403);
+        return json(await callStore(env, '/debug', {}));
+      }
       if (url.pathname === '/') return json({ ok: true, service: 'midnight-push', mobiles: (await callStore(env, '/count', {})).n }, 200, origin);
       return json({ error: 'not found' }, 404, origin);
     } catch (e) {
