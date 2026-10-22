@@ -36,14 +36,11 @@ BASIC=$(print -rn -- "x-access-token:$(<$TOKEN_FILE)" | base64)
 # Només el veu git (no s'exporta: ni build_web.py ni altres programes l'hereten)
 g() { GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader GIT_CONFIG_VALUE_0="Authorization: Basic $BASIC" git "$@"; }
 # Primer baixa els canvis que l'organització hagi fet des del web (docs/changes.json)
-g pull -q --rebase https://github.com/$REPO.git main && echo "ok sincronitzat"
-# i torna a generar docs/ perquè els calendaris (.ics) tinguin els horaris de changes.json
-python3 -I build_web.py >/dev/null
-if [[ -n "$(git status --porcelain)" ]]; then
-  git add -A
-  git commit -q -m "Actualitza els calendaris amb els canvis de l'organització" && echo "ok calendaris"
-fi
-g push -q https://github.com/$REPO.git main && echo "ok push"
+# (si falla, s'atura: millor no publicar que publicar a mitges)
+g pull -q --rebase https://github.com/$REPO.git main || { echo "ERROR: no s'ha pogut sincronitzar amb GitHub (conflicte o sense xarxa). No s'ha publicat res."; exit 1; }
+echo "ok sincronitzat"
+g push -q https://github.com/$REPO.git main || { echo "ERROR: GitHub ha rebutjat la pujada (potser l'organització acaba de publicar). Torna a executar l'script."; exit 1; }
+echo "ok push"
 
 code=$(api https://api.github.com/repos/$REPO/pages)
 if [[ $code == 404 ]]; then

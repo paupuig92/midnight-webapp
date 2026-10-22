@@ -53,7 +53,14 @@ src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "publi
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
 import datetime
-src = src.replace("const BUILD = '';", "const BUILD = '" + datetime.datetime.now().strftime("%d/%m %H:%M") + "';")
+# La data és la de l'últim canvi dels fitxers de l'app (no l'hora del build): així, si no canvia res,
+# la versió és la mateixa i els mòbils no es tornen a baixar l'app ni surt «Hay una versión nueva»
+srcs = [ROOT / "index.html", ROOT / "build_web.py", *(ROOT / "img").iterdir(), *(ROOT / "icons").glob("icon-*.png")]
+stamp_t = max(f.stat().st_mtime for f in srcs if f.is_file())
+push_f2 = CONF / "push.json"
+if push_f2.is_file():
+    stamp_t = max(stamp_t, push_f2.stat().st_mtime)
+src = src.replace("const BUILD = '';", "const BUILD = '" + datetime.datetime.fromtimestamp(stamp_t).strftime("%d/%m %H:%M") + "';")
 head, body = src.split("</style>", 1)
 head += "</style>"
 # Treu la meta pròpia de l'artifact i el viewport (es posen a sota)
@@ -152,7 +159,7 @@ if (OUT / "cal").exists():
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
 version = hashlib.sha1(page.encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
+const FILES = ['index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
@@ -160,8 +167,13 @@ self.addEventListener('install', e => {{
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, {{ cache: 'reload' }})))).then(() => self.skipWaiting()));
 }});
 
-// Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar
+// Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar.
+// 'midnight-meta' (no s'esborra en actualitzar l'app): què s'ha mostrat ja (per no repetir) i si s'ha demanat una prova.
 const PUSH_URL = {json.dumps(push["url"]) if push else "''"};
+const PUSH_KEY = {json.dumps(push["public"]) if push else "''"};
+const META = 'midnight-meta';
+async function metaGet(k, d) {{ try {{ const r = await (await caches.open(META)).match(k); return r ? await r.json() : d; }} catch (e) {{ return d; }} }}
+async function metaPut(k, v) {{ try {{ await (await caches.open(META)).put(k, new Response(JSON.stringify(v))); }} catch (e) {{}} }}
 async function subId() {{
   const s = await self.registration.pushManager.getSubscription();
   if (!s) return '';
@@ -170,14 +182,37 @@ async function subId() {{
 }}
 self.addEventListener('push', e => {{
   e.waitUntil((async () => {{
-    let items = [];
+    let items = [], got = false;
+    // Prova demanada des de Configuración (la pàgina hi deixa la marca abans de demanar-la)
+    const test = await metaGet('test', 0);
+    if (test && Date.now() - test < 3 * 60000) {{
+      items.push({{ title: 'Midnight · prueba', body: 'Las notificaciones llegan también con el móvil bloqueado ✓', tag: 'prueba-' + test }});
+      await metaPut('test', 0);
+    }}
     try {{
-      const r = await fetch(PUSH_URL + '/now?id=' + await subId(), {{ cache: 'no-store' }});
-      items = ((await r.json()).items || []).slice(0, 4);
+      const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 8000);
+      const r = await fetch(PUSH_URL + '/now?id=' + await subId(), {{ cache: 'no-store', signal: ac.signal }});
+      clearTimeout(tm);
+      if (r.ok) {{ items.push(...((await r.json()).items || []).slice(0, 6)); got = true; }}
     }} catch (err) {{}}
+    // No repetir el que ja s'ha mostrat (el servidor torna tot el dels últims 15 min)
+    const shown = await metaGet('shown', []);
+    let fresh = items.filter(i => !shown.includes(i.tag));
+    await metaPut('shown', [...shown, ...fresh.map(i => i.tag)].slice(-200));
     // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
-    if (!items.length) items = [{{ title: 'Midnight', body: 'Hay novedades en el horario.', tag: 'midnight' }}];
-    await Promise.all(items.map(i => self.registration.showNotification(i.title, {{ body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' }})));
+    if (!fresh.length) fresh = [items.length ? items[items.length - 1]
+      : {{ title: 'Midnight', body: got ? 'Abre la app para ver tu horario.' : 'Sin conexión: abre la app para ver tu horario.', tag: 'midnight' }}];
+    await Promise.all(fresh.slice(0, 4).map(i => self.registration.showNotification(i.title, {{ body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' }})));
+  }})());
+}});
+// Si el navegador renova la subscripció, es torna a registrar (el servidor conserva els artistes del registre vell)
+self.addEventListener('pushsubscriptionchange', e => {{
+  e.waitUntil((async () => {{
+    try {{
+      const pad = '='.repeat((4 - PUSH_KEY.length % 4) % 4), raw = atob((PUSH_KEY + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      const sub = e.newSubscription || await self.registration.pushManager.subscribe({{ userVisibleOnly: true, applicationServerKey: Uint8Array.from(raw, c => c.charCodeAt(0)) }});
+      await fetch(PUSH_URL + '/sub', {{ method: 'POST', headers: {{ 'content-type': 'application/json' }}, body: JSON.stringify({{ endpoint: sub.endpoint, old: e.oldSubscription ? e.oldSubscription.endpoint : '' }}) }});
+    }} catch (err) {{}}
   }})());
 }});
 self.addEventListener('notificationclick', e => {{
@@ -187,7 +222,7 @@ self.addEventListener('notificationclick', e => {{
 
 self.addEventListener('activate', e => {{
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== META).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 }});
 
@@ -208,16 +243,17 @@ self.addEventListener('fetch', e => {{
   }}
   // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)
   if (url.searchParams.has('t')) return;
-  // La pàgina: primer la xarxa (màxim 3 s) perquè surti la versió nova; sense cobertura, la còpia guardada
+  // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
   if (e.request.mode === 'navigate') {{
     e.respondWith(caches.open(VERSION).then(async cache => {{
       const hit = await cache.match('index.html');
       const net = fetch(e.request, {{ cache: 'no-cache' }}).then(res => {{
         // Un portal wifi o una pàgina d'error no s'han de guardar com si fossin l'app
         if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put('index.html', res.clone());
+        else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       }});
-      const slow = new Promise(r => setTimeout(() => r(hit), 3000));
+      const slow = new Promise(r => setTimeout(() => r(hit), 1500));
       try {{ return (await Promise.race([net, hit ? slow : net])) || await net; }}
       catch (err) {{ return hit || Response.error(); }}
     }}));

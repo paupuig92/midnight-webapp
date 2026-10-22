@@ -27,19 +27,33 @@ if [[ -z $KV ]]; then
   echo "ok dades creades"
 fi
 
-# Codi + enllaços (la clau privada va com a secret; mai surt per pantalla)
-python3 -I - $CONF/vapid.json $KV $PRIV/meta.json <<'EOF'
+# Clau secreta dels lots d'enviament (el servidor es crida a si mateix; ningú més pot fer servir /send)
+[[ -s $CONF/send-key ]] || { openssl rand -hex 24 > $CONF/send-key; chmod 600 $CONF/send-key; }
+
+# Codi (amb el cartell a dins) + enllaços. La clau privada va com a secret; mai surt per pantalla
+python3 -I - $CONF/vapid.json $KV $PRIV/meta.json $CONF/send-key ../docs/cartel.json worker.js $PRIV/worker.js <<'PY'
 import sys, json
 v = json.load(open(sys.argv[1]))
+cartel = json.load(open(sys.argv[5]))
+code = open(sys.argv[6]).read().replace("/*CARTEL*/null/*CARTEL*/", json.dumps(cartel, ensure_ascii=False))
+open(sys.argv[7], "w").write(code)
 meta = {"main_module": "worker.js", "compatibility_date": "2024-09-23", "bindings": [
   {"type": "kv_namespace", "name": "SUBS", "namespace_id": sys.argv[2]},
+  {"type": "durable_object_namespace", "name": "STORE", "class_name": "Store"},
+  {"type": "service", "name": "SELF", "service": "midnight-push"},
   {"type": "secret_text", "name": "VAPID_JWK", "text": json.dumps(v["jwk"])},
-  {"type": "plain_text", "name": "VAPID_PUBLIC", "text": v["public"]}]}
+  {"type": "secret_text", "name": "SEND_KEY", "text": open(sys.argv[4]).read().strip()},
+  {"type": "plain_text", "name": "VAPID_PUBLIC", "text": v["public"]}],
+  "migrations": {"new_tag": "v1", "new_sqlite_classes": ["Store"]}}
 open(sys.argv[3], "w").write(json.dumps(meta))
-EOF
-cf -X PUT "$API/accounts/$ACCT/workers/scripts/$NAME" \
-  -F "metadata=@$PRIV/meta.json;type=application/json" \
-  -F "worker.js=@worker.js;type=application/javascript+module" | ok
+json.dump({k: v for k, v in meta.items() if k != "migrations"}, open(sys.argv[3] + ".nomig", "w"))
+PY
+upload() { cf -X PUT "$API/accounts/$ACCT/workers/scripts/$NAME" -F "metadata=@$1;type=application/json" -F "worker.js=@$PRIV/worker.js;type=application/javascript+module"; }
+# El primer cop crea l'emmagatzematge (migració v1); després ja hi és i es puja sense
+upload $PRIV/meta.json > $PRIV/up.json
+if ! ok < $PRIV/up.json 2>/dev/null; then
+  if grep -qi migration $PRIV/up.json; then upload $PRIV/meta.json.nomig | ok; else ok < $PRIV/up.json; fi
+fi
 echo "ok servidor"
 
 # Subdomini de workers.dev (el primer cop no n'hi ha: es crea)
