@@ -60,7 +60,8 @@ page = f"""<!doctype html>
 <meta name="description" content="Horario en directo del Bass in the Park 2026 · Montmeló">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>
 /* El que a l'artifact posa la plataforma */
 :root {{ padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }}
@@ -85,6 +86,9 @@ OUT.mkdir(exist_ok=True)
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(ROOT / "img", OUT / "img")
+# Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
+for s in (32, 180, 192, 512):
+    shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
 (OUT / "manifest.webmanifest").write_text("""{
@@ -96,8 +100,8 @@ shutil.copytree(ROOT / "img", OUT / "img")
   "background_color": "#040704",
   "theme_color": "#040704",
   "icons": [
-    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
 """, encoding="utf-8")
@@ -105,7 +109,7 @@ shutil.copytree(ROOT / "img", OUT / "img")
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
 version = hashlib.sha1(page.encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png',
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
 self.addEventListener('install', e => {{
