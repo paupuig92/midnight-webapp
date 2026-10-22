@@ -838,7 +838,7 @@ async function pullChanges() {
 
 // Organització: editor protegit amb contrasenya.
 // ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null).
-const ADMIN = null;
+const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1000000, "len": 319, "ct": "zFPhHUbJ/tvuibM24R1TT5OTM1142z3iK0N4q0euRg7FRm3LYqXCTfbBLyNbumDZ37Jb9CzVYVKD6tWT67560Sn8U+OqQswNQoLScveT2CpgG84/ulfTzGZ0uQhkud4+bxLgYEuzA/dxWHt1unNyDTCpDzJeknjCXkfbcuA3DpYXTiXR2CxEvv7fv6va6jfNIlDtCAIvUgnRztSI+STdhFJvcB031kZT9w5mNw3SPSz9KI/an59b06ql5Hej6Q3wRUXVUW0d9h11z5G+N4A9gfDyF9MslQStsHVfo4KEZ3myFKDqN+VV8n3sApbS04sBCA+HVbmqozDp+j+28xCdcO1voxLWPyfiqmrSi/IgCuL7FVYmt7qLtjX3Op01JsqSo7x/304bSj7CsqDhyQYz9y3NcOpKpHKeLqo5esGrZQ==", "check": "YaeFedVqkV0Hi5Dfc7XEs2RV9wGKlDokXx42gSa3Rh8="};
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const b64e = u => btoa(String.fromCharCode(...u));
 async function unlock(pw) {
