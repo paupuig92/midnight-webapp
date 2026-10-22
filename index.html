@@ -240,6 +240,10 @@ h2 span { color: var(--neon); }
 .edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .edmsg { margin-top: 10px; font-size: 13.5px; color: var(--neon); min-height: 1.2em; }
 .edmsg.bad { color: var(--t5); }
+.tests { margin-top: 22px; border-top: 1px solid var(--rule); padding-top: 4px; display: flex; flex-direction: column; gap: 12px; }
+.tests h3 { margin: 10px 0 0; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tests .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; }
+.notif label { margin-top: 0; }
 .linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 8px 0; cursor: pointer; }
 @media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } }
 
@@ -309,19 +313,6 @@ h2 span { color: var(--neon); }
       <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
       <div class="hint" id="wakeHint" hidden></div>
     </div>
-    <div class="sim">
-      <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
-      <div id="simCtl" class="sim" hidden>
-        <input type="range" id="simRange" aria-label="Hora simulada">
-        <div class="steps" id="simSteps">
-          <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
-        </div>
-        <div class="steps" id="simPresets">
-          <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
-        </div>
-        <output id="simOut"></output>
-      </div>
-    </div>
   </section>
 
   <section class="admin" id="admin" hidden>
@@ -349,6 +340,32 @@ h2 span { color: var(--neon); }
       </div>
       <div class="edmsg" id="edMsg" role="status"></div>
       <button type="button" class="linkbtn" id="edReset">Volver al horario del cartel</button>
+
+      <div class="tests">
+        <h3>Pruebas</h3>
+        <div class="sim">
+          <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
+          <div id="simCtl" class="sim" hidden>
+            <input type="range" id="simRange" aria-label="Hora simulada">
+            <div class="steps" id="simSteps">
+              <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+            </div>
+            <div class="steps" id="simPresets">
+              <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
+            </div>
+            <output id="simOut"></output>
+          </div>
+        </div>
+        <div class="notif">
+          <label>Notificaciones en este móvil</label>
+          <div class="steps">
+            <button type="button" id="notifOn">Activar notificaciones</button>
+            <button type="button" id="notifTest">Enviar una de prueba</button>
+          </div>
+          <div class="hint" id="notifMsg" hidden></div>
+          <p class="note">Avisan de tus artistas 10 min antes y cuando empiezan. En iPhone solo funcionan con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y mientras está abierta. Para avisos con el móvil bloqueado, usa el Calendario.</p>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -652,6 +669,19 @@ function toast(msg) {
   setTimeout(() => el.remove(), 15000);
   try { navigator.vibrate && navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
+// Notificacions del sistema: només si s'han activat en aquest mòbil i hi ha permís
+const NKEY = 'bitp-notif-v1';
+let notifOn = false;
+try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
+const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
+async function sysNotify(title, body, tag) {
+  const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
+  try {
+    const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration();
+    if (reg) return await reg.showNotification(title, opts);
+    new Notification(title, opts);
+  } catch (e) {}
+}
 function checkAlerts(t) {
   for (const id of favs) {
     const x = BYID[id];
@@ -660,10 +690,12 @@ function checkAlerts(t) {
     if (left > 0 && left <= 10 * MIN && !told.has(k + ':pre')) {
       told.add(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
+      if (canNotify()) sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
     }
     if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
       told.add(k + ':go'); told.add(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
+      if (canNotify()) sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
     }
   }
 }
@@ -833,6 +865,42 @@ document.getElementById('simPresets').addEventListener('click', e => { const b =
 function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
 document.getElementById('simBadge2').addEventListener('click', exitSim);
+
+// Botons de notificacions (Organización → Pruebas)
+const notifMsg = document.getElementById('notifMsg');
+function notifUI(text) {
+  const btn = document.getElementById('notifOn');
+  const ok = canNotify();
+  btn.textContent = ok ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  btn.setAttribute('aria-pressed', ok);
+  notifMsg.hidden = !text;
+  notifMsg.textContent = text || '';
+}
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const noNotifHelp = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !standalone()
+  ? 'En iPhone, primero añade la app a la pantalla de inicio (Compartir → Añadir a pantalla de inicio), ábrela desde el icono y vuelve aquí.'
+  : 'Este navegador no permite notificaciones.';
+document.getElementById('notifOn').addEventListener('click', async () => {
+  if (canNotify()) {
+    notifOn = false;
+    try { localStorage.setItem(NKEY, '0'); } catch (e) {}
+    return notifUI('Notificaciones desactivadas en este móvil.');
+  }
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') return notifUI('Las notificaciones están bloqueadas. Actívalas en Ajustes → Notificaciones → Midnight y vuelve a probar.');
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
+});
+document.getElementById('notifTest').addEventListener('click', () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
+  sysNotify('Midnight · prueba', 'Si ves esto, las notificaciones funcionan ✓', 'prueba');
+  notifUI('Enviada. Si no la ves, revisa Ajustes → Notificaciones → Midnight.');
+});
+notifUI();
 
 // Pantalla encesa
 let lock = null, wantWake = false;
