@@ -741,7 +741,8 @@ function icsFor(list) {
 // Enllaç al .ics de cada actuació (docs/cal/<id>.ics, el genera build_web.py; només al web de GitHub)
 const CAL_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const calLink = x => ONLINE && /^[\w-]+$/.test(x.id)
-  ? `<a class="cal1" href="cal/${x.id}.ics?v=${x.a}" aria-label="Añadir ${esc(x.n)} al Calendario">${CAL_SVG}</a>` : '';
+  // target=_blank: des de la pantalla d'inici l'obre Safari, que és qui sap mostrar «Añadir al calendario»
+  ? `<a class="cal1" href="https://paupuig92.github.io/midnight-webapp/cal/${x.id}.ics?v=${x.a}" target="_blank" rel="noopener" aria-label="Añadir ${esc(x.n)} al Calendario">${CAL_SVG}</a>` : '';
 
 function toggleFav(id) {
   if (favs.has(id)) favs.delete(id); else favs.add(id);
