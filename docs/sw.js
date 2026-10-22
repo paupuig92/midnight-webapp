@@ -1,10 +1,35 @@
-const VERSION = 'bitp-291a29df';
+const VERSION = 'bitp-755f0e0b';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
+});
+
+// Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar
+const PUSH_URL = '';
+async function subId() {
+  const s = await self.registration.pushManager.getSubscription();
+  if (!s) return '';
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s.endpoint)));
+  return [...h.slice(0, 16)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+self.addEventListener('push', e => {
+  e.waitUntil((async () => {
+    let items = [];
+    try {
+      const r = await fetch(PUSH_URL + '/now?id=' + await subId(), { cache: 'no-store' });
+      items = ((await r.json()).items || []).slice(0, 4);
+    } catch (err) {}
+    // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
+    if (!items.length) items = [{ title: 'Midnight', body: 'Hay novedades en el horario.', tag: 'midnight' }];
+    await Promise.all(items.map(i => self.registration.showNotification(i.title, { body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' })));
+  })());
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./')));
 });
 
 self.addEventListener('activate', e => {

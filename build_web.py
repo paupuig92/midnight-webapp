@@ -46,6 +46,11 @@ if tok_f.is_file() and pw_f.is_file():
 else:
     print("Editor de l'organització: desactivat (falta", "la contrasenya" if tok_f.is_file() else "el token", "a", CONF, ")")
 src = src.replace("/*ADMIN*/null/*ADMIN*/", admin)
+# Servidor de notificacions (push/instala.sh escriu push.json). Sense push.json, l'app només avisa amb l'app oberta
+push_f = CONF / "push.json"
+push = json.loads(push_f.read_text()) if push_f.is_file() else None
+src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "public": push["public"]}) if push else "null")
+print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
 import datetime
 src = src.replace("const BUILD = '';", "const BUILD = '" + datetime.datetime.now().strftime("%d/%m %H:%M") + "';")
@@ -111,6 +116,20 @@ for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
+# Horari del cartell (DEFAULT i STAGES d'index.html) → docs/cartel.json, per al servidor de notificacions
+import re
+block = src[src.index("const DEFAULT = {"):]
+block = block[len("const DEFAULT = "):block.index("\n};") + 2]
+block = re.sub(r"^\s*//.*$", "", block, flags=re.M)
+block = re.sub(r"(\w+):\s*\[", r'"\1": [', block)                                  # claus
+block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
+block = re.sub(r",(\s*[\]}])", r"\1", block)                                      # comes finals
+STAGE_NAMES = dict(re.findall(r"\{ id: '(\w+)', name: '([^']+)'", src))
+defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in json.loads(block).items()}
+(OUT / "cartel.json").write_text(json.dumps({
+    "stages": [{"id": k, "name": v} for k, v in STAGE_NAMES.items()],
+    "sets": defaults}, ensure_ascii=False), encoding="utf-8")
+
 # Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
 if (OUT / "cal").exists():
     shutil.rmtree(OUT / "cal")
@@ -139,6 +158,31 @@ const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, {{ cache: 'reload' }})))).then(() => self.skipWaiting()));
+}});
+
+// Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar
+const PUSH_URL = {json.dumps(push["url"]) if push else "''"};
+async function subId() {{
+  const s = await self.registration.pushManager.getSubscription();
+  if (!s) return '';
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s.endpoint)));
+  return [...h.slice(0, 16)].map(b => b.toString(16).padStart(2, '0')).join('');
+}}
+self.addEventListener('push', e => {{
+  e.waitUntil((async () => {{
+    let items = [];
+    try {{
+      const r = await fetch(PUSH_URL + '/now?id=' + await subId(), {{ cache: 'no-store' }});
+      items = ((await r.json()).items || []).slice(0, 4);
+    }} catch (err) {{}}
+    // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
+    if (!items.length) items = [{{ title: 'Midnight', body: 'Hay novedades en el horario.', tag: 'midnight' }}];
+    await Promise.all(items.map(i => self.registration.showNotification(i.title, {{ body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' }})));
+  }})());
+}});
+self.addEventListener('notificationclick', e => {{
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({{ type: 'window', includeUncontrolled: true }}).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./')));
 }});
 
 self.addEventListener('activate', e => {{

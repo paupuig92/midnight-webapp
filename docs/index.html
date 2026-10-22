@@ -378,7 +378,7 @@ h2 span { color: var(--accent); }
     <p class="note">☆ = mis artistas</p>
     <details class="howto">
       <summary>Cómo funcionan los avisos</summary>
-      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas antes de que empiecen y cuando empiezan. Cuánto antes, y si quieres notificaciones, lo eliges en Configuración. Con el móvil bloqueado no llegan.</p>
+      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas antes de que empiecen y cuando empiezan. Cuánto antes, y si quieres notificaciones, lo eliges en Configuración.<span id="howLocked"> Con el móvil bloqueado no llegan.</span></p>
     </details>
   </section>
 
@@ -450,7 +450,7 @@ h2 span { color: var(--accent); }
         </select>
       </label>
       <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisarme de cambios de horario y avisos de la organización</label>
-      <p class="note" style="margin:0"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
+      <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div>
       <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
@@ -877,8 +877,11 @@ try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; }
 prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
 prefs.changes = prefs.changes !== false;
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
+// Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
+const PUSH = null;
+let pushActive = false;
 async function sysNotify(title, body, tag) {
-  if (sim !== null || !canNotify()) return;
+  if (sim !== null || !canNotify() || pushActive) return;
   const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
   try {
     const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration();
@@ -919,6 +922,7 @@ function refresh() {
 function setFav(id, on) {
   if (on) favs.add(id); else favs.delete(id);
   saveFavs();
+  if (typeof syncPush === 'function') syncPush();
   paintFavs();
   renderPick();
   refresh();
@@ -1114,10 +1118,50 @@ const noNotifHelp = () => isIOS && !standalone()
 const deniedHelp = () => isIOS
   ? 'Las notificaciones están bloqueadas. Actívalas en Ajustes → Notificaciones → Midnight y vuelve a probar.'
   : 'Las notificaciones están bloqueadas para esta web. Permítelas en los ajustes del sitio (el icono junto a la dirección) y vuelve a probar.';
+// Subscripció al servidor (Web Push). Només si hi ha servidor configurat i el navegador ho permet
+const canPush = () => !!(PUSH && PUSH.url && 'serviceWorker' in navigator && 'PushManager' in window);
+const b64uDec = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0)); };
+async function pushSubscription(create) {
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub && create) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+  return sub;
+}
+async function pushPost(path, body) {
+  const r = await fetchT(PUSH.url + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, 10000);
+  if (!r.ok) throw new Error('push ' + r.status);
+  return r.json();
+}
+let syncTimer = null;
+function syncPush() {
+  if (!pushActive) return;
+  clearTimeout(syncTimer);
+  // Els meus artistes i les preferències van al servidor (un cop has deixat de tocar, per no enviar-ho a cada ★)
+  syncTimer = setTimeout(async () => {
+    try {
+      const sub = await pushSubscription(false);
+      if (!sub) { pushActive = false; return notifUI(); }
+      await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+    } catch (e) {}
+  }, 1500);
+}
+async function pushOn() {
+  const sub = await pushSubscription(true);
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+  pushActive = true;
+}
+async function pushOff() {
+  try {
+    const sub = await pushSubscription(false);
+    if (sub) { try { await pushPost('/unsub', { endpoint: sub.endpoint }); } catch (e) {} await sub.unsubscribe(); }
+  } catch (e) {}
+  pushActive = false;
+}
 document.getElementById('notifOn').addEventListener('click', async () => {
   if (canNotify()) {
     notifOn = false;
     try { localStorage.setItem(NKEY, '0'); } catch (e) {}
+    await pushOff();
     return notifUI('Notificaciones desactivadas en este móvil.');
   }
   if (!('Notification' in window)) return notifUI(noNotifHelp());
@@ -1126,25 +1170,45 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   if (perm !== 'granted') return notifUI(deniedHelp());
   notifOn = true;
   try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  if (canPush()) {
+    notifUI('Conectando con el servidor de avisos…');
+    try { await pushOn(); return notifUI('Activadas ✓ Te llegarán también con el móvil bloqueado.'); }
+    catch (e) { return notifUI('Activadas, pero no se ha podido conectar con el servidor: solo llegarán con la app abierta. Vuelve a probar con cobertura.'); }
+  }
   notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
 });
 document.getElementById('notifTest').addEventListener('click', async () => {
   if (!('Notification' in window)) return notifUI(noNotifHelp());
   if (Notification.permission === 'denied') return notifUI(deniedHelp());
   if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
+  if (pushActive) {
+    // Prova de veritat: la envia el servidor. Bloqueja el mòbil just després de tocar per veure-la arribar
+    try {
+      const sub = await pushSubscription(false);
+      const r = await pushPost('/test', { endpoint: sub.endpoint });
+      return notifUI(r.ok ? 'Enviada desde el servidor. Bloquea el móvil: te llegará en unos segundos.' : 'El servidor no ha podido enviarla. Desactiva y vuelve a activar las notificaciones.');
+    } catch (e) { return notifUI('No hay conexión con el servidor de avisos. Vuelve a probar con cobertura.'); }
+  }
   const opts = { body: 'Si ves esto, las notificaciones funcionan ✓', tag: 'prueba', icon: 'icon-192.png' };
   try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prueba', opts); else new Notification('Midnight · prueba', opts); } catch (e) {}
   notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
 });
 notifUI();
+if (canPush()) {
+  document.getElementById('notifNote').innerHTML = '<b>Llegan también con el móvil bloqueado.</b> En iPhone, con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y las notificaciones activadas aquí.';
+  document.getElementById('howLocked').textContent = ' Si las activas, llegan también con el móvil bloqueado.';
+  // Si aquest mòbil ja estava subscrit, es torna a enviar l'estat al servidor
+  if (notifOn && 'Notification' in window && Notification.permission === 'granted')
+    pushSubscription(false).then(sub => { if (sub) { pushActive = true; notifUI(); syncPush(); } }).catch(() => {});
+}
 const prefBefore = document.getElementById('prefBefore'), prefChanges = document.getElementById('prefChanges');
 prefBefore.value = String(prefs.before);
 prefChanges.checked = prefs.changes;
-prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); });
-prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); });
+prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); syncPush(); });
+prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 12:58';
+const BUILD = '22/10 13:04';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
