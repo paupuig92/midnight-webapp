@@ -1,4 +1,4 @@
-const VERSION = 'bitp-fde910cb';
+const VERSION = 'bitp-37f39ea0';
 const FILES = ['index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
