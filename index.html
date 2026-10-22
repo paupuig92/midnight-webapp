@@ -1,0 +1,693 @@
+<title>Bass in the Park</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+/* Layout: cartell + rellotge gegant (no enganxat), barra fina fixa en baixar, "Ahora suena" compacte, "A continuación", graella tipus cartell */
+:root {
+  --bg: #040704;
+  --panel: #0a110a;
+  --ink: #ecfbe9;
+  --muted: #9ab597;
+  --neon: #3dff2b;
+  --neon-dim: #1d6b15;
+  --rule: #173b13;
+  --paper: #f1f4ee;
+  --on-neon: #041204;
+  --now: #ff4040;
+  --fav: #ffd23d;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --t5: #e8553d;
+  --t4: #f08a2e;
+  --t3: #f2c94c;
+  --t2: #6fbf5f;
+  --t1: #6f8cf0;
+  --gut: 48px;
+  --barh: 50px;
+  --top: calc(var(--barh) + env(safe-area-inset-top, 0px));
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+section { scroll-margin-top: calc(var(--top) + 8px); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--fav); outline-offset: 2px; }
+
+/* Capçalera (no enganxada) */
+.banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 242; object-fit: cover; border-radius: 6px; margin-top: 12px; }
+header.hero { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-bottom: 2px solid var(--neon); padding-block: 4px 14px; }
+.clock { font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--neon); text-shadow: 0 0 18px rgba(61,255,43,.45); }
+.clock small { font-size: .38em; color: var(--muted); text-shadow: none; margin-left: 4px; }
+.status { color: var(--muted); font-size: 14px; }
+.status strong { color: var(--ink); font-weight: 700; }
+.dstnote { color: var(--fav); font-size: 13px; font-weight: 700; }
+.sim-badge { background: var(--fav); color: #1a1400; font: 800 11px/1 var(--body); padding: 6px 8px; border: 0; border-radius: 4px; letter-spacing: .06em; cursor: pointer; }
+button.go {
+  font: 800 13px/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase;
+  background: transparent; color: var(--neon); border: 2px solid var(--neon); border-radius: 999px; padding: 11px 16px; cursor: pointer; min-height: 44px;
+}
+button.go:active { background: var(--neon); color: var(--on-neon); }
+
+/* Barra fina fixa (surt quan el rellotge gran ja no es veu) */
+.minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--neon);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 5px); padding-bottom: 5px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  min-height: var(--barh); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+.minibar .mclock { font: 900 26px/1 var(--display); font-stretch: 125%; color: var(--neon); font-variant-numeric: tabular-nums; }
+.minibar .mstatus { flex: 1; min-width: 0; color: var(--muted); font-size: 12.5px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.minibar button.go { padding: 8px 12px; min-height: 38px; font-size: 12px; }
+
+h2 { margin: 0 0 12px; font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h2 span { color: var(--neon); }
+.dj i, .who i, .blk .n i, .after b i { font-style: normal; color: var(--neon); }
+
+/* Importància */
+.imp { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--tc); margin-right: 6px; vertical-align: .06em; flex: none; }
+.scale { display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; margin: -4px 0 12px; }
+.scale span { display: inline-flex; align-items: center; color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.scale .imp { margin-right: 4px; }
+
+/* Ahora suena: files compactes */
+.rows { display: flex; flex-direction: column; gap: 6px; }
+.row { order: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; align-items: center;
+  background: var(--panel); border: 2px solid var(--rule); border-radius: 6px; padding: 8px 10px 0 10px; overflow: hidden; }
+.row.live { order: 0; border-color: var(--neon); }
+.row.closed { order: 2; padding-block: 6px; opacity: .8; }
+.row img.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
+.row .mid { min-width: 0; padding-bottom: 8px; }
+.row.closed .mid { padding-bottom: 0; }
+.row .sn { font: 800 10.5px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row.live .sn::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--neon); margin-right: 5px; vertical-align: .05em; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+.row .dj { font: 900 16.5px/1.1 var(--display); font-stretch: 112%; text-transform: uppercase; overflow-wrap: break-word; }
+.row .dj .sub { font: 600 11px var(--body); color: var(--muted); letter-spacing: .03em; }
+.row.idle .dj { color: var(--muted); font-size: 14px; }
+.row .after { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.row .after b { color: var(--ink); text-transform: uppercase; }
+.row .right { display: flex; align-items: center; gap: 6px; padding-bottom: 8px; }
+.row.closed .right { padding-bottom: 0; }
+.row .left { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.row .left b { display: block; color: var(--neon); font-size: 14px; }
+.row .left span { font-size: 11px; color: var(--muted); }
+.row .bar { grid-column: 1 / -1; height: 4px; margin: 0 -10px; background: var(--rule); }
+.row .bar > div { height: 100%; background: var(--neon); width: 0; }
+
+.star { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--rule); background: transparent; color: var(--muted); font-size: 19px; line-height: 1; cursor: pointer; }
+.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
+
+/* A continuación */
+.nexthead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.chip { border: 1.5px solid var(--rule); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 700; cursor: pointer; min-height: 38px; }
+.chip[aria-pressed="true"] { border-color: var(--fav); color: var(--fav); }
+.upnext { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.upnext li { display: grid; grid-template-columns: 70px 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.upnext li.fav .who { color: var(--fav); }
+.upnext .when b { display: block; font-variant-numeric: tabular-nums; font-size: 14px; }
+.upnext .when span { font-size: 11.5px; color: var(--neon); }
+.upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
+.upnext .who { font: 900 14px/1.15 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
+.upnext .where { display: block; font: 600 11px var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
+.empty { color: var(--muted); font-size: 13.5px; padding: 10px 0; }
+.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+
+/* Graella */
+.tl-wrap { overflow: auto; max-height: calc(100svh - var(--top) - env(safe-area-inset-bottom, 0px) - 20px); min-height: 260px;
+  border: 2px solid var(--rule); border-radius: 6px; background: var(--bg); overscroll-behavior: contain;
+  scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
+.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(104px, 1fr)); min-width: calc(var(--gut) + 5 * 104px); position: relative; }
+.hd { position: sticky; top: 0; z-index: 7; padding: 8px 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  background: var(--neon); border-left: 2px solid var(--bg); scroll-snap-align: start; }
+.hd.light { background: var(--paper); }
+.hd img { display: block; width: 100%; height: 34px; object-fit: contain; }
+.corner { position: sticky; top: 0; left: 0; z-index: 8; background: var(--bg); }
+.gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
+.gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
+.gut span[data-n] { color: var(--fav); }
+.gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
+.gut .nowlbl { left: 2px; right: 2px; text-align: center; background: var(--now); color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
+.col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
+.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--neon-dim); background: #000; border-radius: 3px; color: var(--ink); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 8px; overflow: hidden; gap: 1px; }
+.blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--tc, transparent); }
+.blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
+.blk .n { font: 900 11.5px/1.08 var(--display); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
+.blk .s { font-size: 11px; color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk.tiny .t, .blk.tiny .s { display: none; }
+.blk.tiny .n { font-size: 10.5px; }
+.blk.past { opacity: .55; }
+.blk.on { border-color: var(--neon); background: var(--neon); box-shadow: 0 0 16px rgba(61,255,43,.55); z-index: 5; }
+.blk.on .n, .blk.on .n i, .blk.on .t, .blk.on .s { color: var(--on-neon); }
+.blk.on::before { width: 6px; }
+.blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); z-index: 0; display: none; }
+.blk.on .pl { display: block; }
+.blk.fav { border-color: var(--fav); }
+.blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
+.blk.on.fav::after { color: var(--on-neon); }
+.closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: 11px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.nowline { grid-column: 2 / -1; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+
+/* Avisos */
+.toasts { position: fixed; z-index: 11; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.toast { pointer-events: auto; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 10px; align-items: center;
+  background: var(--fav); color: #1a1400; border-radius: 8px; padding: 10px 8px 10px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: 14px; }
+.toast b { text-transform: uppercase; }
+.toast div { flex: 1; min-width: 0; }
+.toast button { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(0,0,0,.12); font-size: 18px; cursor: pointer; }
+
+/* Peu */
+.tools { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--rule); padding-top: 16px; color: var(--muted); font-size: 13px; }
+.tools .btn { align-self: flex-start; font: 700 14px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 11px 14px; cursor: pointer; min-height: 44px; }
+.tools .btn[aria-pressed="true"] { border-color: var(--neon); color: var(--neon); }
+.tools .btn:disabled { opacity: .5; cursor: default; }
+.hint { color: var(--fav); font-size: 12.5px; }
+.sim { display: flex; flex-direction: column; gap: 10px; }
+.sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 32px; }
+.sim input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--neon); }
+.sim input[type=range] { width: 100%; accent-color: var(--neon); }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.steps button { font: 700 13px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 8px 10px; min-height: 40px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.sim output { font-variant-numeric: tabular-nums; color: var(--fav); font-weight: 700; font-size: 14px; }
+.legend { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+
+@media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
+@media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
+</style>
+
+<div class="minibar" id="minibar" hidden>
+  <span class="mclock" id="mclock"></span>
+  <span class="mstatus" id="mstatus"></span>
+  <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
+  <button class="go" id="goNow2" type="button">Ahora</button>
+</div>
+
+<div class="wrap">
+  <img class="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
+  <header class="hero">
+    <button class="sim-badge" id="simBadge" type="button" hidden>MODO PRUEBA ✕ Salir</button>
+    <div class="clock" id="clock">--:--<small>--</small></div>
+    <div class="status" id="status"></div>
+    <div class="dstnote" id="dstnote" hidden></div>
+    <button class="go" id="goNow" type="button">Ir a ahora</button>
+  </header>
+
+  <section id="ahora">
+    <h2>Ahora <span>suena</span></h2>
+    <div class="scale" aria-label="Importancia, de 5 (más) a 1 (menos)">Importancia:
+      <span><i class="imp" style="--tc:var(--t5)"></i>5</span><span><i class="imp" style="--tc:var(--t4)"></i>4</span><span><i class="imp" style="--tc:var(--t3)"></i>3</span><span><i class="imp" style="--tc:var(--t2)"></i>2</span><span><i class="imp" style="--tc:var(--t1)"></i>1</span>
+      de más a menos</div>
+    <div class="rows" id="rows"></div>
+  </section>
+
+  <section id="siguiente">
+    <div class="nexthead">
+      <h2>A <span>continuación</span></h2>
+      <button class="chip" id="onlyFav" type="button" aria-pressed="false">★ Solo favoritos</button>
+    </div>
+    <ul class="upnext" id="upnext"></ul>
+    <p class="note">Toca ☆ (o un artista en el horario) para marcarlo como favorito. Te avisamos 10 minutos antes y cuando empieza, siempre que la app esté abierta.</p>
+  </section>
+
+  <section id="horario">
+    <h2>Horario</h2>
+    <div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div>
+    <p class="legend">La línea roja es la hora actual. Esta noche, a las 3:00 se cambia la hora y vuelven a ser las 2:00: por eso las 2:00 salen dos veces (1ª y 2ª).</p>
+  </section>
+
+  <section class="tools">
+    <div>
+      <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
+      <div class="hint" id="wakeHint" hidden></div>
+    </div>
+    <div class="sim">
+      <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
+      <div id="simCtl" class="sim" hidden>
+        <input type="range" id="simRange" aria-label="Hora simulada">
+        <div class="steps" id="simSteps">
+          <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+        </div>
+        <div class="steps" id="simPresets">
+          <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
+        </div>
+        <output id="simOut"></output>
+      </div>
+    </div>
+    <div id="rides"></div>
+  </section>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+document.documentElement.lang = 'es';
+
+// Hora local de Montmeló. La nit del 24 al 25 canvia l'hora a les 3:00 (CEST → CET).
+// "02:00a" = primera vegada que són les 2 (CEST), "02:00b" = segona (CET).
+function T(s) {
+  const m = s.match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  const h = +m[1], mi = +m[2], f = m[3];
+  let day, off;
+  if (h >= 12) { day = 24; off = 2; }
+  else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
+  else { day = 25; off = 1; }
+  return Date.UTC(2026, 9, day, h - off, mi);
+}
+
+const STAGES = [
+  { id: 'ner', name: 'No Es Ruido' },
+  { id: 'tox', name: 'Toxik Parties', light: true },
+  { id: 'pont', name: 'Pont Aeri', light: true },
+  { id: 'misa', name: 'Misa Psicodélika' },
+  { id: 'ss', name: 'Migats Sound System' },
+];
+
+// [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+const SETS = {
+  ner: [
+    ['12:00', '13:00', 'Girls on Decks', 1],
+    ['13:00', '14:00', 'Arcex', 1],
+    ['14:00', '15:00', 'Selecta', 2],
+    ['15:00', '16:00', 'Skudero & Xavi Metralla', 3],
+    ['16:00', '17:00', 'The Saints', 3],
+    ['17:00', '18:00', 'Yoshiko', 4],
+    ['18:00', '19:00', 'Xavistyle', 4],
+    ['19:00', '19:20', 'Cache Oficial', 3],
+    ['19:20', '20:00', 'Jarfaiter', 3],
+    ['20:00', '21:00', 'Carlos Perez B2B K-Style', 3],
+    ['21:00', '22:00', 'Amygdala', 3],
+    ['22:00', '23:00', 'Carnada B2B Quince', 4],
+    ['23:00', '00:00', 'Gea', 3],
+    ['00:00', '01:00', 'DJ Pastis B2B DJ Sisu', 5],
+    ['01:00', '02:00a', 'Toni Massama', 3],
+    ['02:00a', '02:00b', 'Kitus & Frosty', 3],
+    ['02:00b', '03:00', 'The Whistlers', 3],
+    ['03:00', '04:00', 'Tha Playah', 3],
+    ['04:00', '05:00', 'Papero B2B More', 3],
+  ],
+  tox: [
+    ['12:00', '14:00', '4BD3', 1],
+    ['14:00', '15:30', 'Seve', 1],
+    ['15:30', '17:00', 'Pau Miau', 1],
+    ['17:00', '18:30', 'Kodi VS Black Mamba', 1],
+    ['18:30', '20:00', 'Rozz Rigo', 1],
+    ['20:00', '21:00', 'Kou2tatane', 1],
+    ['21:00', '22:00', 'Miss Pixie', 1],
+    ['22:00', '23:00', 'Ling Ling', 3],
+    ['23:00', '00:00', 'Stiwie', 2],
+    ['00:00', '01:00', 'Apre VS Choko', 2],
+    ['01:00', '02:00a', 'Diprosopiks', 2, 'Neurotribe vs Koko'],
+    ['02:00a', '02:00b', 'Teka', 2],
+    ['02:00b', '03:00', 'Farfacid', 3],
+    ['03:00', '05:00', 'Radze VS Brain Impact VS Jan Vercauteren', 3],
+  ],
+  misa: [
+    ['12:00', '13:30', 'Afroditta B2B Kosmonow', 2],
+    ['13:30', '15:00', 'Chaac B2B Lightwormie', 2],
+    ['15:00', '16:30', 'Jandri', 2],
+    ['16:30', '18:00', 'Mr Frisson', 2],
+    ['18:00', '19:30', 'Hypatia', 2],
+    ['19:30', '21:00', 'Zeridium', 2],
+    ['21:00', '22:30', 'Guapa Lee', 2],
+    ['22:30', '00:00', 'Hëdera', 2],
+  ],
+  pont: [
+    ['12:00', '13:00', 'Merlin', 1],
+    ['13:00', '14:00', 'Kcho', 1],
+    ['14:00', '15:00', 'Soriano VS Fløres', 1],
+    ['15:00', '16:00', 'Merti B2B Altrax', 1],
+    ['16:00', '17:00', 'Skudero B2B Dvrk Oktopus', 3],
+    ['17:00', '18:00', 'Xavi Metralla B2B DJ Sisu', 5],
+    ['18:00', '19:00', 'DJ Sonic', 2],
+    ['19:00', '20:00', 'D-Vstor', 2],
+    ['20:00', '21:00', 'Wakan', 3],
+    ['21:00', '22:00', 'Kitus & Frosty', 3],
+    ['22:00', '23:00', 'Lia Jensen', 3],
+    ['23:00', '00:00', 'Marti VS Celi', 1],
+    ['00:00', '01:00', 'More', 3],
+  ],
+  ss: [
+    ['12:00', '14:00', 'Migats Sound System', 2],
+    ['14:00', '15:00', 'Redland Sound System', 0],
+    ['15:00', '16:00', 'Migats Sound System', 0],
+    ['16:00', '17:00', 'Lion on Top Sound System', 0],
+    ['17:00', '18:00', 'Redland Sound System', 0],
+    ['18:00', '20:00', 'Migats Sound System', 0],
+    ['20:00', '21:00', 'Redland Sound System', 0],
+    ['21:00', '22:00', 'Migats Sound System', 0],
+    ['22:00', '23:00', 'Peivol', 0],
+    ['23:00', '00:00', 'Al·le', 0],
+  ],
+};
+
+const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
+for (const id in SETS) SETS[id] = SETS[id].map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, s: STAGE[id], a: T(a), b: T(b), n, t, sub }));
+const ALL = STAGES.flatMap(s => SETS[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
+const BYID = Object.fromEntries(ALL.map(x => [x.id, x]));
+
+const T0 = T('12:00'), TEND = T('05:00'), RIDES = T('01:30');
+const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
+const MIN = 60000, PX = 1.25, PAD = 12;
+const H = (TEND - T0) / MIN * PX;
+const y = t => PAD + (t - T0) / MIN * PX;
+
+const fmtHM = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const fmtS = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', second: '2-digit' });
+const hm = t => fmtHM.format(t);
+// Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
+const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
+const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
+const deco = n => n.toUpperCase().replace(/ (B2B|VS|&) /g, ' <i>$1</i> ');
+const esc = s => s.replace(/"/g, '&quot;');
+const imp = t => t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5" title="Importancia ${t} de 5"></i>` : '';
+function dur(ms) {
+  const m = Math.max(0, Math.round(ms / MIN));
+  if (m >= 1440) return `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} h`;
+  if (m >= 60) return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
+  return `${m} min`;
+}
+const inDur = ms => ms < MIN ? 'ya' : `en ${dur(ms)}`;
+
+let sim = null;
+const now = () => sim ?? Date.now();
+
+// Preferits (al navegador de cadascú; si no hi ha emmagatzematge, només en memòria)
+const FKEY = 'bitp-favs-v1';
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]')); } catch (e) {}
+function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
+const star = x => {
+  const on = favs.has(x.id);
+  return `<button type="button" class="star" data-fav="${x.id}" aria-pressed="${on}" aria-label="${on ? 'Quitar de favoritos' : 'Marcar como favorito'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+};
+
+// Graella
+const tl = document.getElementById('tl');
+let html = '<div class="corner"></div>';
+for (const s of STAGES) html += `<div class="hd${s.light ? ' light' : ''}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+html += `<div class="gut" id="gut" style="height:${H + 2 * PAD}px">`;
+for (let t = T0; t <= TEND; t += 60 * MIN) html += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+html += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
+STAGES.forEach((s, i) => {
+  const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
+  html += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
+  for (const x of SETS[s.id]) {
+    const h = (x.b - x.a) / MIN * PX;
+    const tiny = (x.b - x.a) / MIN <= 40 ? ' tiny' : '';
+    const tc = x.t ? `--tc:var(--t${x.t});` : '';
+    const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}`;
+    html += `<button type="button" class="blk${tiny}" data-fav="${x.id}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${y(x.a) + 1.5}px;height:${h - 3}px">`
+      + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${x.sub}</span>` : ''}<span class="t">${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+  }
+  const last = SETS[s.id][SETS[s.id].length - 1];
+  if (last.b < TEND) html += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
+  html += '</div>';
+});
+html += '<div class="nowline" id="nowline" hidden></div>';
+tl.innerHTML = html;
+
+const blocks = [...tl.querySelectorAll('.blk')];
+const nowline = document.getElementById('nowline'), nowlbl = document.getElementById('nowlbl');
+const tlwrap = document.getElementById('tlwrap');
+
+function paintFavs() {
+  for (const b of blocks) {
+    const on = favs.has(b.dataset.fav);
+    b.classList.toggle('fav', on);
+    b.setAttribute('aria-pressed', on);
+  }
+}
+
+function scrollToNow(smooth) {
+  const t = now();
+  const head = tl.querySelector('.hd').offsetHeight;
+  const top = t < T0 || t >= TEND ? 0 : Math.max(0, head + y(t) - (tlwrap.clientHeight - head) / 3 - head);
+  tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+}
+function goNow() {
+  tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollToNow(true);
+}
+
+// Ahora suena: una fila per escenari
+const rowsEl = document.getElementById('rows');
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('');
+const rowCache = {};
+
+function rowHTML(s, t) {
+  const list = SETS[s.id];
+  const cur = list.find(x => t >= x.a && t < x.b);
+  const nxt = list.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${cur.sub}</span>` : ''}</div>
+      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">Abre a las ${lbl(nxt.a)}</div>
+      <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para abrir</span></div></div>`, null];
+  return ['closed', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div><div class="dj">Cerrado desde las ${lbl(list[list.length - 1].b)}</div></div>
+    <div class="right"></div>`, null];
+}
+
+// A continuación
+let onlyFav = false;
+const upEl = document.getElementById('upnext');
+let upCache = '';
+function upHTML(t) {
+  let list = ALL.filter(x => x.a > t);
+  if (onlyFav) list = list.filter(x => favs.has(x.id));
+  if (!list.length) {
+    if (onlyFav) return `<li class="empty">${favs.size ? 'No quedan favoritos por empezar.' : 'Aún no tienes favoritos. Toca ☆ en cualquier artista.'}</li>`;
+    return '<li class="empty">No quedan más actuaciones.</li>';
+  }
+  return list.slice(0, 6).map(x => `<li class="${favs.has(x.id) ? 'fav' : ''}">
+    <div class="when"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></div>
+    <img class="logo" src="img/${x.s.id}.png" alt="">
+    <div class="who">${imp(x.t)}${deco(x.n)}<span class="where">${x.s.name}</span></div>
+    ${star(x)}</li>`).join('');
+}
+
+// Avisos dels preferits (només amb l'app oberta)
+const toasts = document.getElementById('toasts');
+let told = new Set();
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div>${msg}</div><button type="button" aria-label="Cerrar aviso">✕</button>`;
+  el.querySelector('button').addEventListener('click', () => el.remove());
+  toasts.appendChild(el);
+  while (toasts.children.length > 3) toasts.firstElementChild.remove();
+  setTimeout(() => el.remove(), 15000);
+  try { navigator.vibrate && navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+function checkAlerts(t) {
+  for (const id of favs) {
+    const x = BYID[id];
+    if (!x) continue;
+    const left = x.a - t;
+    if (left > 0 && left <= 10 * MIN && !told.has(id + ':pre')) {
+      told.add(id + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
+    }
+    if (t >= x.a && t < x.a + 2 * MIN && !told.has(id + ':go')) {
+      told.add(id + ':go'); told.add(id + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
+    }
+  }
+}
+
+function toggleFav(id) {
+  if (favs.has(id)) favs.delete(id); else favs.add(id);
+  saveFavs();
+  paintFavs();
+  for (const k in rowCache) rowCache[k] = '';
+  upCache = '';
+  tick();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-fav]');
+  if (b) toggleFav(b.dataset.fav);
+});
+document.getElementById('onlyFav').addEventListener('click', e => {
+  onlyFav = !onlyFav;
+  e.currentTarget.setAttribute('aria-pressed', onlyFav);
+  upCache = '';
+  tick();
+});
+
+function tick() {
+  const t = now();
+  document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
+  document.getElementById('mclock').textContent = hm(t);
+
+  const st = document.getElementById('status'), ms = document.getElementById('mstatus');
+  const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
+  if (t < T0) {
+    st.innerHTML = `Empieza el sábado 24.10 a las <strong>12:00</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
+    ms.textContent = `Faltan ${dur(T0 - t)}`;
+  } else if (t < TEND) {
+    st.innerHTML = `<strong>En marcha</strong> · ${live} escenario${live === 1 ? '' : 's'} sonando · acaba a las 05:00 (quedan ${dur(TEND - t)})`;
+    ms.textContent = `${live} sonando`;
+  } else {
+    st.innerHTML = `<strong>Se ha acabado.</strong> Hasta el año que viene.`;
+    ms.textContent = 'Se ha acabado';
+  }
+  const dn = document.getElementById('dstnote');
+  const p = pass(t);
+  dn.hidden = !p && !(t >= T('01:30') && t < W0);
+  dn.textContent = p === '1ª' ? 'Las 2:00 (1ª vez). A las 3:00 se cambia la hora y vuelven a ser las 2:00.'
+    : p === '2ª' ? 'Ya se ha cambiado la hora: son las 2:00 por 2ª vez.'
+    : 'Esta noche se cambia la hora: a las 3:00 vuelven a ser las 2:00.';
+  if (p) ms.textContent = `${p} vez · ` + ms.textContent;
+
+  for (const s of STAGES) {
+    const [state, inner, cur] = rowHTML(s, t);
+    const r = document.getElementById('r-' + s.id);
+    const key = state + inner;
+    if (rowCache[s.id] !== key) {
+      r.className = 'row ' + state;
+      r.innerHTML = inner;
+      rowCache[s.id] = key;
+    }
+    if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
+  }
+
+  const up = upHTML(t);
+  if (up !== upCache) { upEl.innerHTML = up; upCache = up; }
+
+  for (const b of blocks) {
+    const x = BYID[b.dataset.fav];
+    const on = t >= x.a && t < x.b;
+    b.classList.toggle('on', on);
+    b.classList.toggle('past', t >= x.b);
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(x.a) + 1.5) - 2.5}px`;
+  }
+  const inside = t >= T0 && t < TEND;
+  nowline.hidden = !inside;
+  nowlbl.hidden = !inside;
+  if (inside) {
+    nowline.style.transform = `translateY(${y(t) - 1}px)`;
+    nowlbl.style.top = `${y(t)}px`;
+    nowlbl.textContent = hm(t);
+  }
+
+  const rides = document.getElementById('rides');
+  rides.textContent = t < T0 ? 'Atracciones: abren a las 12:00.' : t < RIDES ? 'Atracciones: abiertas hasta la 1:30.' : 'Atracciones: cerradas desde la 1:30.';
+
+  checkAlerts(t);
+}
+
+document.getElementById('goNow').addEventListener('click', goNow);
+document.getElementById('goNow2').addEventListener('click', goNow);
+
+// Barra fina: es mostra quan el rellotge gran surt de la pantalla
+const clockEl = document.getElementById('clock');
+const minibar = document.getElementById('minibar');
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([e]) => { minibar.hidden = e.isIntersecting; }, { rootMargin: '-20px 0px 0px 0px' }).observe(clockEl);
+}
+
+// Mode prova
+const simOn = document.getElementById('simOn'), simRange = document.getElementById('simRange'), simOut = document.getElementById('simOut');
+const simCtl = document.getElementById('simCtl');
+simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; simRange.step = MIN; simRange.value = T('21:30');
+function applySim() {
+  const was = sim !== null;
+  sim = simOn.checked ? +simRange.value : null;
+  simCtl.hidden = !simOn.checked;
+  if (simOn.checked) {
+    simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
+    simOut.textContent = `Simulando: ${lbl(+simRange.value)}`;
+  }
+  if (was !== simOn.checked) told = new Set();
+  document.getElementById('simBadge').hidden = !simOn.checked;
+  document.getElementById('simBadge2').hidden = !simOn.checked;
+  tick();
+  scrollToNow(false);
+}
+function setSim(v) {
+  simRange.value = Math.min(Math.max(v, +simRange.min), +simRange.max);
+  applySim();
+}
+simOn.addEventListener('change', applySim);
+simRange.addEventListener('input', applySim);
+document.getElementById('simSteps').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) setSim(+simRange.value + b.dataset.d * MIN); });
+document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) setSim(T(b.dataset.p)); });
+function exitSim() { simOn.checked = false; applySim(); }
+document.getElementById('simBadge').addEventListener('click', exitSim);
+document.getElementById('simBadge2').addEventListener('click', exitSim);
+
+// Pantalla encesa
+let lock = null, wantWake = false;
+const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
+function wakeUI(on, hint) {
+  wakeBtn.setAttribute('aria-pressed', on);
+  wakeBtn.textContent = on ? 'Pantalla encendida ✓ (toca para desactivar)' : 'Mantener la pantalla encendida';
+  wakeHint.hidden = !hint;
+  wakeHint.textContent = hint || '';
+}
+async function acquire() {
+  try {
+    lock = await navigator.wakeLock.request('screen');
+    lock.addEventListener('release', () => { lock = null; if (!wantWake) wakeUI(false); });
+    wakeUI(true);
+  } catch (e) {
+    lock = null; wantWake = false;
+    wakeUI(false, e && e.name === 'NotAllowedError'
+      ? 'No se ha podido activar. Si tienes el modo ahorro de batería, desactívalo y vuelve a probar.'
+      : 'No se ha podido activar en este momento. Vuelve a probar.');
+  }
+}
+if (!('wakeLock' in navigator)) {
+  wakeBtn.disabled = true;
+  wakeUI(false, 'Este navegador no permite mantener la pantalla encendida.');
+} else {
+  wakeBtn.addEventListener('click', async () => {
+    if (wantWake) {
+      wantWake = false;
+      try { if (lock) await lock.release(); } catch (e) {}
+      lock = null; wakeUI(false);
+    } else { wantWake = true; acquire(); }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && wantWake && !lock) acquire();
+  });
+}
+
+// El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
+function fitClock() {
+  clockEl.style.fontSize = '100px';
+  const w = clockEl.scrollWidth, target = clockEl.parentElement.clientWidth;
+  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.3).toFixed(1) + 'px';
+}
+addEventListener('resize', fitClock);
+if (document.fonts) document.fonts.ready.then(fitClock);
+
+paintFavs();
+tick();
+fitClock();
+scrollToNow(false);
+setInterval(tick, 1000);
+</script>
