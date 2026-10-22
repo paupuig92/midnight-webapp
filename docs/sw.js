@@ -1,9 +1,10 @@
-const VERSION = 'bitp-2253f836';
+const VERSION = 'bitp-f13d0c42';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
+// cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -27,9 +28,24 @@ self.addEventListener('fetch', e => {
     }).catch(() => cache.match('changes.json').then(r => r || new Response('', { status: 504 })))));
     return;
   }
+  // La pàgina: primer la xarxa (màxim 3 s) perquè surti la versió nova; sense cobertura, la còpia guardada
+  if (e.request.mode === 'navigate') {
+    e.respondWith(caches.open(VERSION).then(async cache => {
+      const hit = await cache.match('index.html');
+      const net = fetch(e.request, { cache: 'no-cache' }).then(res => {
+        if (res.ok) cache.put('index.html', res.clone());
+        return res;
+      });
+      const slow = new Promise(r => setTimeout(() => r(hit), 3000));
+      try { return (await Promise.race([net, hit ? slow : net])) || await net; }
+      catch (err) { return hit || Response.error(); }
+    }));
+    return;
+  }
+  // La resta (imatges, fonts…): primer la còpia guardada i s'actualitza en segon pla
   e.respondWith(caches.open(VERSION).then(async cache => {
     const hit = await cache.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then(res => {
+    const net = fetch(e.request, { cache: 'no-cache' }).then(res => {
       if (res.ok || res.type === 'opaque') cache.put(e.request, res.clone());
       return res;
     }).catch(() => hit);
