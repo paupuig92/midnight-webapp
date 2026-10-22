@@ -230,11 +230,10 @@ h2 span { color: var(--neon); }
 
 /* Capçalera: botó + atraccions, i avís de l'organització */
 .herorow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; width: 100%; margin-top: 2px; }
-.rides { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--rule); border-radius: 999px; padding: 8px 12px; font-size: 12.5px; color: var(--muted); line-height: 1.2; }
-.rides::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
-.rides.open { border-color: var(--neon-dim); color: var(--ink); }
-.rides.open::before { background: var(--neon); }
-.rides b { color: var(--ink); font-weight: 700; }
+.row.rides svg.logo { width: 56px; height: 30px; color: var(--ink); }
+.row.rides.live { order: 1; }
+.row.rides.idle { order: 2; }
+.row.rides.closed { order: 3; }
 .notice { width: 100%; box-sizing: border-box; background: var(--fav); color: #1a1400; border-radius: 6px; padding: 10px 12px; font-size: 14.5px; font-weight: 600; white-space: pre-line; }
 .notice b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
 .legend.upd { color: var(--fav); }
@@ -295,7 +294,6 @@ h2 span { color: var(--neon); }
     <div class="notice" id="notice" role="status" hidden></div>
     <div class="herorow">
       <button class="go" id="goNow" type="button">Ir a ahora</button>
-      <span class="rides" id="rides"></span>
     </div>
   </header>
 
@@ -630,7 +628,7 @@ function goNow() {
 
 // Ahora suena: una fila per escenari
 const rowsEl = document.getElementById('rows');
-rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('');
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + '<div class="row rides" id="r-rides"></div>';
 const rowCache = {};
 
 function rowHTML(s, t) {
@@ -862,11 +860,17 @@ function tick() {
     nowlbl.textContent = pass(t) ? `${hm(t)} ${pass(t)}` : hm(t);
   }
 
-  const rides = document.getElementById('rides');
+  // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»)
+  const rr = document.getElementById('r-rides');
   const open = t >= T0 && t < RIDES;
-  rides.classList.toggle('open', open);
-  rides.innerHTML = t < T0 ? '<b>Atracciones</b> abren a las 12:00'
-    : open ? `<b>Atracciones abiertas</b> hasta la 1:00 · ${dur(RIDES - t)}` : '<b>Atracciones cerradas</b> desde la 1:00';
+  const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
+  const ricon = '<svg class="logo" viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+  const rin = `${ricon}<div class="mid"><div class="sn">Atracciones</div>`
+    + (open ? `<div class="dj">Abiertas</div><div class="after">Hasta la 1:00</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
+      : t < T0 ? `<div class="dj">Abren a las 12:00</div><div class="after">Hasta la 1:00</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
+      : `<div class="dj">Cerradas desde la 1:00</div></div><div class="right"></div>`);
+  if (rowCache.rides !== rstate + rin) { rr.className = 'row rides ' + rstate; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
+  if (open) rr.querySelector('.bar > div').style.width = ((t - T0) / (RIDES - T0) * 100).toFixed(1) + '%';
 
   checkAlerts(t);
 }
@@ -948,7 +952,7 @@ document.getElementById('notifTest').addEventListener('click', () => {
 notifUI();
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 11:46';
+const BUILD = '22/10 11:48';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
