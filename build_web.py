@@ -111,76 +111,9 @@ for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
-# Calendaris: un .ics per actuació a docs/cal/<id>.ics. L'iPhone només obre bé el
-# «Añadir al calendario» amb un fitxer de veritat servit pel web (no amb un data: generat a la pàgina).
-# Horari = el del cartell (DEFAULT d'index.html) + els canvis de l'organització (docs/changes.json).
-import re
-from datetime import datetime as _dt, timezone as _tz
-block = src[src.index("const DEFAULT = {"):]
-block = block[len("const DEFAULT = "):block.index("\n};") + 2]
-block = re.sub(r"^\s*//.*$", "", block, flags=re.M)
-block = re.sub(r"(\w+):\s*\[", r'"\1": [', block)                 # claus
-block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
-block = re.sub(r",(\s*[\]}])", r"\1", block)                     # comes finals
-default = json.loads(block)
-STAGE_NAMES = dict(re.findall(r"\{ id: '(\w+)', name: '([^']+)'", src))
-defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_rest) in enumerate(arr)] for sid, arr in default.items()}
-DEFMAP = {r["id"]: r for lst in defaults.values() for r in lst}
-sets, updated = defaults, None
-chg = OUT / "changes.json"
-if chg.is_file():
-    try:
-        d = json.loads(chg.read_text(encoding="utf-8"))
-        updated = d.get("updated") if isinstance(d.get("updated"), str) else None
-        if isinstance(d.get("sets"), dict):
-            sets = {sid: [r for r in lst if isinstance(r, dict) and r.get("n")] for sid, lst in d["sets"].items() if isinstance(lst, list)}
-    except Exception as e:
-        print("Avís: changes.json no s'ha pogut llegir:", e)
-
-def T(code):  # igual que T() de la pàgina: hora de Montmeló → UTC (canvi d'hora a les 3:00 del 25). None si no és vàlida
-    m = re.fullmatch(r"(\d{1,2}):(\d{2})([ab]?)", str(code))
-    if not m or int(m[1]) > 23 or int(m[2]) > 59:
-        return None
-    h, mi, f = int(m[1]), int(m[2]), m[3]
-    day, off = (24, 2) if h >= 6 else ((25, 2) if h < 2 or (h == 2 and f == "a") else (25, 1))
-    return _dt(2026, 10, day, 0, mi, tzinfo=_tz.utc).timestamp() + (h - off) * 3600
-
-def stamp_of(x):
-    """(DTSTAMP, SEQUENCE): de la data del canvi si l'actuació és diferent del cartell (igual que icsFor de la pàgina)."""
-    dflt = DEFMAP.get(x["id"])
-    changed = not dflt or T(dflt["a"]) != T(x["a"]) or T(dflt["b"]) != T(x["b"]) or str(dflt["n"]) != str(x["n"]).strip()
-    try:
-        up = _dt.fromisoformat(updated.replace("Z", "+00:00")) if changed and updated else None
-    except ValueError:
-        up = None
-    if not up:
-        return "20261020T000000Z", 0
-    return up.astimezone(_tz.utc).strftime("%Y%m%dT%H%M%SZ"), max(1, int(up.timestamp() - _dt(2026, 10, 1, tzinfo=_tz.utc).timestamp()))
-
-def ics_text(x, sname):
-    d = lambda ts: _dt.fromtimestamp(ts, _tz.utc).strftime("%Y%m%dT%H%M%SZ")
-    tx = lambda t: str(t).replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;").replace("\n", "\\n")
-    a = T(x["a"])
-    dtstamp, seq = stamp_of(x)
-    return "\r\n".join([
-        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Midnight//Bass in the Park//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-        "BEGIN:VEVENT", f"UID:{x['id']}@midnight-webapp", f"DTSTAMP:{dtstamp}", f"SEQUENCE:{seq}",
-        f"DTSTART:{d(a)}", f"DTEND:{d(T(x['b']))}", f"SUMMARY:{tx(str(x['n']).strip())} · {tx(sname)}",
-        "LOCATION:Bass in the Park · Espai Can Guitet\\, Montmeló",
-        "BEGIN:VALARM", "TRIGGER:-PT10M", "ACTION:DISPLAY", f"DESCRIPTION:{tx(str(x['n']).strip())} empieza en 10 min ({tx(sname)})", "END:VALARM",
-        "END:VEVENT", "END:VCALENDAR", ""])
-
-cal = OUT / "cal"
-if cal.exists():
-    shutil.rmtree(cal)
-cal.mkdir()
-n_cal = 0
-for sid, lst in sets.items():
-    for x in lst:
-        if re.fullmatch(r"[\w-]{1,40}", str(x.get("id", ""))) and T(x.get("a")) is not None and T(x.get("b")) is not None:
-            (cal / f"{x['id']}.ics").write_bytes(ics_text(x, STAGE_NAMES.get(sid, sid)).encode("utf-8"))
-            n_cal += 1
-print(f"Calendaris: {n_cal} fitxers a docs/cal/")
+# Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
+if (OUT / "cal").exists():
+    shutil.rmtree(OUT / "cal")
 
 (OUT / "manifest.webmanifest").write_text("""{
   "name": "Midnight App",
@@ -218,7 +151,6 @@ self.addEventListener('activate', e => {{
 self.addEventListener('fetch', e => {{
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  if (url.pathname.endsWith('.ics')) return;  // calendaris: sempre de la xarxa (l'organització els pot haver canviat)
   if (url.origin !== location.origin) {{
     if (!url.hostname.endsWith('fonts.googleapis.com') && !url.hostname.endsWith('fonts.gstatic.com')) return;  // API de GitHub: directe
   }}
