@@ -41,6 +41,9 @@ if tok_f.is_file() and pw_f.is_file():
 else:
     print("Editor de l'organització: desactivat (falta", "la contrasenya" if tok_f.is_file() else "el token", "a", CONF, ")")
 src = src.replace("/*ADMIN*/null/*ADMIN*/", admin)
+# Data de la versió (surt sota «Actualizar la app»)
+import datetime
+src = src.replace("const BUILD = '';", "const BUILD = '" + datetime.datetime.now().strftime("%d/%m %H:%M") + "';")
 head, body = src.split("</style>", 1)
 head += "</style>"
 # Treu la meta pròpia de l'artifact i el viewport (es posen a sota)

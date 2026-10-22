@@ -240,8 +240,12 @@ h2 span { color: var(--neon); }
 .edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .edmsg { margin-top: 10px; font-size: 13.5px; color: var(--neon); min-height: 1.2em; }
 .edmsg.bad { color: var(--t5); }
-.tests { margin-top: 22px; border-top: 1px solid var(--rule); padding-top: 4px; display: flex; flex-direction: column; gap: 12px; }
-.tests h3 { margin: 10px 0 0; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.orgmenu { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.orgmenu .btn { align-self: stretch; text-align: center; }
+.orgmenu .btn[aria-expanded="true"] { border-color: var(--neon); color: var(--neon); }
+.orgmenu #edClose { color: var(--muted); }
+.panel { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; }
+.tests { display: flex; flex-direction: column; gap: 12px; }
 .tests .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; }
 .notif label { margin-top: 0; }
 .linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 8px 0; cursor: pointer; }
@@ -313,6 +317,11 @@ h2 span { color: var(--neon); }
       <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
       <div class="hint" id="wakeHint" hidden></div>
     </div>
+    <div>
+      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
+      <div class="hint" id="updMsg" hidden></div>
+      <p class="note" id="appVer"></p>
+    </div>
   </section>
 
   <section class="admin" id="admin" hidden>
@@ -326,23 +335,34 @@ h2 span { color: var(--neon); }
       <div class="hint" id="pwMsg" hidden></div>
     </form>
     <div id="editor" class="editor" hidden>
-      <label for="edNotice">Aviso para todos (sale arriba, debajo de la hora)</label>
-      <textarea id="edNotice" rows="2" placeholder="Ej.: Hëdera empieza 30 min tarde"></textarea>
-      <label for="edStage">Escenario</label>
-      <select id="edStage">
-        <option value="ner">No Es Ruido</option><option value="tox">Toxik Parties</option><option value="pont">Pont Aeri</option><option value="misa">Misa Psicodélika</option><option value="ss">Migats Sound System</option>
-      </select>
-      <div id="edRows" class="edrows"></div>
-      <button type="button" class="btn" id="edAdd">+ Añadir actuación</button>
-      <div class="edbar">
-        <button type="button" class="btn primary" id="edSave">Guardar y publicar</button>
+      <div class="orgmenu">
+        <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horario</button>
+        <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Aviso para todos</button>
+        <button type="button" class="btn" data-panel="pPruebas" aria-expanded="false">Pruebas</button>
         <button type="button" class="btn" id="edClose">Salir</button>
       </div>
-      <div class="edmsg" id="edMsg" role="status"></div>
-      <button type="button" class="linkbtn" id="edReset">Volver al horario del cartel</button>
 
-      <div class="tests">
-        <h3>Pruebas</h3>
+      <div class="panel" id="pHorario" hidden>
+        <label for="edStage">Escenario</label>
+        <select id="edStage">
+          <option value="ner">No Es Ruido</option><option value="tox">Toxik Parties</option><option value="pont">Pont Aeri</option><option value="misa">Misa Psicodélika</option><option value="ss">Migats Sound System</option>
+        </select>
+        <div id="edRows" class="edrows"></div>
+        <button type="button" class="btn" id="edAdd">+ Añadir actuación</button>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave">Guardar y publicar</button></div>
+        <p class="note">Nadie ve los cambios mientras editas. Cuando tocas «Guardar y publicar», los verán todos los móviles en 1 o 2 minutos.</p>
+        <button type="button" class="linkbtn" id="edReset">Volver al horario del cartel</button>
+      </div>
+
+      <div class="panel" id="pAviso" hidden>
+        <label for="edNotice">Aviso para todos (sale arriba, debajo de la hora)</label>
+        <textarea id="edNotice" rows="3" placeholder="Ej.: Hëdera empieza 30 min tarde"></textarea>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave2">Guardar y publicar</button></div>
+        <p class="note">Para quitar el aviso, borra el texto y publica. Lo verán todos en 1 o 2 minutos.</p>
+      </div>
+
+      <div class="panel tests" id="pPruebas" hidden>
+        <p class="note">Las pruebas solo afectan a este móvil: nadie más las ve.</p>
         <div class="sim">
           <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
           <div id="simCtl" class="sim" hidden>
@@ -366,6 +386,8 @@ h2 span { color: var(--neon); }
           <p class="note">Avisan de tus artistas 10 min antes y cuando empiezan. En iPhone solo funcionan con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y mientras está abierta. Para avisos con el móvil bloqueado, usa el Calendario.</p>
         </div>
       </div>
+
+      <div class="edmsg" id="edMsg" role="status"></div>
     </div>
   </section>
 </div>
@@ -902,6 +924,25 @@ document.getElementById('notifTest').addEventListener('click', () => {
 });
 notifUI();
 
+// Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
+const BUILD = '';
+document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
+document.getElementById('appUpdate').addEventListener('click', async () => {
+  const msg = document.getElementById('updMsg');
+  if (!ONLINE) return location.reload();
+  msg.hidden = false; msg.textContent = 'Buscando la última versión…';
+  try {
+    const r = await fetchT(`./?t=${Date.now()}`, { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+  } catch (e) {
+    msg.textContent = 'Sin conexión: sigues con la versión guardada. Vuelve a probar cuando tengas cobertura.';
+    return;
+  }
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
+  if (dirty) { msg.textContent = 'Tienes cambios sin publicar en Organización: publícalos o sal antes de actualizar.'; return; }
+  location.reload();
+});
+
 // Pantalla encesa
 let lock = null, wantWake = false;
 const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
@@ -1072,6 +1113,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     document.getElementById('edNotice').value = draft.notice;
     document.getElementById('pwForm').hidden = true;
     document.getElementById('editor').hidden = false;
+    openPanel('');
     renderEditor();
     edMsg(saved && saved.draft ? 'Hemos recuperado los cambios que aún no habías publicado.' : '');
   } catch (err) {
@@ -1079,6 +1121,21 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
   }
   go.disabled = false;
 });
+// Menú d'Organización: un apartat obert cada vegada
+function openPanel(id) {
+  for (const b of document.querySelectorAll('.orgmenu [data-panel]')) {
+    const on = b.dataset.panel === id;
+    b.setAttribute('aria-expanded', on);
+    document.getElementById(b.dataset.panel).hidden = !on;
+  }
+}
+document.querySelector('.orgmenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-panel]');
+  if (!b) return;
+  openPanel(b.getAttribute('aria-expanded') === 'true' ? '' : b.dataset.panel);
+  edMsg('');
+});
+document.getElementById('edSave2').addEventListener('click', () => document.getElementById('edSave').click());
 document.getElementById('edStage').addEventListener('change', e => { edStage = e.target.value; renderEditor(); });
 document.getElementById('edRows').addEventListener('change', e => {
   const row = e.target.closest('.edrow');
@@ -1155,8 +1212,8 @@ async function save(data) {
 document.getElementById('edSave').addEventListener('click', () => {
   for (const s of STAGES) for (const r of draft.sets[s.id]) {
     r.n = r.n.trim();
-    if (!r.n) { edStage = s.id; renderEditor(); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
-    if (!(T(r.b) > T(r.a))) { edStage = s.id; renderEditor(); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
+    if (!r.n) { edStage = s.id; openPanel('pHorario'); renderEditor(); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
+    if (!(T(r.b) > T(r.a))) { edStage = s.id; openPanel('pHorario'); renderEditor(); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
   }
   save({ v: 1, updated: new Date().toISOString(), notice: draft.notice.trim(), sets: draft.sets });
 });
