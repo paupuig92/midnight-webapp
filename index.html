@@ -419,6 +419,7 @@ h2 span { color: var(--accent); }
       <div class="row2">
         <button class="btn" type="button" id="notifOn">Activar notificaciones</button>
         <button class="btn" type="button" id="notifTest">Enviar una de prueba</button>
+        <button class="btn" type="button" id="notifReset">Restablecer notificaciones</button>
       </div>
       <div class="hint" id="notifMsg" hidden></div>
       <label class="cfgsel" for="prefBefore">Avisarme de mis artistas
@@ -1179,6 +1180,33 @@ document.getElementById('notifTest').addEventListener('click', async () => {
   try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prueba', opts); else new Notification('Midnight · prueba', opts); } catch (e) {}
   notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
 });
+// Restablecer: es dona de baixa d'aquest mòbil i es torna a registrar de zero (per si es queden en un estat estrany).
+// La subscripció nova es fa just en tocar (l'iPhone només la permet com a resposta a un toc); la baixa al servidor, després.
+document.getElementById('notifReset').addEventListener('click', async () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  notifUI('Restableciendo…');
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') { notifOn = false; try { localStorage.setItem(NKEY, '0'); } catch (e) {} return notifUI(deniedHelp()); }
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  told = new Set();
+  if (!canPush()) return notifUI('Restablecidas. Te avisaremos de tus artistas mientras la app esté abierta.');
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const old = await reg.pushManager.getSubscription();
+    if (old) await old.unsubscribe();
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+    if (old && old.endpoint !== sub.endpoint) pushPost('/unsub', { endpoint: old.endpoint }).catch(() => {});
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+    pushActive = true;
+    notifUI('Restablecidas ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.');
+  } catch (e) {
+    pushActive = false;
+    notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`);
+  }
+});
+
 notifUI();
 if (canPush()) {
   document.getElementById('notifNote').innerHTML = '<b>Llegan también con el móvil bloqueado.</b> En iPhone, con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y las notificaciones activadas aquí.';
