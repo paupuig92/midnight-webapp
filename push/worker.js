@@ -143,6 +143,8 @@ export default {
         const id = await idOf(ep);
         const subs = await getSubs(env);
         if (Object.keys(subs).length >= 2000 && !subs[id]) return json({ error: 'full' }, 429, origin);
+        // Si el mòbil substitueix un registre vell (Restablecer), es treu en el mateix pas (dues peticions alhora es trepitjarien)
+        if (typeof b.old === 'string' && b.old && b.old !== ep) delete subs[await idOf(b.old)];
         subs[id] = { endpoint: ep, favs, before, changes: b.changes !== false, at: Date.now() };
         await putSubs(env, subs);
         return json({ ok: true, id }, 200, origin);

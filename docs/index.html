@@ -1196,7 +1196,7 @@ document.getElementById('notifTest').addEventListener('click', async () => {
     try {
       const sub = await pushSubscription(false);
       const r = await pushPost('/test', { endpoint: sub.endpoint });
-      return notifUI(r.ok ? 'Enviada desde el servidor. Bloquea el móvil: te llegará en unos segundos.' : 'El servidor no ha podido enviarla. Desactiva y vuelve a activar las notificaciones.');
+      return notifUI(r.ok ? 'Enviada desde el servidor. Bloquea el móvil: te llegará en unos segundos.' : `El servidor no ha podido enviarla (código ${r.status}). Toca «Restablecer notificaciones» y vuelve a probar.`);
     } catch (e) { return notifUI('No hay conexión con el servidor de avisos. Vuelve a probar con cobertura.'); }
   }
   const opts = { body: 'Si ves esto, las notificaciones funcionan ✓', tag: 'prueba', icon: 'icon-192.png' };
@@ -1220,8 +1220,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     const old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    if (old && old.endpoint !== sub.endpoint) pushPost('/unsub', { endpoint: old.endpoint }).catch(() => {});
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes });
     pushActive = true;
     notifUI('Restablecidas ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.');
   } catch (e) {
@@ -1245,7 +1244,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 13:25';
+const BUILD = '22/10 13:28';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
