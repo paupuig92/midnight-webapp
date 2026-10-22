@@ -270,7 +270,7 @@ h2 span { color: var(--neon); }
 .tests .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; }
 .notif label { margin-top: 0; }
 .cfglabel { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; margin: 0 0 6px; }
-.tools h2 { margin-bottom: 0; }
+.tools h2 { margin-bottom: 0; color: var(--ink); }
 .simbox { margin: 0; }
 .simbox .sim { padding-bottom: 12px; }
 .tools .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; color: var(--ink); }
@@ -949,7 +949,7 @@ document.getElementById('notifTest').addEventListener('click', () => {
 notifUI();
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 12:02';
+const BUILD = '22/10 12:04';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
