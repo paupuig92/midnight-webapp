@@ -18,6 +18,7 @@
   --on-neon: #041204;
   --now: #ff4040;
   --fav: #ffd23d;
+  --chg: #3ad0ff;
   --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
   --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --t5: #e8553d;
@@ -180,6 +181,13 @@ h2 span { color: var(--neon); }
 .blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); z-index: 0; display: none; }
 .blk.on .pl { display: block; }
 .blk.fav { border-color: var(--fav); }
+/* Canviat per l'organització: vora blava discontínua (es veu al costat del verd, el groc i els colors d'importància) */
+.blk.chg { box-shadow: inset 0 0 0 2px var(--chg); border-style: dashed; border-color: var(--chg); }
+.blk.chg.on { box-shadow: inset 0 0 0 3px var(--chg), 0 0 16px rgba(61,255,43,.55); }
+.chgw { color: var(--chg); font-weight: 800; }
+.blk.on .chgw { color: #002a3d; }
+.chgtag { display: inline-block; margin-top: 3px; font: 800 10.5px/1.3 var(--body); letter-spacing: .04em; text-transform: uppercase; color: #00131c; background: var(--chg); border-radius: 3px; padding: 1px 5px; }
+.who .chgtag, .nm .chgtag { display: table; }
 .blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
 .blk.on.fav::after { color: var(--on-neon); }
 .closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: 11px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
@@ -314,6 +322,7 @@ h2 span { color: var(--neon); }
     <div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div>
     <p class="legend">La línea roja es la hora actual. Esta noche, a las 3:00 se cambia la hora y vuelven a ser las 2:00: por eso las 2:00 salen dos veces (1ª y 2ª).</p>
     <p class="legend upd" id="updated" hidden></p>
+    <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde azul en el horario).</p>
   </section>
 
 
@@ -507,19 +516,24 @@ const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
 const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
   [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
 let SETS = {}, ALL = [], BYID = {};
+const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 function load(raw) {
   SETS = {};
   for (const s of STAGES) {
     SETS[s.id] = (Array.isArray(raw && raw[s.id]) ? raw[s.id] : [])
-      .map(r => ({ id: String(r.id), s, a: T(r.a), b: T(r.b), n: String(r.n || '').trim(), t: Math.min(5, Math.max(0, +r.t || 0)), sub: String(r.sub || '').trim() }))
+      .map(r => {
+        const d = DEFMAP[r.id];
+        // chg: 'new' (afegida), 'time' (hora canviada), 'name' (nom canviat) o '' (com al cartell)
+        const chg = !d ? 'new' : d.a !== r.a || d.b !== r.b ? 'time' : String(d.n) !== String(r.n || '').trim() ? 'name' : '';
+        return { id: String(r.id), s, a: T(r.a), b: T(r.b), n: String(r.n || '').trim(), t: Math.min(5, Math.max(0, +r.t || 0)), sub: String(r.sub || '').trim(),
+          chg, was: chg === 'time' ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : chg === 'name' ? d.n : '' };
+      })
       .filter(x => x.n && x.b > x.a)
       .sort((x, y) => x.a - y.a);
   }
   ALL = STAGES.flatMap(s => SETS[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
   BYID = Object.fromEntries(ALL.map(x => [x.id, x]));
 }
-load(DEFAULT_RAW);
-
 const T0 = T('12:00'), TEND = T('05:00'), RIDES = T('01:00');
 const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
 const MIN = 60000, PX = 1.25, PAD = 12;
@@ -543,6 +557,8 @@ function dur(ms) {
   return `${m} min`;
 }
 const inDur = ms => ms < MIN ? 'ya' : `en ${dur(ms)}`;
+const chgTag = x => !x.chg ? '' : `<span class="chgtag" title="${x.chg === 'new' ? 'Añadido por la organización' : `Antes: ${esc(x.was)}`}">${x.chg === 'new' ? 'Nuevo' : x.chg === 'time' ? `Cambio · antes ${esc(x.was)}` : 'Cambio'}</span>`;
+load(DEFAULT_RAW);
 
 let sim = null;
 const now = () => sim ?? Date.now();
@@ -574,9 +590,9 @@ function buildGrid() {
       const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 40 ? ' tiny' : '';
       const tc = x.t ? `--tc:var(--t${x.t});` : '';
-      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}`;
-      g += `<button type="button" class="blk${tiny}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
-        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}<span class="t">${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}`;
+      g += `<button type="button" class="blk${tiny}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
     }
     const last = SETS[s.id][SETS[s.id].length - 1];
     if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
@@ -623,7 +639,7 @@ function rowHTML(s, t) {
   const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
       <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
     <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
@@ -645,13 +661,13 @@ function rowMine(s, t) {
   const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
       <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Es tu último aquí'}</div></div>
     <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">${imp(nxt.t)}${deco(nxt.n)}</div>
+      <div class="dj">${imp(nxt.t)}${deco(nxt.n)}</div>${chgTag(nxt)}
       <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
     <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null];
   return ['hide', '', null];
@@ -662,7 +678,7 @@ function renderPick() {
   document.getElementById('pickCount').textContent = favs.size ? `(${favs.size})` : '';
   if (!document.getElementById('pick').open) return;
   document.getElementById('pickList').innerHTML = STAGES.map(s => `<h3>${s.name}</h3><ul>${SETS[s.id].map(x =>
-    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}</span><span class="acts">${calLink(x)}${star(x)}</span></li>`).join('')}</ul>`).join('');
+    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${calLink(x)}${star(x)}</span></li>`).join('')}</ul>`).join('');
 }
 document.getElementById('pick').addEventListener('toggle', renderPick);
 
@@ -679,7 +695,7 @@ function upHTML(t) {
   return list.slice(0, 6).map(x => `<li class="${favs.has(x.id) ? 'fav' : ''}">
     <div class="when"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></div>
     <img class="logo" src="img/${x.s.id}.png" alt="">
-    <div class="who">${imp(x.t)}${deco(x.n)}<span class="where">${x.s.name}</span></div>
+    <div class="who">${imp(x.t)}${deco(x.n)}<span class="where">${x.s.name}</span>${chgTag(x)}</div>
     <span class="acts">${calLink(x)}${star(x)}</span></li>`).join('');
 }
 
@@ -1002,8 +1018,19 @@ function applyChanges(d) {
   if (!d || typeof d !== 'object') return;
   const st = String(d.updated || '');
   if (st === stamp) return;
+  const wasLoaded = stamp !== '', oldNotice = notice;
   stamp = st;
   notice = String(d.notice || '');
+  // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa
+  if (wasLoaded && st !== 'cartel') {
+    if (notice && notice !== oldNotice) {
+      toast(`<b>Aviso de la organización</b><br>${html(notice)}`);
+      if (canNotify()) sysNotify('Aviso de la organización', notice, 'aviso-' + st);
+    } else {
+      toast('<b>La organización ha cambiado el horario.</b> Los cambios salen con borde azul.');
+      if (canNotify()) sysNotify('Cambio de horario', 'La organización ha cambiado el horario.', 'horario-' + st);
+    }
+  }
   load(d.sets && typeof d.sets === 'object' ? d.sets : DEFAULT_RAW);
   const nt = document.getElementById('notice');
   nt.hidden = !notice;
@@ -1011,6 +1038,7 @@ function applyChanges(d) {
   const up = document.getElementById('updated');
   up.hidden = !d.sets;
   up.textContent = d.sets && d.updated ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : '';
+  document.getElementById('chgLegend').hidden = !ALL.some(x => x.chg);
   buildGrid();
   paintFavs();
   renderPick();
