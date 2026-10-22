@@ -261,7 +261,7 @@ h2 span { color: var(--neon); }
 .edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .edmsg { margin-top: 10px; font-size: 13.5px; color: var(--neon); min-height: 1.2em; }
 .edmsg.bad { color: var(--t5); }
-.orgmenu { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.orgmenu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; }
 .orgmenu .btn { align-self: stretch; text-align: center; }
 .orgmenu .btn[aria-expanded="true"] { border-color: var(--neon); color: var(--neon); }
 .orgmenu #edClose { color: var(--muted); }
@@ -269,6 +269,11 @@ h2 span { color: var(--neon); }
 .tests { display: flex; flex-direction: column; gap: 12px; }
 .tests .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; }
 .notif label { margin-top: 0; }
+.cfglabel { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; margin: 0 0 6px; }
+.tools h2 { margin-bottom: 0; }
+.simbox { margin: 0; }
+.simbox .sim { padding-bottom: 12px; }
+.tools .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; color: var(--ink); }
 .linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 8px 0; cursor: pointer; }
 @media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } }
 
@@ -334,17 +339,6 @@ h2 span { color: var(--neon); }
     <p class="legend upd" id="updated" hidden></p>
   </section>
 
-  <section class="tools">
-    <div>
-      <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
-      <div class="hint" id="wakeHint" hidden></div>
-    </div>
-    <div>
-      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
-      <div class="hint" id="updMsg" hidden></div>
-      <p class="note" id="appVer"></p>
-    </div>
-  </section>
 
   <section class="admin" id="admin" hidden>
     <h2>Organización</h2>
@@ -360,7 +354,6 @@ h2 span { color: var(--neon); }
       <div class="orgmenu">
         <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horario</button>
         <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Aviso para todos</button>
-        <button type="button" class="btn" data-panel="pPruebas" aria-expanded="false">Pruebas</button>
         <button type="button" class="btn" id="edClose">Salir</button>
       </div>
 
@@ -383,34 +376,47 @@ h2 span { color: var(--neon); }
         <p class="note">Para quitar el aviso, borra el texto y publica. Lo verán todos en 1 o 2 minutos.</p>
       </div>
 
-      <div class="panel tests" id="pPruebas" hidden>
-        <p class="note">Las pruebas solo afectan a este móvil: nadie más las ve.</p>
-        <div class="sim">
-          <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
-          <div id="simCtl" class="sim" hidden>
-            <input type="range" id="simRange" aria-label="Hora simulada">
-            <div class="steps" id="simSteps">
-              <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
-            </div>
-            <div class="steps" id="simPresets">
-              <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
-            </div>
-            <output id="simOut"></output>
-          </div>
-        </div>
-        <div class="notif">
-          <label>Notificaciones en este móvil</label>
-          <div class="steps">
-            <button type="button" id="notifOn">Activar notificaciones</button>
-            <button type="button" id="notifTest">Enviar una de prueba</button>
-          </div>
-          <div class="hint" id="notifMsg" hidden></div>
-          <p class="note">Avisan de tus artistas 10 min antes y cuando empiezan. En iPhone solo funcionan con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y mientras está abierta. Para avisos con el móvil bloqueado, usa el Calendario.</p>
-        </div>
-      </div>
-
       <div class="edmsg" id="edMsg" role="status"></div>
     </div>
+  </section>
+
+  <section class="tools" id="config">
+    <h2>Configuración</h2>
+    <p class="note">Esto solo afecta a este móvil.</p>
+    <div>
+      <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
+      <div class="hint" id="wakeHint" hidden></div>
+    </div>
+    <div class="notif">
+      <label class="cfglabel">Notificaciones</label>
+      <div class="steps">
+        <button type="button" id="notifOn">Activar notificaciones</button>
+        <button type="button" id="notifTest">Enviar una de prueba</button>
+      </div>
+      <div class="hint" id="notifMsg" hidden></div>
+      <p class="note">Avisan de tus artistas 10 min antes y cuando empiezan. En iPhone solo funcionan con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y mientras está abierta. Para avisos con el móvil bloqueado, usa el Calendario.</p>
+    </div>
+    <div>
+      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
+      <div class="hint" id="updMsg" hidden></div>
+      <p class="note" id="appVer"></p>
+    </div>
+    <details class="pick simbox">
+      <summary>Modo prueba (simular una hora del festival)</summary>
+    <div class="sim">
+        <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
+        <div id="simCtl" class="sim" hidden>
+          <input type="range" id="simRange" aria-label="Hora simulada">
+          <div class="steps" id="simSteps">
+            <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+          </div>
+          <div class="steps" id="simPresets">
+            <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
+          </div>
+          <output id="simOut"></output>
+        </div>
+      </div>
+    </details>
   </section>
 </div>
 
@@ -943,7 +949,7 @@ document.getElementById('notifTest').addEventListener('click', () => {
 notifUI();
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 12:00';
+const BUILD = '22/10 12:02';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
