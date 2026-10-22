@@ -288,6 +288,10 @@ h2 span { color: var(--accent); }
 .tools { display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: var(--fs-s); }
 .tools > div, .tools > details { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .tools h3, .admin h3 { margin: 0; color: var(--ink); font-size: var(--fs-s); font-weight: 700; }
+.cfgsel { display: flex; flex-direction: column; gap: 6px; color: var(--ink); font-weight: 700; font-size: var(--fs-s); margin-top: 6px; }
+.cfgsel select { font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 10px; max-width: 260px; }
+.cfgchk { display: flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 600; font-size: var(--fs-s); min-height: 44px; }
+.cfgchk input { width: 24px; height: 24px; flex: none; accent-color: var(--accent); }
 .hint { color: var(--ink); font-size: var(--fs-s); border-left: 3px solid var(--mid-red); padding-left: 8px; }
 .row2 { display: flex; flex-wrap: wrap; gap: 8px; }
 .admin label { display: block; color: var(--ink); font-size: var(--fs-s); font-weight: 700; margin: 10px 0 6px; }
@@ -374,7 +378,7 @@ h2 span { color: var(--accent); }
     <p class="note">☆ = mis artistas</p>
     <details class="howto">
       <summary>Cómo funcionan los avisos</summary>
-      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas 10 minutos antes y cuando empiezan. Para recibir también una notificación, actívalas en Configuración.</p>
+      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas antes de que empiecen y cuando empiezan. Cuánto antes, y si quieres notificaciones, lo eliges en Configuración. Con el móvil bloqueado no llegan.</p>
     </details>
   </section>
 
@@ -440,7 +444,13 @@ h2 span { color: var(--accent); }
         <button class="btn" type="button" id="notifTest">Enviar una de prueba</button>
       </div>
       <div class="hint" id="notifMsg" hidden></div>
-      <p class="note" style="margin:0">Avisan de tus artistas 10 min antes y cuando empiezan, con la app abierta. En iPhone, solo con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
+      <label class="cfgsel" for="prefBefore">Avisarme de mis artistas
+        <select id="prefBefore">
+          <option value="0">No avisar</option><option value="5">5 min antes</option><option value="10">10 min antes</option><option value="15">15 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option>
+        </select>
+      </label>
+      <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisarme de cambios de horario y avisos de la organización</label>
+      <p class="note" style="margin:0"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div>
       <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
@@ -860,6 +870,13 @@ const NKEY = 'bitp-notif-v1';
 let notifOn = false;
 try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
 const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
+// Preferències d'avís (Configuración): quants minuts abans dels meus artistes, i si avisar dels canvis de l'organització
+const PKEY = 'bitp-prefs-v1';
+let prefs = { before: 10, changes: true };
+try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; } catch (e) {}
+prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
+prefs.changes = prefs.changes !== false;
+function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 async function sysNotify(title, body, tag) {
   if (sim !== null || !canNotify()) return;
   const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
@@ -879,7 +896,8 @@ function checkAlerts(t) {
     const x = BYID[id];
     if (!x) continue;
     const left = x.a - t, k = `${id}@${x.a}`;  // si l'organització canvia l'hora, es torna a avisar
-    if (left > 0 && left <= 10 * MIN && !told.has(k + ':pre')) {
+    if (!prefs.before) continue;
+    if (left > 0 && left <= prefs.before * MIN && !told.has(k + ':pre')) {
       remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
       sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
@@ -1119,9 +1137,14 @@ document.getElementById('notifTest').addEventListener('click', async () => {
   notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
 });
 notifUI();
+const prefBefore = document.getElementById('prefBefore'), prefChanges = document.getElementById('prefChanges');
+prefBefore.value = String(prefs.before);
+prefChanges.checked = prefs.changes;
+prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); });
+prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 12:53';
+const BUILD = '22/10 12:58';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -1237,7 +1260,7 @@ function applyChanges(d, quiet) {
   refresh();
 
   // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa del que ha canviat
-  if (!wasLoaded || quiet) return;
+  if (!wasLoaded || quiet || !prefs.changes) return;
   const schedChanged = setsKey() !== oldKey;
   if (notice && notice !== oldNotice) {
     toast(`<b>Aviso de la organización</b><br>${html(notice)}`, 'org', null, 30000);
