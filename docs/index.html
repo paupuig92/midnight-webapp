@@ -25,36 +25,48 @@ img { max-width: 100%; }
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
 <style>
-/* Layout: cartell + rellotge gegant (no enganxat), barra fina fixa en baixar, "Ahora suena" compacte, "A continuación", graella tipus cartell */
+/* Layout: cartell petit + rellotge a tot l'ample, "Ahora suena" just a sota, "A continuación", graella tipus cartell, Organización i Configuración al final.
+   Colors: la marca Midnight (vermell) i els significats fixos (groc = meu, magenta = canvi, vermell = ara) no canvien mai;
+   l'accent és el color de cada festival (FEST al començament del script). */
 :root {
+  /* Marca i base (fixos) */
+  --mid-red: #e8253a;
   --bg: #040704;
-  --panel: #0a110a;
+  --panel: #0b120b;
   --ink: #ecfbe9;
-  --muted: #9ab597;
-  --neon: #3dff2b;
-  --neon-dim: #1d6b15;
-  --rule: #173b13;
-  --paper: #f1f4ee;
-  --on-neon: #041204;
+  --muted: #a3bba0;
+  --rule: #2c5a26;
+  --line: #4a7f42;
+  --paper: #f3f5f0;
+  /* Significats fixos */
   --now: #ff4040;
   --fav: #ffd23d;
-  --chg: #3ad0ff;
-  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --chg: #ff4fd8;
+  /* Color del festival (el canvia FEST) */
+  --accent: #3dff2b;
+  --accent-rgb: 61, 255, 43;
+  --accent-dim: #1d6b15;
+  --accent-deep: #0f2a0c;
+  --accent-ink: #041204;
+  /* Importància (del full de l'organització): 5 vermell … 1 blau; sempre amb el número a dins */
   --t5: #e8553d;
   --t4: #f08a2e;
-  --t3: #f2c94c;
+  --t3: #e6c13d;
   --t2: #6fbf5f;
   --t1: #6f8cf0;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* Escala de text: 11 / 13 / 15 / 18 / 24 */
+  --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
   --gut: 48px;
-  --barh: 50px;
+  --barh: 52px;
   --top: calc(var(--barh) + env(safe-area-inset-top, 0px));
   color-scheme: dark;
 }
 html, body { background: var(--bg); color: var(--ink); }
 body {
   font-family: var(--body);
-  font-size: 15px;
+  font-size: var(--fs-m);
   line-height: 1.4;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -62,229 +74,247 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-.wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+body.locked { overflow: hidden; }
+.wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
 section { scroll-margin-top: calc(var(--top) + 8px); }
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--fav); outline-offset: 2px; }
+.mdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mid-red); flex: none; }
 
-/* Capçalera (no enganxada) */
-.banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 242; object-fit: cover; border-radius: 6px; margin-top: 12px; }
-header.hero { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-bottom: 2px solid var(--neon); padding-block: 4px 14px; }
+/* Botons: dos components. .btn (pastilla 44 px; .primary = color del festival) i .chip (filtres) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s)/1.1 var(--body); cursor: pointer; text-decoration: none; text-align: center; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.go { color: var(--accent); border-color: var(--accent); font: 800 var(--fs-s)/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; }
+.btn.go:active { background: var(--accent); color: var(--accent-ink); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.chip { min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fav); border-color: var(--fav); color: #1a1400; }
+.round { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
+.star { font-size: 20px; line-height: 1; color: var(--muted); }
+.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
+.acts { display: flex; gap: 10px; align-items: center; }
+
+/* Capçalera */
+.banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 175; object-fit: cover; object-position: center 78%; border-radius: 8px; margin-top: 12px; }
+header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--accent); padding-block: 0 12px; }
+.brandline { display: flex; align-items: center; gap: 7px; font: 800 var(--fs-xs)/1.2 var(--display); font-stretch: 112%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.brandline b { color: var(--ink); }
 .clock { font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
-  font-variant-numeric: tabular-nums; color: var(--neon); text-shadow: 0 0 18px rgba(61,255,43,.45); }
-.clock small { font-size: .38em; color: var(--muted); text-shadow: none; margin-left: 4px; }
-.status { color: var(--muted); font-size: 14px; }
+  font-variant-numeric: tabular-nums; color: var(--accent); text-shadow: 0 0 10px rgba(var(--accent-rgb), .3); }
+.clock small { font-size: .34em; color: var(--muted); text-shadow: none; margin-left: 4px; }
+.statusrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
 .status strong { color: var(--ink); font-weight: 700; }
-.dstnote { color: var(--fav); font-size: 13px; font-weight: 700; }
-.sim-badge { background: var(--fav); color: #1a1400; font: 800 11px/1 var(--body); padding: 6px 8px; border: 0; border-radius: 4px; letter-spacing: .06em; cursor: pointer; }
-button.go {
-  font: 800 13px/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase;
-  background: transparent; color: var(--neon); border: 2px solid var(--neon); border-radius: 999px; padding: 11px 16px; cursor: pointer; min-height: 44px;
-}
-button.go:active { background: var(--neon); color: var(--on-neon); }
+.statusrow .btn { flex: none; padding: 0 14px; }
+.dstnote { color: var(--ink); font-size: var(--fs-s); font-weight: 700; display: flex; gap: 7px; align-items: baseline; }
+.dstnote::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--now); flex: none; }
+.notice { box-sizing: border-box; background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); border-radius: 6px; padding: 10px 12px; font-size: var(--fs-m); font-weight: 600; white-space: pre-line; }
+.notice b { display: block; font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; color: var(--mid-red); }
+.sim-badge { align-self: flex-start; min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer; color: #fff; font: 800 var(--fs-xs)/1 var(--body); letter-spacing: .06em;
+  background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); }
 
 /* Barra fina fixa (surt quan el rellotge gran ja no es veu) */
-.minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--neon);
-  padding-top: calc(env(safe-area-inset-top, 0px) + 5px); padding-bottom: 5px;
+.minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--accent);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4px); padding-bottom: 4px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   min-height: var(--barh); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
-.minibar .mclock { font: 900 26px/1 var(--display); font-stretch: 125%; color: var(--neon); font-variant-numeric: tabular-nums; }
-.minibar .mstatus { flex: 1; min-width: 0; color: var(--muted); font-size: 12.5px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.minibar button.go { padding: 8px 12px; min-height: 38px; font-size: 12px; }
+.minibar .mclock { font: 900 26px/1 var(--display); font-stretch: 125%; color: var(--accent); font-variant-numeric: tabular-nums; }
+.minibar .mnext { flex: 1; min-width: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.minibar .mnext b { color: var(--fav); }
+.minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
+.minibar .btn { min-height: 40px; padding: 0 12px; }
 
-h2 { margin: 0 0 12px; font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
-h2 span { color: var(--neon); }
-.dj i, .who i, .blk .n i, .after b i { font-style: normal; color: var(--neon); }
+h2 { margin: 0; font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h2 span { color: var(--accent); }
+.shead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dj i, .who i, .blk .n i, .after b i, .nm i { font-style: normal; color: var(--accent); }
 
-/* Importància */
-.imp { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--tc); margin-right: 6px; vertical-align: .06em; flex: none; }
-.scale { display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; margin: -4px 0 12px; }
-.scale span { display: inline-flex; align-items: center; color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
-.scale .imp { margin-right: 4px; }
+/* Importància: quadrat de color amb el número (no es confon amb la ★ ni amb els canvis) */
+.imp { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 3px; background: var(--tc); color: #0b0b0b; font: 800 10px/1 var(--body);
+  margin-right: 6px; vertical-align: .1em; flex: none; font-style: normal; text-transform: none; }
+.scale { display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap; color: var(--muted); font-size: var(--fs-xs); margin-top: 10px; }
+.scale .imp { margin-right: 0; }
 
-/* Ahora suena: files compactes */
+/* Ahora suena */
 .rows { display: flex; flex-direction: column; gap: 6px; }
 .row { order: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; align-items: center;
-  background: var(--panel); border: 2px solid var(--rule); border-radius: 6px; padding: 8px 10px 0 10px; overflow: hidden; }
-.row.live { order: 0; border-color: var(--neon); }
-.row.closed { order: 2; padding-block: 6px; opacity: .8; }
-.row img.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
+  background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px 10px 0 10px; overflow: hidden; }
+.row.live { order: 0; border: 2px solid var(--accent); }
+.row.hide, .row.closed { display: none; }
+.row img.logo, .row svg.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); color: var(--ink); }
+.row svg.logo { filter: none; }
 .row .mid { min-width: 0; padding-bottom: 8px; }
-.row.closed .mid { padding-bottom: 0; }
-.row .sn { font: 800 10.5px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.row.live .sn::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--neon); margin-right: 5px; vertical-align: .05em; animation: pulse 1.4s ease-in-out infinite; }
+.row .sn { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row.live .sn::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; animation: pulse 1.6s ease-in-out 8; }
 @keyframes pulse { 50% { opacity: .25; } }
-.row .dj { font: 900 16.5px/1.1 var(--display); font-stretch: 112%; text-transform: uppercase; overflow-wrap: break-word; }
-.row .dj .sub { font: 600 11px var(--body); color: var(--muted); letter-spacing: .03em; }
-.row.idle .dj { color: var(--muted); font-size: 14px; }
-.row .after { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
+.row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+.row.idle .dj { color: var(--muted); font-size: var(--fs-m); }
+.row.idle.mine .dj { color: var(--ink); font-size: var(--fs-l); }
+.row .after { font-size: var(--fs-s); color: var(--muted); margin-top: 2px; }
 .row .after b { color: var(--ink); text-transform: uppercase; }
-.row .right { display: flex; align-items: center; gap: 6px; padding-bottom: 8px; }
-.row.closed .right { padding-bottom: 0; }
+.row .right { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
 .row .left { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.row .left b { display: block; color: var(--neon); font-size: 14px; }
-.row .left span { font-size: 11px; color: var(--muted); }
+.row .left b { display: block; color: var(--accent); font-size: var(--fs-m); }
+.row .left span { font-size: var(--fs-xs); color: var(--muted); }
 .row .bar { grid-column: 1 / -1; height: 4px; margin: 0 -10px; background: var(--rule); }
-.row .bar > div { height: 100%; background: var(--neon); width: 0; }
+.row .bar > div { height: 100%; background: var(--accent); width: 0; }
+.closedline { color: var(--muted); font-size: var(--fs-s); margin: 8px 2px 0; }
+.closedline b { color: var(--ink); font-weight: 700; }
+.underrows { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
-.star { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--rule); background: transparent; color: var(--muted); font-size: 19px; line-height: 1; cursor: pointer; }
-.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
-
-/* A continuación */
-.nexthead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.chip { border: 1.5px solid var(--rule); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 700; cursor: pointer; min-height: 38px; }
-.chip[aria-pressed="true"] { border-color: var(--fav); color: var(--fav); }
-.chip.mine { min-height: 44px; }
-.chip.mine[aria-pressed="true"] { background: var(--fav); color: #1a1400; }
-.pick { margin: -2px 0 12px; border: 1.5px solid var(--rule); border-radius: 6px; padding: 0 12px; }
-.pick summary { cursor: pointer; font-weight: 700; font-size: 14px; padding: 12px 0; min-height: 20px; }
-.pick summary span { color: var(--fav); }
-.pick h3 { margin: 12px 0 4px; font: 800 11px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.pick ul { list-style: none; margin: 0 0 8px; padding: 0; }
-.pick li { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px solid var(--rule); }
-.pick li .tm { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.pick li .nm { font: 800 13.5px/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
+/* Full per triar els meus artistes (a sobre de tot, amb «Listo») */
+.sheet { position: fixed; inset: 0; z-index: 12; background: var(--bg); display: flex; flex-direction: column; }
+.sheet[hidden] { display: none !important; }
+.sheet header { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--accent);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+.sheet header h2 { font-size: var(--fs-l); }
+.sheet header h2 span { color: var(--fav); }
+.sheet .body { flex: 1; overflow: auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 90px) max(16px, env(safe-area-inset-left, 0px)); overscroll-behavior: contain; }
+.sheet .foot { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); display: flex; justify-content: center;
+  padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 14px); }
+.sheet .foot .btn { min-width: 60%; }
+.pick h3 { margin: 16px 0 4px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pick ul { list-style: none; margin: 0; padding: 0; }
+.pick li { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.pick li .tm { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.pick li .nm { font: 800 var(--fs-s)/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
 .pick li.on .nm { color: var(--fav); }
-/* Mode "Solo mis artistas": a la graella la resta queda molt apagada (es pot tocar per afegir-la) */
-.mine-mode .blk:not(.fav) { opacity: .18; }
-.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--neon-dim); box-shadow: none; }
-.mine-mode .blk.on:not(.fav) .n, .mine-mode .blk.on:not(.fav) .t, .mine-mode .blk.on:not(.fav) .n i { color: var(--ink); }
-.mine-mode .blk.on:not(.fav) .pl { display: none; }
-.row.hide { display: none; }
+.pick .pastnote { color: var(--muted); font-size: var(--fs-xs); margin: 12px 0 0; }
+
+/* Mode "Solo mis artistas": a la graella la resta queda apagada (es pot tocar per afegir-la) */
+.mine-mode .blk:not(.fav) { opacity: .3; }
+.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--accent-dim); }
+
+/* A continuación: agrupat per hora */
 .upnext { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.upnext li { display: grid; grid-template-columns: 70px 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.upnext li.grp { display: flex; gap: 8px; align-items: baseline; padding: 12px 0 4px; border: 0; font-variant-numeric: tabular-nums; }
+.upnext li.grp b { font-size: var(--fs-m); }
+.upnext li.grp span { font-size: var(--fs-s); color: var(--accent); }
+.upnext li.it { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
 .upnext li.fav .who { color: var(--fav); }
-.upnext .when b { display: block; font-variant-numeric: tabular-nums; font-size: 14px; }
-.upnext .when span { font-size: 11.5px; color: var(--neon); }
 .upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
-.upnext .who { font: 900 14px/1.15 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
-.upnext .where { display: block; font: 600 11px var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
-.empty { color: var(--muted); font-size: 13.5px; padding: 10px 0; }
-.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
-.calrow { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.acts { display: flex; gap: 6px; align-items: center; }
-.cal1 { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--rule); color: var(--ink); display: grid; place-items: center; }
-.cal1:active { background: var(--panel); }
-.calico { color: var(--ink); vertical-align: -3px; }
+.upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
+.upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
+.upnext .where { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
+.empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
+.note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.howto { margin-top: 8px; color: var(--muted); font-size: var(--fs-s); }
+.howto summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+.howto p { margin: 6px 0 0; }
+.inlico { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 50%; vertical-align: -6px; color: var(--ink); font-size: 12px; }
+
+/* Canvis de l'organització: magenta (un color que no fa servir res més) */
+.chgtag { display: inline-block; margin-top: 3px; font: 800 var(--fs-xs)/1.3 var(--body); letter-spacing: .03em; text-transform: uppercase; color: #2a0022; background: var(--chg); border-radius: 3px; padding: 1px 6px; }
+.who .chgtag, .nm .chgtag { display: table; }
 
 /* Graella */
-/* Més baixa que la pantalla i sense "contain" en vertical: amb el dit a sobre, en arribar al final segueix baixant la pàgina */
+.tlbox { position: relative; }
+.tlbox::after { content: ""; position: absolute; top: 2px; right: 2px; bottom: 2px; width: 22px; border-radius: 0 6px 6px 0; pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(4, 7, 4, .85)); z-index: 9; }
 .tl-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px;
-  border: 2px solid var(--rule); border-radius: 6px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
+  border: 2px solid var(--rule); border-radius: 8px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
   scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
-.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(104px, 1fr)); min-width: calc(var(--gut) + 5 * 104px); position: relative; }
-.hd { position: sticky; top: 0; z-index: 7; padding: 8px 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
-  background: var(--neon); border-left: 2px solid var(--bg); scroll-snap-align: start; }
-.hd.light { background: var(--paper); }
+.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(108px, 1fr)) 14px; min-width: calc(var(--gut) + 5 * 108px + 14px); position: relative; }
+.hd { position: sticky; top: 0; z-index: 7; padding: 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  background: var(--paper); border-left: 2px solid var(--bg); scroll-snap-align: start; }
 .hd img { display: block; width: 100%; height: 34px; object-fit: contain; }
-.corner { position: sticky; top: 0; left: 0; z-index: 8; background: var(--bg); }
+.corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
+.corner { left: 0; }
 .gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
 .gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
   font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
-.gut span[data-n] { color: var(--fav); }
+.gut span[data-n] { color: var(--now); }
 .gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
 .gut .nowlbl { left: 2px; right: 2px; text-align: center; background: var(--now); color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
 .col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
-.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--neon-dim); background: #000; border-radius: 3px; color: var(--ink); cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 8px; overflow: hidden; gap: 1px; }
-.blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--tc, transparent); }
+.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); cursor: pointer; touch-action: manipulation;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 9px; overflow: hidden; gap: 1px; }
+.blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
 .blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
-.blk .n { font: 900 11.5px/1.08 var(--display); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
-.blk .s { font-size: 11px; color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
-.blk .t { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
-.blk.tiny .t, .blk.tiny .s { display: none; }
-.blk.tiny .n { font-size: 10.5px; }
-.blk.past { opacity: .55; }
-.blk.on { border-color: var(--neon); background: var(--neon); box-shadow: 0 0 16px rgba(61,255,43,.55); z-index: 5; }
-.blk.on .n, .blk.on .n i, .blk.on .t, .blk.on .s { color: var(--on-neon); }
-.blk.on::before { width: 6px; }
+.blk .n { font: 900 12px/1.08 var(--display); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
+.blk .s { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk.tiny .s { display: none; }
+.blk.tiny .t { font-size: 10px; }
+.blk.past { background: #050805; border-color: #1b3317; }
+.blk.past .n, .blk.past .t, .blk.past .n i { color: #6f8a6b; }
+/* En directe: fons fosc i vora del festival (la franja d'importància i la línia d'ara es continuen veient) */
+.blk.on { border: 2px solid var(--accent); background: var(--accent-deep); box-shadow: 0 0 14px rgba(var(--accent-rgb), .45); z-index: 5; }
+.blk.on .n { color: var(--accent); }
+.blk.on .t, .blk.on .s { color: var(--ink); }
+/* Meu i sonant ara: el cas més important, ple */
+.blk.on.fav { background: var(--accent); }
+.blk.on.fav .n, .blk.on.fav .n i, .blk.on.fav .t, .blk.on.fav .s { color: var(--accent-ink); }
 .blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); z-index: 0; display: none; }
 .blk.on .pl { display: block; }
 .blk.fav { border-color: var(--fav); }
-/* Canviat per l'organització: vora blava discontínua (es veu al costat del verd, el groc i els colors d'importància) */
-.blk.chg { box-shadow: inset 0 0 0 2px var(--chg); border-style: dashed; border-color: var(--chg); }
-.blk.chg.on { box-shadow: inset 0 0 0 3px var(--chg), 0 0 16px rgba(61,255,43,.55); }
-.chgw { color: var(--chg); font-weight: 800; }
-.blk.on .chgw { color: #002a3d; }
-.chgtag { display: inline-block; margin-top: 3px; font: 800 10.5px/1.3 var(--body); letter-spacing: .04em; text-transform: uppercase; color: #00131c; background: var(--chg); border-radius: 3px; padding: 1px 5px; }
-.who .chgtag, .nm .chgtag { display: table; }
 .blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
-.blk.on.fav::after { color: var(--on-neon); }
-.closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: 11px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
-.nowline { grid-column: 2 / -1; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.blk.on.fav::after { color: var(--accent-ink); }
+.blk.chg { border-style: dashed; border-color: var(--chg); box-shadow: inset 0 0 0 2px var(--chg); }
+.blk.chg.on { box-shadow: inset 0 0 0 2px var(--chg), 0 0 14px rgba(var(--accent-rgb), .45); }
+.chgw { color: var(--chg); font-weight: 800; }
+.blk.on.fav .chgw { color: #5a004a; }
+.closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: var(--fs-xs); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.nowline { grid-column: 2 / 7; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.legend { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.legend.upd { color: var(--ink); }
 
-/* Avisos */
-.toasts { position: fixed; z-index: 11; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+/* Avisos emergents: groc = meus artistes, paper i vermell = organització, fosc = informació */
+.toasts { position: fixed; z-index: 13; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.toast { pointer-events: auto; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 10px; align-items: center;
-  background: var(--fav); color: #1a1400; border-radius: 8px; padding: 10px 8px 10px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: 14px; }
+.toast { pointer-events: auto; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 8px; align-items: center;
+  border-radius: 10px; padding: 8px 8px 8px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: var(--fs-m); }
+.toast.mine { background: var(--fav); color: #1a1400; }
+.toast.org { background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); }
+.toast.info { background: #1a2618; color: var(--ink); border: 1.5px solid var(--line); }
 .toast b { text-transform: uppercase; }
-.toast div { flex: 1; min-width: 0; }
-.toast button { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(0,0,0,.12); font-size: 18px; cursor: pointer; }
+.toast .msg { flex: 1; min-width: 0; }
+.toast .act { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; font-weight: 800; cursor: pointer; }
+.toast .x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(127,127,127,.18); font-size: 18px; cursor: pointer; }
 
-/* Peu */
-.tools { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--rule); padding-top: 16px; color: var(--muted); font-size: 13px; }
-.tools .btn { align-self: flex-start; font: 700 14px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 11px 14px; cursor: pointer; min-height: 44px; }
-.tools .btn[aria-pressed="true"] { border-color: var(--neon); color: var(--neon); }
-.tools .btn:disabled { opacity: .5; cursor: default; }
-.hint { color: var(--fav); font-size: 12.5px; }
-.sim { display: flex; flex-direction: column; gap: 10px; }
-.sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 32px; }
-.sim input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--neon); }
-.sim input[type=range] { width: 100%; accent-color: var(--neon); }
-.steps { display: flex; flex-wrap: wrap; gap: 6px; }
-.steps button { font: 700 13px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 8px 10px; min-height: 40px; cursor: pointer; font-variant-numeric: tabular-nums; }
-.sim output { font-variant-numeric: tabular-nums; color: var(--fav); font-weight: 700; font-size: 14px; }
-.legend { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
-
-/* Capçalera: botó + atraccions, i avís de l'organització */
-.herorow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; width: 100%; margin-top: 2px; }
-.row.rides svg.logo { width: 56px; height: 30px; color: var(--ink); }
-.row.rides.live { order: 1; }
-.row.rides.idle { order: 2; }
-.row.rides.closed { order: 3; }
-.notice { width: 100%; box-sizing: border-box; background: var(--fav); color: #1a1400; border-radius: 6px; padding: 10px 12px; font-size: 14.5px; font-weight: 600; white-space: pre-line; }
-.notice b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
-.legend.upd { color: var(--fav); }
-
-/* Organització */
-.admin { border-top: 1px solid var(--rule); padding-top: 16px; }
-.admin label { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; margin: 10px 0 6px; }
+/* Organización i Configuración */
+.admin, .tools { border-top: 1px solid var(--rule); padding-top: 16px; }
+.tools { display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: var(--fs-s); }
+.tools > div, .tools > details { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.tools h3, .admin h3 { margin: 0; color: var(--ink); font-size: var(--fs-s); font-weight: 700; }
+.hint { color: var(--ink); font-size: var(--fs-s); border-left: 3px solid var(--mid-red); padding-left: 8px; }
+.row2 { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin label { display: block; color: var(--ink); font-size: var(--fs-s); font-weight: 700; margin: 10px 0 6px; }
 .admin input[type=text], .admin input[type=password], .admin select, .admin textarea {
-  font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--rule); border-radius: 6px; padding: 9px 10px; min-height: 42px; box-sizing: border-box; width: 100%; }
+  font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 44px; box-sizing: border-box; width: 100%; }
 .admin textarea { resize: vertical; }
 .pwrow { display: flex; gap: 8px; }
 .pwrow input { flex: 1; min-width: 0; }
-.tools .btn, .admin .btn { align-self: flex-start; font: 700 14px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 11px 14px; cursor: pointer; min-height: 44px; }
-.admin .btn.primary { background: var(--neon); color: var(--on-neon); border-color: var(--neon); }
-.admin .btn:disabled { opacity: .5; }
+.orgmenu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.orgmenu .btn { padding: 0 8px; }
+.orgmenu .btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.panel { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; }
 .edrows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
-.edrow { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1.5px solid var(--rule); border-radius: 6px; padding: 8px; }
+.edrow { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px; }
+.edrow.bad { border-color: var(--now); }
 .edtimes { display: flex; align-items: center; gap: 6px; }
 .edtimes select { flex: 1; min-width: 0; }
 .edtimes span { color: var(--muted); }
 .edmore { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 6px; }
-.edrow .del { border: 1.5px solid var(--rule); background: transparent; color: var(--t5); border-radius: 6px; padding: 0 10px; min-height: 42px; font: 700 13px var(--body); cursor: pointer; }
+.edrow .del { border: 1.5px solid var(--line); background: transparent; color: var(--t5); border-radius: 999px; padding: 0 12px; min-height: 44px; font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.edmsg { margin-top: 10px; font-size: 13.5px; color: var(--neon); min-height: 1.2em; }
-.edmsg.bad { color: var(--t5); }
-.orgmenu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; }
-.orgmenu .btn { align-self: stretch; text-align: center; }
-.orgmenu .btn[aria-expanded="true"] { border-color: var(--neon); color: var(--neon); }
-.orgmenu #edClose { color: var(--muted); }
-.panel { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; }
-.tests { display: flex; flex-direction: column; gap: 12px; }
-.tests .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; }
-.notif label { margin-top: 0; }
-.cfglabel { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; margin: 0 0 6px; }
-.tools h2 { margin-bottom: 0; color: var(--ink); }
-.simbox { margin: 0; }
-.simbox .sim { padding-bottom: 12px; }
-.tools .sim label { display: flex; gap: 10px; align-items: center; margin: 0; font-weight: 600; color: var(--ink); }
-.linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 8px 0; cursor: pointer; }
-@media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } }
-
+.edmsg { margin-top: 10px; font-size: var(--fs-s); color: var(--accent); min-height: 1.2em; }
+.edmsg.bad { color: var(--now); }
+.linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: var(--fs-s); padding: 10px 0; cursor: pointer; }
+.simbox summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.sim { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 44px; font-weight: 600; }
+.sim input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); }
+.sim input[type=range] { width: 100%; accent-color: var(--accent); }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.steps button { font: 700 var(--fs-s) var(--body); background: transparent; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.sim output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; font-size: var(--fs-m); }
+@media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } .orgmenu { grid-template-columns: 1fr 1fr; } }
+@media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } }
 @media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
 </style>
@@ -293,61 +323,62 @@ h2 span { color: var(--neon); }
 
 
 <div class="minibar" id="minibar" hidden>
+  <i class="mdot" aria-hidden="true"></i>
   <span class="mclock" id="mclock"></span>
-  <span class="mstatus" id="mstatus"></span>
+  <span class="mnext" id="mnext"></span>
   <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
-  <button class="go" id="goNow2" type="button">Ahora</button>
+  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas">☆</button>
+  <button class="btn go" id="goNow2" type="button">Ahora</button>
 </div>
 
 <div class="wrap">
-  <img class="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
+  <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
   <header class="hero">
+    <div class="brandline"><i class="mdot" aria-hidden="true"></i><b>Midnight</b> · <span id="festName">Bass in the Park</span></div>
     <button class="sim-badge" id="simBadge" type="button" hidden>MODO PRUEBA ✕ Salir</button>
     <div class="clock" id="clock">--:--<small>--</small></div>
-    <div class="status" id="status"></div>
+    <div class="statusrow">
+      <div class="status" id="status"></div>
+      <button class="btn go" id="goNow" type="button">Ir a ahora</button>
+    </div>
     <div class="dstnote" id="dstnote" hidden></div>
     <div class="notice" id="notice" role="status" hidden></div>
-    <div class="herorow">
-      <button class="go" id="goNow" type="button">Ir a ahora</button>
-    </div>
   </header>
 
   <section id="ahora">
-    <div class="nexthead">
+    <div class="shead">
       <h2>Ahora <span>suena</span></h2>
-      <button class="chip mine" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button>
+      <button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button>
     </div>
-    <details class="pick" id="pick">
-      <summary>Elegir mis artistas <span id="pickCount"></span></summary>
-      <p class="note">Marca con ☆ los artistas que cubres. Con «Solo mis artistas» activado solo te saldrán estos en la app. Se guardan en este móvil.</p>
-      <div id="pickList"></div>
-    </details>
-    <div class="scale" aria-label="Importancia, de 5 (más) a 1 (menos)">Importancia:
-      <span><i class="imp" style="--tc:var(--t5)"></i>5</span><span><i class="imp" style="--tc:var(--t4)"></i>4</span><span><i class="imp" style="--tc:var(--t3)"></i>3</span><span><i class="imp" style="--tc:var(--t2)"></i>2</span><span><i class="imp" style="--tc:var(--t1)"></i>1</span>
-      de más a menos</div>
     <div class="rows" id="rows"></div>
     <p class="empty" id="rowsEmpty" hidden></p>
+    <p class="closedline" id="closedLine" hidden></p>
+    <div class="underrows">
+      <button class="btn" id="pickOpen" type="button">Elegir mis artistas <span id="pickCount"></span></button>
+    </div>
+    <div class="scale" aria-label="Importancia, de 5 (más) a 1 (menos)">Importancia:
+      <i class="imp" style="--tc:var(--t5)">5</i><i class="imp" style="--tc:var(--t4)">4</i><i class="imp" style="--tc:var(--t3)">3</i><i class="imp" style="--tc:var(--t2)">2</i><i class="imp" style="--tc:var(--t1)">1</i>
+      de más a menos</div>
   </section>
 
   <section id="siguiente">
-    <div class="nexthead">
-      <h2>A <span>continuación</span></h2>
-    </div>
+    <div class="shead"><h2>A <span>continuación</span></h2></div>
     <ul class="upnext" id="upnext"></ul>
-    <p class="note">Toca ☆ (o un artista en el horario) para añadirlo a tus artistas. Con la app abierta y la pantalla encendida te avisamos 10 minutos antes. Para que te avise con el móvil bloqueado, añádelos al Calendario.</p>
-    <div class="calrow" id="calRow" hidden>
-      <p class="note"><b>Calendario:</b> toca <span class="calico" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span> al lado de un artista y luego «Añadir». El iPhone te avisará 10 min antes aunque esté bloqueado.</p>
-    </div>
+    <p class="note" id="calNote">☆ = mis artistas<span id="calNoteCal"> · <span class="inlico" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span> = aviso en el Calendario</span></p>
+    <details class="howto">
+      <summary>Cómo funcionan los avisos</summary>
+      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas 10 minutos antes y cuando empiezan.</p>
+      <p id="howCal">Para que te avise con el móvil bloqueado, toca el calendario junto al artista y luego «Añadir». Si la organización cambia su hora, vuelve a añadirlo.</p>
+    </details>
   </section>
 
   <section id="horario">
-    <h2>Horario</h2>
-    <div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div>
-    <p class="legend">La línea roja es la hora actual. Esta noche, a las 3:00 se cambia la hora y vuelven a ser las 2:00: por eso las 2:00 salen dos veces (1ª y 2ª).</p>
+    <h2 style="margin-bottom:10px">Horario</h2>
+    <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
+    <p class="legend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
     <p class="legend upd" id="updated" hidden></p>
-    <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde azul en el horario).</p>
+    <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde rosa en el horario).</p>
   </section>
-
 
   <section class="admin" id="admin" hidden>
     <h2>Organización</h2>
@@ -391,36 +422,36 @@ h2 span { color: var(--neon); }
 
   <section class="tools" id="config">
     <h2>Configuración</h2>
-    <p class="note">Esto solo afecta a este móvil.</p>
+    <p class="note" style="margin:0">Esto solo afecta a este móvil.</p>
     <div>
       <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
       <div class="hint" id="wakeHint" hidden></div>
     </div>
-    <div class="notif">
-      <label class="cfglabel">Notificaciones</label>
-      <div class="steps">
-        <button type="button" id="notifOn">Activar notificaciones</button>
-        <button type="button" id="notifTest">Enviar una de prueba</button>
+    <div class="notif" role="group" aria-labelledby="notifH">
+      <h3 id="notifH">Notificaciones</h3>
+      <div class="row2">
+        <button class="btn" type="button" id="notifOn">Activar notificaciones</button>
+        <button class="btn" type="button" id="notifTest">Enviar una de prueba</button>
       </div>
       <div class="hint" id="notifMsg" hidden></div>
-      <p class="note">Avisan de tus artistas 10 min antes y cuando empiezan. En iPhone solo funcionan con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y mientras está abierta. Para avisos con el móvil bloqueado, usa el Calendario.</p>
+      <p class="note" style="margin:0">Avisan de tus artistas 10 min antes y cuando empiezan, con la app abierta. En iPhone, solo con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div>
       <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
       <div class="hint" id="updMsg" hidden></div>
-      <p class="note" id="appVer"></p>
+      <p class="note" id="appVer" style="margin:0"></p>
     </div>
-    <details class="pick simbox">
+    <details class="simbox">
       <summary>Modo prueba (simular una hora del festival)</summary>
-    <div class="sim">
-        <label><input type="checkbox" id="simOn"> Modo prueba: simular una hora del festival</label>
+      <div class="sim">
+        <label><input type="checkbox" id="simOn"> Simular una hora (solo en este móvil, sin notificaciones)</label>
         <div id="simCtl" class="sim" hidden>
           <input type="range" id="simRange" aria-label="Hora simulada">
           <div class="steps" id="simSteps">
             <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
           </div>
           <div class="steps" id="simPresets">
-            <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:00">00:00</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
+            <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:30">00:30</button><button type="button" data-p="01:05">01:05</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
           </div>
           <output id="simOut"></output>
         </div>
@@ -429,10 +460,30 @@ h2 span { color: var(--neon); }
   </section>
 </div>
 
+<div class="sheet pick" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH" hidden>
+  <header>
+    <h2 id="sheetH">Mis artistas <span id="sheetCount"></span></h2>
+    <button class="btn primary" id="sheetDone2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note">Marca con ☆ los artistas que cubres. Con «Solo mis artistas» solo te saldrán estos. Se guardan en este móvil.</p>
+    <div id="pickList"></div>
+  </div>
+  <div class="foot"><button class="btn primary" id="sheetDone" type="button">Listo</button></div>
+</div>
+
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
 document.documentElement.lang = 'es';
+
+// Festival actual: canviar aquest objecte (i l'horari) és el que caldria per a cadascun dels festivals de Midnight
+const FEST = {
+  name: 'Bass in the Park', accent: '#3dff2b', accentRgb: '61, 255, 43', accentDim: '#1d6b15', accentDeep: '#0f2a0c', accentInk: '#041204',
+};
+for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
+  document.documentElement.style.setProperty(k, v);
+document.getElementById('festName').textContent = FEST.name;
 
 // Hora local de Montmeló. La nit del 24 al 25 canvia l'hora a les 3:00 (CEST → CET).
 // "02:00a" = primera vegada que són les 2 (CEST), "02:00b" = segona (CET).
@@ -440,6 +491,7 @@ function T(s) {
   const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
   const h = +m[1], mi = +m[2], f = m[3];
+  if (h > 23 || mi > 59) return NaN;
   let day, off;
   if (h >= 6) { day = 24; off = 2; }  // de 6:00 a 23:59 és dissabte; de 0:00 a 5:59, diumenge
   else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
@@ -449,8 +501,8 @@ function T(s) {
 
 const STAGES = [
   { id: 'ner', name: 'No Es Ruido' },
-  { id: 'tox', name: 'Toxik Parties', light: true },
-  { id: 'pont', name: 'Pont Aeri', light: true },
+  { id: 'tox', name: 'Toxik Parties' },
+  { id: 'pont', name: 'Pont Aeri' },
   { id: 'misa', name: 'Misa Psicodélika' },
   { id: 'ss', name: 'Migats Sound System' },
 ];
@@ -538,62 +590,79 @@ const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
 // Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
 const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
   [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
-let SETS = {}, ALL = [], BYID = {};
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
-function load(raw) {
-  SETS = {};
-  for (const s of STAGES) {
-    SETS[s.id] = (Array.isArray(raw && raw[s.id]) ? raw[s.id] : [])
-      .map(r => {
-        const d = DEFMAP[r.id];
-        // chg: 'new' (afegida), 'time' (hora canviada), 'name' (nom canviat) o '' (com al cartell)
-        const chg = !d ? 'new' : d.a !== r.a || d.b !== r.b ? 'time' : String(d.n) !== String(r.n || '').trim() ? 'name' : '';
-        return { id: String(r.id), s, a: T(r.a), b: T(r.b), n: String(r.n || '').trim(), t: Math.min(5, Math.max(0, +r.t || 0)), sub: String(r.sub || '').trim(),
-          chg, was: chg === 'time' ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : chg === 'name' ? d.n : '' };
-      })
-      .filter(x => x.n && x.b > x.a)
-      .sort((x, y) => x.a - y.a);
-  }
-  ALL = STAGES.flatMap(s => SETS[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
-  BYID = Object.fromEntries(ALL.map(x => [x.id, x]));
-}
-const T0 = T('12:00'), TEND = T('05:00'), RIDES = T('01:00');
+
+const T0 = T('12:00'), TEND0 = T('05:00'), RIDES = T('01:00');
 const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
-const MIN = 60000, PX = 1.25, PAD = 12;
-const H = (TEND - T0) / MIN * PX;
+const MIN = 60000, PX = 1.6, PAD = 12;
+let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
 const y = t => PAD + (t - T0) / MIN * PX;
 
 const fmtHM = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const fmtS = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', second: '2-digit' });
+const fmtD = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' });
+const fmtDay = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const okDate = s => typeof s === 'string' && !isNaN(new Date(s));
 const hm = t => fmtHM.format(t);
 // Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
 const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
 const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const esc = html;
-const deco = n => html(n.toUpperCase()).replace(/ (B2B|VS|&amp;) /g, ' <i>$1</i> ');
-const imp = t => t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5" title="Importancia ${t} de 5"></i>` : '';
+// El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
+const deco = n => html(n).replace(/ (B2B|VS|&amp;) /gi, ' <i>$1</i> ');
+const imp = t => t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5">${t}</i>` : '';
+// Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
 function dur(ms) {
-  const m = Math.max(0, Math.round(ms / MIN));
+  const m = Math.max(0, Math.ceil(ms / MIN));
   if (m >= 1440) return `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} h`;
   if (m >= 60) return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
   return `${m} min`;
 }
-const inDur = ms => ms < MIN ? 'ya' : `en ${dur(ms)}`;
-const chgTag = x => !x.chg ? '' : `<span class="chgtag" title="${x.chg === 'new' ? 'Añadido por la organización' : `Antes: ${esc(x.was)}`}">${x.chg === 'new' ? 'Nuevo' : x.chg === 'time' ? `Cambio · antes ${esc(x.was)}` : 'Cambio'}</span>`;
+const inDur = ms => ms <= 0 ? 'ya' : `en ${dur(ms)}`;
+const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nuevo' : `Cambio · antes ${esc(x.was)}`}</span>`;
+
+// Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
+// i, si alguna cosa peta, l'horari d'abans es queda tal com era (no es pot deixar l'app a mitges).
+let SETS = {}, ALL = [], BYID = {};
+const okRaw = r => r && typeof r === 'object' && typeof r.id === 'string' && /^[\w-]{1,40}$/.test(r.id)
+  && Number.isFinite(T(r.a)) && Number.isFinite(T(r.b)) && (typeof r.n === 'string' || typeof r.n === 'number');
+function load(raw) {
+  const sets = {};
+  for (const s of STAGES) {
+    const list = raw && Object.prototype.hasOwnProperty.call(raw, s.id) && Array.isArray(raw[s.id]) ? raw[s.id] : [];
+    sets[s.id] = list.filter(okRaw)
+      .map(r => {
+        const d = Object.prototype.hasOwnProperty.call(DEFMAP, r.id) ? DEFMAP[r.id] : null;
+        const a = T(r.a), b = T(r.b), n = String(r.n).trim().slice(0, 120);
+        // chg: 'new' (afegida), 'time' (hora canviada), 'name' (nom canviat) o '' (com al cartell)
+        const timeChg = d && (T(d.a) !== a || T(d.b) !== b), nameChg = d && String(d.n) !== n;
+        const chg = !d ? 'new' : timeChg ? 'time' : nameChg ? 'name' : '';
+        const was = !d ? '' : [timeChg ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : '', nameChg ? d.n : ''].filter(Boolean).join(' · ');
+        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), chg, was };
+      })
+      .filter(x => x.n && x.b > x.a)
+      .sort((x, y) => x.a - y.a);
+  }
+  const all = STAGES.flatMap(s => sets[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
+  SETS = sets; ALL = all;
+  BYID = Object.fromEntries(all.map(x => [x.id, x]));
+  TEND = Math.max(TEND0, ...all.map(x => x.b));
+  H = (TEND - T0) / MIN * PX;
+}
 load(DEFAULT_RAW);
 
 let sim = null;
 const now = () => sim ?? Date.now();
 
-// Preferits (al navegador de cadascú; si no hi ha emmagatzematge, només en memòria)
+// Preferits (al mòbil de cadascú; si no hi ha emmagatzematge, només en memòria)
 const FKEY = 'bitp-favs-v1';
 let favs = new Set();
-try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]')); } catch (e) {}
+try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]').filter(x => typeof x === 'string')); } catch (e) {}
 function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
 const star = x => {
   const on = favs.has(x.id);
-  return `<button type="button" class="star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+  return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
 };
 
 // Graella (es torna a dibuixar quan arriben canvis de l'organització)
@@ -602,7 +671,8 @@ const tlwrap = document.getElementById('tlwrap');
 let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
-  for (const s of STAGES) g += `<div class="hd${s.light ? ' light' : ''}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  for (const s of STAGES) g += `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  g += '<div class="hdend"></div>';
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
   for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
@@ -611,7 +681,7 @@ function buildGrid() {
     g += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
     for (const x of SETS[s.id]) {
       const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
-      const tiny = (x.b - x.a) / MIN <= 40 ? ' tiny' : '';
+      const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
       const tc = x.t ? `--tc:var(--t${x.t});` : '';
       const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}`;
       g += `<button type="button" class="blk${tiny}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
@@ -636,12 +706,15 @@ function paintFavs() {
     b.classList.toggle('fav', on);
     b.setAttribute('aria-pressed', on);
   }
+  const n = ALL.filter(x => favs.has(x.id)).length;
+  document.getElementById('pickCount').textContent = n ? `(${n})` : '';
+  document.getElementById('sheetCount').textContent = n ? `(${n})` : '';
 }
 
 function scrollToNow(smooth) {
   const t = now();
   const head = tl.querySelector('.hd').offsetHeight;
-  const top = t < T0 || t >= TEND ? 0 : Math.max(0, head + y(t) - (tlwrap.clientHeight - head) / 3 - head);
+  const top = t < T0 || t >= TEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
   tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
 }
 function goNow() {
@@ -649,9 +722,17 @@ function goNow() {
   scrollToNow(true);
 }
 
+// Si es torna a dibuixar una llista mentre una ★ té el focus (VoiceOver, teclat), el focus es manté
+function setHTML(el, h) {
+  const a = document.activeElement;
+  const k = a && el.contains(a) && a.dataset ? a.dataset.fav : null;
+  el.innerHTML = h;
+  if (k) { const b = el.querySelector(`[data-fav="${CSS.escape(k)}"]`); if (b) b.focus(); }
+}
+
 // Ahora suena: una fila per escenari
 const rowsEl = document.getElementById('rows');
-rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + '<div class="row rides" id="r-rides"></div>';
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + '<div class="row" id="r-rides"></div>';
 const rowCache = {};
 
 function rowHTML(s, t) {
@@ -671,9 +752,7 @@ function rowHTML(s, t) {
       <div class="dj">Abre a las ${lbl(nxt.a)}</div>
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
     <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para abrir</span></div></div>`, null];
-  return ['closed', `${logo}
-    <div class="mid"><div class="sn">${s.name}</div><div class="dj">${list.length ? `Cerrado desde las ${lbl(list[list.length - 1].b)}` : 'Sin actuaciones'}</div></div>
-    <div class="right"></div>`, null];
+  return ['closed', '', null];
 }
 
 // Només els meus: si el que sona ara és meu, surt en directe; si no, el meu pròxim en aquest escenari; si no en queda cap, no surt
@@ -688,24 +767,48 @@ function rowMine(s, t) {
       <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Es tu último aquí'}</div></div>
     <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
-  if (nxt) return ['idle', `${logo}
+  if (nxt) return ['idle mine', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj">${imp(nxt.t)}${deco(nxt.n)}</div>${chgTag(nxt)}
       <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
-    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null];
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null, nxt];
   return ['hide', '', null];
 }
 
-// Llista per triar els meus artistes
+// Full per triar els meus artistes (no surten les actuacions que ja han passat, si no són meves)
+const sheet = document.getElementById('sheet');
 function renderPick() {
-  document.getElementById('pickCount').textContent = favs.size ? `(${favs.size})` : '';
-  if (!document.getElementById('pick').open) return;
-  document.getElementById('pickList').innerHTML = STAGES.map(s => `<h3>${s.name}</h3><ul>${SETS[s.id].map(x =>
-    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${calLink(x)}${star(x)}</span></li>`).join('')}</ul>`).join('');
+  if (sheet.hidden) return;
+  const t = now();
+  let past = 0;
+  const h = STAGES.map(s => {
+    const items = SETS[s.id].filter(x => x.b > t || favs.has(x.id));
+    past += SETS[s.id].length - items.length;
+    if (!items.length) return '';
+    return `<h3>${s.name}</h3><ul>${items.map(x =>
+      `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${calLink(x)}${star(x)}</span></li>`).join('')}</ul>`;
+  }).join('');
+  setHTML(document.getElementById('pickList'), (h || '<p class="empty">Ya no quedan actuaciones.</p>')
+    + (past ? `<p class="pastnote">No salen ${past} ${past === 1 ? 'actuación que ya ha pasado' : 'actuaciones que ya han pasado'}.</p>` : ''));
 }
-document.getElementById('pick').addEventListener('toggle', renderPick);
+function openSheet() {
+  sheet.hidden = false;
+  document.body.classList.add('locked');
+  renderPick();
+  document.getElementById('sheetDone2').focus();
+}
+function closeSheet() {
+  sheet.hidden = true;
+  document.body.classList.remove('locked');
+  document.getElementById('ahora').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('pickOpen').focus({ preventScroll: true });
+}
+document.getElementById('pickOpen').addEventListener('click', openSheet);
+document.getElementById('sheetDone').addEventListener('click', closeSheet);
+document.getElementById('sheetDone2').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
 
-// A continuación
+// A continuación: les 6 properes, agrupades per hora d'inici
 const upEl = document.getElementById('upnext');
 let upCache = '';
 function upHTML(t) {
@@ -715,32 +818,37 @@ function upHTML(t) {
     if (mineOnly) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido tus artistas: toca «Elegir mis artistas».'}</li>`;
     return '<li class="empty">No quedan más actuaciones.</li>';
   }
-  return list.slice(0, 6).map(x => `<li class="${favs.has(x.id) ? 'fav' : ''}">
-    <div class="when"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></div>
+  let out = '', last = null;
+  for (const x of list.slice(0, 6)) {
+    if (x.a !== last) { out += `<li class="grp"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
+    out += `<li class="it${favs.has(x.id) ? ' fav' : ''}">
     <img class="logo" src="img/${x.s.id}.png" alt="">
-    <div class="who">${imp(x.t)}${deco(x.n)}<span class="where">${x.s.name}</span>${chgTag(x)}</div>
-    <span class="acts">${calLink(x)}${star(x)}</span></li>`).join('');
+    <div class="who"><span class="nmc">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${chgTag(x)}</div>
+    <span class="acts">${calLink(x)}${star(x)}</span></li>`;
+  }
+  return out;
 }
 
-// Avisos dels preferits (només amb l'app oberta)
+// Avisos emergents. kind: 'mine' (groc, els meus artistes), 'org' (organització), 'info'. action: { label, fn }
 const toasts = document.getElementById('toasts');
-let told = new Set();
-function toast(msg) {
+function toast(msg, kind = 'mine', action = null, ms = 15000) {
   const el = document.createElement('div');
-  el.className = 'toast';
-  el.innerHTML = `<div>${msg}</div><button type="button" aria-label="Cerrar aviso">✕</button>`;
-  el.querySelector('button').addEventListener('click', () => el.remove());
+  el.className = `toast ${kind}`;
+  el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Cerrar aviso">✕</button>`;
+  el.querySelector('.x').addEventListener('click', () => el.remove());
+  if (action) el.querySelector('.act').addEventListener('click', () => { el.remove(); action.fn(); });
   toasts.appendChild(el);
   while (toasts.children.length > 3) toasts.firstElementChild.remove();
-  setTimeout(() => el.remove(), 15000);
-  try { navigator.vibrate && navigator.vibrate([180, 90, 180]); } catch (e) {}
+  setTimeout(() => el.remove(), ms);
+  try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
-// Notificacions del sistema: només si s'han activat en aquest mòbil i hi ha permís
+// Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
 const NKEY = 'bitp-notif-v1';
 let notifOn = false;
 try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
 const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
 async function sysNotify(title, body, tag) {
+  if (sim !== null || !canNotify()) return;
   const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
   try {
     const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration();
@@ -748,53 +856,70 @@ async function sysNotify(title, body, tag) {
     new Notification(title, opts);
   } catch (e) {}
 }
+// Què s'ha avisat ja: es guarda a la sessió (si l'iPhone tanca l'app i es torna a obrir, no es repeteix)
+const TKEY = 'bitp-told-v1';
+let told = new Set();
+try { told = new Set(JSON.parse(sessionStorage.getItem(TKEY) || '[]')); } catch (e) {}
+function remember(k) { told.add(k); if (sim === null) try { sessionStorage.setItem(TKEY, JSON.stringify([...told].slice(-200))); } catch (e) {} }
 function checkAlerts(t) {
   for (const id of favs) {
     const x = BYID[id];
     if (!x) continue;
     const left = x.a - t, k = `${id}@${x.a}`;  // si l'organització canvia l'hora, es torna a avisar
     if (left > 0 && left <= 10 * MIN && !told.has(k + ':pre')) {
-      told.add(k + ':pre');
+      remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
-      if (canNotify()) sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
+      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
     }
     if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
-      told.add(k + ':go'); told.add(k + ':pre');
+      remember(k + ':go'); remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
-      if (canNotify()) sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
+      sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
     }
   }
 }
 
-// Calendari: un .ics amb els preferits i un avís 10 min abans (l'iPhone avisa encara que estigui bloquejat)
-function icsFor(list) {
+// Calendari: .ics amb un avís 10 min abans (l'iPhone avisa encara que estigui bloquejat).
+// SEQUENCE i DTSTAMP surten de la data del canvi: així, si l'organització canvia l'hora, el calendari sap que és més nou.
+const seqOf = (x, updated) => x.chg && okDate(updated) ? Math.max(1, Math.floor((Date.parse(updated) - Date.UTC(2026, 9, 1)) / 1000)) : 0;
+function icsFor(list, updated) {
   const d = t => new Date(t).toISOString().replace(/[-:]|\.\d+/g, '');
   const tx = s => String(s).replace(/\\/g, '\\\\').replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
   const ev = x => [
-    'BEGIN:VEVENT', `UID:${x.id}@midnight-webapp`, 'DTSTAMP:20261020T000000Z', `DTSTART:${d(x.a)}`, `DTEND:${d(x.b)}`,
+    'BEGIN:VEVENT', `UID:${x.id}@midnight-webapp`, `DTSTAMP:${x.chg && okDate(updated) ? d(Date.parse(updated)) : '20261020T000000Z'}`, `SEQUENCE:${seqOf(x, updated)}`,
+    `DTSTART:${d(x.a)}`, `DTEND:${d(x.b)}`,
     `SUMMARY:${tx(x.n)} · ${tx(x.s.name)}`, 'LOCATION:Bass in the Park · Espai Can Guitet\\, Montmeló',
     'BEGIN:VALARM', 'TRIGGER:-PT10M', 'ACTION:DISPLAY', `DESCRIPTION:${tx(x.n)} empieza en 10 min (${tx(x.s.name)})`, 'END:VALARM',
     'END:VEVENT'].join('\r\n');
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Midnight//Bass in the Park//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', ...list.map(ev), 'END:VCALENDAR', ''].join('\r\n');
 }
-// Enllaç al .ics de cada actuació (docs/cal/<id>.ics, el genera build_web.py; només al web de GitHub)
+// Enllaç al .ics de cada actuació (docs/cal/<id>.ics; només al web de GitHub). target=_blank: des de la pantalla d'inici l'obre Safari
 const CAL_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ver = x => { let h = 0; for (const c of `${x.a}|${x.b}|${x.n}`) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
 const calLink = x => ONLINE && /^[\w-]+$/.test(x.id)
-  // target=_blank: des de la pantalla d'inici l'obre Safari, que és qui sap mostrar «Añadir al calendario»
-  ? `<a class="cal1" href="https://paupuig92.github.io/midnight-webapp/cal/${x.id}.ics?v=${x.a}" target="_blank" rel="noopener" aria-label="Añadir ${esc(x.n)} al Calendario">${CAL_SVG}</a>` : '';
+  ? `<a class="round" href="https://paupuig92.github.io/midnight-webapp/cal/${x.id}.ics?v=${ver(x)}" target="_blank" rel="noopener" aria-label="Añadir ${esc(x.n)} al Calendario">${CAL_SVG}</a>` : '';
 
-function toggleFav(id) {
-  if (favs.has(id)) favs.delete(id); else favs.add(id);
+function refresh() {
+  for (const k in rowCache) rowCache[k] = '';
+  upCache = '';
+  tick(true);
+}
+function setFav(id, on) {
+  if (on) favs.add(id); else favs.delete(id);
   saveFavs();
   paintFavs();
   renderPick();
-  for (const k in rowCache) rowCache[k] = '';
-  upCache = '';
-  tick();
+  refresh();
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-fav]');
-  if (b) toggleFav(b.dataset.fav);
+  if (!b) return;
+  const id = b.dataset.fav, x = BYID[id];
+  if (favs.has(id)) {
+    setFav(id, false);
+    // Treure'l sense voler (sobretot amb «Solo mis artistas», on la fila desapareix) es pot desfer
+    toast(`Quitado de tus artistas: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, true) }, 6000);
+  } else setFav(id, true);
 });
 const MKEY = 'bitp-mine-v1';
 let mineOnly = false;
@@ -802,68 +927,100 @@ try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
 function paintMine() {
   document.body.classList.toggle('mine-mode', mineOnly);
   document.getElementById('mineOnly').setAttribute('aria-pressed', mineOnly);
-  for (const k in rowCache) rowCache[k] = '';
-  upCache = '';
+  const m2 = document.getElementById('mineOnly2');
+  m2.setAttribute('aria-pressed', mineOnly);
+  m2.textContent = mineOnly ? '★' : '☆';
 }
-document.getElementById('mineOnly').addEventListener('click', () => {
+function toggleMine() {
   mineOnly = !mineOnly;
   try { localStorage.setItem(MKEY, mineOnly ? '1' : '0'); } catch (e) {}
-  if (mineOnly && !favs.size) document.getElementById('pick').open = true;
   paintMine();
-  tick();
-});
+  refresh();
+  if (mineOnly && !ALL.some(x => favs.has(x.id))) openSheet();
+}
+document.getElementById('mineOnly').addEventListener('click', toggleMine);
+document.getElementById('mineOnly2').addEventListener('click', toggleMine);
 
-function tick() {
+// Rellotge cada segon; la resta només quan canvia el minut (o quan cal), per gastar menys bateria
+let lastMin = -1;
+function tick(force) {
   const t = now();
   document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
   document.getElementById('mclock').textContent = hm(t);
+  const minute = Math.floor(t / MIN);
+  if (!force && minute === lastMin) return;
+  lastMin = minute;
 
-  const st = document.getElementById('status'), ms = document.getElementById('mstatus');
+  const st = document.getElementById('status');
   const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
   if (t < T0) {
-    st.innerHTML = `Empieza el sábado 24.10 a las <strong>12:00</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
-    ms.textContent = `Faltan ${dur(T0 - t)}`;
+    const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
+    st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : 'el sábado 24.10'} a las <strong>12:00</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
   } else if (t < TEND) {
-    st.innerHTML = `<strong>En marcha</strong> · ${live} escenario${live === 1 ? '' : 's'} sonando · acaba a las 05:00 (quedan ${dur(TEND - t)})`;
-    ms.textContent = `${live} sonando`;
+    st.innerHTML = `<strong>En marcha</strong> · ${live} sonando · hasta las ${lbl(TEND)}`;
   } else {
-    st.innerHTML = `<strong>Se ha acabado.</strong> Hasta el año que viene.`;
-    ms.textContent = 'Se ha acabado';
+    st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
   const dn = document.getElementById('dstnote');
   const p = pass(t);
   dn.hidden = !p && !(t >= T('01:30') && t < W0);
-  dn.textContent = p === '1ª' ? 'Las 2:00 (1ª vez). A las 3:00 se cambia la hora y vuelven a ser las 2:00.'
-    : p === '2ª' ? 'Ya se ha cambiado la hora: son las 2:00 por 2ª vez.'
+  dn.textContent = p === '1ª' ? 'Son las 2 por 1ª vez: a las 3:00 se cambia la hora y vuelven a ser las 2:00.'
+    : p === '2ª' ? 'Ya se ha cambiado la hora: estás en las 2 por 2ª vez.'
     : 'Esta noche se cambia la hora: a las 3:00 vuelven a ser las 2:00.';
-  if (p) ms.textContent = `${p} vez · ` + ms.textContent;
 
+  const closed = [];
+  let nextMine = null;
   for (const s of STAGES) {
-    const [state, inner, cur] = rowHTML(s, t);
+    const [state, inner, cur, nx] = rowHTML(s, t);
     const r = document.getElementById('r-' + s.id);
     const key = state + inner;
     if (rowCache[s.id] !== key) {
       r.className = 'row ' + state;
-      r.innerHTML = inner;
+      setHTML(r, inner);
       rowCache[s.id] = key;
     }
+    // Amb «Solo mis artistas», els pròxims surten per ordre d'hora
+    r.style.order = state === 'idle mine' && nx ? String(10 + Math.round((nx.a - t) / MIN)) : '';
+    if (state === 'closed') closed.push(s.name);
     if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
   }
 
+  // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»; tancades, a la línia de tancats)
+  const rr = document.getElementById('r-rides');
+  const open = t >= T0 && t < RIDES;
+  const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
+  const ricon = '<svg class="logo" viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+  const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abiertas</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
+    : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abren a las 12:00</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
+    : '';
+  if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
+  if (open && !mineOnly) rr.querySelector('.bar > div').style.width = ((t - T0) / (RIDES - T0) * 100).toFixed(1) + '%';
+  if (rstate === 'closed' && t >= T0) closed.push('Atracciones');
+
+  const cl = document.getElementById('closedLine');
+  cl.hidden = mineOnly || !closed.length;
+  cl.innerHTML = closed.length ? `<b>Cerrados:</b> ${closed.map(html).join(' · ')}` : '';
+
   const re = document.getElementById('rowsEmpty');
-  const anyRow = STAGES.some(s => !document.getElementById('r-' + s.id).classList.contains('hide'));
-  re.hidden = anyRow;
-  re.textContent = !favs.size ? 'Aún no has elegido tus artistas. Toca «Elegir mis artistas» y márcalos con ☆.' : 'Ya no te quedan artistas por cubrir.';
+  const anyRow = [...rowsEl.children].some(r => !r.classList.contains('hide') && !r.classList.contains('closed'));
+  re.hidden = anyRow || !mineOnly;
+  re.textContent = !ALL.some(x => favs.has(x.id)) ? 'Aún no has elegido tus artistas. Toca «Elegir mis artistas» y márcalos con ☆.' : 'Ya no te quedan artistas por cubrir.';
+
+  // Barra fina: el meu proper artista
+  nextMine = ALL.find(x => favs.has(x.id) && x.b > t);
+  document.getElementById('mnext').innerHTML = nextMine
+    ? (nextMine.a <= t ? `<b>★ ${html(nextMine.n)}</b> ahora` : `<b>★ ${html(nextMine.n)}</b> ${lbl(nextMine.a)}`) : '';
 
   const up = upHTML(t);
-  if (up !== upCache) { upEl.innerHTML = up; upCache = up; }
+  if (up !== upCache) { setHTML(upEl, up); upCache = up; }
 
   for (const b of blocks) {
     const x = BYID[b.dataset.fav];
+    if (!x) continue;
     const on = t >= x.a && t < x.b;
     b.classList.toggle('on', on);
     b.classList.toggle('past', t >= x.b);
-    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(x.a) + 1.5) - 2.5}px`;
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
   }
   const inside = t >= T0 && t < TEND;
   nowline.hidden = !inside;
@@ -873,19 +1030,7 @@ function tick() {
     nowlbl.style.top = `${y(t)}px`;
     nowlbl.textContent = pass(t) ? `${hm(t)} ${pass(t)}` : hm(t);
   }
-
-  // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»)
-  const rr = document.getElementById('r-rides');
-  const open = t >= T0 && t < RIDES;
-  const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
-  const ricon = '<svg class="logo" viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
-  const rin = `${ricon}<div class="mid"><div class="sn">Atracciones</div>`
-    + (open ? `<div class="dj">Abiertas</div><div class="after">Hasta la 1:00</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
-      : t < T0 ? `<div class="dj">Abren a las 12:00</div><div class="after">Hasta la 1:00</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
-      : `<div class="dj">Cerradas desde la 1:00</div></div><div class="right"></div>`);
-  if (rowCache.rides !== rstate + rin) { rr.className = 'row rides ' + rstate; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
-  if (open) rr.querySelector('.bar > div').style.width = ((t - T0) / (RIDES - T0) * 100).toFixed(1) + '%';
-
+  if (!sheet.hidden) renderPick();
   checkAlerts(t);
 }
 
@@ -899,10 +1044,12 @@ if ('IntersectionObserver' in window) {
   new IntersectionObserver(([e]) => { minibar.hidden = e.isIntersecting; }, { rootMargin: '-20px 0px 0px 0px' }).observe(clockEl);
 }
 
-// Mode prova
+// Mode prova (Configuración): només en aquest mòbil i sense notificacions del sistema
 const simOn = document.getElementById('simOn'), simRange = document.getElementById('simRange'), simOut = document.getElementById('simOut');
 const simCtl = document.getElementById('simCtl');
-simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; simRange.step = MIN; simRange.value = T('21:30');
+function simBounds() { simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; }
+simBounds(); simRange.step = MIN; simRange.value = T('21:30');
+let realTold = null;
 function applySim() {
   const was = sim !== null;
   sim = simOn.checked ? +simRange.value : null;
@@ -911,10 +1058,12 @@ function applySim() {
     simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
     simOut.textContent = `Simulando: ${lbl(+simRange.value)}`;
   }
-  if (was !== simOn.checked) told = new Set();
+  // Els avisos del Modo prueba no compten per als de veritat
+  if (!was && simOn.checked) { realTold = told; told = new Set(); }
+  if (was && !simOn.checked) { told = realTold || new Set(); realTold = null; }
   document.getElementById('simBadge').hidden = !simOn.checked;
   document.getElementById('simBadge2').hidden = !simOn.checked;
-  tick();
+  tick(true);
   scrollToNow(false);
 }
 function setSim(v) {
@@ -929,8 +1078,10 @@ function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
 document.getElementById('simBadge2').addEventListener('click', exitSim);
 
-// Botons de notificacions (Organización → Pruebas)
+// Notificacions (Configuración)
 const notifMsg = document.getElementById('notifMsg');
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 function notifUI(text) {
   const btn = document.getElementById('notifOn');
   const ok = canNotify();
@@ -939,10 +1090,12 @@ function notifUI(text) {
   notifMsg.hidden = !text;
   notifMsg.textContent = text || '';
 }
-const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-const noNotifHelp = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !standalone()
+const noNotifHelp = () => isIOS && !standalone()
   ? 'En iPhone, primero añade la app a la pantalla de inicio (Compartir → Añadir a pantalla de inicio), ábrela desde el icono y vuelve aquí.'
   : 'Este navegador no permite notificaciones.';
+const deniedHelp = () => isIOS
+  ? 'Las notificaciones están bloqueadas. Actívalas en Ajustes → Notificaciones → Midnight y vuelve a probar.'
+  : 'Las notificaciones están bloqueadas para esta web. Permítelas en los ajustes del sitio (el icono junto a la dirección) y vuelve a probar.';
 document.getElementById('notifOn').addEventListener('click', async () => {
   if (canNotify()) {
     notifOn = false;
@@ -952,39 +1105,47 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   if (!('Notification' in window)) return notifUI(noNotifHelp());
   let perm = Notification.permission;
   if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
-  if (perm !== 'granted') return notifUI('Las notificaciones están bloqueadas. Actívalas en Ajustes → Notificaciones → Midnight y vuelve a probar.');
+  if (perm !== 'granted') return notifUI(deniedHelp());
   notifOn = true;
   try { localStorage.setItem(NKEY, '1'); } catch (e) {}
   notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
 });
-document.getElementById('notifTest').addEventListener('click', () => {
+document.getElementById('notifTest').addEventListener('click', async () => {
   if (!('Notification' in window)) return notifUI(noNotifHelp());
+  if (Notification.permission === 'denied') return notifUI(deniedHelp());
   if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
-  sysNotify('Midnight · prueba', 'Si ves esto, las notificaciones funcionan ✓', 'prueba');
-  notifUI('Enviada. Si no la ves, revisa Ajustes → Notificaciones → Midnight.');
+  const opts = { body: 'Si ves esto, las notificaciones funcionan ✓', tag: 'prueba', icon: 'icon-192.png' };
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prueba', opts); else new Notification('Midnight · prueba', opts); } catch (e) {}
+  notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
 });
 notifUI();
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 12:13';
+const BUILD = '22/10 12:36';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
   if (!ONLINE) return location.reload();
   msg.hidden = false; msg.textContent = 'Buscando la última versión…';
+  let latest = '';
   try {
     const r = await fetchT(`./?t=${Date.now()}`, { cache: 'no-store' }, 8000);
     if (!r.ok) throw new Error(r.status);
+    latest = ((await r.text()).match(/const BUILD = '([^']*)'/) || [])[1] || '';
   } catch (e) {
     msg.textContent = 'Sin conexión: sigues con la versión guardada. Vuelve a probar cuando tengas cobertura.';
     return;
   }
+  await pullChanges();
+  if (latest && latest === BUILD) { msg.textContent = `Ya tienes la última versión (${BUILD}). El horario también está al día.`; return; }
   try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
-  if (dirty) { msg.textContent = 'Tienes cambios sin publicar en Organización: publícalos o sal antes de actualizar.'; return; }
+  if (dirty) { msg.textContent = 'Hay una versión nueva, pero tienes cambios sin publicar en Organización: publícalos o sal antes de actualizar.'; return; }
+  msg.textContent = 'Hay una versión nueva. Actualizando…';
   location.reload();
 });
 
-// Pantalla encesa
+// Pantalla encesa (es recorda: si la tenies activada, es torna a activar en obrir l'app)
+const WKEY = 'bitp-wake-v1';
 let lock = null, wantWake = false;
 const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
 function wakeUI(on, hint) {
@@ -993,13 +1154,16 @@ function wakeUI(on, hint) {
   wakeHint.hidden = !hint;
   wakeHint.textContent = hint || '';
 }
-async function acquire() {
+function saveWake() { try { localStorage.setItem(WKEY, wantWake ? '1' : '0'); } catch (e) {} }
+async function acquire(quiet) {
   try {
     lock = await navigator.wakeLock.request('screen');
     lock.addEventListener('release', () => { lock = null; if (!wantWake) wakeUI(false); });
     wakeUI(true);
   } catch (e) {
-    lock = null; wantWake = false;
+    lock = null;
+    if (quiet) return wakeUI(false);
+    wantWake = false; saveWake();
     wakeUI(false, e && e.name === 'NotAllowedError'
       ? 'No se ha podido activar. Si tienes el modo ahorro de batería, desactívalo y vuelve a probar.'
       : 'No se ha podido activar en este momento. Vuelve a probar.');
@@ -1010,24 +1174,28 @@ if (!('wakeLock' in navigator)) {
   wakeUI(false, 'Este navegador no permite mantener la pantalla encendida.');
 } else {
   wakeBtn.addEventListener('click', async () => {
-    if (wantWake) {
-      wantWake = false;
-      try { if (lock) await lock.release(); } catch (e) {}
+    if (wantWake && lock) {
+      wantWake = false; saveWake();
+      try { await lock.release(); } catch (e) {}
       lock = null; wakeUI(false);
-    } else { wantWake = true; acquire(); }
+    } else { wantWake = true; saveWake(); acquire(false); }
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && wantWake && !lock) acquire();
+    if (document.visibilityState === 'visible' && wantWake && !lock) acquire(true);
   });
+  try { wantWake = localStorage.getItem(WKEY) === '1'; } catch (e) {}
+  if (wantWake) acquire(true);
 }
 
 // El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
 function fitClock() {
   clockEl.style.fontSize = '100px';
   const w = clockEl.scrollWidth, target = clockEl.parentElement.clientWidth;
-  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.3).toFixed(1) + 'px';
+  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.22).toFixed(1) + 'px';
 }
-addEventListener('resize', fitClock);
+addEventListener('orientationchange', () => setTimeout(fitClock, 300));
+let lastW = innerWidth;
+addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); } });  // la barra de Safari canvia l'alçada, no l'amplada
 if (document.fonts) document.fonts.ready.then(fitClock);
 
 // Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
@@ -1035,73 +1203,107 @@ if (document.fonts) document.fonts.ready.then(fitClock);
 const REPO = 'paupuig92/midnight-webapp';
 const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
 const CKEY = 'bitp-changes-v1';
-document.getElementById('calRow').hidden = !ONLINE;  // a l'artifact no es poden baixar fitxers
+if (!ONLINE) { document.getElementById('calNoteCal').hidden = true; document.getElementById('howCal').hidden = true; }
 let stamp = '', notice = '';
-function applyChanges(d) {
-  if (!d || typeof d !== 'object') return;
-  const st = String(d.updated || '');
-  if (st === stamp) return;
-  const wasLoaded = stamp !== '', oldNotice = notice;
-  stamp = st;
-  notice = String(d.notice || '');
-  // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa
-  if (wasLoaded && st !== 'cartel') {
-    if (notice && notice !== oldNotice) {
-      toast(`<b>Aviso de la organización</b><br>${html(notice)}`);
-      if (canNotify()) sysNotify('Aviso de la organización', notice, 'aviso-' + st);
-    } else {
-      toast('<b>La organización ha cambiado el horario.</b> Los cambios salen con borde azul.');
-      if (canNotify()) sysNotify('Cambio de horario', 'La organización ha cambiado el horario.', 'horario-' + st);
-    }
+const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}`).join('~');
+function applyChanges(d, quiet) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return;
+  const st = String(d.updated || '').slice(0, 40);
+  if (!st || st === stamp) return;
+  const wasLoaded = stamp !== '', oldNotice = notice, oldKey = setsKey();
+  const prev = { SETS, ALL, BYID, TEND, H };
+  const oldFavSets = ALL.filter(x => favs.has(x.id)).map(x => ({ id: x.id, n: x.n, a: x.a, b: x.b }));
+  const newNotice = typeof d.notice === 'string' ? d.notice.slice(0, 500) : '';
+  const hasSets = d.sets && typeof d.sets === 'object' && !Array.isArray(d.sets);
+  try {
+    load(hasSets ? d.sets : DEFAULT_RAW);
+    buildGrid();
+  } catch (e) {
+    ({ SETS, ALL, BYID, TEND, H } = prev);  // dades dolentes: l'app es queda amb l'horari que tenia
+    buildGrid();
+    return;
   }
-  load(d.sets && typeof d.sets === 'object' ? d.sets : DEFAULT_RAW);
+  stamp = st;
+  notice = newNotice;
   const nt = document.getElementById('notice');
   nt.hidden = !notice;
   nt.innerHTML = notice ? `<b>Aviso de la organización</b>${html(notice)}` : '';
   const up = document.getElementById('updated');
-  up.hidden = !d.sets;
-  up.textContent = d.sets && d.updated ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : '';
+  up.hidden = !hasSets;
+  up.textContent = hasSets && okDate(d.updated) ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : hasSets ? 'Horario actualizado por la organización.' : '';
   document.getElementById('chgLegend').hidden = !ALL.some(x => x.chg);
-  buildGrid();
+  simBounds();
   paintFavs();
   renderPick();
-  for (const k in rowCache) rowCache[k] = '';
-  upCache = '';
-  tick();
+  refresh();
+
+  // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa del que ha canviat
+  if (!wasLoaded || quiet) return;
+  const schedChanged = setsKey() !== oldKey;
+  if (notice && notice !== oldNotice) {
+    toast(`<b>Aviso de la organización</b><br>${html(notice)}`, 'org', null, 30000);
+    sysNotify('Aviso de la organización', notice, 'aviso-' + st);
+  } else if (!notice && oldNotice && !schedChanged) {
+    toast('La organización ha quitado el aviso.', 'info', null, 6000);
+  }
+  if (schedChanged) {
+    const msg = !hasSets ? 'La organización ha vuelto al horario del cartel.' : 'La organización ha cambiado el horario. Los cambios salen en rosa.';
+    toast(`<b>${msg}</b>`, 'org', null, 20000);
+    sysNotify('Cambio de horario', msg, 'horario-' + st);
+    // Els meus artistes: cancel·lats o amb una altra hora (si el tenien al calendari, l'han de tornar a afegir)
+    const gone = oldFavSets.filter(o => !BYID[o.id]);
+    const moved = oldFavSets.filter(o => BYID[o.id] && (BYID[o.id].a !== o.a || BYID[o.id].b !== o.b));
+    if (gone.length) toast(`★ Cancelado: <b>${gone.map(o => html(o.n)).join(', ')}</b>`, 'mine', null, 30000);
+    if (moved.length) toast(`★ Cambio de hora: <b>${moved.map(o => `${html(o.n)} → ${lbl(BYID[o.id].a)}`).join(', ')}</b>${ONLINE ? '. Si lo tenías en el Calendario, vuelve a añadirlo.' : ''}`, 'mine', null, 30000);
+  }
 }
-const fmtDay = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 function fetchT(url, opts = {}, ms = 10000) {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ms);
   return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
 }
+// Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
+let pubStamp = '', pubUntil = 0;
 let pulling = false;
 async function pullChanges() {
   if (!ONLINE || pulling) return;
   pulling = true;
   try {
     const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (r.status === 404) { applyChanges({ updated: 'cartel' }); try { localStorage.removeItem(CKEY); } catch (e) {} }
-    else if (r.ok) {
+    if (r.status === 404) {
+      if (!(pubStamp && Date.now() < pubUntil)) { applyChanges({ updated: 'cartel' }); try { localStorage.removeItem(CKEY); } catch (e) {} }
+    } else if (r.ok) {
       const d = await r.json();
-      applyChanges(d);
-      try { localStorage.setItem(CKEY, JSON.stringify(d)); } catch (e) {}
+      const st = d && String(d.updated || '');
+      if (pubStamp && Date.now() < pubUntil && st !== pubStamp) { /* encara és el d'abans */ }
+      else {
+        if (st === pubStamp) pubStamp = '';
+        applyChanges(d);
+        if (st === stamp) try { localStorage.setItem(CKEY, JSON.stringify(d)); } catch (e) {}
+      }
     }
   } catch (e) {}
   pulling = false;
 }
 
 // Organització: editor protegit amb contrasenya.
-// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null).
-const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1000000, "len": 93, "ct": "xlHxHEGLjNuvg8MpszFvf7StXWkhjiWyfHJ57lG7S13WaQvcFvbBW/HTa3RivXnD5dpY8QiGTEC9/L/s4b1oxXqOO6/jFdJKUJbvZ43mp00hS5sY1iDU8iMij39J", "check": "1rBKHXOTBYgCYtcBOQkUmh8TLV/baFMw+wKjPS4YwY4="};
+// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
+// clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
+const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1500000, "nonce": "ulVjz7izyQaRF0Xb0jiiIA==", "ct": "GDCgR8q4YZwOMNKkpz1/QfNNlmRaoFDfDabwKwy5M3sR5ZROI9jrAso4w16sjKMRyK9YTlZ1KkfJCMXgLvt0G38hS56j2WI58IygMoK2UsM8dWtVJR3kR9lrIUno", "check": "rVFVhV2Hb3Z9a0OybsqNQ9zsR0G1WVFz/g4llbQ9hA0="};
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const b64e = u => btoa(String.fromCharCode(...u));
 async function unlock(pw) {
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, key, (ADMIN.len + 32) * 8));
-  if (b64e(bits.slice(ADMIN.len)) !== ADMIN.check) throw new Error('pw');
-  return new TextDecoder().decode(b64d(ADMIN.ct).map((c, i) => c ^ bits[i]));
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const k = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, base, 256));
+  const hk = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = async data => new Uint8Array(await crypto.subtle.sign('HMAC', hk, data));
+  if (b64e(await mac(new TextEncoder().encode('check'))) !== ADMIN.check) throw new Error('pw');
+  const ct = b64d(ADMIN.ct), nonce = b64d(ADMIN.nonce), out = new Uint8Array(ct.length);
+  for (let i = 0; i * 32 < ct.length; i++) {
+    const block = await mac(new Uint8Array([...nonce, i >> 24 & 255, i >> 16 & 255, i >> 8 & 255, i & 255]));
+    for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ block[j];
+  }
+  return new TextDecoder().decode(out);
 }
 let token = null, draft = null, edStage = STAGES[0].id;
 const adminEl = document.getElementById('admin');
@@ -1111,27 +1313,28 @@ adminEl.hidden = !(ONLINE && ADMIN);
 const code = t => { const s = hm(t); return s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
 const TIMES = [];
 for (let t = T0; t <= T('05:55'); t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
-const timeSel = (cls, v) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
   const raw = {};
   for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub }));
   return raw;
 }
-function renderEditor() {
+function renderEditor(badIdx) {
   document.getElementById('edStage').value = edStage;
   const list = draft.sets[edStage];
-  document.getElementById('edRows').innerHTML = list.map((r, i) => `<div class="edrow" data-i="${i}">
-    <div class="edtimes">${timeSel('a', r.a)}<span>–</span>${timeSel('b', r.b)}</div>
-    <input class="n" type="text" value="${html(r.n)}" aria-label="Artista" placeholder="Artista" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done">
+  document.getElementById('edRows').innerHTML = list.map((r, i) => `<div class="edrow${i === badIdx ? ' bad' : ''}" data-i="${i}">
+    <div class="edtimes">${timeSel('a', r.a, r.n)}<span>–</span>${timeSel('b', r.b, r.n)}</div>
+    <input class="n" type="text" value="${html(r.n)}" aria-label="Artista" placeholder="Artista" maxlength="120" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done">
     <div class="edmore">
-      <select class="t" aria-label="Importancia">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select>
-      <input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo" placeholder="Subtítulo (opcional)" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <select class="t" aria-label="Importancia: ${esc(r.n || 'actuación nueva')}">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select>
+      <input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo: ${esc(r.n || 'actuación nueva')}" placeholder="Subtítulo (opcional)" maxlength="80" autocorrect="off" spellcheck="false" enterkeyhint="done">
       <button type="button" class="del" aria-label="Quitar ${html(r.n)}">Quitar</button>
     </div></div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
+  if (badIdx != null) { const el = document.querySelector(`#edRows .edrow[data-i="${badIdx}"]`); if (el) el.scrollIntoView({ block: 'center' }); }
 }
 const DKEY = 'bitp-draft-v1';
-let dirty = false, baseStamp = '', baseRaw = null;
+let dirty = false, baseStamp = '';
 function markDirty() {
   dirty = true;
   try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, draft })); } catch (e) {}
@@ -1158,13 +1361,12 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     msg.hidden = true;
     let saved = null;
     try { saved = JSON.parse(sessionStorage.getItem(DKEY) || 'null'); } catch (err) {}
-    if (saved && saved.draft) {
+    if (saved && saved.draft && saved.draft.sets) {
       draft = saved.draft; baseStamp = saved.base; dirty = true;
     } else {
-      draft = { notice: notice, sets: rawNow() }; baseStamp = stamp; dirty = false;
+      draft = { notice, sets: rawNow() }; baseStamp = stamp; dirty = false;
     }
-    baseRaw = rawNow();  // per saber quins calendaris cal tornar a generar en publicar
-    document.getElementById('edNotice').value = draft.notice;
+    document.getElementById('edNotice').value = draft.notice || '';
     document.getElementById('pwForm').hidden = true;
     document.getElementById('editor').hidden = false;
     openPanel('');
@@ -1226,63 +1428,71 @@ document.getElementById('edAdd').addEventListener('click', () => {
 });
 document.getElementById('edNotice').addEventListener('input', e => { draft.notice = e.target.value; markDirty(); });
 
+// Publicar: changes.json i els calendaris canviats en UN sol commit (API de dades de Git), comprovant abans
+// que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
+const GH = 'https://api.github.com/repos/' + REPO;
+const gh = async (path, opts = {}) => {
+  const r = await fetchT(GH + path, { ...opts, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...(opts.headers || {}) }, cache: 'no-store' }, 15000);
+  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; throw err; }
+  return r.status === 204 ? null : r.json();
+};
+async function remoteChanges() {
+  try {
+    const cur = await gh(`/contents/docs/changes.json?ref=main&t=${Date.now()}`);
+    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+function changedIcs(remoteSets, data) {
+  // Què ha canviat respecte del que hi ha publicat ara (no respecte del que jo tenia en entrar)
+  const old = {};
+  for (const s of STAGES) for (const r of ((remoteSets || DEFAULT_RAW)[s.id] || [])) if (okRaw(r)) old[r.id] = `${T(r.a)}|${T(r.b)}|${String(r.n).trim()}`;
+  return ALL.filter(x => /^[\w-]+$/.test(x.id) && old[x.id] !== `${x.a}|${x.b}|${x.n}`)
+    .map(x => ({ path: `docs/cal/${x.id}.ics`, content: icsFor([x], data.updated) }));
+}
+async function commitFiles(files, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ref = await gh('/git/ref/heads/main');
+    const head = await gh(`/git/commits/${ref.object.sha}`);
+    const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
+    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
+    try { return await gh('/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); }
+    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
+  }
+  throw new Error('GitHub ocupado');
+}
 async function publish(data) {
-  const api = `https://api.github.com/repos/${REPO}/contents/docs/changes.json`;
-  const h = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
-  const g = await fetchT(`${api}?ref=main&t=${Date.now()}`, { headers: h, cache: 'no-store' });
-  if (!g.ok && g.status !== 404) throw new Error(`GitHub ${g.status}`);
-  const cur = g.ok ? await g.json() : null;
-  const sha = cur ? cur.sha : undefined;
-  let remote = 'cartel';
-  try { if (cur) remote = String(JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, '')))).updated || ''); } catch (e) {}
-  if (remote !== baseStamp && !confirm(`Otra persona ha publicado cambios mientras editabas${remote !== 'cartel' ? ` (${fmtDay.format(new Date(remote))})` : ''}.\n\nSi publicas, sus cambios se sustituirán por los tuyos. ¿Publicar igualmente?`)) {
+  const remote = await remoteChanges();
+  const rs = remote ? String(remote.updated || '') : 'cartel';
+  if (rs !== baseStamp && !confirm(`Otra persona ha publicado cambios mientras editabas${okDate(rs) ? ` (${fmtDay.format(new Date(rs))})` : ''}.\n\nSi publicas, sus cambios se sustituirán por los tuyos. ¿Publicar igualmente?`)) {
     throw new Error('cancelado');
   }
-  const bytes = new TextEncoder().encode(JSON.stringify(data, null, 1));
-  let bin = '';
-  for (const c of bytes) bin += String.fromCharCode(c);
-  const p = await fetchT(api, { method: 'PUT', headers: h, body: JSON.stringify({ message: 'Cambio de última hora en el horario', content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
-  if (!p.ok) throw new Error(`GitHub ${p.status}`);
-}
-// Torna a escriure docs/cal/<id>.ics de les actuacions noves o canviades (hora o nom)
-async function putFile(path, text, message) {
-  const api = `https://api.github.com/repos/${REPO}/contents/${path}`;
-  const h = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
-  const g = await fetchT(`${api}?ref=main&t=${Date.now()}`, { headers: h, cache: 'no-store' });
-  const sha = g.ok ? (await g.json()).sha : undefined;
-  const bytes = new TextEncoder().encode(text);
-  let bin = '';
-  for (const c of bytes) bin += String.fromCharCode(c);
-  const r = await fetchT(api, { method: 'PUT', headers: h, body: JSON.stringify({ message, content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
-  if (!r.ok) throw new Error(`GitHub ${r.status}`);
-}
-async function updateCalendars(before) {
-  const old = {};
-  for (const s of STAGES) for (const r of (before && before[s.id]) || []) old[r.id] = `${r.a}|${r.b}|${r.n}`;
-  const changed = ALL.filter(x => /^[\w-]+$/.test(x.id) && old[x.id] !== `${code(x.a)}|${code(x.b)}|${x.n}`);
-  let ok = 0;
-  for (const x of changed) {
-    try { await putFile(`docs/cal/${x.id}.ics`, icsFor([x]), `Calendario: ${x.n}`); ok++; } catch (e) {}
-  }
-  return [ok, changed.length];
+  // Primer s'aplica aquí (per calcular els calendaris amb l'horari nou); si falla, es torna enrere
+  const prevStamp = stamp;
+  stamp = '';
+  applyChanges(data, true);
+  if (stamp !== data.updated) { stamp = prevStamp; throw new Error('datos'); }
+  const files = [{ path: 'docs/changes.json', content: JSON.stringify(data, null, 1) }, ...changedIcs(remote && remote.sets, data)];
+  await commitFiles(files, data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel');
+  return files.length - 1;
 }
 async function save(data) {
   const btns = document.querySelectorAll('#editor button');
   btns.forEach(b => b.disabled = true);
   edMsg('Publicando…');
+  const before = { raw: rawNow(), notice, stamp };
   try {
-    await publish(data);
-    stamp = '';
-    applyChanges(data);
+    const nCal = await publish(data);
     baseStamp = stamp;
+    pubStamp = stamp; pubUntil = Date.now() + 5 * MIN;
     clearDraft();
     try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
-    edMsg('Publicado. Actualizando los calendarios…');
-    const [ok, n] = await updateCalendars(baseRaw);
-    baseRaw = rawNow();
-    edMsg(n === ok ? 'Publicado. Lo verán todos los móviles en 1 o 2 minutos.'
-      : `Publicado, pero ${n - ok} calendario${n - ok === 1 ? '' : 's'} no se ha${n - ok === 1 ? '' : 'n'} podido actualizar. Vuelve a publicar cuando tengas cobertura.`);
+    edMsg(`Publicado${nCal ? ` (con ${nCal} calendario${nCal === 1 ? '' : 's'})` : ''}. Lo verán todos los móviles en 1 o 2 minutos.`);
   } catch (err) {
+    // No s'ha publicat: aquest mòbil torna a l'horari que hi havia
+    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
     edMsg(err.message === 'cancelado' ? 'No se ha publicado. Sal y vuelve a entrar para ver los cambios de la otra persona.'
       : err.name === 'AbortError' ? 'No hay conexión suficiente para publicar. Tus cambios siguen aquí: vuelve a probar en un momento.'
       : `No se ha podido publicar (${err.message}). Tus cambios siguen aquí: vuelve a probar.`, true);
@@ -1290,12 +1500,21 @@ async function save(data) {
   btns.forEach(b => b.disabled = false);
 }
 document.getElementById('edSave').addEventListener('click', () => {
-  for (const s of STAGES) for (const r of draft.sets[s.id]) {
-    r.n = r.n.trim();
-    if (!r.n) { edStage = s.id; openPanel('pHorario'); renderEditor(); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
-    if (!(T(r.b) > T(r.a))) { edStage = s.id; openPanel('pHorario'); renderEditor(); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
+  for (const s of STAGES) {
+    const list = draft.sets[s.id];
+    for (const [i, r] of list.entries()) {
+      r.n = String(r.n || '').trim();
+      if (!r.n) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
+      if (!(T(r.b) > T(r.a))) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
+    }
+    // Dues actuacions alhora al mateix escenari: a la graella es taparien i una no sortiria a «Ahora suena»
+    const order = list.map((r, i) => [r, i]).sort((p, q) => T(p[0].a) - T(q[0].a));
+    for (let k = 1; k < order.length; k++) {
+      const [prev] = order[k - 1], [cur, i] = order[k];
+      if (T(cur.a) < T(prev.b)) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${cur.n} y ${prev.n} se solapan en ${s.name} (${lbl(T(cur.a))}). Cambia una de las dos horas.`, true); }
+    }
   }
-  save({ v: 1, updated: new Date().toISOString(), notice: draft.notice.trim(), sets: draft.sets });
+  save({ v: 1, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
 });
 document.getElementById('edReset').addEventListener('click', () => {
   if (!confirm('Se borrarán todos los cambios y el aviso, y volverá el horario del cartel para todos. ¿Continuar?')) return;
@@ -1315,14 +1534,13 @@ document.getElementById('edClose').addEventListener('click', () => {
 try { applyChanges(JSON.parse(localStorage.getItem(CKEY) || 'null')); } catch (e) {}
 paintFavs();
 paintMine();
-renderPick();
-tick();
+tick(true);
 fitClock();
 scrollToNow(false);
-setInterval(tick, 1000);
+setInterval(() => { if (!document.hidden) tick(); }, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();
-setInterval(() => { if (document.visibilityState === 'visible') pullChanges(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pullChanges(); });
+setInterval(() => { if (!document.hidden) pullChanges(); }, 60000);
 </script>
 
 <script>
@@ -1334,9 +1552,9 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!had) return;
     const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerHTML = '<div>Hay una versión nueva de la app.</div><button type="button" style="width:auto;border-radius:6px;padding:0 12px;font-weight:700">Actualizar</button>';
-    t.querySelector('button').onclick = () => location.reload();
+    t.className = 'toast info';
+    t.innerHTML = '<div class="msg">Hay una versión nueva de la app.</div><button type="button" class="act">Actualizar</button>';
+    t.querySelector('.act').onclick = () => location.reload();
     document.getElementById('toasts').appendChild(t);
   });
 }

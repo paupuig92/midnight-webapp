@@ -19,11 +19,13 @@ OUT = ROOT / "docs"
 
 src = (ROOT / "index.html").read_text(encoding="utf-8")
 
-# Editor de l'organització: el token de GitHub va xifrat amb la contrasenya.
-# PBKDF2-SHA256(contrasenya, sal) dona len(token)+32 bytes: els primers fan XOR amb el token
-# i els últims 32 serveixen per comprovar la contrasenya. Ni el token ni la contrasenya es mostren mai.
+# Editor de l'organització: el token de GitHub va xifrat amb la contrasenya. Ni el token ni la contrasenya es mostren mai.
+#   clau        = PBKDF2-SHA256(contrasenya, sal, ITER) → 32 bytes (un sol bloc: costa el mateix a l'iPhone que a qui la vulgui endevinar)
+#   comprovació = HMAC-SHA256(clau, "check")
+#   flux        = HMAC-SHA256(clau, nonce ‖ comptador); nonce = SHA-256("nonce" ‖ token)[:16], així un token nou mai reutilitza el flux
+import hmac
 CONF = pathlib.Path.home() / ".config" / "midnight-webapp"
-ITER = 1_000_000
+ITER = 1_500_000
 tok_f, pw_f, salt_f = CONF / "github-token", CONF / "admin-password", CONF / "admin-salt"
 admin = "null"
 if tok_f.is_file() and pw_f.is_file():
@@ -33,10 +35,13 @@ if tok_f.is_file() and pw_f.is_file():
         salt_f.write_bytes(os.urandom(16))
         salt_f.chmod(0o600)
     salt = salt_f.read_bytes()
-    pad = hashlib.pbkdf2_hmac("sha256", pw, salt, ITER, dklen=len(tok) + 32)
+    key = hashlib.pbkdf2_hmac("sha256", pw, salt, ITER, dklen=32)
+    nonce = hashlib.sha256(b"nonce" + tok).digest()[:16]
+    stream = b"".join(hmac.new(key, nonce + i.to_bytes(4, "big"), hashlib.sha256).digest() for i in range((len(tok) + 31) // 32))
     b64 = lambda b: base64.b64encode(b).decode()
-    admin = json.dumps({"salt": b64(salt), "iter": ITER, "len": len(tok),
-                        "ct": b64(bytes(a ^ b for a, b in zip(tok, pad))), "check": b64(pad[len(tok):])})
+    admin = json.dumps({"salt": b64(salt), "iter": ITER, "nonce": b64(nonce),
+                        "ct": b64(bytes(a ^ b for a, b in zip(tok, stream))),
+                        "check": b64(hmac.new(key, b"check", hashlib.sha256).digest())})
     print("Editor de l'organització: activat")
 else:
     print("Editor de l'organització: desactivat (falta", "la contrasenya" if tok_f.is_file() else "el token", "a", CONF, ")")
@@ -85,9 +90,9 @@ if ('serviceWorker' in navigator) {{
   navigator.serviceWorker.addEventListener('controllerchange', () => {{
     if (!had) return;
     const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerHTML = '<div>Hay una versión nueva de la app.</div><button type="button" style="width:auto;border-radius:6px;padding:0 12px;font-weight:700">Actualizar</button>';
-    t.querySelector('button').onclick = () => location.reload();
+    t.className = 'toast info';
+    t.innerHTML = '<div class="msg">Hay una versión nueva de la app.</div><button type="button" class="act">Actualizar</button>';
+    t.querySelector('.act').onclick = () => location.reload();
     document.getElementById('toasts').appendChild(t);
   }});
 }}
@@ -119,32 +124,50 @@ block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block) 
 block = re.sub(r",(\s*[\]}])", r"\1", block)                     # comes finals
 default = json.loads(block)
 STAGE_NAMES = dict(re.findall(r"\{ id: '(\w+)', name: '([^']+)'", src))
-sets = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_rest) in enumerate(arr)] for sid, arr in default.items()}
+defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_rest) in enumerate(arr)] for sid, arr in default.items()}
+DEFMAP = {r["id"]: r for lst in defaults.values() for r in lst}
+sets, updated = defaults, None
 chg = OUT / "changes.json"
 if chg.is_file():
     try:
         d = json.loads(chg.read_text(encoding="utf-8"))
+        updated = d.get("updated") if isinstance(d.get("updated"), str) else None
         if isinstance(d.get("sets"), dict):
-            sets = {sid: [r for r in lst if r.get("n")] for sid, lst in d["sets"].items()}
+            sets = {sid: [r for r in lst if isinstance(r, dict) and r.get("n")] for sid, lst in d["sets"].items() if isinstance(lst, list)}
     except Exception as e:
         print("Avís: changes.json no s'ha pogut llegir:", e)
 
-def T(code):  # igual que T() de la pàgina: hora de Montmeló → UTC (canvi d'hora a les 3:00 del 25)
-    m = re.fullmatch(r"(\d{1,2}):(\d{2})([ab]?)", code)
+def T(code):  # igual que T() de la pàgina: hora de Montmeló → UTC (canvi d'hora a les 3:00 del 25). None si no és vàlida
+    m = re.fullmatch(r"(\d{1,2}):(\d{2})([ab]?)", str(code))
+    if not m or int(m[1]) > 23 or int(m[2]) > 59:
+        return None
     h, mi, f = int(m[1]), int(m[2]), m[3]
     day, off = (24, 2) if h >= 6 else ((25, 2) if h < 2 or (h == 2 and f == "a") else (25, 1))
     return _dt(2026, 10, day, 0, mi, tzinfo=_tz.utc).timestamp() + (h - off) * 3600
+
+def stamp_of(x):
+    """(DTSTAMP, SEQUENCE): de la data del canvi si l'actuació és diferent del cartell (igual que icsFor de la pàgina)."""
+    dflt = DEFMAP.get(x["id"])
+    changed = not dflt or T(dflt["a"]) != T(x["a"]) or T(dflt["b"]) != T(x["b"]) or str(dflt["n"]) != str(x["n"]).strip()
+    try:
+        up = _dt.fromisoformat(updated.replace("Z", "+00:00")) if changed and updated else None
+    except ValueError:
+        up = None
+    if not up:
+        return "20261020T000000Z", 0
+    return up.astimezone(_tz.utc).strftime("%Y%m%dT%H%M%SZ"), max(1, int(up.timestamp() - _dt(2026, 10, 1, tzinfo=_tz.utc).timestamp()))
 
 def ics_text(x, sname):
     d = lambda ts: _dt.fromtimestamp(ts, _tz.utc).strftime("%Y%m%dT%H%M%SZ")
     tx = lambda t: str(t).replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;").replace("\n", "\\n")
     a = T(x["a"])
+    dtstamp, seq = stamp_of(x)
     return "\r\n".join([
         "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Midnight//Bass in the Park//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-        "BEGIN:VEVENT", f"UID:{x['id']}@midnight-webapp", "DTSTAMP:20261020T000000Z",
-        f"DTSTART:{d(a)}", f"DTEND:{d(T(x['b']))}", f"SUMMARY:{tx(x['n'])} · {tx(sname)}",
+        "BEGIN:VEVENT", f"UID:{x['id']}@midnight-webapp", f"DTSTAMP:{dtstamp}", f"SEQUENCE:{seq}",
+        f"DTSTART:{d(a)}", f"DTEND:{d(T(x['b']))}", f"SUMMARY:{tx(str(x['n']).strip())} · {tx(sname)}",
         "LOCATION:Bass in the Park · Espai Can Guitet\\, Montmeló",
-        "BEGIN:VALARM", "TRIGGER:-PT10M", "ACTION:DISPLAY", f"DESCRIPTION:{tx(x['n'])} empieza en 10 min ({tx(sname)})", "END:VALARM",
+        "BEGIN:VALARM", "TRIGGER:-PT10M", "ACTION:DISPLAY", f"DESCRIPTION:{tx(str(x['n']).strip())} empieza en 10 min ({tx(sname)})", "END:VALARM",
         "END:VEVENT", "END:VCALENDAR", ""])
 
 cal = OUT / "cal"
@@ -154,7 +177,7 @@ cal.mkdir()
 n_cal = 0
 for sid, lst in sets.items():
     for x in lst:
-        if re.fullmatch(r"[\w-]+", str(x.get("id", ""))):
+        if re.fullmatch(r"[\w-]{1,40}", str(x.get("id", ""))) and T(x.get("a")) is not None and T(x.get("b")) is not None:
             (cal / f"{x['id']}.ics").write_bytes(ics_text(x, STAGE_NAMES.get(sid, sid)).encode("utf-8"))
             n_cal += 1
 print(f"Calendaris: {n_cal} fitxers a docs/cal/")
@@ -207,12 +230,15 @@ self.addEventListener('fetch', e => {{
     }}).catch(() => cache.match('changes.json').then(r => r || new Response('', {{ status: 504 }})))));
     return;
   }}
+  // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)
+  if (url.searchParams.has('t')) return;
   // La pàgina: primer la xarxa (màxim 3 s) perquè surti la versió nova; sense cobertura, la còpia guardada
   if (e.request.mode === 'navigate') {{
     e.respondWith(caches.open(VERSION).then(async cache => {{
       const hit = await cache.match('index.html');
       const net = fetch(e.request, {{ cache: 'no-cache' }}).then(res => {{
-        if (res.ok) cache.put('index.html', res.clone());
+        // Un portal wifi o una pàgina d'error no s'han de guardar com si fossin l'app
+        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put('index.html', res.clone());
         return res;
       }});
       const slow = new Promise(r => setTimeout(() => r(hit), 3000));

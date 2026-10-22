@@ -1,4 +1,4 @@
-const VERSION = 'bitp-ca77a58c';
+const VERSION = 'bitp-18913491';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
@@ -29,12 +29,15 @@ self.addEventListener('fetch', e => {
     }).catch(() => cache.match('changes.json').then(r => r || new Response('', { status: 504 })))));
     return;
   }
+  // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)
+  if (url.searchParams.has('t')) return;
   // La pàgina: primer la xarxa (màxim 3 s) perquè surti la versió nova; sense cobertura, la còpia guardada
   if (e.request.mode === 'navigate') {
     e.respondWith(caches.open(VERSION).then(async cache => {
       const hit = await cache.match('index.html');
       const net = fetch(e.request, { cache: 'no-cache' }).then(res => {
-        if (res.ok) cache.put('index.html', res.clone());
+        // Un portal wifi o una pàgina d'error no s'han de guardar com si fossin l'app
+        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put('index.html', res.clone());
         return res;
       });
       const slow = new Promise(r => setTimeout(() => r(hit), 3000));
