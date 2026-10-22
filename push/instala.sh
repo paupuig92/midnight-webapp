@@ -42,14 +42,21 @@ cf -X PUT "$API/accounts/$ACCT/workers/scripts/$NAME" \
   -F "worker.js=@worker.js;type=application/javascript+module" | ok
 echo "ok servidor"
 
+# Subdomini de workers.dev (el primer cop no n'hi ha: es crea)
+SUB=$(cf $API/accounts/$ACCT/workers/subdomain | val 'd["result"]["subdomain"] if d.get("result") else ""')
+if [[ -z $SUB ]]; then
+  for cand in midnightgroup midnight-group midnight-app-bitp midnight-$RANDOM; do
+    if cf -X PUT -H 'content-type: application/json' --data "{\"subdomain\":\"$cand\"}" $API/accounts/$ACCT/workers/subdomain | ok 2>/dev/null; then SUB=$cand; echo "ok subdomini: $SUB.workers.dev"; break; fi
+  done
+fi
+[[ -n $SUB ]] || { echo "No s'ha pogut crear el subdomini de workers.dev: entra un cop a Workers & Pages al tauler de Cloudflare i torna a executar"; exit 1; }
+
 # Cada minut
 cf -X PUT -H 'content-type: application/json' --data '[{"cron":"* * * * *"}]' "$API/accounts/$ACCT/workers/scripts/$NAME/schedules" | ok
 echo "ok cada minut"
 
 # Adreça pública (*.workers.dev)
 cf -X POST -H 'content-type: application/json' --data '{"enabled":true}' "$API/accounts/$ACCT/workers/scripts/$NAME/subdomain" >/dev/null || true
-SUB=$(cf $API/accounts/$ACCT/workers/subdomain | val 'd["result"]["subdomain"] if d.get("result") else ""')
-[[ -n $SUB ]] || { echo "Falta triar el subdomini de workers.dev: entra un cop a Workers & Pages al tauler de Cloudflare i torna a executar"; exit 1; }
 URL="https://$NAME.$SUB.workers.dev"
 python3 -I -c 'import json,sys; v=json.load(open(sys.argv[1])); json.dump({"url": sys.argv[2], "public": v["public"]}, open(sys.argv[3], "w"))' $CONF/vapid.json $URL $CONF/push.json
 chmod 600 $CONF/push.json

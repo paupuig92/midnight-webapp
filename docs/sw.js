@@ -1,4 +1,4 @@
-const VERSION = 'bitp-755f0e0b';
+const VERSION = 'bitp-afc7c2b5';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
 
@@ -8,7 +8,7 @@ self.addEventListener('install', e => {
 });
 
 // Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar
-const PUSH_URL = '';
+const PUSH_URL = "https://midnight-push.midnightgroup.workers.dev";
 async function subId() {
   const s = await self.registration.pushManager.getSubscription();
   if (!s) return '';

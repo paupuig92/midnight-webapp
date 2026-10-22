@@ -878,7 +878,7 @@ prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 
 prefs.changes = prefs.changes !== false;
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 // Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
-const PUSH = null;
+const PUSH = {"url": "https://midnight-push.midnightgroup.workers.dev", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
 let pushActive = false;
 async function sysNotify(title, body, tag) {
   if (sim !== null || !canNotify() || pushActive) return;
@@ -1208,7 +1208,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 13:04';
+const BUILD = '22/10 13:18';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
