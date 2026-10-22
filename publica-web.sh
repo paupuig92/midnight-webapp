@@ -1,6 +1,7 @@
 #!/bin/zsh
 # Publica la web app a GitHub Pages (paupuig92/midnight-webapp), com fa la Midnight Suite:
-# fa servir el token de ~/.config/midnight-suite/github-token sense mostrar-lo mai.
+# fa servir el token de ~/.config/midnight-webapp/github-token (o, si no hi és, el de la Suite)
+# sense mostrar-lo mai.
 #   1. regenera docs/ i fa commit si hi ha canvis
 #   2. crea el repositori si encara no existeix
 #   3. puja la branca main
@@ -8,7 +9,8 @@
 set -e
 cd "${0:A:h}"
 REPO=paupuig92/midnight-webapp
-TOKEN_FILE=~/.config/midnight-suite/github-token
+TOKEN_FILE=~/.config/midnight-webapp/github-token
+[[ -r $TOKEN_FILE ]] || TOKEN_FILE=~/.config/midnight-suite/github-token
 
 python3 -I build_web.py
 if [[ -n "$(git status --porcelain)" ]]; then
