@@ -1084,7 +1084,10 @@ const standalone = () => matchMedia('(display-mode: standalone)').matches || nav
 function notifUI(text) {
   const btn = document.getElementById('notifOn');
   const ok = canNotify();
-  btn.textContent = ok ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  // Activades però sense registrar al servidor (p. ex. activades amb una versió anterior): cal un toc per registrar-se
+  const needPush = ok && typeof canPush === 'function' && canPush() && !pushActive;
+  btn.textContent = needPush ? 'Activar también con el móvil bloqueado' : ok ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  btn.classList.toggle('primary', needPush);
   btn.setAttribute('aria-pressed', ok);
   notifMsg.hidden = !text;
   notifMsg.textContent = text || '';
@@ -1135,6 +1138,11 @@ async function pushOff() {
   pushActive = false;
 }
 document.getElementById('notifOn').addEventListener('click', async () => {
+  if (canNotify() && canPush() && !pushActive) {
+    notifUI('Conectando con el servidor de avisos…');
+    try { await pushOn(); return notifUI('Listo ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.'); }
+    catch (e) { return notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`); }
+  }
   if (canNotify()) {
     notifOn = false;
     try { localStorage.setItem(NKEY, '0'); } catch (e) {}
@@ -1150,7 +1158,7 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   if (canPush()) {
     notifUI('Conectando con el servidor de avisos…');
     try { await pushOn(); return notifUI('Activadas ✓ Te llegarán también con el móvil bloqueado.'); }
-    catch (e) { return notifUI('Activadas, pero no se ha podido conectar con el servidor: solo llegarán con la app abierta. Vuelve a probar con cobertura.'); }
+    catch (e) { return notifUI(`Activadas, pero no se ha podido conectar con el servidor (${e && e.message ? e.message : 'error'}): solo llegarán con la app abierta. Vuelve a probar con cobertura.`); }
   }
   notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
 });
@@ -1158,6 +1166,7 @@ document.getElementById('notifTest').addEventListener('click', async () => {
   if (!('Notification' in window)) return notifUI(noNotifHelp());
   if (Notification.permission === 'denied') return notifUI(deniedHelp());
   if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
+  if (canPush() && !pushActive) return notifUI('Primero toca «Activar también con el móvil bloqueado».');
   if (pushActive) {
     // Prova de veritat: la envia el servidor. Bloqueja el mòbil just després de tocar per veure-la arribar
     try {
