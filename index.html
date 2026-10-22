@@ -113,6 +113,23 @@ h2 span { color: var(--neon); }
 .nexthead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .chip { border: 1.5px solid var(--rule); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 700; cursor: pointer; min-height: 38px; }
 .chip[aria-pressed="true"] { border-color: var(--fav); color: var(--fav); }
+.chip.mine { min-height: 44px; }
+.chip.mine[aria-pressed="true"] { background: var(--fav); color: #1a1400; }
+.pick { margin: -2px 0 12px; border: 1.5px solid var(--rule); border-radius: 6px; padding: 0 12px; }
+.pick summary { cursor: pointer; font-weight: 700; font-size: 14px; padding: 12px 0; min-height: 20px; }
+.pick summary span { color: var(--fav); }
+.pick h3 { margin: 12px 0 4px; font: 800 11px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pick ul { list-style: none; margin: 0 0 8px; padding: 0; }
+.pick li { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px solid var(--rule); }
+.pick li .tm { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pick li .nm { font: 800 13.5px/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
+.pick li.on .nm { color: var(--fav); }
+/* Mode "Solo mis artistas": a la graella la resta queda molt apagada (es pot tocar per afegir-la) */
+.mine-mode .blk:not(.fav) { opacity: .18; }
+.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--neon-dim); box-shadow: none; }
+.mine-mode .blk.on:not(.fav) .n, .mine-mode .blk.on:not(.fav) .t, .mine-mode .blk.on:not(.fav) .n i { color: var(--ink); }
+.mine-mode .blk.on:not(.fav) .pl { display: none; }
+.row.hide { display: none; }
 .upnext { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .upnext li { display: grid; grid-template-columns: 70px 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
 .upnext li.fav .who { color: var(--fav); }
@@ -252,22 +269,30 @@ h2 span { color: var(--neon); }
   </header>
 
   <section id="ahora">
-    <h2>Ahora <span>suena</span></h2>
+    <div class="nexthead">
+      <h2>Ahora <span>suena</span></h2>
+      <button class="chip mine" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button>
+    </div>
+    <details class="pick" id="pick">
+      <summary>Elegir mis artistas <span id="pickCount"></span></summary>
+      <p class="note">Marca con ☆ los artistas que cubres. Con «Solo mis artistas» activado solo te saldrán estos en la app. Se guardan en este móvil.</p>
+      <div id="pickList"></div>
+    </details>
     <div class="scale" aria-label="Importancia, de 5 (más) a 1 (menos)">Importancia:
       <span><i class="imp" style="--tc:var(--t5)"></i>5</span><span><i class="imp" style="--tc:var(--t4)"></i>4</span><span><i class="imp" style="--tc:var(--t3)"></i>3</span><span><i class="imp" style="--tc:var(--t2)"></i>2</span><span><i class="imp" style="--tc:var(--t1)"></i>1</span>
       de más a menos</div>
     <div class="rows" id="rows"></div>
+    <p class="empty" id="rowsEmpty" hidden></p>
   </section>
 
   <section id="siguiente">
     <div class="nexthead">
       <h2>A <span>continuación</span></h2>
-      <button class="chip" id="onlyFav" type="button" aria-pressed="false">★ Solo favoritos</button>
     </div>
     <ul class="upnext" id="upnext"></ul>
-    <p class="note">Toca ☆ (o un artista en el horario) para marcarlo como favorito. Con la app abierta y la pantalla encendida te avisamos 10 minutos antes. Para que te avise con el móvil bloqueado, añádelos al Calendario.</p>
+    <p class="note">Toca ☆ (o un artista en el horario) para añadirlo a tus artistas. Con la app abierta y la pantalla encendida te avisamos 10 minutos antes. Para que te avise con el móvil bloqueado, añádelos al Calendario.</p>
     <div class="calrow" id="calRow" hidden>
-      <a class="btn calbtn" id="calBtn" href="#" role="button">Añadir mis favoritos al Calendario</a>
+      <a class="btn calbtn" id="calBtn" href="#" role="button">Añadir mis artistas al Calendario</a>
       <span class="hint" id="calMsg" hidden></span>
     </div>
   </section>
@@ -485,7 +510,7 @@ try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]')); } catch (e
 function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
 const star = x => {
   const on = favs.has(x.id);
-  return `<button type="button" class="star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de favoritos' : 'Marcar como favorito'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+  return `<button type="button" class="star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
 };
 
 // Graella (es torna a dibuixar quan arriben canvis de l'organització)
@@ -547,6 +572,7 @@ rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).joi
 const rowCache = {};
 
 function rowHTML(s, t) {
+  if (mineOnly) return rowMine(s, t);
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
@@ -567,15 +593,43 @@ function rowHTML(s, t) {
     <div class="right"></div>`, null];
 }
 
+// Només els meus: si el que sona ara és meu, surt en directe; si no, el meu pròxim en aquest escenari; si no en queda cap, no surt
+function rowMine(s, t) {
+  const mine = SETS[s.id].filter(x => favs.has(x.id));
+  const cur = mine.find(x => t >= x.a && t < x.b);
+  const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
+      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Es tu último aquí'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(nxt.t)}${deco(nxt.n)}</div>
+      <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null];
+  return ['hide', '', null];
+}
+
+// Llista per triar els meus artistes
+function renderPick() {
+  document.getElementById('pickCount').textContent = favs.size ? `(${favs.size})` : '';
+  if (!document.getElementById('pick').open) return;
+  document.getElementById('pickList').innerHTML = STAGES.map(s => `<h3>${s.name}</h3><ul>${SETS[s.id].map(x =>
+    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}</span>${star(x)}</li>`).join('')}</ul>`).join('');
+}
+document.getElementById('pick').addEventListener('toggle', renderPick);
+
 // A continuación
-let onlyFav = false;
 const upEl = document.getElementById('upnext');
 let upCache = '';
 function upHTML(t) {
   let list = ALL.filter(x => x.a > t);
-  if (onlyFav) list = list.filter(x => favs.has(x.id));
+  if (mineOnly) list = list.filter(x => favs.has(x.id));
   if (!list.length) {
-    if (onlyFav) return `<li class="empty">${favs.size ? 'No quedan favoritos por empezar.' : 'Aún no tienes favoritos. Toca ☆ en cualquier artista.'}</li>`;
+    if (mineOnly) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido tus artistas: toca «Elegir mis artistas».'}</li>`;
     return '<li class="empty">No quedan más actuaciones.</li>';
   }
   return list.slice(0, 6).map(x => `<li class="${favs.has(x.id) ? 'fav' : ''}">
@@ -631,11 +685,11 @@ document.getElementById('calBtn').addEventListener('click', e => {
   if (!list.length) {
     e.preventDefault();
     msg.hidden = false;
-    msg.textContent = favs.size ? 'Tus favoritos ya han pasado.' : 'Primero marca algún favorito con ☆.';
+    msg.textContent = favs.size ? 'Tus artistas ya han pasado.' : 'Primero elige tus artistas con ☆.';
     return;
   }
   msg.hidden = false;
-  msg.textContent = `${list.length} actuación${list.length === 1 ? '' : 'es'} con aviso 10 min antes. Si cambias de favoritos, vuelve a tocar el botón.`;
+  msg.textContent = `${list.length} actuación${list.length === 1 ? '' : 'es'} con aviso 10 min antes. Si cambias tus artistas, vuelve a tocar el botón.`;
   e.currentTarget.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsFor(list));
   e.currentTarget.download = 'bass-in-the-park.ics';
 });
@@ -644,6 +698,7 @@ function toggleFav(id) {
   if (favs.has(id)) favs.delete(id); else favs.add(id);
   saveFavs();
   paintFavs();
+  renderPick();
   for (const k in rowCache) rowCache[k] = '';
   upCache = '';
   tick();
@@ -652,10 +707,20 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-fav]');
   if (b) toggleFav(b.dataset.fav);
 });
-document.getElementById('onlyFav').addEventListener('click', e => {
-  onlyFav = !onlyFav;
-  e.currentTarget.setAttribute('aria-pressed', onlyFav);
+const MKEY = 'bitp-mine-v1';
+let mineOnly = false;
+try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
+function paintMine() {
+  document.body.classList.toggle('mine-mode', mineOnly);
+  document.getElementById('mineOnly').setAttribute('aria-pressed', mineOnly);
+  for (const k in rowCache) rowCache[k] = '';
   upCache = '';
+}
+document.getElementById('mineOnly').addEventListener('click', () => {
+  mineOnly = !mineOnly;
+  try { localStorage.setItem(MKEY, mineOnly ? '1' : '0'); } catch (e) {}
+  if (mineOnly && !favs.size) document.getElementById('pick').open = true;
+  paintMine();
   tick();
 });
 
@@ -695,6 +760,11 @@ function tick() {
     }
     if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
   }
+
+  const re = document.getElementById('rowsEmpty');
+  const anyRow = STAGES.some(s => !document.getElementById('r-' + s.id).classList.contains('hide'));
+  re.hidden = anyRow;
+  re.textContent = !favs.size ? 'Aún no has elegido tus artistas. Toca «Elegir mis artistas» y márcalos con ☆.' : 'Ya no te quedan artistas por cubrir.';
 
   const up = upHTML(t);
   if (up !== upCache) { upEl.innerHTML = up; upCache = up; }
@@ -832,6 +902,7 @@ function applyChanges(d) {
   up.textContent = d.sets && d.updated ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : '';
   buildGrid();
   paintFavs();
+  renderPick();
   for (const k in rowCache) rowCache[k] = '';
   upCache = '';
   tick();
@@ -1038,6 +1109,8 @@ document.getElementById('edClose').addEventListener('click', () => {
 
 try { applyChanges(JSON.parse(localStorage.getItem(CKEY) || 'null')); } catch (e) {}
 paintFavs();
+paintMine();
+renderPick();
 tick();
 fitClock();
 scrollToNow(false);
