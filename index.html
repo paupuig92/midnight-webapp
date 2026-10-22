@@ -197,10 +197,18 @@ h2 span { color: var(--accent); }
 .tl-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px;
   border: 2px solid var(--rule); border-radius: 8px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
   scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
-.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(108px, 1fr)) 14px; min-width: calc(var(--gut) + 5 * 108px + 14px); position: relative; }
+.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(108px, 1fr)) minmax(92px, .8fr) 14px; min-width: calc(var(--gut) + 5 * 108px + 92px + 14px); position: relative; }
 .hd { position: sticky; top: 0; z-index: 7; padding: 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
   background: var(--paper); border-left: 2px solid var(--bg); scroll-snap-align: start; }
 .hd img { display: block; width: 100%; height: 34px; object-fit: contain; }
+.hd.rides { flex-direction: column; gap: 1px; color: #111; font: 900 10px/1 var(--display); font-stretch: 105%; letter-spacing: .04em; text-transform: uppercase; }
+.hd.rides svg { width: 34px; height: 24px; }
+.blk.ridesblk { cursor: default; border-style: solid; justify-content: flex-start; overflow: visible; }
+/* El bloc fa 13 h: el text es queda enganxat a dalt mentre es desplaça la graella */
+.blk.ridesblk > span { position: sticky; top: 60px; }
+.blk.ridesblk > span.n { padding-top: 6px; }
+.blk.ridesblk > span.t { top: 76px; }
+.blk.ridesblk .n { font-size: 12px; }
 .corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
 .corner { left: 0; }
 .gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
@@ -238,7 +246,7 @@ h2 span { color: var(--accent); }
 .chgw { color: var(--chg); font-weight: 800; }
 .blk.on.fav .chgw { color: #5a004a; }
 .closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: var(--fs-xs); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
-.nowline { grid-column: 2 / 7; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.nowline { grid-column: 2 / 8; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
 .legend { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
 .legend.upd { color: var(--ink); }
 
@@ -642,6 +650,8 @@ const star = x => {
   return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
 };
 
+const RIDE_SVG = '<svg viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+
 // Graella (es torna a dibuixar quan arriben canvis de l'organització)
 const tl = document.getElementById('tl');
 const tlwrap = document.getElementById('tlwrap');
@@ -649,7 +659,7 @@ let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
   for (const s of STAGES) g += `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
-  g += '<div class="hdend"></div>';
+  g += `<div class="hd rides">${RIDE_SVG}Atracciones</div><div class="hdend"></div>`;
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
   for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
@@ -669,9 +679,14 @@ function buildGrid() {
     else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
     g += '</div>';
   });
+  // Atraccions: una columna més, no és un artista (no es pot marcar com a meu)
+  const rt = y(T0), rh = y(RIDES) - rt;
+  g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
+    + `<div class="blk ridesblk" id="ridesBlk" role="img" aria-label="Atracciones abiertas de 12:00 a ${lbl(RIDES)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Abiertas</span><span class="t">12:00–${lbl(RIDES)}</span></div>`
+    + `<div class="closedtag" style="top:${y(RIDES) + 10}px">Cerradas</div></div>`;
   g += '<div class="nowline" id="nowline" hidden></div>';
   tl.innerHTML = g;
-  blocks = [...tl.querySelectorAll('.blk')];
+  blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
   nowline = document.getElementById('nowline');
   nowlbl = document.getElementById('nowlbl');
 }
@@ -966,7 +981,7 @@ function tick(force) {
   const rr = document.getElementById('r-rides');
   const open = t >= T0 && t < RIDES;
   const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
-  const ricon = '<svg class="logo" viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+  const ricon = RIDE_SVG.replace('<svg ', '<svg class="logo" ');
   const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abiertas</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
     : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abren a las 12:00</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
     : '';
@@ -998,6 +1013,12 @@ function tick(force) {
     b.classList.toggle('on', on);
     b.classList.toggle('past', t >= x.b);
     if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
+  }
+  const rb = document.getElementById('ridesBlk');
+  if (rb) {
+    rb.classList.toggle('on', open);
+    rb.classList.toggle('past', t >= RIDES);
+    if (open) rb.querySelector('.pl').style.top = `${y(t) - (y(T0) + 1.5) - 2.5}px`;
   }
   const inside = t >= T0 && t < TEND;
   nowline.hidden = !inside;
