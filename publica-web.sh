@@ -33,9 +33,11 @@ fi
 
 # El token va per variable d'entorn (no surt a la línia d'ordres ni es guarda a .git/config)
 BASIC=$(print -rn -- "x-access-token:$(<$TOKEN_FILE)" | base64)
-GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader \
-  GIT_CONFIG_VALUE_0="Authorization: Basic $BASIC" \
-  git push -q https://github.com/$REPO.git main && echo "ok push"
+export GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader \
+  GIT_CONFIG_VALUE_0="Authorization: Basic $BASIC"
+# Primer baixa els canvis que l'organització hagi fet des del web (docs/changes.json)
+git pull -q --rebase https://github.com/$REPO.git main && echo "ok sincronitzat"
+git push -q https://github.com/$REPO.git main && echo "ok push"
 
 code=$(api https://api.github.com/repos/$REPO/pages)
 if [[ $code == 404 ]]; then

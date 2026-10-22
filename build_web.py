@@ -7,7 +7,10 @@ el manifest i el service worker perquè funcioni sense connexió.
 
 Ús:  python3 build_web.py
 """
+import base64
 import hashlib
+import json
+import os
 import pathlib
 import shutil
 
@@ -15,6 +18,29 @@ ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT / "docs"
 
 src = (ROOT / "index.html").read_text(encoding="utf-8")
+
+# Editor de l'organització: el token de GitHub va xifrat amb la contrasenya.
+# PBKDF2-SHA256(contrasenya, sal) dona len(token)+32 bytes: els primers fan XOR amb el token
+# i els últims 32 serveixen per comprovar la contrasenya. Ni el token ni la contrasenya es mostren mai.
+CONF = pathlib.Path.home() / ".config" / "midnight-webapp"
+ITER = 1_000_000
+tok_f, pw_f, salt_f = CONF / "github-token", CONF / "admin-password", CONF / "admin-salt"
+admin = "null"
+if tok_f.is_file() and pw_f.is_file():
+    tok = tok_f.read_bytes().strip()
+    pw = pw_f.read_bytes().strip()
+    if not salt_f.is_file():
+        salt_f.write_bytes(os.urandom(16))
+        salt_f.chmod(0o600)
+    salt = salt_f.read_bytes()
+    pad = hashlib.pbkdf2_hmac("sha256", pw, salt, ITER, dklen=len(tok) + 32)
+    b64 = lambda b: base64.b64encode(b).decode()
+    admin = json.dumps({"salt": b64(salt), "iter": ITER, "len": len(tok),
+                        "ct": b64(bytes(a ^ b for a, b in zip(tok, pad))), "check": b64(pad[len(tok):])})
+    print("Editor de l'organització: activat")
+else:
+    print("Editor de l'organització: desactivat (falta", "la contrasenya" if tok_f.is_file() else "el token", "a", CONF, ")")
+src = src.replace("/*ADMIN*/null/*ADMIN*/", admin)
 head, body = src.split("</style>", 1)
 head += "</style>"
 # Treu la meta pròpia de l'artifact i el viewport (es posen a sota)
@@ -95,6 +121,18 @@ self.addEventListener('activate', e => {{
 // Primer la còpia guardada (va sense cobertura) i, si hi ha xarxa, s'actualitza per a la propera vegada
 self.addEventListener('fetch', e => {{
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) {{
+    if (!url.hostname.endsWith('fonts.googleapis.com') && !url.hostname.endsWith('fonts.gstatic.com')) return;  // API de GitHub: directe
+  }}
+  // Canvis de l'organització: sempre primer la xarxa; sense cobertura, l'última còpia
+  if (url.pathname.endsWith('/changes.json')) {{
+    e.respondWith(caches.open(VERSION).then(cache => fetch(e.request).then(res => {{
+      if (res.ok) cache.put('changes.json', res.clone());
+      return res;
+    }}).catch(() => cache.match('changes.json').then(r => r || new Response('', {{ status: 504 }})))));
+    return;
+  }}
   e.respondWith(caches.open(VERSION).then(async cache => {{
     const hit = await cache.match(e.request, {{ ignoreSearch: true }});
     const net = fetch(e.request).then(res => {{

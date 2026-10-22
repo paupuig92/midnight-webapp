@@ -187,6 +187,41 @@ h2 span { color: var(--neon); }
 .sim output { font-variant-numeric: tabular-nums; color: var(--fav); font-weight: 700; font-size: 14px; }
 .legend { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
 
+/* Capçalera: botó + atraccions, i avís de l'organització */
+.herorow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; width: 100%; margin-top: 2px; }
+.rides { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--rule); border-radius: 999px; padding: 8px 12px; font-size: 12.5px; color: var(--muted); line-height: 1.2; }
+.rides::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.rides.open { border-color: var(--neon-dim); color: var(--ink); }
+.rides.open::before { background: var(--neon); }
+.rides b { color: var(--ink); font-weight: 700; }
+.notice { width: 100%; box-sizing: border-box; background: var(--fav); color: #1a1400; border-radius: 6px; padding: 10px 12px; font-size: 14.5px; font-weight: 600; white-space: pre-line; }
+.notice b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
+.legend.upd { color: var(--fav); }
+
+/* Organització */
+.admin { border-top: 1px solid var(--rule); padding-top: 16px; }
+.admin label { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; margin: 10px 0 6px; }
+.admin input[type=text], .admin input[type=password], .admin select, .admin textarea {
+  font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--rule); border-radius: 6px; padding: 9px 10px; min-height: 42px; box-sizing: border-box; width: 100%; }
+.admin textarea { resize: vertical; }
+.pwrow { display: flex; gap: 8px; }
+.pwrow input { flex: 1; min-width: 0; }
+.tools .btn, .admin .btn { align-self: flex-start; font: 700 14px var(--body); background: var(--panel); color: var(--ink); border: 1.5px solid var(--rule); border-radius: 6px; padding: 11px 14px; cursor: pointer; min-height: 44px; }
+.admin .btn.primary { background: var(--neon); color: var(--on-neon); border-color: var(--neon); }
+.admin .btn:disabled { opacity: .5; }
+.edrows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.edrow { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1.5px solid var(--rule); border-radius: 6px; padding: 8px; }
+.edtimes { display: flex; align-items: center; gap: 6px; }
+.edtimes select { flex: 1; min-width: 0; }
+.edtimes span { color: var(--muted); }
+.edmore { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 6px; }
+.edrow .del { border: 1.5px solid var(--rule); background: transparent; color: var(--t5); border-radius: 6px; padding: 0 10px; min-height: 42px; font: 700 13px var(--body); cursor: pointer; }
+.edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.edmsg { margin-top: 10px; font-size: 13.5px; color: var(--neon); min-height: 1.2em; }
+.edmsg.bad { color: var(--t5); }
+.linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 8px 0; cursor: pointer; }
+@media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } }
+
 @media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
 </style>
@@ -205,7 +240,11 @@ h2 span { color: var(--neon); }
     <div class="clock" id="clock">--:--<small>--</small></div>
     <div class="status" id="status"></div>
     <div class="dstnote" id="dstnote" hidden></div>
-    <button class="go" id="goNow" type="button">Ir a ahora</button>
+    <div class="notice" id="notice" role="status" hidden></div>
+    <div class="herorow">
+      <button class="go" id="goNow" type="button">Ir a ahora</button>
+      <span class="rides" id="rides"></span>
+    </div>
   </header>
 
   <section id="ahora">
@@ -229,6 +268,7 @@ h2 span { color: var(--neon); }
     <h2>Horario</h2>
     <div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div>
     <p class="legend">La línea roja es la hora actual. Esta noche, a las 3:00 se cambia la hora y vuelven a ser las 2:00: por eso las 2:00 salen dos veces (1ª y 2ª).</p>
+    <p class="legend upd" id="updated" hidden></p>
   </section>
 
   <section class="tools">
@@ -249,7 +289,34 @@ h2 span { color: var(--neon); }
         <output id="simOut"></output>
       </div>
     </div>
-    <div id="rides"></div>
+  </section>
+
+  <section class="admin" id="admin" hidden>
+    <h2>Organización</h2>
+    <form id="pwForm" class="pwform">
+      <label for="pw">Cambios de última hora (solo organización)</label>
+      <div class="pwrow">
+        <input type="password" id="pw" autocomplete="current-password" placeholder="Contraseña" required>
+        <button type="submit" class="btn">Entrar</button>
+      </div>
+      <div class="hint" id="pwMsg" hidden></div>
+    </form>
+    <div id="editor" class="editor" hidden>
+      <label for="edNotice">Aviso para todos (sale arriba, debajo de la hora)</label>
+      <textarea id="edNotice" rows="2" placeholder="Ej.: Hëdera empieza 30 min tarde"></textarea>
+      <label for="edStage">Escenario</label>
+      <select id="edStage">
+        <option value="ner">No Es Ruido</option><option value="tox">Toxik Parties</option><option value="pont">Pont Aeri</option><option value="misa">Misa Psicodélika</option><option value="ss">Migats Sound System</option>
+      </select>
+      <div id="edRows" class="edrows"></div>
+      <button type="button" class="btn" id="edAdd">+ Añadir actuación</button>
+      <div class="edbar">
+        <button type="button" class="btn primary" id="edSave">Guardar y publicar</button>
+        <button type="button" class="btn" id="edClose">Salir</button>
+      </div>
+      <div class="edmsg" id="edMsg" role="status"></div>
+      <button type="button" class="linkbtn" id="edReset">Volver al horario del cartel</button>
+    </div>
   </section>
 </div>
 
@@ -261,10 +328,11 @@ document.documentElement.lang = 'es';
 // Hora local de Montmeló. La nit del 24 al 25 canvia l'hora a les 3:00 (CEST → CET).
 // "02:00a" = primera vegada que són les 2 (CEST), "02:00b" = segona (CET).
 function T(s) {
-  const m = s.match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  if (!m) return NaN;
   const h = +m[1], mi = +m[2], f = m[3];
   let day, off;
-  if (h >= 12) { day = 24; off = 2; }
+  if (h >= 6) { day = 24; off = 2; }  // de 6:00 a 23:59 és dissabte; de 0:00 a 5:59, diumenge
   else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
   else { day = 25; off = 1; }
   return Date.UTC(2026, 9, day, h - off, mi);
@@ -278,8 +346,9 @@ const STAGES = [
   { id: 'ss', name: 'Migats Sound System' },
 ];
 
-// [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
-const SETS = {
+// Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+// Els canvis d'última hora de l'organització arriben per changes.json i el substitueixen.
+const DEFAULT = {
   ner: [
     ['12:00', '13:00', 'Girls on Decks', 1],
     ['13:00', '14:00', 'Arcex', 1],
@@ -357,11 +426,24 @@ const SETS = {
 };
 
 const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
-for (const id in SETS) SETS[id] = SETS[id].map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, s: STAGE[id], a: T(a), b: T(b), n, t, sub }));
-const ALL = STAGES.flatMap(s => SETS[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
-const BYID = Object.fromEntries(ALL.map(x => [x.id, x]));
+// Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
+const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
+  [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
+let SETS = {}, ALL = [], BYID = {};
+function load(raw) {
+  SETS = {};
+  for (const s of STAGES) {
+    SETS[s.id] = (Array.isArray(raw && raw[s.id]) ? raw[s.id] : [])
+      .map(r => ({ id: String(r.id), s, a: T(r.a), b: T(r.b), n: String(r.n || '').trim(), t: Math.min(5, Math.max(0, +r.t || 0)), sub: String(r.sub || '').trim() }))
+      .filter(x => x.n && x.b > x.a)
+      .sort((x, y) => x.a - y.a);
+  }
+  ALL = STAGES.flatMap(s => SETS[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
+  BYID = Object.fromEntries(ALL.map(x => [x.id, x]));
+}
+load(DEFAULT_RAW);
 
-const T0 = T('12:00'), TEND = T('05:00'), RIDES = T('01:30');
+const T0 = T('12:00'), TEND = T('05:00'), RIDES = T('01:00');
 const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
 const MIN = 60000, PX = 1.25, PAD = 12;
 const H = (TEND - T0) / MIN * PX;
@@ -373,8 +455,9 @@ const hm = t => fmtHM.format(t);
 // Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
 const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
-const deco = n => n.toUpperCase().replace(/ (B2B|VS|&) /g, ' <i>$1</i> ');
-const esc = s => s.replace(/"/g, '&quot;');
+const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = html;
+const deco = n => html(n.toUpperCase()).replace(/ (B2B|VS|&amp;) /g, ' <i>$1</i> ');
 const imp = t => t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5" title="Importancia ${t} de 5"></i>` : '';
 function dur(ms) {
   const m = Math.max(0, Math.round(ms / MIN));
@@ -397,34 +480,39 @@ const star = x => {
   return `<button type="button" class="star" data-fav="${x.id}" aria-pressed="${on}" aria-label="${on ? 'Quitar de favoritos' : 'Marcar como favorito'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
 };
 
-// Graella
+// Graella (es torna a dibuixar quan arriben canvis de l'organització)
 const tl = document.getElementById('tl');
-let html = '<div class="corner"></div>';
-for (const s of STAGES) html += `<div class="hd${s.light ? ' light' : ''}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
-html += `<div class="gut" id="gut" style="height:${H + 2 * PAD}px">`;
-for (let t = T0; t <= TEND; t += 60 * MIN) html += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
-html += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
-STAGES.forEach((s, i) => {
-  const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
-  html += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
-  for (const x of SETS[s.id]) {
-    const h = (x.b - x.a) / MIN * PX;
-    const tiny = (x.b - x.a) / MIN <= 40 ? ' tiny' : '';
-    const tc = x.t ? `--tc:var(--t${x.t});` : '';
-    const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}`;
-    html += `<button type="button" class="blk${tiny}" data-fav="${x.id}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${y(x.a) + 1.5}px;height:${h - 3}px">`
-      + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${x.sub}</span>` : ''}<span class="t">${lbl(x.a)}–${lbl(x.b)}</span></button>`;
-  }
-  const last = SETS[s.id][SETS[s.id].length - 1];
-  if (last.b < TEND) html += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
-  html += '</div>';
-});
-html += '<div class="nowline" id="nowline" hidden></div>';
-tl.innerHTML = html;
-
-const blocks = [...tl.querySelectorAll('.blk')];
-const nowline = document.getElementById('nowline'), nowlbl = document.getElementById('nowlbl');
 const tlwrap = document.getElementById('tlwrap');
+let blocks = [], nowline, nowlbl;
+function buildGrid() {
+  let g = '<div class="corner"></div>';
+  for (const s of STAGES) g += `<div class="hd${s.light ? ' light' : ''}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
+  for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+  g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
+  STAGES.forEach((s, i) => {
+    const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
+    g += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
+    for (const x of SETS[s.id]) {
+      const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
+      const tiny = (x.b - x.a) / MIN <= 40 ? ' tiny' : '';
+      const tc = x.t ? `--tc:var(--t${x.t});` : '';
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}`;
+      g += `<button type="button" class="blk${tiny}" data-fav="${x.id}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}<span class="t">${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+    }
+    const last = SETS[s.id][SETS[s.id].length - 1];
+    if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
+    else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
+    g += '</div>';
+  });
+  g += '<div class="nowline" id="nowline" hidden></div>';
+  tl.innerHTML = g;
+  blocks = [...tl.querySelectorAll('.blk')];
+  nowline = document.getElementById('nowline');
+  nowlbl = document.getElementById('nowlbl');
+}
+buildGrid();
 
 function paintFavs() {
   for (const b of blocks) {
@@ -457,7 +545,7 @@ function rowHTML(s, t) {
   const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${cur.sub}</span>` : ''}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
       <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
     <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
@@ -467,7 +555,7 @@ function rowHTML(s, t) {
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
     <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para abrir</span></div></div>`, null];
   return ['closed', `${logo}
-    <div class="mid"><div class="sn">${s.name}</div><div class="dj">Cerrado desde las ${lbl(list[list.length - 1].b)}</div></div>
+    <div class="mid"><div class="sn">${s.name}</div><div class="dj">${list.length ? `Cerrado desde las ${lbl(list[list.length - 1].b)}` : 'Sin actuaciones'}</div></div>
     <div class="right"></div>`, null];
 }
 
@@ -506,13 +594,13 @@ function checkAlerts(t) {
   for (const id of favs) {
     const x = BYID[id];
     if (!x) continue;
-    const left = x.a - t;
-    if (left > 0 && left <= 10 * MIN && !told.has(id + ':pre')) {
-      told.add(id + ':pre');
+    const left = x.a - t, k = `${id}@${x.a}`;  // si l'organització canvia l'hora, es torna a avisar
+    if (left > 0 && left <= 10 * MIN && !told.has(k + ':pre')) {
+      told.add(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
     }
-    if (t >= x.a && t < x.a + 2 * MIN && !told.has(id + ':go')) {
-      told.add(id + ':go'); told.add(id + ':pre');
+    if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
+      told.add(k + ':go'); told.add(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
     }
   }
@@ -594,7 +682,10 @@ function tick() {
   }
 
   const rides = document.getElementById('rides');
-  rides.textContent = t < T0 ? 'Atracciones: abren a las 12:00.' : t < RIDES ? 'Atracciones: abiertas hasta la 1:30.' : 'Atracciones: cerradas desde la 1:30.';
+  const open = t >= T0 && t < RIDES;
+  rides.classList.toggle('open', open);
+  rides.innerHTML = t < T0 ? '<b>Atracciones</b> abren a las 12:00'
+    : open ? `<b>Atracciones abiertas</b> hasta la 1:00 · ${dur(RIDES - t)}` : '<b>Atracciones cerradas</b> desde la 1:00';
 
   checkAlerts(t);
 }
@@ -685,9 +776,194 @@ function fitClock() {
 addEventListener('resize', fitClock);
 if (document.fonts) document.fonts.ready.then(fitClock);
 
+// Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
+// A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
+const REPO = 'paupuig92/midnight-webapp';
+const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+const CKEY = 'bitp-changes-v1';
+let stamp = '', notice = '';
+function applyChanges(d) {
+  if (!d || typeof d !== 'object') return;
+  const st = String(d.updated || '');
+  if (st === stamp) return;
+  stamp = st;
+  notice = String(d.notice || '');
+  load(d.sets && typeof d.sets === 'object' ? d.sets : DEFAULT_RAW);
+  const nt = document.getElementById('notice');
+  nt.hidden = !notice;
+  nt.innerHTML = notice ? `<b>Aviso de la organización</b>${html(notice)}` : '';
+  const up = document.getElementById('updated');
+  up.hidden = !d.sets;
+  up.textContent = d.sets && d.updated ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : '';
+  buildGrid();
+  paintFavs();
+  for (const k in rowCache) rowCache[k] = '';
+  upCache = '';
+  tick();
+}
+const fmtDay = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+async function pullChanges() {
+  if (!ONLINE) return;
+  try {
+    const r = await fetch(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (r.status === 404) { applyChanges({ updated: 'cartel' }); try { localStorage.removeItem(CKEY); } catch (e) {} return; }
+    if (!r.ok) return;
+    const d = await r.json();
+    applyChanges(d);
+    try { localStorage.setItem(CKEY, JSON.stringify(d)); } catch (e) {}
+  } catch (e) {}
+}
+
+// Organització: editor protegit amb contrasenya.
+// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null).
+const ADMIN = /*ADMIN*/null/*ADMIN*/;
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = u => btoa(String.fromCharCode(...u));
+async function unlock(pw) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, key, (ADMIN.len + 32) * 8));
+  if (b64e(bits.slice(ADMIN.len)) !== ADMIN.check) throw new Error('pw');
+  return new TextDecoder().decode(b64d(ADMIN.ct).map((c, i) => c ^ bits[i]));
+}
+let token = null, draft = null, edStage = STAGES[0].id;
+const adminEl = document.getElementById('admin');
+adminEl.hidden = !(ONLINE && ADMIN);
+
+// Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
+const code = t => { const s = hm(t); return s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+const TIMES = [];
+for (let t = T0; t <= T('05:55'); t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+const timeSel = (cls, v) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+
+function rawNow() {
+  const raw = {};
+  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub }));
+  return raw;
+}
+function renderEditor() {
+  document.getElementById('edStage').value = edStage;
+  const list = draft.sets[edStage];
+  document.getElementById('edRows').innerHTML = list.map((r, i) => `<div class="edrow" data-i="${i}">
+    <div class="edtimes">${timeSel('a', r.a)}<span>–</span>${timeSel('b', r.b)}</div>
+    <input class="n" type="text" value="${html(r.n)}" aria-label="Artista" placeholder="Artista">
+    <div class="edmore">
+      <select class="t" aria-label="Importancia">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select>
+      <input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo" placeholder="Subtítulo (opcional)">
+      <button type="button" class="del" aria-label="Quitar ${html(r.n)}">Quitar</button>
+    </div></div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
+}
+function edMsg(text, bad) {
+  const m = document.getElementById('edMsg');
+  m.textContent = text;
+  m.classList.toggle('bad', !!bad);
+}
+document.getElementById('pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = document.getElementById('pwMsg');
+  msg.hidden = false; msg.textContent = 'Comprobando…';
+  try {
+    token = await unlock(document.getElementById('pw').value);
+    document.getElementById('pw').value = '';
+    msg.hidden = true;
+    draft = { notice: notice, sets: rawNow() };
+    document.getElementById('edNotice').value = draft.notice;
+    document.getElementById('pwForm').hidden = true;
+    document.getElementById('editor').hidden = false;
+    renderEditor();
+  } catch (err) {
+    msg.textContent = 'Contraseña incorrecta.';
+  }
+});
+document.getElementById('edStage').addEventListener('change', e => { edStage = e.target.value; renderEditor(); });
+document.getElementById('edRows').addEventListener('change', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  for (const k of ['a', 'b', 't']) if (e.target.classList.contains(k)) r[k] = k === 't' ? +e.target.value : e.target.value;
+});
+document.getElementById('edRows').addEventListener('input', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  if (e.target.classList.contains('n')) r.n = e.target.value;
+  if (e.target.classList.contains('sub')) r.sub = e.target.value;
+});
+document.getElementById('edRows').addEventListener('click', e => {
+  const b = e.target.closest('.del');
+  if (!b) return;
+  draft.sets[edStage].splice(+b.closest('.edrow').dataset.i, 1);
+  renderEditor();
+});
+document.getElementById('edAdd').addEventListener('click', () => {
+  const list = draft.sets[edStage];
+  const last = list[list.length - 1];
+  const a = last ? last.b : '12:00';
+  const ia = TIMES.findIndex(([c]) => c === a);
+  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '' });
+  renderEditor();
+  const rows = document.querySelectorAll('#edRows .n');
+  rows[rows.length - 1].focus();
+});
+document.getElementById('edNotice').addEventListener('input', e => { draft.notice = e.target.value; });
+
+async function publish(data) {
+  const api = `https://api.github.com/repos/${REPO}/contents/docs/changes.json`;
+  const h = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
+  const g = await fetch(`${api}?ref=main&t=${Date.now()}`, { headers: h, cache: 'no-store' });
+  if (!g.ok && g.status !== 404) throw new Error(`GitHub ${g.status}`);
+  const sha = g.ok ? (await g.json()).sha : undefined;
+  const bytes = new TextEncoder().encode(JSON.stringify(data, null, 1));
+  let bin = '';
+  for (const c of bytes) bin += String.fromCharCode(c);
+  const p = await fetch(api, { method: 'PUT', headers: h, body: JSON.stringify({ message: 'Cambio de última hora en el horario', content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
+  if (!p.ok) throw new Error(`GitHub ${p.status}`);
+}
+async function save(data) {
+  const btns = document.querySelectorAll('#editor button');
+  btns.forEach(b => b.disabled = true);
+  edMsg('Publicando…');
+  try {
+    await publish(data);
+    stamp = '';
+    applyChanges(data);
+    try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
+    edMsg('Publicado. Lo verán todos los móviles en 1 o 2 minutos.');
+  } catch (err) {
+    edMsg(`No se ha podido publicar (${err.message}). Revisa la conexión y vuelve a probar.`, true);
+  }
+  btns.forEach(b => b.disabled = false);
+}
+document.getElementById('edSave').addEventListener('click', () => {
+  for (const s of STAGES) for (const r of draft.sets[s.id]) {
+    r.n = r.n.trim();
+    if (!r.n) { edStage = s.id; renderEditor(); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
+    if (!(T(r.b) > T(r.a))) { edStage = s.id; renderEditor(); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
+  }
+  save({ v: 1, updated: new Date().toISOString(), notice: draft.notice.trim(), sets: draft.sets });
+});
+document.getElementById('edReset').addEventListener('click', () => {
+  const r = document.getElementById('edReset');
+  if (r.dataset.sure !== '1') { r.dataset.sure = '1'; r.textContent = 'Toca otra vez para confirmar'; return; }
+  r.dataset.sure = ''; r.textContent = 'Volver al horario del cartel';
+  draft = { notice: '', sets: structuredClone(DEFAULT_RAW) };
+  document.getElementById('edNotice').value = '';
+  renderEditor();
+  save({ v: 1, updated: new Date().toISOString(), notice: '', sets: null });
+});
+document.getElementById('edClose').addEventListener('click', () => {
+  token = null; draft = null;
+  document.getElementById('editor').hidden = true;
+  document.getElementById('pwForm').hidden = false;
+});
+
+try { applyChanges(JSON.parse(localStorage.getItem(CKEY) || 'null')); } catch (e) {}
 paintFavs();
 tick();
 fitClock();
 scrollToNow(false);
 setInterval(tick, 1000);
+pullChanges();
+setInterval(() => { if (document.visibilityState === 'visible') pullChanges(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pullChanges(); });
 </script>
