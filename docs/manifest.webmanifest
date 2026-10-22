@@ -1,6 +1,6 @@
 {
-  "name": "Bass in the Park",
-  "short_name": "Bass Park",
+  "name": "Midnight App",
+  "short_name": "Midnight",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

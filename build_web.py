@@ -56,7 +56,7 @@ page = f"""<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Bass Park">
+<meta name="apple-mobile-web-app-title" content="Midnight">
 <meta name="description" content="Horario en directo del Bass in the Park 2026 · Montmeló">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -92,8 +92,8 @@ for s in (32, 180, 192, 512):
 (OUT / ".nojekyll").touch()
 
 (OUT / "manifest.webmanifest").write_text("""{
-  "name": "Bass in the Park",
-  "short_name": "Bass Park",
+  "name": "Midnight App",
+  "short_name": "Midnight",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

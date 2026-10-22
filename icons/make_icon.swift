@@ -29,10 +29,10 @@ let maskCtx = CGContext(data: &mask, width: lw, height: lh, bitsPerComponent: 8,
                         space: cs, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
 let logo = maskCtx.makeImage()!
 
-// 2. Fons: negre verdós amb llums verdes difuminades (com el degradat de la Suite, però en neó)
+// 2. Fons: fosc amb llums vermelles i taronja difuminades, com la de la Suite
 let ctx = CGContext(data: nil, width: S, height: S, bitsPerComponent: 8, bytesPerRow: 0,
                     space: cs, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-ctx.setFillColor(CGColor(red: 0.012, green: 0.03, blue: 0.012, alpha: 1))
+ctx.setFillColor(CGColor(red: 0.035, green: 0.02, blue: 0.02, alpha: 1))
 ctx.fill(CGRect(x: 0, y: 0, width: S, height: S))
 func glow(_ x: CGFloat, _ y: CGFloat, _ r: CGFloat, _ c: (CGFloat, CGFloat, CGFloat), _ a: CGFloat) {
   let g = CGGradient(colorsSpace: cs, colors: [CGColor(red: c.0, green: c.1, blue: c.2, alpha: a),
@@ -42,28 +42,28 @@ func glow(_ x: CGFloat, _ y: CGFloat, _ r: CGFloat, _ c: (CGFloat, CGFloat, CGFl
                          endCenter: CGPoint(x: x, y: y), endRadius: r, options: [])
 }
 // (origen a baix a l'esquerra)
-glow(700, 860, 560, (0.24, 1.0, 0.17), 0.55)   // dalt a la dreta
-glow(260, 300, 520, (0.05, 0.45, 0.05), 0.65)  // baix a l'esquerra
-glow(520, 520, 380, (0.10, 0.35, 0.08), 0.35)  // centre
+glow(640, 820, 520, (0.62, 0.24, 0.08), 0.75)  // taronja, dalt
+glow(470, 330, 560, (0.55, 0.06, 0.07), 0.85)  // vermell, baix
+glow(860, 280, 300, (0.25, 0.12, 0.14), 0.5)   // reflex fred, baix a la dreta
 
-// 3. Logo en blanc, centrat a dalt, amb una mica de resplendor
+// 3. Logo en blanc, centrat a dalt, amb una ombra suau
 let scale: CGFloat = 1.32
 let dw = CGFloat(lw) * scale, dh = CGFloat(lh) * scale
 let logoRect = CGRect(x: (CGFloat(S) - dw) / 2, y: 470, width: dw, height: dh)
-ctx.setShadow(offset: .zero, blur: 28, color: CGColor(red: 0.24, green: 1, blue: 0.17, alpha: 0.55))
+ctx.setShadow(offset: CGSize(width: 0, height: -6), blur: 18, color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.45))
 ctx.draw(logo, in: logoRect)
 ctx.setShadow(offset: .zero, blur: 0, color: nil)
 
-// 4. "APP" espaiat en verd neó, com "SUITE"
+// 4. "APP" espaiat en vermell, com "SUITE"
 let ns = NSGraphicsContext(cgContext: ctx, flipped: false)
 NSGraphicsContext.current = ns
 let font = NSFont.systemFont(ofSize: 150, weight: .heavy)
 let shadow = NSShadow()
-shadow.shadowColor = NSColor(red: 0.24, green: 1, blue: 0.17, alpha: 0.7)
-shadow.shadowBlurRadius = 30
+shadow.shadowColor = NSColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+shadow.shadowBlurRadius = 14
 let attrs: [NSAttributedString.Key: Any] = [
   .font: font, .kern: 34,
-  .foregroundColor: NSColor(red: 0.24, green: 1.0, blue: 0.17, alpha: 1),
+  .foregroundColor: NSColor(red: 0.89, green: 0.2, blue: 0.18, alpha: 1),
   .shadow: shadow,
 ]
 let text = NSAttributedString(string: "APP", attributes: attrs)
