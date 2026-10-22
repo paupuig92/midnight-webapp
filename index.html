@@ -141,8 +141,10 @@ h2 span { color: var(--neon); }
 .empty { color: var(--muted); font-size: 13.5px; padding: 10px 0; }
 .note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .calrow { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.calbtn { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 6px;
-  border: 1.5px solid var(--fav); color: var(--fav); font: 700 14px var(--body); text-decoration: none; }
+.acts { display: flex; gap: 6px; align-items: center; }
+.cal1 { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--rule); color: var(--ink); display: grid; place-items: center; }
+.cal1:active { background: var(--panel); }
+.calico { color: var(--ink); vertical-align: -3px; }
 
 /* Graella */
 /* Més baixa que la pantalla i sense "contain" en vertical: amb el dit a sobre, en arribar al final segueix baixant la pàgina */
@@ -298,8 +300,7 @@ h2 span { color: var(--neon); }
     <ul class="upnext" id="upnext"></ul>
     <p class="note">Toca ☆ (o un artista en el horario) para añadirlo a tus artistas. Con la app abierta y la pantalla encendida te avisamos 10 minutos antes. Para que te avise con el móvil bloqueado, añádelos al Calendario.</p>
     <div class="calrow" id="calRow" hidden>
-      <a class="btn calbtn" id="calBtn" href="#" role="button">Añadir mis artistas al Calendario</a>
-      <span class="hint" id="calMsg" hidden></span>
+      <p class="note"><b>Calendario:</b> toca <span class="calico" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span> al lado de un artista y luego «Añadir». El iPhone te avisará 10 min antes aunque esté bloqueado.</p>
     </div>
   </section>
 
@@ -655,7 +656,7 @@ function renderPick() {
   document.getElementById('pickCount').textContent = favs.size ? `(${favs.size})` : '';
   if (!document.getElementById('pick').open) return;
   document.getElementById('pickList').innerHTML = STAGES.map(s => `<h3>${s.name}</h3><ul>${SETS[s.id].map(x =>
-    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}</span>${star(x)}</li>`).join('')}</ul>`).join('');
+    `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}</span><span class="acts">${calLink(x)}${star(x)}</span></li>`).join('')}</ul>`).join('');
 }
 document.getElementById('pick').addEventListener('toggle', renderPick);
 
@@ -673,7 +674,7 @@ function upHTML(t) {
     <div class="when"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></div>
     <img class="logo" src="img/${x.s.id}.png" alt="">
     <div class="who">${imp(x.t)}${deco(x.n)}<span class="where">${x.s.name}</span></div>
-    ${star(x)}</li>`).join('');
+    <span class="acts">${calLink(x)}${star(x)}</span></li>`).join('');
 }
 
 // Avisos dels preferits (només amb l'app oberta)
@@ -725,26 +726,16 @@ function icsFor(list) {
   const d = t => new Date(t).toISOString().replace(/[-:]|\.\d+/g, '');
   const tx = s => String(s).replace(/\\/g, '\\\\').replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
   const ev = x => [
-    'BEGIN:VEVENT', `UID:${x.id}-${x.a}@midnight-webapp`, `DTSTAMP:${d(Date.now())}`, `DTSTART:${d(x.a)}`, `DTEND:${d(x.b)}`,
+    'BEGIN:VEVENT', `UID:${x.id}@midnight-webapp`, 'DTSTAMP:20261020T000000Z', `DTSTART:${d(x.a)}`, `DTEND:${d(x.b)}`,
     `SUMMARY:${tx(x.n)} · ${tx(x.s.name)}`, 'LOCATION:Bass in the Park · Espai Can Guitet\\, Montmeló',
     'BEGIN:VALARM', 'TRIGGER:-PT10M', 'ACTION:DISPLAY', `DESCRIPTION:${tx(x.n)} empieza en 10 min (${tx(x.s.name)})`, 'END:VALARM',
     'END:VEVENT'].join('\r\n');
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Midnight//Bass in the Park//ES', 'CALSCALE:GREGORIAN', ...list.map(ev), 'END:VCALENDAR'].join('\r\n');
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Midnight//Bass in the Park//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', ...list.map(ev), 'END:VCALENDAR', ''].join('\r\n');
 }
-document.getElementById('calBtn').addEventListener('click', e => {
-  const list = ALL.filter(x => favs.has(x.id) && x.b > Date.now());
-  const msg = document.getElementById('calMsg');
-  if (!list.length) {
-    e.preventDefault();
-    msg.hidden = false;
-    msg.textContent = favs.size ? 'Tus artistas ya han pasado.' : 'Primero elige tus artistas con ☆.';
-    return;
-  }
-  msg.hidden = false;
-  msg.textContent = `${list.length} actuación${list.length === 1 ? '' : 'es'} con aviso 10 min antes. Si cambias tus artistas, vuelve a tocar el botón.`;
-  e.currentTarget.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsFor(list));
-  e.currentTarget.download = 'bass-in-the-park.ics';
-});
+// Enllaç al .ics de cada actuació (docs/cal/<id>.ics, el genera build_web.py; només al web de GitHub)
+const CAL_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const calLink = x => ONLINE && /^[\w-]+$/.test(x.id)
+  ? `<a class="cal1" href="cal/${x.id}.ics?v=${x.a}" aria-label="Añadir ${esc(x.n)} al Calendario">${CAL_SVG}</a>` : '';
 
 function toggleFav(id) {
   if (favs.has(id)) favs.delete(id); else favs.add(id);
@@ -1082,7 +1073,7 @@ function renderEditor() {
     </div></div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
 }
 const DKEY = 'bitp-draft-v1';
-let dirty = false, baseStamp = '';
+let dirty = false, baseStamp = '', baseRaw = null;
 function markDirty() {
   dirty = true;
   try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, draft })); } catch (e) {}
@@ -1114,6 +1105,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     } else {
       draft = { notice: notice, sets: rawNow() }; baseStamp = stamp; dirty = false;
     }
+    baseRaw = rawNow();  // per saber quins calendaris cal tornar a generar en publicar
     document.getElementById('edNotice').value = draft.notice;
     document.getElementById('pwForm').hidden = true;
     document.getElementById('editor').hidden = false;
@@ -1194,6 +1186,28 @@ async function publish(data) {
   const p = await fetchT(api, { method: 'PUT', headers: h, body: JSON.stringify({ message: 'Cambio de última hora en el horario', content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
   if (!p.ok) throw new Error(`GitHub ${p.status}`);
 }
+// Torna a escriure docs/cal/<id>.ics de les actuacions noves o canviades (hora o nom)
+async function putFile(path, text, message) {
+  const api = `https://api.github.com/repos/${REPO}/contents/${path}`;
+  const h = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
+  const g = await fetchT(`${api}?ref=main&t=${Date.now()}`, { headers: h, cache: 'no-store' });
+  const sha = g.ok ? (await g.json()).sha : undefined;
+  const bytes = new TextEncoder().encode(text);
+  let bin = '';
+  for (const c of bytes) bin += String.fromCharCode(c);
+  const r = await fetchT(api, { method: 'PUT', headers: h, body: JSON.stringify({ message, content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
+  if (!r.ok) throw new Error(`GitHub ${r.status}`);
+}
+async function updateCalendars(before) {
+  const old = {};
+  for (const s of STAGES) for (const r of (before && before[s.id]) || []) old[r.id] = `${r.a}|${r.b}|${r.n}`;
+  const changed = ALL.filter(x => /^[\w-]+$/.test(x.id) && old[x.id] !== `${code(x.a)}|${code(x.b)}|${x.n}`);
+  let ok = 0;
+  for (const x of changed) {
+    try { await putFile(`docs/cal/${x.id}.ics`, icsFor([x]), `Calendario: ${x.n}`); ok++; } catch (e) {}
+  }
+  return [ok, changed.length];
+}
 async function save(data) {
   const btns = document.querySelectorAll('#editor button');
   btns.forEach(b => b.disabled = true);
@@ -1205,7 +1219,11 @@ async function save(data) {
     baseStamp = stamp;
     clearDraft();
     try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
-    edMsg('Publicado. Lo verán todos los móviles en 1 o 2 minutos.');
+    edMsg('Publicado. Actualizando los calendarios…');
+    const [ok, n] = await updateCalendars(baseRaw);
+    baseRaw = rawNow();
+    edMsg(n === ok ? 'Publicado. Lo verán todos los móviles en 1 o 2 minutos.'
+      : `Publicado, pero ${n - ok} calendario${n - ok === 1 ? '' : 's'} no se ha${n - ok === 1 ? '' : 'n'} podido actualizar. Vuelve a publicar cuando tengas cobertura.`);
   } catch (err) {
     edMsg(err.message === 'cancelado' ? 'No se ha publicado. Sal y vuelve a entrar para ver los cambios de la otra persona.'
       : err.name === 'AbortError' ? 'No hay conexión suficiente para publicar. Tus cambios siguen aquí: vuelve a probar en un momento.'

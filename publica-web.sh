@@ -37,6 +37,12 @@ export GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeade
   GIT_CONFIG_VALUE_0="Authorization: Basic $BASIC"
 # Primer baixa els canvis que l'organització hagi fet des del web (docs/changes.json)
 git pull -q --rebase https://github.com/$REPO.git main && echo "ok sincronitzat"
+# i torna a generar docs/ perquè els calendaris (.ics) tinguin els horaris de changes.json
+python3 -I build_web.py >/dev/null
+if [[ -n "$(git status --porcelain)" ]]; then
+  git add -A
+  git commit -q -m "Actualitza els calendaris amb els canvis de l'organització" && echo "ok calendaris"
+fi
 git push -q https://github.com/$REPO.git main && echo "ok push"
 
 code=$(api https://api.github.com/repos/$REPO/pages)
