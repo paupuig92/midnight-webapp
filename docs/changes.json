@@ -1,7 +1,7 @@
 {
  "v": 1,
- "updated": "2026-10-24T15:31:18.232Z",
- "notice": "",
+ "updated": "2026-10-24T15:33:17.189Z",
+ "notice": "Canvi al stage de pontaeri!",
  "sets": {
   "ner": [
    {
@@ -316,8 +316,8 @@
     "id": "pont-5",
     "a": "17:00",
     "b": "18:00",
-    "n": "Xavi Metralla",
-    "t": 4,
+    "n": "Xavi Metralla B2B DJ Sisu",
+    "t": 5,
     "sub": ""
    },
    {
