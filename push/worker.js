@@ -16,21 +16,29 @@ const PAGES = 'https://paupuig92.github.io/midnight-webapp/';
 const ORIGINS = ['https://paupuig92.github.io', 'http://localhost:8765'];
 const PUSH_HOSTS = /(^|\.)(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)$/;
 const MIN = 60000;
-const END = Date.UTC(2026, 9, 25, 6, 0);   // després del festival el servidor ja no envia res
 const BATCH = 40, MAX_SUBS = 600;
 
-// Hora local de Montmeló → UTC (igual que T() de l'app; la nit del 24 al 25 canvia l'hora a les 3:00)
+// Hora local (Europe/Madrid) → instant, igual que T() de l'app. El dia i l'hora d'inici surten de CARTEL
+// (cartel.json, que genera build_web.py a partir del bloc FEST de l'app).
+const fmtWall = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+function wallOf(ms) {
+  const p = Object.fromEntries(fmtWall.formatToParts(ms).map(x => [x.type, +x.value]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+}
+const START_M = (([h, m]) => h * 60 + m)(CARTEL.start.split(':').map(Number));
 function T(s) {
   const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
   const h = +m[1], mi = +m[2], f = m[3];
   if (h > 23 || mi > 59) return NaN;
-  let day, off;
-  if (h >= 6) { day = 24; off = 2; }
-  else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
-  else { day = 25; off = 1; }
-  return Date.UTC(2026, 9, day, h - off, mi);
+  const [Y, M, D] = CARTEL.date;
+  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
+  return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
 }
+const END = T(CARTEL.end) + 60 * MIN;   // una hora després del final ja no s'envia res
+// Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
+const sameFest = c => (c.fest || 'bass-in-the-park-2026') === CARTEL.fest;
 
 const cors = origin => ORIGINS.includes(origin)
   ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'vary': 'origin' }
@@ -66,6 +74,7 @@ async function fetchSchedule() {
     if (!r.ok) return null;
     const c = await r.json();
     if (!c || typeof c !== 'object' || typeof c.updated !== 'string') return null;
+    if (!sameFest(c)) return { sets: CARTEL.sets, stamp: 'cartel', notice: '' };  // són d'un altre festival
     return { sets: c.sets && typeof c.sets === 'object' ? c.sets : CARTEL.sets, stamp: c.updated, notice: c.notice };
   } catch (e) { return null; }
 }
@@ -155,6 +164,12 @@ export class Store {
     this.sql = state.storage.sql;
     this.sql.exec(`CREATE TABLE IF NOT EXISTS subs (id TEXT PRIMARY KEY, endpoint TEXT NOT NULL, favs TEXT NOT NULL, before INTEGER NOT NULL, changes INTEGER NOT NULL, at INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)`);
+    // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
+    if (this.get('fest') !== CARTEL.fest) {
+      this.sql.exec('DELETE FROM subs');
+      this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
+      this.put('fest', CARTEL.fest);
+    }
     this.ready = state.blockConcurrencyWhile(() => this.importOld());
   }
   get(k) { const r = this.sql.exec('SELECT v FROM kv WHERE k = ?', k).toArray()[0]; return r ? JSON.parse(r.v) : null; }

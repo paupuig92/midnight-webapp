@@ -45,6 +45,15 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - Si una acció es denega, no buscar drecera: dir-ho a en Pau.
 - Descartat: calendari .ics (no anava a l'iPhone), ubicació en temps real, pagar Cloudflare.
 
+## Festivals (des del 26-10-2026)
+- Tot el que canvia d'un festival a un altre és al bloc `/* ==== FESTIVAL ==== */` d'`index.html` (objecte `FEST`: id, key, nom, dia, inici/final, colors, `rides` opcional, escenaris, horari).
+- Cada festival guardat a `festivals/<id>/` (`festival.js` + `img/` amb banner.jpg i un `<escenari>.png` per escenari).
+- `python3 festival.py` (llista) · `python3 festival.py <id>` (el posa a l'app) · `python3 festival.py --desa` (guarda l'actual). Després `./publica-web.sh`.
+- `changes.json` porta `fest`: l'app i el servidor ignoren els d'un altre festival (els antics sense `fest` = Bass). Claus del mòbil amb prefix `FEST.key`.
+- El servidor d'avisos llegeix dia/hores de `cartel.json`; en canviar de festival esborra els mòbils anteriors. Cal `push/instala.sh` després de publicar un festival nou.
+- `festivals/bass-in-the-park-2026/original/` = còpia exacta de tota l'app tal com va funcionar al Bass.
+- Comptador «⏳ quedan X h» fins al final (status + barra fina de dalt).
+
 ## Pendent
 - Post-festival (24-10 ja passat): treure el cron del servidor, esborrar les dades dels mòbils, revocar els tokens de GitHub i Cloudflare (el de Cloudflare caduca sol ~21-11).
 - Per al proper festival: fer l'app genèrica (dades i colors per festival), canviar `END` del servidor.

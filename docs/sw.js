@@ -1,6 +1,6 @@
-const VERSION = 'bitp-37f39ea0';
+const VERSION = 'bitp-b90e35d2';
 const FILES = ['index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
+  "img/banner.jpg", "img/festa.png", "img/photo.png", "img/principal.png"];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {

@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Midnight">
-<meta name="description" content="Horario en directo del Bass in the Park 2026 · Montmeló">
+<meta name="description" content="Horario en directo · Midnight">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -20,7 +20,7 @@ body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<title>Bass in the Park</title>
+<title>Midnight</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
@@ -107,6 +107,11 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .statusrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
 .status strong { color: var(--ink); font-weight: 700; }
+/* Comptador fins al final del festival */
+.endleft { display: inline-block; padding: 1px 8px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); white-space: nowrap; }
+.endleft b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.endat { white-space: nowrap; }
+.minibar .mleft { flex: none; color: var(--accent); font-size: var(--fs-xs); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .statusrow .btn { flex: none; padding: 0 14px; }
 .dstnote { color: var(--ink); font-size: var(--fs-s); font-weight: 700; display: flex; gap: 7px; align-items: baseline; }
 .dstnote::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--now); flex: none; }
@@ -214,7 +219,7 @@ i.imp { color: #0b0b0b; }
 /* Graella */
 .tlbox { position: relative; }
 .tlbox::after { content: ""; position: absolute; top: 2px; right: 2px; bottom: 2px; width: 22px; border-radius: 0 6px 6px 0; pointer-events: none;
-  background: linear-gradient(to right, transparent, rgba(4, 7, 4, .85)); z-index: 9; }
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--bg) 85%, transparent)); z-index: 9; }
 .tl-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px;
   border: 2px solid var(--rule); border-radius: 8px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
   scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
@@ -249,8 +254,8 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .blk.tiny .s { display: none; }
 .blk.tiny .t { font-size: 10px; }
-.blk.past { background: #050805; border-color: #1b3317; }
-.blk.past .n, .blk.past .t, .blk.past .n i:not(.imp) { color: #6f8a6b; }
+.blk.past { background: var(--bg); border-color: color-mix(in srgb, var(--rule) 55%, var(--bg)); }
+.blk.past .n, .blk.past .t, .blk.past .n i:not(.imp) { color: color-mix(in srgb, var(--muted) 62%, var(--bg)); }
 /* En directe: fons fosc i vora del festival (la franja d'importància i la línia d'ara es continuen veient) */
 .blk.on { border: 2px solid var(--accent); background: var(--accent-deep); box-shadow: 0 0 14px rgba(var(--accent-rgb), .45); z-index: 5; }
 .blk.on .n { color: var(--accent); }
@@ -280,7 +285,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
   border-radius: 10px; padding: 8px 8px 8px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: var(--fs-m); }
 .toast.mine { background: var(--fav); color: #1a1400; }
 .toast.org { background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); }
-.toast.info { background: #1a2618; color: var(--ink); border: 1.5px solid var(--line); }
+.toast.info { background: color-mix(in srgb, var(--panel) 80%, var(--line)); color: var(--ink); border: 1.5px solid var(--line); }
 .toast b { text-transform: uppercase; }
 .toast .msg { flex: 1; min-width: 0; }
 .toast .act { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; font-weight: 800; cursor: pointer; }
@@ -339,6 +344,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 <div class="minibar" id="minibar" hidden>
   <i class="mdot" aria-hidden="true"></i>
   <span class="mclock" id="mclock"></span>
+  <span class="mleft" id="mleft" hidden aria-label="Tiempo hasta que acaba el festival"></span>
   <span class="mnext" id="mnext"></span>
   <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
   <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas">☆</button>
@@ -388,7 +394,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
   <section id="horario">
     <h2 style="margin-bottom:10px">Horario</h2>
     <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
-    <p class="legend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
+    <p class="legend" id="gridLegend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
     <p class="legend upd" id="updated" hidden></p>
     <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde rosa en el horario).</p>
   </section>
@@ -470,9 +476,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
           <div class="steps" id="simSteps">
             <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
           </div>
-          <div class="steps" id="simPresets">
-            <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:30">00:30</button><button type="button" data-p="01:05">01:05</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
-          </div>
+          <div class="steps" id="simPresets"></div>
           <output id="simOut"></output>
         </div>
       </div>
@@ -497,114 +501,99 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 <script>
 document.documentElement.lang = 'es';
 
-// Festival actual: canviar aquest objecte (i l'horari) és el que caldria per a cadascun dels festivals de Midnight
+/* ==== FESTIVAL ==== */
+// Tot el que canvia d'un festival a un altre és dins d'aquest bloc. Cada festival en té una còpia a
+// festivals/<id>/festival.js, i `python3 festival.py <id>` la posa aquí i copia els seus logos a img/.
 const FEST = {
-  name: 'Bass in the Park', accent: '#3dff2b', accentRgb: '61, 255, 43', accentDim: '#1d6b15', accentDeep: '#0f2a0c', accentInk: '#041204',
+  id: 'castanyada-2026',        // també separa els canvis de l'organització (changes.json) d'un festival a un altre
+  key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
+  name: 'La Castanyada',
+  banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
+  date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
+  dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
+  start: '12:00', end: '05:00',
+  accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
+  // Colors de base propis (opcional): els del Bass eren verdosos
+  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428' },
+  // Columna extra que no és un escenari (null si no n'hi ha)
+  rides: { name: 'Atracciones', from: '12:00', to: '00:00' },
+  // Escenaris: el logo és img/<id>.png
+  stages: [
+    { id: 'principal', name: 'Escenari Principal' },
+    { id: 'festa', name: 'Escenari Festa Major' },
+    { id: 'photo', name: 'Photocall' },
+  ],
+  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
+  sets: {
+    principal: [
+      ['12:30', '13:10', 'Juls', 0],
+      ['13:30', '14:10', 'Ven’nus', 0],
+      ['14:30', '15:30', '31 FAM', 0],
+      ['16:00', '17:15', 'Els Amics de les Arts', 0],
+      ['17:45', '19:00', 'Els Pets', 0],
+      ['19:30', '20:40', 'La Ludwig Band', 0],
+      ['21:10', '22:30', 'Lax’n’Busto', 0],
+      ['22:30', '23:00', 'DJ K-Zu', 0],
+      ['23:00', '00:15', 'Els Catarres', 0],
+      ['00:15', '00:45', 'DJ K-Zu', 0],
+      ['00:45', '01:55', 'The Tyets', 0],
+      ['01:55', '02:25', 'Anna Gisbert', 0],
+      ['02:25', '03:35', 'Figa Flawas', 0],
+      ['03:35', '04:00', 'Anna Gisbert', 0],
+      ['04:00', '05:00', 'Doctor Prats', 0],
+    ],
+    festa: [
+      ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
+      ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
+      ['17:15', '17:45', 'Lo Pau de Ponts', 0],
+      ['19:00', '19:30', 'Lo Pau de Ponts', 0, 'Havaneres i cremat popular'],
+      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
+    ],
+    photo: [
+      ['17:40', '18:00', 'Cabronàs', 0],
+      ['18:00', '18:20', 'Nena Posseïda', 0],
+      ['18:20', '18:40', 'Cabronàs i entitats', 0],
+      ['18:40', '19:00', 'Nena Posseïda', 0],
+      ['19:00', '19:20', 'Cabronàs i entitats', 0],
+      ['19:20', '19:40', 'Nena Posseïda', 0],
+      ['19:40', '20:00', 'Cabronàs i entitats', 0],
+      ['20:00', '20:20', 'Nena Posseïda', 0],
+      ['20:40', '21:00', 'Nena Posseïda', 0],
+    ],
+  },
 };
+/* ==== /FESTIVAL ==== */
+
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
   document.documentElement.style.setProperty(k, v);
+for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.style.setProperty(k, v);  // colors de base propis (opcional)
+document.title = FEST.name;
 document.getElementById('festName').textContent = FEST.name;
+document.getElementById('banner').alt = FEST.banner;
 
-// Hora local de Montmeló. La nit del 24 al 25 canvia l'hora a les 3:00 (CEST → CET).
-// "02:00a" = primera vegada que són les 2 (CEST), "02:00b" = segona (CET).
+// Hora local (Europe/Madrid) → instant. Si aquella nit es canvia l'hora, les 2:xx passen dues vegades:
+// "02:30a" és la primera, "02:30b" (o sense lletra) la segona.
+const fmtWall = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+function wallOf(ms) {
+  const p = Object.fromEntries(fmtWall.formatToParts(ms).map(x => [x.type, +x.value]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+}
+const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
 function T(s) {
   const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
   const h = +m[1], mi = +m[2], f = m[3];
   if (h > 23 || mi > 59) return NaN;
-  let day, off;
-  if (h >= 6) { day = 24; off = 2; }  // de 6:00 a 23:59 és dissabte; de 0:00 a 5:59, diumenge
-  else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
-  else { day = 25; off = 1; }
-  return Date.UTC(2026, 9, day, h - off, mi);
+  const [Y, M, D] = FEST.date;
+  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  // Espanya és UTC+1 o UTC+2: es miren les dues possibilitats
+  const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
+  return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
 }
 
-const STAGES = [
-  { id: 'ner', name: 'No Es Ruido' },
-  { id: 'tox', name: 'Toxik Parties' },
-  { id: 'pont', name: 'Pont Aeri' },
-  { id: 'misa', name: 'Misa Psicodélika' },
-  { id: 'ss', name: 'Migats Sound System' },
-];
-
-// Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
-// Els canvis d'última hora de l'organització arriben per changes.json i el substitueixen.
-const DEFAULT = {
-  ner: [
-    ['12:00', '13:00', 'Girls on Decks', 1],
-    ['13:00', '14:00', 'Arcex', 1],
-    ['14:00', '15:00', 'Selecta', 2],
-    ['15:00', '16:00', 'Skudero & Xavi Metralla', 3],
-    ['16:00', '17:00', 'The Saints', 3],
-    ['17:00', '18:00', 'Yoshiko', 4],
-    ['18:00', '19:00', 'Xavistyle', 4],
-    ['19:00', '19:20', 'Cache Oficial', 3],
-    ['19:20', '20:00', 'Jarfaiter', 3],
-    ['20:00', '21:00', 'Carlos Perez B2B K-Style', 3],
-    ['21:00', '22:00', 'Amygdala', 3],
-    ['22:00', '23:00', 'Carnada B2B Quince', 4],
-    ['23:00', '00:00', 'Gea', 3],
-    ['00:00', '01:00', 'DJ Pastis B2B DJ Sisu', 5],
-    ['01:00', '02:00a', 'Toni Massama', 3],
-    ['02:00a', '02:00b', 'Kitus & Frosty', 3],
-    ['02:00b', '03:00', 'The Whistlers', 3],
-    ['03:00', '04:00', 'Tha Playah', 3],
-    ['04:00', '05:00', 'Papero B2B More', 3],
-  ],
-  tox: [
-    ['12:00', '14:00', '4BD3', 1],
-    ['14:00', '15:30', 'Seve', 1],
-    ['15:30', '17:00', 'Pau Miau', 1],
-    ['17:00', '18:30', 'Kodi VS Black Mamba', 1],
-    ['18:30', '20:00', 'Rozz Rigo', 1],
-    ['20:00', '21:00', 'Kou2tatane', 1],
-    ['21:00', '22:00', 'Miss Pixie', 1],
-    ['22:00', '23:00', 'Ling Ling', 3],
-    ['23:00', '00:00', 'Stiwie', 2],
-    ['00:00', '01:00', 'Apre VS Choko', 2],
-    ['01:00', '02:00a', 'Diprosopiks', 2, 'Neurotribe vs Koko'],
-    ['02:00a', '02:00b', 'Teka', 2],
-    ['02:00b', '03:00', 'Farfacid', 3],
-    ['03:00', '05:00', 'Radze VS Brain Impact VS Jan Vercauteren', 3],
-  ],
-  misa: [
-    ['12:00', '13:30', 'Afroditta B2B Kosmonow', 2],
-    ['13:30', '15:00', 'Chaac B2B Lightwormie', 2],
-    ['15:00', '16:30', 'Jandri', 2],
-    ['16:30', '18:00', 'Mr Frisson', 2],
-    ['18:00', '19:30', 'Hypatia', 2],
-    ['19:30', '21:00', 'Zeridium', 2],
-    ['21:00', '22:30', 'Guapa Lee', 2],
-    ['22:30', '00:00', 'Hëdera', 2],
-  ],
-  pont: [
-    ['12:00', '13:00', 'Merlin', 1],
-    ['13:00', '14:00', 'Kcho', 1],
-    ['14:00', '15:00', 'Soriano VS Fløres', 1],
-    ['15:00', '16:00', 'Merti B2B Altrax', 1],
-    ['16:00', '17:00', 'Skudero B2B Dvrk Oktopus', 3],
-    ['17:00', '18:00', 'Xavi Metralla B2B DJ Sisu', 5],
-    ['18:00', '19:00', 'DJ Sonic', 2],
-    ['19:00', '20:00', 'D-Vstor', 2],
-    ['20:00', '21:00', 'Wakan', 3],
-    ['21:00', '22:00', 'Kitus & Frosty', 3],
-    ['22:00', '23:00', 'Lia Jensen', 3],
-    ['23:00', '00:00', 'Marti VS Celi', 1],
-    ['00:00', '01:00', 'More', 3],
-  ],
-  ss: [
-    ['12:00', '14:00', 'Migats Sound System', 2],
-    ['14:00', '15:00', 'Redland Sound System', 0],
-    ['15:00', '16:00', 'Migats Sound System', 0],
-    ['16:00', '17:00', 'Lion on Top Sound System', 0],
-    ['17:00', '18:00', 'Redland Sound System', 0],
-    ['18:00', '20:00', 'Migats Sound System', 0],
-    ['20:00', '21:00', 'Redland Sound System', 0],
-    ['21:00', '22:00', 'Migats Sound System', 0],
-    ['22:00', '23:00', 'Peivol', 0],
-    ['23:00', '00:00', 'Al·le', 0],
-  ],
-};
+const STAGES = FEST.stages;
+const DEFAULT = FEST.sets;
 
 const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
 // Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
@@ -612,8 +601,10 @@ const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =
   [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 
-const T0 = T('12:00'), TEND0 = T('05:00'), RIDES = T('01:00');
-const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
+const T0 = T(FEST.start), TEND0 = T(FEST.end);
+const RIDES = FEST.rides ? T(FEST.rides.to) : 0, RIDES0 = FEST.rides ? T(FEST.rides.from) : 0;
+// Nit del canvi d'hora (si n'hi ha): W0 = 2:00 (1a), DUP = 2:00 (2a), W1 = 3:00
+const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00') : W0;
 const MIN = 60000, PX = 1.6, PAD = 12;
 let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
 const y = t => PAD + (t - T0) / MIN * PX;
@@ -676,7 +667,7 @@ let sim = null;
 const now = () => sim ?? Date.now();
 
 // Preferits (al mòbil de cadascú; si no hi ha emmagatzematge, només en memòria)
-const FKEY = 'bitp-favs-v1';
+const FKEY = FEST.key + '-favs-v1';
 let favs = new Set();
 try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]').filter(x => typeof x === 'string')); } catch (e) {}
 function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
@@ -694,7 +685,8 @@ let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
   for (const s of STAGES) g += `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
-  g += `<div class="hd rides">${RIDE_SVG}Atracciones</div><div class="hdend"></div>`;
+  if (FEST.rides) g += `<div class="hd rides">${RIDE_SVG}${html(FEST.rides.name)}</div>`;
+  g += '<div class="hdend"></div>';
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
   for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
@@ -715,17 +707,21 @@ function buildGrid() {
     g += '</div>';
   });
   // Atraccions: una columna més, no és un artista (no es pot marcar com a meu)
-  const rt = y(T0), rh = y(RIDES) - rt;
-  g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
-    + `<div class="blk ridesblk" id="ridesBlk" role="img" aria-label="Atracciones abiertas de 12:00 a ${lbl(RIDES)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Abiertas</span><span class="t">12:00–${lbl(RIDES)}</span></div>`
-    + `<div class="closedtag" style="top:${y(RIDES) + 10}px">Cerradas</div></div>`;
+  if (FEST.rides) {
+    const rt = y(RIDES0), rh = y(RIDES) - rt, rn = html(FEST.rides.name);
+    g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
+      + `<div class="blk ridesblk" id="ridesBlk" role="img" aria-label="${rn} abiertas de ${lbl(RIDES0)} a ${lbl(RIDES)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Abiertas</span><span class="t">${lbl(RIDES0)}–${lbl(RIDES)}</span></div>`
+      + `<div class="closedtag" style="top:${y(RIDES) + 10}px">Cerradas</div></div>`;
+  }
   g += '<div class="nowline" id="nowline" hidden></div>';
   tl.innerHTML = g;
+  document.querySelector('.scale').hidden = !ALL.some(x => x.t);  // sense importàncies, sense llegenda
   blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
   nowline = document.getElementById('nowline');
   nowlbl = document.getElementById('nowlbl');
 }
 buildGrid();
+if (!DST) document.getElementById('gridLegend').textContent = 'Línea roja = ahora.';
 
 function paintFavs() {
   for (const b of blocks) {
@@ -759,7 +755,7 @@ function setHTML(el, h) {
 
 // Ahora suena: una fila per escenari
 const rowsEl = document.getElementById('rows');
-rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + '<div class="row" id="r-rides"></div>';
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + (FEST.rides ? '<div class="row" id="r-rides"></div>' : '');
 const rowCache = {};
 
 function rowHTML(s, t) {
@@ -870,12 +866,12 @@ function toast(msg, kind = 'mine', action = null, ms = 10000) {
   try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
 // Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
-const NKEY = 'bitp-notif-v1';
+const NKEY = FEST.key + '-notif-v1';
 let notifOn = false;
 try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
 const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
 // Preferències d'avís (Configuración): quants minuts abans dels meus artistes, i si avisar dels canvis de l'organització
-const PKEY = 'bitp-prefs-v1';
+const PKEY = FEST.key + '-prefs-v1';
 let prefs = { before: 10, changes: true };
 try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; } catch (e) {}
 prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
@@ -894,7 +890,7 @@ async function sysNotify(title, body, tag) {
   } catch (e) {}
 }
 // Què s'ha avisat ja: es guarda al mòbil (si l'iPhone tanca l'app i es torna a obrir, no es repeteix)
-const TKEY = 'bitp-told-v1';
+const TKEY = FEST.key + '-told-v1';
 let told = new Set();
 try { told = new Set(JSON.parse(localStorage.getItem(TKEY) || '[]')); } catch (e) {}
 function remember(k) { told.add(k); if (sim === null) try { localStorage.setItem(TKEY, JSON.stringify([...told].slice(-300))); } catch (e) {} }
@@ -941,7 +937,7 @@ document.addEventListener('click', e => {
     toast(`Quitado de tus artistas: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, true) }, 6000);
   } else setFav(id, true);
 });
-const MKEY = 'bitp-mine-v1';
+const MKEY = FEST.key + '-mine-v1';
 let mineOnly = false;
 try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
 function paintMine() {
@@ -967,6 +963,9 @@ function tick(force) {
   const t = now();
   document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
   document.getElementById('mclock').textContent = hm(t);
+  const ml = document.getElementById('mleft');
+  ml.hidden = !(t >= T0 && t < TEND);
+  if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(' min', '′').replace(' h ', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
@@ -975,15 +974,15 @@ function tick(force) {
   const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
   if (t < T0) {
     const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
-    st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : 'el sábado 24.10'} a las <strong>12:00</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
+    st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : FEST.dayLabel} a las <strong>${lbl(T0)}</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
   } else if (t < TEND) {
-    st.innerHTML = `<strong>En marcha</strong> · ${live} sonando · hasta las ${lbl(TEND)}`;
+    st.innerHTML = `<strong>En marcha</strong> · ${live} sonando · <span class="endleft">⏳ quedan <b>${dur(TEND - t)}</b></span> <span class="endat">hasta las ${lbl(TEND)}</span>`;
   } else {
     st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
   const dn = document.getElementById('dstnote');
   const p = pass(t);
-  dn.hidden = !p && !(t >= T('01:30') && t < W0);
+  dn.hidden = !p && !(DST && t >= W0 - 30 * MIN && t < W0);
   dn.textContent = p === '1ª' ? 'Son las 2 por 1ª vez: a las 3:00 se cambia la hora y vuelven a ser las 2:00.'
     : p === '2ª' ? 'Ya se ha cambiado la hora: estás en las 2 por 2ª vez.'
     : 'Esta noche se cambia la hora: a las 3:00 vuelven a ser las 2:00.';
@@ -1006,16 +1005,18 @@ function tick(force) {
   }
 
   // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»; tancades, a la línia de tancats)
-  const rr = document.getElementById('r-rides');
-  const open = t >= T0 && t < RIDES;
-  const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
-  const ricon = RIDE_SVG.replace('<svg ', '<svg class="logo" ');
-  const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abiertas</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
-    : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abren a las 12:00</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
-    : '';
-  if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
-  if (open && !mineOnly) rr.querySelector('.bar > div').style.width = ((t - T0) / (RIDES - T0) * 100).toFixed(1) + '%';
-  if (rstate === 'closed' && t >= T0) closed.push('Atracciones');
+  const open = !!FEST.rides && t >= RIDES0 && t < RIDES;
+  if (FEST.rides) {
+    const rr = document.getElementById('r-rides'), rn = html(FEST.rides.name);
+    const rstate = mineOnly ? 'hide' : open ? 'live' : t < RIDES0 ? 'idle' : 'closed';
+    const ricon = RIDE_SVG.replace('<svg ', '<svg class="logo" ');
+    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abiertas</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
+      : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abren a las ${lbl(RIDES0)}</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES0 - t)}</b><span>para abrir</span></div></div>`
+      : '';
+    if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
+    if (open && !mineOnly) rr.querySelector('.bar > div').style.width = ((t - RIDES0) / (RIDES - RIDES0) * 100).toFixed(1) + '%';
+    if (rstate === 'closed' && t >= T0) closed.push(FEST.rides.name);
+  }
 
   const cl = document.getElementById('closedLine');
   cl.hidden = mineOnly || !closed.length;
@@ -1046,7 +1047,7 @@ function tick(force) {
   if (rb) {
     rb.classList.toggle('on', open);
     rb.classList.toggle('past', t >= RIDES);
-    if (open) rb.querySelector('.pl').style.top = `${y(t) - (y(T0) + 1.5) - 2.5}px`;
+    if (open) rb.querySelector('.pl').style.top = `${y(t) - (y(RIDES0) + 1.5) - 2.5}px`;
   }
   const inside = t >= T0 && t < TEND;
   nowline.hidden = !inside;
@@ -1074,7 +1075,7 @@ if ('IntersectionObserver' in window) {
 const simOn = document.getElementById('simOn'), simRange = document.getElementById('simRange'), simOut = document.getElementById('simOut');
 const simCtl = document.getElementById('simCtl');
 function simBounds() { simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; }
-simBounds(); simRange.step = MIN; simRange.value = T('21:30');
+simBounds(); simRange.step = MIN; simRange.value = Math.round((T0 + TEND0) / 2 / MIN) * MIN;
 let realTold = null;
 function applySim() {
   const was = sim !== null;
@@ -1099,7 +1100,11 @@ function setSim(v) {
 simOn.addEventListener('change', applySim);
 simRange.addEventListener('input', applySim);
 document.getElementById('simSteps').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) setSim(+simRange.value + b.dataset.d * MIN); });
-document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) setSim(T(b.dataset.p)); });
+// Moments típics per provar: abans d'obrir, obertura, meitat, canvi d'hora (si n'hi ha) i tancament
+document.getElementById('simPresets').innerHTML = [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000,
+  ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0]
+  .map(t => `<button type="button" data-t="${t}">${lbl(t)}</button>`).join('');
+document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setSim(+b.dataset.t); });
 function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
 document.getElementById('simBadge2').addEventListener('click', exitSim);
@@ -1263,7 +1268,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '22/10 15:48';
+const BUILD = '26/10 13:09';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -1287,7 +1292,7 @@ document.getElementById('appUpdate').addEventListener('click', async () => {
 });
 
 // Pantalla encesa (es recorda: si la tenies activada, es torna a activar en obrir l'app)
-const WKEY = 'bitp-wake-v1';
+const WKEY = FEST.key + '-wake-v1';
 let lock = null, wantWake = false;
 const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
 function wakeUI(on, hint) {
@@ -1344,11 +1349,14 @@ if (document.fonts) document.fonts.ready.then(fitClock);
 // A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
 const REPO = 'paupuig92/midnight-webapp';
 const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
-const CKEY = 'bitp-changes-v1';
+const CKEY = FEST.key + '-changes-v1';
 let stamp = '', notice = '';
+// Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
+const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
 const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}`).join('~');
 function applyChanges(d, quiet) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return;
+  if (!sameFest(d)) d = { updated: 'cartel', notice: '', sets: null };  // són d'un altre festival: horari del cartell
   const st = String(d.updated || '').slice(0, 40);
   if (!st || st === stamp) return;
   const wasLoaded = stamp !== '', oldNotice = notice, oldKey = setsKey();
@@ -1452,9 +1460,9 @@ const adminEl = document.getElementById('admin');
 adminEl.hidden = !(ONLINE && ADMIN);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
-const code = t => { const s = hm(t); return s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
 const TIMES = [];
-for (let t = T0; t <= T('05:55'); t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+for (let t = T0; t <= TEND0 + 55 * MIN; t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
 const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
@@ -1475,12 +1483,38 @@ function renderEditor(badIdx) {
     </div></div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
   if (badIdx != null) { const el = document.querySelector(`#edRows .edrow[data-i="${badIdx}"]`); if (el) el.scrollIntoView({ block: 'center' }); }
 }
-const DKEY = 'bitp-draft-v1';
-let dirty = false, baseStamp = '';
+const DKEY = FEST.key + '-draft-v1';
+let dirty = false, baseStamp = '', baseRaw = null, baseNotice = '';
+// La versió publicada de la qual parteix l'edició (per combinar-la si algú altre publica mentrestant)
+function setBase(st, raw, nt) { baseStamp = st; baseRaw = structuredClone(raw); baseNotice = nt || ''; }
 function markDirty() {
   dirty = true;
-  try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, draft })); } catch (e) {}
+  try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, baseRaw, baseNotice, draft })); } catch (e) {}
 }
+// Combina tres versions de l'horari: de la qual partia (base), la meva i la publicada per una altra persona.
+// Cada actuació (per id): si només l'ha canviada un, guanya aquell canvi; si l'han canviada tots dos, guanya la meva.
+const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || '')]) : '';
+function merge3(base, mine, theirs, bn, mn, tn) {
+  const sets = {}, clash = [];
+  for (const s of STAGES) {
+    const by = l => Object.fromEntries((Array.isArray(l) ? l : []).map(r => [r.id, r]));
+    const B = by(base[s.id]), M = by(mine[s.id]), O = by(theirs[s.id]);
+    sets[s.id] = [];
+    for (const id of new Set([...Object.keys(O), ...Object.keys(M)])) {
+      const b = norm(B[id]), m = norm(M[id]), o = norm(O[id]);
+      let r;
+      if (m === b) r = O[id]; else if (o === b || o === m) r = M[id];
+      else { r = M[id]; clash.push((M[id] || O[id]).n); }
+      if (r) sets[s.id].push({ ...r });
+    }
+    sets[s.id].sort((x, y) => T(x.a) - T(y.a));
+  }
+  const notice = mn === bn ? tn : mn;
+  if (mn !== bn && tn !== bn && mn !== tn) clash.push('Aviso para todos');
+  return { sets, notice, clash };
+}
+const rawOf = d => d && sameFest(d) && d.sets && typeof d.sets === 'object' && !Array.isArray(d.sets) ? d.sets : DEFAULT_RAW;
+const noticeOf = d => d && sameFest(d) && typeof d.notice === 'string' ? d.notice : '';
 function clearDraft() {
   dirty = false;
   try { sessionStorage.removeItem(DKEY); } catch (e) {}
@@ -1501,13 +1535,23 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     token = await unlock(document.getElementById('pw').value);
     document.getElementById('pw').value = '';
     msg.hidden = true;
+    msg.hidden = false; msg.textContent = 'Cargando el último horario publicado…';
+    // La web (GitHub Pages) pot servir un changes.json de fa uns minuts: per editar es llegeix l'original de GitHub,
+    // si no, s'editaria un horari vell i en publicar s'esborraria el que ha fet una altra persona
+    try {
+      const remote = await remoteChanges();
+      if (remote && sameFest(remote)) applyChanges(remote, true);
+      else if (stamp && stamp !== 'cartel') applyChanges({ v: 1, fest: FEST.id, updated: 'cartel', notice: '', sets: null }, true);
+    } catch (err) {}
+    msg.hidden = true;
     let saved = null;
     try { saved = JSON.parse(sessionStorage.getItem(DKEY) || 'null'); } catch (err) {}
-    if (saved && saved.draft && saved.draft.sets) {
-      draft = saved.draft; baseStamp = saved.base; dirty = true;
+    if (saved && saved.draft && saved.draft.sets && saved.baseRaw) {
+      draft = saved.draft; setBase(saved.base, saved.baseRaw, saved.baseNotice); dirty = true;
       for (const st of STAGES) if (!Array.isArray(draft.sets[st.id])) draft.sets[st.id] = [];
     } else {
-      draft = { notice, sets: rawNow() }; baseStamp = stamp; dirty = false;
+      saved = null;
+      draft = { notice, sets: rawNow() }; setBase(stamp || 'cartel', draft.sets, notice); dirty = false;
     }
     document.getElementById('edNotice').value = draft.notice || '';
     document.getElementById('pwForm').hidden = true;
@@ -1561,7 +1605,7 @@ document.getElementById('edRows').addEventListener('click', e => {
 document.getElementById('edAdd').addEventListener('click', () => {
   const list = draft.sets[edStage];
   const last = list[list.length - 1];
-  const a = last ? last.b : '12:00';
+  const a = last ? last.b : FEST.start;
   const ia = TIMES.findIndex(([c]) => c === a);
   list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '' });
   markDirty();
@@ -1602,9 +1646,21 @@ async function commitFiles(files, message) {
 }
 async function publish(data) {
   const remote = await remoteChanges();
-  const rs = remote ? String(remote.updated || '') : 'cartel';
-  if (rs !== baseStamp && !confirm(`Otra persona ha publicado cambios mientras editabas${okDate(rs) ? ` (${fmtDay.format(new Date(rs))})` : ''}.\n\nSi publicas, sus cambios se sustituirán por los tuyos. ¿Publicar igualmente?`)) {
-    throw new Error('cancelado');
+  const rs = remote && sameFest(remote) ? String(remote.updated || '') : 'cartel';
+  if (rs !== (baseStamp || 'cartel')) {
+    const when = okDate(rs) ? ` (${fmtDay.format(new Date(rs))})` : '';
+    if (!data.sets) {
+      if (!confirm(`Otra persona ha publicado cambios mientras editabas${when}.\n\nSi vuelves al horario del cartel, se borrarán también sus cambios. ¿Continuar?`)) throw new Error('cancelado');
+    } else {
+      // Es combinen els canvis de tots dos; el resultat es mostra a l'editor perquè es revisi abans de publicar
+      const m = merge3(baseRaw || DEFAULT_RAW, data.sets, rawOf(remote), baseNotice, data.notice, noticeOf(remote));
+      draft = { notice: m.notice, sets: m.sets };
+      setBase(rs, rawOf(remote), noticeOf(remote));
+      markDirty();
+      document.getElementById('edNotice').value = draft.notice || '';
+      renderEditor();
+      const e = new Error('combinado'); e.when = when; e.clash = m.clash; throw e;
+    }
   }
   // Primer s'aplica aquí (així es comprova que les dades són bones); si falla, es torna enrere
   const prevStamp = stamp;
@@ -1621,15 +1677,16 @@ async function save(data) {
   const before = { raw: rawNow(), notice, stamp };
   try {
     await publish(data);
-    baseStamp = stamp;
+    setBase(stamp, data.sets || DEFAULT_RAW, data.notice);
     pubStamp = stamp; pubUntil = Date.now() + 15 * MIN;
     clearDraft();
     try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
     edMsg('Publicado. Lo verán todos los móviles en 1 o 2 minutos.');
   } catch (err) {
     // No s'ha publicat: aquest mòbil torna a l'horari que hi havia
-    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
-    edMsg(err.message === 'cancelado' ? 'No se ha publicado. Sal y vuelve a entrar para ver los cambios de la otra persona.'
+    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, fest: FEST.id, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
+    edMsg(err.message === 'combinado' ? `Otra persona ha publicado cambios mientras editabas${err.when}. Los hemos juntado con los tuyos${err.clash.length ? ` (en ${err.clash.slice(0, 3).join(', ')} habíais tocado lo mismo: se queda lo tuyo)` : ''}. Revísalo y pulsa «Publicar» otra vez.`
+      : err.message === 'cancelado' ? 'No se ha publicado.'
       : err.name === 'AbortError' ? 'No hay conexión suficiente para publicar. Tus cambios siguen aquí: vuelve a probar en un momento.'
       : `No se ha podido publicar (${err.message}). Tus cambios siguen aquí: vuelve a probar.`, true);
   }
@@ -1650,14 +1707,14 @@ document.getElementById('edSave').addEventListener('click', () => {
       if (T(cur.a) < T(prev.b)) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${cur.n} y ${prev.n} se solapan en ${s.name} (${lbl(T(cur.a))}). Cambia una de las dos horas.`, true); }
     }
   }
-  save({ v: 1, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
 });
 document.getElementById('edReset').addEventListener('click', () => {
   if (!confirm('Se borrarán todos los cambios y el aviso, y volverá el horario del cartel para todos. ¿Continuar?')) return;
   draft = { notice: '', sets: structuredClone(DEFAULT_RAW) };
   document.getElementById('edNotice').value = '';
   renderEditor();
-  save({ v: 1, updated: new Date().toISOString(), notice: '', sets: null });
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: '', sets: null });
 });
 document.getElementById('edClose').addEventListener('click', () => {
   if (dirty && !confirm('Tienes cambios sin publicar. ¿Salir y perderlos?')) return;

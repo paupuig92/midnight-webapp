@@ -1,0 +1,1657 @@
+<title>Bass in the Park</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+/* Layout: cartell petit + rellotge a tot l'ample, "Ahora suena" just a sota, "A continuación", graella tipus cartell, Organización i Configuración al final.
+   Colors: la marca Midnight (vermell) i els significats fixos (groc = meu, magenta = canvi, vermell = ara) no canvien mai;
+   l'accent és el color de cada festival (FEST al començament del script). */
+:root {
+  /* Marca i base (fixos) */
+  --mid-red: #e8253a;
+  --bg: #040704;
+  --panel: #0b120b;
+  --ink: #ecfbe9;
+  --muted: #a3bba0;
+  --rule: #35702d;
+  --line: #4a7f42;
+  --paper: #f3f5f0;
+  /* Significats fixos */
+  --now: #ff4040;
+  --fav: #ffd23d;
+  --chg: #ff4fd8;
+  /* Color del festival (el canvia FEST) */
+  --accent: #3dff2b;
+  --accent-rgb: 61, 255, 43;
+  --accent-dim: #2a8f1f;
+  --accent-deep: #0f2a0c;
+  --accent-ink: #041204;
+  /* Importància (del full de l'organització): 5 vermell … 1 blau; sempre amb el número a dins */
+  --t5: #e8553d;
+  --t4: #f08a2e;
+  --t3: #d9a23a;
+  --t2: #6fbf5f;
+  --t1: #6f8cf0;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* Escala de text: 11 / 13 / 15 / 18 / 24 */
+  --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
+  --gut: 48px;
+  --barh: 52px;
+  --top: calc(var(--barh) + env(safe-area-inset-top, 0px));
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  font-family: var(--body);
+  font-size: var(--fs-m);
+  line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+body.locked { overflow: hidden; }
+.wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+section { scroll-margin-top: calc(var(--top) + 8px); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--fav); outline-offset: 2px; }
+.mdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mid-red); flex: none; }
+
+/* Botons: dos components. .btn (pastilla 44 px; .primary = color del festival) i .chip (filtres) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s)/1.1 var(--body); cursor: pointer; text-decoration: none; text-align: center; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.go { color: var(--accent); border-color: var(--accent); font: 800 var(--fs-s)/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; }
+.btn.go:active { background: var(--accent); color: var(--accent-ink); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.chip { min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fav); border-color: var(--fav); color: #1a1400; }
+.round { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
+.star { font-size: 20px; line-height: 1; color: var(--muted); }
+.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
+.acts { display: flex; gap: 10px; align-items: center; }
+
+/* Capçalera */
+.banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 175; object-fit: cover; object-position: center 78%; border-radius: 8px; margin-top: 12px; }
+header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--accent); padding-block: 0 12px; }
+.brandline { display: flex; align-items: center; gap: 7px; font: 800 var(--fs-xs)/1.2 var(--display); font-stretch: 112%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.brandline b { color: var(--ink); }
+.clock { font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--accent); text-shadow: 0 0 10px rgba(var(--accent-rgb), .3); }
+.clock small { font-size: .34em; color: var(--muted); text-shadow: none; margin-left: 4px; }
+.statusrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
+.status strong { color: var(--ink); font-weight: 700; }
+.statusrow .btn { flex: none; padding: 0 14px; }
+.dstnote { color: var(--ink); font-size: var(--fs-s); font-weight: 700; display: flex; gap: 7px; align-items: baseline; }
+.dstnote::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--now); flex: none; }
+.notice { box-sizing: border-box; background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); border-radius: 6px; padding: 10px 12px; font-size: var(--fs-m); font-weight: 600; white-space: pre-line; }
+.notice b { display: block; font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; color: var(--mid-red); }
+.sim-badge { align-self: flex-start; min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer; color: #fff; font: 800 var(--fs-xs)/1 var(--body); letter-spacing: .06em;
+  background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); }
+
+/* Barra fina fixa (surt quan el rellotge gran ja no es veu) */
+.minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--accent);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4px); padding-bottom: 4px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  min-height: var(--barh); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+.minibar .mclock { font: 900 22px/1 var(--display); font-stretch: 125%; color: var(--accent); font-variant-numeric: tabular-nums; }
+.minibar .mnext { flex: 1; min-width: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.minibar .mnext b { color: var(--fav); }
+.minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
+.minibar .btn { min-height: 36px; padding: 0 10px; }
+
+h2 { margin: 0; font-family: var(--display); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h2 span { color: var(--accent); }
+.shead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dj i:not(.imp), .who i:not(.imp), .blk .n i:not(.imp), .after b i:not(.imp), .nm i:not(.imp) { font-style: normal; color: var(--accent); }
+i.imp { color: #0b0b0b; }
+
+/* Importància: quadrat de color amb el número (no es confon amb la ★ ni amb els canvis) */
+.imp { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 3px; background: var(--tc); color: #0b0b0b; font: 800 10px/1 var(--body);
+  margin-right: 6px; vertical-align: .1em; flex: none; font-style: normal; text-transform: none; }
+.scale { display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap; color: var(--muted); font-size: var(--fs-xs); margin-top: 10px; }
+.scale .imp { margin-right: 0; }
+
+/* Ahora suena */
+.rows { display: flex; flex-direction: column; gap: 6px; }
+.row { order: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; align-items: center;
+  background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px 10px 0 10px; overflow: hidden; }
+.row.live { order: 0; border: 2px solid var(--accent); }
+.row.hide, .row.closed { display: none; }
+.row img.logo, .row svg.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); color: var(--ink); }
+.row svg.logo { filter: none; }
+.row .mid { min-width: 0; padding-bottom: 8px; }
+.row .sn { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row.live .sn::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; animation: pulse 1.6s ease-in-out 8; }
+@keyframes pulse { 50% { opacity: .25; } }
+.row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
+.row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+.row.idle .dj { color: var(--muted); font-size: var(--fs-m); }
+.row.idle.mine .dj { color: var(--ink); font-size: var(--fs-l); }
+.row .after { font-size: var(--fs-s); color: var(--muted); margin-top: 2px; }
+.row .after b { color: var(--ink); text-transform: uppercase; }
+.row .right { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
+.row .left { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.row .left b { display: block; color: var(--accent); font-size: var(--fs-m); }
+.row .left span { font-size: var(--fs-xs); color: var(--muted); }
+.row .bar { grid-column: 1 / -1; height: 4px; margin: 0 -10px; background: var(--rule); }
+.row .bar > div { height: 100%; background: var(--accent); width: 0; }
+.closedline { color: var(--muted); font-size: var(--fs-s); margin: 8px 2px 0; }
+.closedline b { color: var(--ink); font-weight: 700; }
+.underrows { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Full per triar els meus artistes (a sobre de tot, amb «Listo») */
+.sheet { position: fixed; inset: 0; z-index: 12; background: var(--bg); display: flex; flex-direction: column; }
+.sheet[hidden] { display: none !important; }
+.sheet header { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--accent);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+.sheet header h2 { font-size: var(--fs-l); }
+.sheet header h2 span { color: var(--fav); }
+.sheet .body { flex: 1; overflow: auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 90px) max(16px, env(safe-area-inset-left, 0px)); overscroll-behavior: contain; }
+.sheet .foot { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); display: flex; justify-content: center;
+  padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 14px); }
+.sheet .foot .btn { min-width: 60%; }
+.pick h3 { margin: 16px 0 4px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pick ul { list-style: none; margin: 0; padding: 0; }
+.pick li { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.pick li .tm { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.pick li .nm { font: 800 var(--fs-s)/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
+.pick li.on .nm { color: var(--fav); }
+.pick .pastnote { color: var(--muted); font-size: var(--fs-xs); margin: 12px 0 0; }
+
+/* Mode "Solo mis artistas": a la graella la resta queda apagada (es pot tocar per afegir-la) */
+.mine-mode .blk:not(.fav) { opacity: .3; }
+.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--accent-dim); }
+.mine-mode .blk:not(.fav) { opacity: .45; }
+
+/* A continuación: agrupat per hora */
+.upnext { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.upnext li.grp { display: flex; gap: 8px; align-items: baseline; padding: 12px 0 4px; border: 0; font-variant-numeric: tabular-nums; }
+.upnext li.grp b { font-size: var(--fs-m); }
+.upnext li.grp span { font-size: var(--fs-s); color: var(--accent); }
+.upnext li.it { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.upnext li.fav .who { color: var(--fav); }
+.upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
+.upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
+.upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
+.upnext .where { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
+.empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
+.note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.howto { margin-top: 8px; color: var(--muted); font-size: var(--fs-s); }
+.howto summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+.howto p { margin: 6px 0 0; }
+
+/* Canvis de l'organització: magenta (un color que no fa servir res més) */
+.chgtag { display: inline-block; margin-top: 3px; font: 800 var(--fs-xs)/1.3 var(--body); letter-spacing: .03em; text-transform: uppercase; color: #2a0022; background: var(--chg); border-radius: 3px; padding: 1px 6px; }
+.who .chgtag, .nm .chgtag { display: table; }
+
+/* Graella */
+.tlbox { position: relative; }
+.tlbox::after { content: ""; position: absolute; top: 2px; right: 2px; bottom: 2px; width: 22px; border-radius: 0 6px 6px 0; pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(4, 7, 4, .85)); z-index: 9; }
+.tl-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px;
+  border: 2px solid var(--rule); border-radius: 8px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
+  scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
+.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(108px, 1fr)) minmax(92px, .8fr) 14px; min-width: calc(var(--gut) + 5 * 108px + 92px + 14px); position: relative; }
+.hd { position: sticky; top: 0; z-index: 7; padding: 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  background: var(--paper); border-left: 2px solid var(--bg); scroll-snap-align: start; }
+.hd img { display: block; width: 100%; height: 34px; object-fit: contain; }
+.hd.rides { flex-direction: column; gap: 1px; color: #111; font: 900 10px/1 var(--display); font-stretch: 105%; letter-spacing: .04em; text-transform: uppercase; }
+.hd.rides svg { width: 34px; height: 24px; }
+.blk.ridesblk { cursor: default; border-style: solid; justify-content: flex-start; overflow: visible; }
+/* El bloc fa 13 h: el text es queda enganxat a dalt mentre es desplaça la graella */
+.blk.ridesblk > span { position: sticky; top: 60px; }
+.blk.ridesblk > span.n { padding-top: 6px; }
+.blk.ridesblk > span.t { top: 76px; }
+.blk.ridesblk .n { font-size: 12px; }
+.corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
+.corner { left: 0; }
+.gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
+.gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
+.gut span[data-n] { color: var(--now); }
+body.offline .status::after { content: " · sin conexión (horario guardado)"; color: var(--muted); }
+.gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
+.gut .nowlbl { left: 2px; right: 2px; text-align: center; background: #e8253a; color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
+.col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
+.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); cursor: pointer; touch-action: manipulation;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 9px; overflow: hidden; gap: 1px; }
+.blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
+.blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
+.blk .n { font: 900 12px/1.08 var(--display); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
+.blk .s { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk.tiny .s { display: none; }
+.blk.tiny .t { font-size: 10px; }
+.blk.past { background: #050805; border-color: #1b3317; }
+.blk.past .n, .blk.past .t, .blk.past .n i:not(.imp) { color: #6f8a6b; }
+/* En directe: fons fosc i vora del festival (la franja d'importància i la línia d'ara es continuen veient) */
+.blk.on { border: 2px solid var(--accent); background: var(--accent-deep); box-shadow: 0 0 14px rgba(var(--accent-rgb), .45); z-index: 5; }
+.blk.on .n { color: var(--accent); }
+.blk.on .t, .blk.on .s { color: var(--ink); }
+/* Meu i sonant ara: el cas més important, ple */
+.blk.on.fav { background: var(--accent); }
+.blk.on.fav .n, .blk.on.fav .n i:not(.imp), .blk.on.fav .t, .blk.on.fav .s { color: var(--accent-ink); }
+.blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); opacity: .7; z-index: 0; display: none; }
+.blk.on .pl { display: block; }
+.blk.fav { border-color: var(--fav); }
+.blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
+.blk.on.fav::after { color: var(--accent-ink); }
+.blk.chg { border-style: dashed; border-color: var(--chg); box-shadow: inset 0 0 0 2px var(--chg); }
+.blk.chg.on { box-shadow: inset 0 0 0 2px var(--chg), 0 0 14px rgba(var(--accent-rgb), .45); }
+.chgw { color: var(--chg); font-weight: 800; }
+.blk.on.fav .chgw { color: #5a004a; }
+.closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: var(--fs-xs); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.nowline { grid-column: 2 / 8; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.legend { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.legend.upd { color: var(--ink); }
+
+/* Avisos emergents: groc = meus artistes, paper i vermell = organització, fosc = informació */
+.toasts { position: fixed; z-index: 13; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.toast { pointer-events: auto; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 8px; align-items: center;
+  border-radius: 10px; padding: 8px 8px 8px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: var(--fs-m); }
+.toast.mine { background: var(--fav); color: #1a1400; }
+.toast.org { background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); }
+.toast.info { background: #1a2618; color: var(--ink); border: 1.5px solid var(--line); }
+.toast b { text-transform: uppercase; }
+.toast .msg { flex: 1; min-width: 0; }
+.toast .act { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; font-weight: 800; cursor: pointer; }
+.toast .x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(127,127,127,.18); font-size: 18px; cursor: pointer; }
+
+/* Organización i Configuración */
+.admin, .tools { border-top: 1px solid var(--rule); padding-top: 16px; }
+.tools { display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: var(--fs-s); }
+.tools > div, .tools > details { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.tools h3, .admin h3 { margin: 0; color: var(--ink); font-size: var(--fs-s); font-weight: 700; }
+.cfgsel { display: flex; flex-direction: column; gap: 6px; color: var(--ink); font-weight: 700; font-size: var(--fs-s); margin-top: 6px; }
+.cfgsel select { font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 10px; max-width: 260px; }
+.cfgchk { display: flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 600; font-size: var(--fs-s); min-height: 44px; }
+.cfgchk input { width: 24px; height: 24px; flex: none; accent-color: var(--accent); }
+.hint { color: var(--ink); font-size: var(--fs-s); border-left: 3px solid var(--mid-red); padding-left: 8px; }
+.row2 { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin label { display: block; color: var(--ink); font-size: var(--fs-s); font-weight: 700; margin: 10px 0 6px; }
+.admin input[type=text], .admin input[type=password], .admin select, .admin textarea {
+  font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 44px; box-sizing: border-box; width: 100%; }
+.admin textarea { resize: vertical; }
+.pwrow { display: flex; gap: 8px; }
+.pwrow input { flex: 1; min-width: 0; }
+.orgmenu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.orgmenu .btn { padding: 0 8px; }
+.orgmenu .btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.panel { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; }
+.edrows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.edrow { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px; }
+.edrow.bad { border-color: var(--now); }
+.edtimes { display: flex; align-items: center; gap: 6px; }
+.edtimes select { flex: 1; min-width: 0; }
+.edtimes span { color: var(--muted); }
+.edmore { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 6px; }
+.edrow .del { border: 1.5px solid var(--line); background: transparent; color: var(--t5); border-radius: 999px; padding: 0 12px; min-height: 44px; font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.edmsg { margin-top: 10px; font-size: var(--fs-s); color: var(--accent); min-height: 1.2em; }
+.edmsg.bad { color: var(--now); }
+.linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: var(--fs-s); padding: 10px 0; cursor: pointer; }
+.simbox summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.sim { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 44px; font-weight: 600; }
+.sim input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); }
+.sim input[type=range] { width: 100%; accent-color: var(--accent); }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.steps button { font: 700 var(--fs-s) var(--body); background: transparent; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.sim output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; font-size: var(--fs-m); }
+@media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } .orgmenu { grid-template-columns: 1fr 1fr; } }
+@media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } }
+@media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
+@media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
+</style>
+
+<div class="minibar" id="minibar" hidden>
+  <i class="mdot" aria-hidden="true"></i>
+  <span class="mclock" id="mclock"></span>
+  <span class="mnext" id="mnext"></span>
+  <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
+  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas">☆</button>
+  <button class="btn go" id="goNow2" type="button">Ahora</button>
+</div>
+
+<div class="wrap">
+  <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
+  <header class="hero">
+    <div class="brandline"><i class="mdot" aria-hidden="true"></i><b>Midnight</b> · <span id="festName">Bass in the Park</span></div>
+    <button class="sim-badge" id="simBadge" type="button" hidden>MODO PRUEBA ✕ Salir</button>
+    <div class="clock" id="clock">--:--<small>--</small></div>
+    <div class="statusrow">
+      <div class="status" id="status"></div>
+      <button class="btn go" id="goNow" type="button">Ir a ahora</button>
+    </div>
+    <div class="dstnote" id="dstnote" hidden></div>
+    <div class="notice" id="notice" role="status" hidden></div>
+  </header>
+
+  <section id="ahora">
+    <div class="shead">
+      <h2>Ahora <span>suena</span></h2>
+      <button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button>
+    </div>
+    <div class="rows" id="rows"></div>
+    <p class="empty" id="rowsEmpty" hidden></p>
+    <p class="closedline" id="closedLine" hidden></p>
+    <div class="underrows">
+      <button class="btn" id="pickOpen" type="button">Elegir mis artistas <span id="pickCount"></span></button>
+    </div>
+    <div class="scale" aria-label="Importancia, de 5 (más) a 1 (menos)">Importancia:
+      <i class="imp" style="--tc:var(--t5)">5</i><i class="imp" style="--tc:var(--t4)">4</i><i class="imp" style="--tc:var(--t3)">3</i><i class="imp" style="--tc:var(--t2)">2</i><i class="imp" style="--tc:var(--t1)">1</i>
+      de más a menos</div>
+  </section>
+
+  <section id="siguiente">
+    <div class="shead"><h2>A <span>continuación</span></h2></div>
+    <ul class="upnext" id="upnext"></ul>
+    <p class="note">☆ = mis artistas</p>
+    <details class="howto">
+      <summary>Cómo funcionan los avisos</summary>
+      <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas antes de que empiecen y cuando empiezan. Cuánto antes, y si quieres notificaciones, lo eliges en Configuración.<span id="howLocked"> Con el móvil bloqueado no llegan.</span></p>
+    </details>
+  </section>
+
+  <section id="horario">
+    <h2 style="margin-bottom:10px">Horario</h2>
+    <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
+    <p class="legend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
+    <p class="legend upd" id="updated" hidden></p>
+    <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde rosa en el horario).</p>
+  </section>
+
+  <section class="admin" id="admin" hidden>
+    <h2>Organización</h2>
+    <form id="pwForm" class="pwform">
+      <label for="pw">Cambios de última hora (solo organización)</label>
+      <div class="pwrow">
+        <input type="password" id="pw" autocomplete="current-password" placeholder="Contraseña" required>
+        <button type="submit" class="btn">Entrar</button>
+      </div>
+      <div class="hint" id="pwMsg" hidden></div>
+    </form>
+    <div id="editor" class="editor" hidden>
+      <div class="orgmenu">
+        <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horario</button>
+        <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Aviso para todos</button>
+        <button type="button" class="btn" id="edClose">Salir</button>
+      </div>
+
+      <div class="panel" id="pHorario" hidden>
+        <label for="edStage">Escenario</label>
+        <select id="edStage">
+          <option value="ner">No Es Ruido</option><option value="tox">Toxik Parties</option><option value="pont">Pont Aeri</option><option value="misa">Misa Psicodélika</option><option value="ss">Migats Sound System</option>
+        </select>
+        <div id="edRows" class="edrows"></div>
+        <button type="button" class="btn" id="edAdd">+ Añadir actuación</button>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave">Guardar y publicar</button></div>
+        <p class="note">Nadie ve los cambios mientras editas. Cuando tocas «Guardar y publicar», los verán todos los móviles en 1 o 2 minutos.</p>
+        <button type="button" class="linkbtn" id="edReset">Volver al horario del cartel</button>
+      </div>
+
+      <div class="panel" id="pAviso" hidden>
+        <label for="edNotice">Aviso para todos (sale arriba, debajo de la hora)</label>
+        <textarea id="edNotice" rows="3" placeholder="Ej.: Hëdera empieza 30 min tarde"></textarea>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave2">Guardar y publicar</button></div>
+        <p class="note">Para quitar el aviso, borra el texto y publica. Lo verán todos en 1 o 2 minutos.</p>
+      </div>
+
+      <div class="edmsg" id="edMsg" role="status"></div>
+    </div>
+  </section>
+
+  <section class="tools" id="config">
+    <h2>Configuración</h2>
+    <p class="note" style="margin:0">Esto solo afecta a este móvil.</p>
+    <div>
+      <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
+      <div class="hint" id="wakeHint" hidden></div>
+    </div>
+    <div class="notif" role="group" aria-labelledby="notifH">
+      <h3 id="notifH">Notificaciones</h3>
+      <div class="row2">
+        <button class="btn" type="button" id="notifOn">Activar notificaciones</button>
+        <button class="btn" type="button" id="notifTest">Enviar una de prueba</button>
+        <button class="btn" type="button" id="notifReset">Restablecer notificaciones</button>
+      </div>
+      <div class="hint" id="notifMsg" hidden></div>
+      <label class="cfgsel" for="prefBefore">Avisarme de mis artistas
+        <select id="prefBefore">
+          <option value="0">No avisar</option><option value="5">5 min antes</option><option value="10">10 min antes</option><option value="15">15 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option>
+        </select>
+      </label>
+      <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisarme de cambios de horario y avisos de la organización</label>
+      <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
+    </div>
+    <div>
+      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
+      <div class="hint" id="updMsg" hidden></div>
+      <p class="note" id="appVer" style="margin:0"></p>
+    </div>
+    <details class="simbox">
+      <summary>Modo prueba (simular una hora del festival)</summary>
+      <div class="sim">
+        <label><input type="checkbox" id="simOn"> Simular una hora (solo en este móvil, sin notificaciones)</label>
+        <div id="simCtl" class="sim" hidden>
+          <input type="range" id="simRange" aria-label="Hora simulada">
+          <div class="steps" id="simSteps">
+            <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+          </div>
+          <div class="steps" id="simPresets">
+            <button type="button" data-p="11:50">11:50</button><button type="button" data-p="12:00">12:00</button><button type="button" data-p="19:10">19:10</button><button type="button" data-p="23:59">23:59</button><button type="button" data-p="00:30">00:30</button><button type="button" data-p="01:05">01:05</button><button type="button" data-p="02:10a">2:10 (1ª)</button><button type="button" data-p="02:10b">2:10 (2ª)</button><button type="button" data-p="04:59">4:59</button><button type="button" data-p="05:00">5:00</button>
+          </div>
+          <output id="simOut"></output>
+        </div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<div class="sheet pick" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH" hidden>
+  <header>
+    <h2 id="sheetH">Mis artistas <span id="sheetCount"></span></h2>
+    <button class="btn primary" id="sheetDone2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note">Marca con ☆ los artistas que cubres. Con «Solo mis artistas» solo te saldrán estos. Se guardan en este móvil.</p>
+    <div id="pickList"></div>
+  </div>
+  <div class="foot"><button class="btn primary" id="sheetDone" type="button">Listo</button></div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+document.documentElement.lang = 'es';
+
+// Festival actual: canviar aquest objecte (i l'horari) és el que caldria per a cadascun dels festivals de Midnight
+const FEST = {
+  name: 'Bass in the Park', accent: '#3dff2b', accentRgb: '61, 255, 43', accentDim: '#1d6b15', accentDeep: '#0f2a0c', accentInk: '#041204',
+};
+for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
+  document.documentElement.style.setProperty(k, v);
+document.getElementById('festName').textContent = FEST.name;
+
+// Hora local de Montmeló. La nit del 24 al 25 canvia l'hora a les 3:00 (CEST → CET).
+// "02:00a" = primera vegada que són les 2 (CEST), "02:00b" = segona (CET).
+function T(s) {
+  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  if (!m) return NaN;
+  const h = +m[1], mi = +m[2], f = m[3];
+  if (h > 23 || mi > 59) return NaN;
+  let day, off;
+  if (h >= 6) { day = 24; off = 2; }  // de 6:00 a 23:59 és dissabte; de 0:00 a 5:59, diumenge
+  else if (h < 2 || (h === 2 && f === 'a')) { day = 25; off = 2; }
+  else { day = 25; off = 1; }
+  return Date.UTC(2026, 9, day, h - off, mi);
+}
+
+const STAGES = [
+  { id: 'ner', name: 'No Es Ruido' },
+  { id: 'tox', name: 'Toxik Parties' },
+  { id: 'pont', name: 'Pont Aeri' },
+  { id: 'misa', name: 'Misa Psicodélika' },
+  { id: 'ss', name: 'Migats Sound System' },
+];
+
+// Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+// Els canvis d'última hora de l'organització arriben per changes.json i el substitueixen.
+const DEFAULT = {
+  ner: [
+    ['12:00', '13:00', 'Girls on Decks', 1],
+    ['13:00', '14:00', 'Arcex', 1],
+    ['14:00', '15:00', 'Selecta', 2],
+    ['15:00', '16:00', 'Skudero & Xavi Metralla', 3],
+    ['16:00', '17:00', 'The Saints', 3],
+    ['17:00', '18:00', 'Yoshiko', 4],
+    ['18:00', '19:00', 'Xavistyle', 4],
+    ['19:00', '19:20', 'Cache Oficial', 3],
+    ['19:20', '20:00', 'Jarfaiter', 3],
+    ['20:00', '21:00', 'Carlos Perez B2B K-Style', 3],
+    ['21:00', '22:00', 'Amygdala', 3],
+    ['22:00', '23:00', 'Carnada B2B Quince', 4],
+    ['23:00', '00:00', 'Gea', 3],
+    ['00:00', '01:00', 'DJ Pastis B2B DJ Sisu', 5],
+    ['01:00', '02:00a', 'Toni Massama', 3],
+    ['02:00a', '02:00b', 'Kitus & Frosty', 3],
+    ['02:00b', '03:00', 'The Whistlers', 3],
+    ['03:00', '04:00', 'Tha Playah', 3],
+    ['04:00', '05:00', 'Papero B2B More', 3],
+  ],
+  tox: [
+    ['12:00', '14:00', '4BD3', 1],
+    ['14:00', '15:30', 'Seve', 1],
+    ['15:30', '17:00', 'Pau Miau', 1],
+    ['17:00', '18:30', 'Kodi VS Black Mamba', 1],
+    ['18:30', '20:00', 'Rozz Rigo', 1],
+    ['20:00', '21:00', 'Kou2tatane', 1],
+    ['21:00', '22:00', 'Miss Pixie', 1],
+    ['22:00', '23:00', 'Ling Ling', 3],
+    ['23:00', '00:00', 'Stiwie', 2],
+    ['00:00', '01:00', 'Apre VS Choko', 2],
+    ['01:00', '02:00a', 'Diprosopiks', 2, 'Neurotribe vs Koko'],
+    ['02:00a', '02:00b', 'Teka', 2],
+    ['02:00b', '03:00', 'Farfacid', 3],
+    ['03:00', '05:00', 'Radze VS Brain Impact VS Jan Vercauteren', 3],
+  ],
+  misa: [
+    ['12:00', '13:30', 'Afroditta B2B Kosmonow', 2],
+    ['13:30', '15:00', 'Chaac B2B Lightwormie', 2],
+    ['15:00', '16:30', 'Jandri', 2],
+    ['16:30', '18:00', 'Mr Frisson', 2],
+    ['18:00', '19:30', 'Hypatia', 2],
+    ['19:30', '21:00', 'Zeridium', 2],
+    ['21:00', '22:30', 'Guapa Lee', 2],
+    ['22:30', '00:00', 'Hëdera', 2],
+  ],
+  pont: [
+    ['12:00', '13:00', 'Merlin', 1],
+    ['13:00', '14:00', 'Kcho', 1],
+    ['14:00', '15:00', 'Soriano VS Fløres', 1],
+    ['15:00', '16:00', 'Merti B2B Altrax', 1],
+    ['16:00', '17:00', 'Skudero B2B Dvrk Oktopus', 3],
+    ['17:00', '18:00', 'Xavi Metralla B2B DJ Sisu', 5],
+    ['18:00', '19:00', 'DJ Sonic', 2],
+    ['19:00', '20:00', 'D-Vstor', 2],
+    ['20:00', '21:00', 'Wakan', 3],
+    ['21:00', '22:00', 'Kitus & Frosty', 3],
+    ['22:00', '23:00', 'Lia Jensen', 3],
+    ['23:00', '00:00', 'Marti VS Celi', 1],
+    ['00:00', '01:00', 'More', 3],
+  ],
+  ss: [
+    ['12:00', '14:00', 'Migats Sound System', 2],
+    ['14:00', '15:00', 'Redland Sound System', 0],
+    ['15:00', '16:00', 'Migats Sound System', 0],
+    ['16:00', '17:00', 'Lion on Top Sound System', 0],
+    ['17:00', '18:00', 'Redland Sound System', 0],
+    ['18:00', '20:00', 'Migats Sound System', 0],
+    ['20:00', '21:00', 'Redland Sound System', 0],
+    ['21:00', '22:00', 'Migats Sound System', 0],
+    ['22:00', '23:00', 'Peivol', 0],
+    ['23:00', '00:00', 'Al·le', 0],
+  ],
+};
+
+const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
+// Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
+const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
+  [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
+const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
+
+const T0 = T('12:00'), TEND0 = T('05:00'), RIDES = T('01:00');
+const W0 = T('02:00a'), DUP = T('02:00b'), W1 = T('03:00');
+const MIN = 60000, PX = 1.6, PAD = 12;
+let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
+const y = t => PAD + (t - T0) / MIN * PX;
+
+const fmtHM = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const fmtS = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', second: '2-digit' });
+const fmtD = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' });
+const fmtDay = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const okDate = s => typeof s === 'string' && !isNaN(new Date(s));
+const hm = t => fmtHM.format(t);
+// Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
+const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
+const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
+const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = html;
+// El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
+const deco = n => html(n).replace(/ (B2B|VS|&amp;) /gi, ' <i>$1</i> ');
+const imp = t => t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5">${t}</i>` : '';
+// Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
+function dur(ms) {
+  const m = Math.max(0, Math.ceil(ms / MIN));
+  if (m >= 1440) return `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} h`;
+  if (m >= 60) return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
+  return `${m} min`;
+}
+const inDur = ms => ms <= 0 ? 'ya' : `en ${dur(ms)}`;
+const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nuevo' : `Cambio · antes ${esc(x.was)}`}</span>`;
+
+// Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
+// i, si alguna cosa peta, l'horari d'abans es queda tal com era (no es pot deixar l'app a mitges).
+let SETS = {}, ALL = [], BYID = {};
+const okRaw = r => r && typeof r === 'object' && typeof r.id === 'string' && /^[\w-]{1,40}$/.test(r.id)
+  && Number.isFinite(T(r.a)) && Number.isFinite(T(r.b)) && (typeof r.n === 'string' || typeof r.n === 'number');
+function load(raw) {
+  const sets = {};
+  for (const s of STAGES) {
+    const list = raw && Object.prototype.hasOwnProperty.call(raw, s.id) && Array.isArray(raw[s.id]) ? raw[s.id] : [];
+    sets[s.id] = list.filter(okRaw)
+      .map(r => {
+        const d = Object.prototype.hasOwnProperty.call(DEFMAP, r.id) ? DEFMAP[r.id] : null;
+        const a = T(r.a), b = T(r.b), n = String(r.n).trim().slice(0, 120);
+        // chg: 'new' (afegida), 'time' (hora canviada), 'name' (nom canviat) o '' (com al cartell)
+        const timeChg = d && (T(d.a) !== a || T(d.b) !== b), nameChg = d && String(d.n) !== n;
+        const chg = !d ? 'new' : timeChg ? 'time' : nameChg ? 'name' : '';
+        const was = !d ? '' : [timeChg ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : '', nameChg ? d.n : ''].filter(Boolean).join(' · ');
+        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), chg, was };
+      })
+      .filter(x => x.n && x.b > x.a)
+      .sort((x, y) => x.a - y.a);
+  }
+  const all = STAGES.flatMap(s => sets[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
+  SETS = sets; ALL = all;
+  BYID = Object.fromEntries(all.map(x => [x.id, x]));
+  TEND = Math.max(TEND0, ...all.map(x => x.b));
+  H = (TEND - T0) / MIN * PX;
+}
+load(DEFAULT_RAW);
+
+let sim = null;
+const now = () => sim ?? Date.now();
+
+// Preferits (al mòbil de cadascú; si no hi ha emmagatzematge, només en memòria)
+const FKEY = 'bitp-favs-v1';
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]').filter(x => typeof x === 'string')); } catch (e) {}
+function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
+const star = x => {
+  const on = favs.has(x.id);
+  return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+};
+
+const RIDE_SVG = '<svg viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+
+// Graella (es torna a dibuixar quan arriben canvis de l'organització)
+const tl = document.getElementById('tl');
+const tlwrap = document.getElementById('tlwrap');
+let blocks = [], nowline, nowlbl;
+function buildGrid() {
+  let g = '<div class="corner"></div>';
+  for (const s of STAGES) g += `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  g += `<div class="hd rides">${RIDE_SVG}Atracciones</div><div class="hdend"></div>`;
+  g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
+  for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${t === W0 ? 'data-n="1ª"' : t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+  g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
+  STAGES.forEach((s, i) => {
+    const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
+    g += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
+    for (const x of SETS[s.id]) {
+      const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
+      const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
+      const tc = x.t ? `--tc:var(--t${x.t});` : '';
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}`;
+      g += `<button type="button" class="blk${tiny}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+    }
+    const last = SETS[s.id][SETS[s.id].length - 1];
+    if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
+    else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
+    g += '</div>';
+  });
+  // Atraccions: una columna més, no és un artista (no es pot marcar com a meu)
+  const rt = y(T0), rh = y(RIDES) - rt;
+  g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
+    + `<div class="blk ridesblk" id="ridesBlk" role="img" aria-label="Atracciones abiertas de 12:00 a ${lbl(RIDES)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Abiertas</span><span class="t">12:00–${lbl(RIDES)}</span></div>`
+    + `<div class="closedtag" style="top:${y(RIDES) + 10}px">Cerradas</div></div>`;
+  g += '<div class="nowline" id="nowline" hidden></div>';
+  tl.innerHTML = g;
+  blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
+  nowline = document.getElementById('nowline');
+  nowlbl = document.getElementById('nowlbl');
+}
+buildGrid();
+
+function paintFavs() {
+  for (const b of blocks) {
+    const on = favs.has(b.dataset.fav);
+    b.classList.toggle('fav', on);
+    b.setAttribute('aria-pressed', on);
+  }
+  const n = ALL.filter(x => favs.has(x.id)).length;
+  document.getElementById('pickCount').textContent = n ? `(${n})` : '';
+  document.getElementById('sheetCount').textContent = n ? `(${n})` : '';
+}
+
+function scrollToNow(smooth) {
+  const t = now();
+  const head = tl.querySelector('.hd').offsetHeight;
+  const top = t < T0 || t >= TEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
+  tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+}
+function goNow() {
+  tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollToNow(true);
+}
+
+// Si es torna a dibuixar una llista mentre una ★ té el focus (VoiceOver, teclat), el focus es manté
+function setHTML(el, h) {
+  const a = document.activeElement;
+  const k = a && el.contains(a) && a.dataset ? a.dataset.fav : null;
+  el.innerHTML = h;
+  if (k) { const b = el.querySelector(`[data-fav="${CSS.escape(k)}"]`); if (b) b.focus(); }
+}
+
+// Ahora suena: una fila per escenari
+const rowsEl = document.getElementById('rows');
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + '<div class="row" id="r-rides"></div>';
+const rowCache = {};
+
+function rowHTML(s, t) {
+  if (mineOnly) return rowMine(s, t);
+  const list = SETS[s.id];
+  const cur = list.find(x => t >= x.a && t < x.b);
+  const nxt = list.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
+      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">Abre a las ${lbl(nxt.a)}</div>
+      <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para abrir</span></div></div>`, null];
+  return ['closed', '', null];
+}
+
+// Només els meus: si el que sona ara és meu, surt en directe; si no, el meu pròxim en aquest escenari; si no en queda cap, no surt
+function rowMine(s, t) {
+  const mine = SETS[s.id].filter(x => favs.has(x.id));
+  const cur = mine.find(x => t >= x.a && t < x.b);
+  const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
+      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> · ${lbl(nxt.a)}` : 'Es tu último aquí'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle mine', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">${imp(nxt.t)}${deco(nxt.n)}</div>${chgTag(nxt)}
+      <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null, nxt];
+  return ['hide', '', null];
+}
+
+// Full per triar els meus artistes (no surten les actuacions que ja han passat, si no són meves)
+const sheet = document.getElementById('sheet');
+function renderPick() {
+  if (sheet.hidden) return;
+  const t = now();
+  let past = 0;
+  const h = STAGES.map(s => {
+    const items = SETS[s.id].filter(x => x.b > t || favs.has(x.id));
+    past += SETS[s.id].length - items.length;
+    if (!items.length) return '';
+    return `<h3>${s.name}</h3><ul>${items.map(x =>
+      `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${star(x)}</span></li>`).join('')}</ul>`;
+  }).join('');
+  setHTML(document.getElementById('pickList'), (h || '<p class="empty">Ya no quedan actuaciones.</p>')
+    + (past ? `<p class="pastnote">No salen ${past} ${past === 1 ? 'actuación que ya ha pasado' : 'actuaciones que ya han pasado'}.</p>` : ''));
+}
+function openSheet() {
+  sheet.hidden = false;
+  document.body.classList.add('locked');
+  renderPick();
+  document.getElementById('sheetDone2').focus();
+}
+function closeSheet() {
+  sheet.hidden = true;
+  document.body.classList.remove('locked');
+  document.getElementById('ahora').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('pickOpen').focus({ preventScroll: true });
+}
+document.getElementById('pickOpen').addEventListener('click', openSheet);
+document.getElementById('sheetDone').addEventListener('click', closeSheet);
+document.getElementById('sheetDone2').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+
+// A continuación: les 6 properes, agrupades per hora d'inici
+const upEl = document.getElementById('upnext');
+let upCache = '';
+function upHTML(t) {
+  let list = ALL.filter(x => x.a > t);
+  if (mineOnly) list = list.filter(x => favs.has(x.id));
+  if (!list.length) {
+    if (mineOnly) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido tus artistas: toca «Elegir mis artistas».'}</li>`;
+    return '<li class="empty">No quedan más actuaciones.</li>';
+  }
+  let out = '', last = null;
+  for (const x of list.slice(0, 6)) {
+    if (x.a !== last) { out += `<li class="grp"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
+    out += `<li class="it${favs.has(x.id) ? ' fav' : ''}">
+    <img class="logo" src="img/${x.s.id}.png" alt="">
+    <div class="who"><span class="nmc">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${chgTag(x)}</div>
+    <span class="acts">${star(x)}</span></li>`;
+  }
+  return out;
+}
+
+// Avisos emergents. kind: 'mine' (groc, els meus artistes), 'org' (organització), 'info'. action: { label, fn }
+const toasts = document.getElementById('toasts');
+function toast(msg, kind = 'mine', action = null, ms = 10000) {
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Cerrar aviso">✕</button>`;
+  el.querySelector('.x').addEventListener('click', () => el.remove());
+  if (action) el.querySelector('.act').addEventListener('click', () => { el.remove(); action.fn(); });
+  toasts.appendChild(el);
+  while (toasts.children.length > 2) toasts.firstElementChild.remove();
+  setTimeout(() => el.remove(), ms);
+  try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+// Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
+const NKEY = 'bitp-notif-v1';
+let notifOn = false;
+try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
+const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
+// Preferències d'avís (Configuración): quants minuts abans dels meus artistes, i si avisar dels canvis de l'organització
+const PKEY = 'bitp-prefs-v1';
+let prefs = { before: 10, changes: true };
+try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; } catch (e) {}
+prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
+prefs.changes = prefs.changes !== false;
+function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
+// Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
+const PUSH = /*PUSH*/null/*PUSH*/;
+let pushActive = false;
+async function sysNotify(title, body, tag) {
+  if (sim !== null || !canNotify() || pushActive) return;
+  const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
+  try {
+    const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration();
+    if (reg) return await reg.showNotification(title, opts);
+    new Notification(title, opts);
+  } catch (e) {}
+}
+// Què s'ha avisat ja: es guarda al mòbil (si l'iPhone tanca l'app i es torna a obrir, no es repeteix)
+const TKEY = 'bitp-told-v1';
+let told = new Set();
+try { told = new Set(JSON.parse(localStorage.getItem(TKEY) || '[]')); } catch (e) {}
+function remember(k) { told.add(k); if (sim === null) try { localStorage.setItem(TKEY, JSON.stringify([...told].slice(-300))); } catch (e) {} }
+function checkAlerts(t) {
+  for (const id of favs) {
+    const x = BYID[id];
+    if (!x) continue;
+    const left = x.a - t, k = `${id}@${x.a}`;  // si l'organització canvia l'hora, es torna a avisar
+    if (!prefs.before) continue;
+    if (left > 0 && left <= prefs.before * MIN && !told.has(k + ':pre')) {
+      remember(k + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
+      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
+    }
+    if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
+      remember(k + ':go'); remember(k + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
+      sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
+    }
+  }
+}
+
+
+function refresh() {
+  for (const k in rowCache) rowCache[k] = '';
+  upCache = '';
+  tick(true);
+}
+function setFav(id, on) {
+  if (on) favs.add(id); else favs.delete(id);
+  saveFavs();
+  syncPush();
+  paintFavs();
+  renderPick();
+  refresh();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-fav]');
+  if (!b) return;
+  const id = b.dataset.fav, x = BYID[id];
+  if (favs.has(id)) {
+    setFav(id, false);
+    // Treure'l sense voler (sobretot amb «Solo mis artistas», on la fila desapareix) es pot desfer
+    toast(`Quitado de tus artistas: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, true) }, 6000);
+  } else setFav(id, true);
+});
+const MKEY = 'bitp-mine-v1';
+let mineOnly = false;
+try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
+function paintMine() {
+  document.body.classList.toggle('mine-mode', mineOnly);
+  document.getElementById('mineOnly').setAttribute('aria-pressed', mineOnly);
+  const m2 = document.getElementById('mineOnly2');
+  m2.setAttribute('aria-pressed', mineOnly);
+  m2.textContent = mineOnly ? '★' : '☆';
+}
+function toggleMine() {
+  mineOnly = !mineOnly;
+  try { localStorage.setItem(MKEY, mineOnly ? '1' : '0'); } catch (e) {}
+  paintMine();
+  refresh();
+  if (mineOnly && !ALL.some(x => favs.has(x.id))) openSheet();
+}
+document.getElementById('mineOnly').addEventListener('click', toggleMine);
+document.getElementById('mineOnly2').addEventListener('click', toggleMine);
+
+// Rellotge cada segon; la resta només quan canvia el minut (o quan cal), per gastar menys bateria
+let lastMin = -1;
+function tick(force) {
+  const t = now();
+  document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
+  document.getElementById('mclock').textContent = hm(t);
+  const minute = Math.floor(t / MIN);
+  if (!force && minute === lastMin) return;
+  lastMin = minute;
+
+  const st = document.getElementById('status');
+  const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
+  if (t < T0) {
+    const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
+    st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : 'el sábado 24.10'} a las <strong>12:00</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
+  } else if (t < TEND) {
+    st.innerHTML = `<strong>En marcha</strong> · ${live} sonando · hasta las ${lbl(TEND)}`;
+  } else {
+    st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
+  }
+  const dn = document.getElementById('dstnote');
+  const p = pass(t);
+  dn.hidden = !p && !(t >= T('01:30') && t < W0);
+  dn.textContent = p === '1ª' ? 'Son las 2 por 1ª vez: a las 3:00 se cambia la hora y vuelven a ser las 2:00.'
+    : p === '2ª' ? 'Ya se ha cambiado la hora: estás en las 2 por 2ª vez.'
+    : 'Esta noche se cambia la hora: a las 3:00 vuelven a ser las 2:00.';
+
+  const closed = [];
+  let nextMine = null;
+  for (const s of STAGES) {
+    const [state, inner, cur, nx] = rowHTML(s, t);
+    const r = document.getElementById('r-' + s.id);
+    const key = state + inner;
+    if (rowCache[s.id] !== key) {
+      r.className = 'row ' + state;
+      setHTML(r, inner);
+      rowCache[s.id] = key;
+    }
+    // Amb «Solo mis artistas», els pròxims surten per ordre d'hora
+    r.style.order = state === 'idle mine' && nx ? String(10 + Math.round((nx.a - t) / MIN)) : '';
+    if (state === 'closed') closed.push(s.name);
+    if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
+  }
+
+  // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»; tancades, a la línia de tancats)
+  const rr = document.getElementById('r-rides');
+  const open = t >= T0 && t < RIDES;
+  const rstate = mineOnly ? 'hide' : open ? 'live' : t < T0 ? 'idle' : 'closed';
+  const ricon = RIDE_SVG.replace('<svg ', '<svg class="logo" ');
+  const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abiertas</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(RIDES - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
+    : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">Atracciones</div><div class="dj">Abren a las 12:00</div><div class="after">Hasta las ${lbl(RIDES)}</div></div><div class="right"><div class="left"><b>${dur(T0 - t)}</b><span>para abrir</span></div></div>`
+    : '';
+  if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
+  if (open && !mineOnly) rr.querySelector('.bar > div').style.width = ((t - T0) / (RIDES - T0) * 100).toFixed(1) + '%';
+  if (rstate === 'closed' && t >= T0) closed.push('Atracciones');
+
+  const cl = document.getElementById('closedLine');
+  cl.hidden = mineOnly || !closed.length;
+  cl.innerHTML = closed.length ? `<b>Cerrados:</b> ${closed.map(html).join(' · ')}` : '';
+
+  const re = document.getElementById('rowsEmpty');
+  const anyRow = [...rowsEl.children].some(r => !r.classList.contains('hide') && !r.classList.contains('closed'));
+  re.hidden = anyRow || !mineOnly;
+  re.textContent = !ALL.some(x => favs.has(x.id)) ? 'Aún no has elegido tus artistas. Toca «Elegir mis artistas» y márcalos con ☆.' : 'Ya no te quedan artistas por cubrir.';
+
+  // Barra fina: el meu proper artista
+  nextMine = ALL.find(x => favs.has(x.id) && x.b > t);
+  document.getElementById('mnext').innerHTML = nextMine
+    ? (nextMine.a <= t ? `<b>★ ${html(nextMine.n)}</b> ahora` : `<b>★ ${html(nextMine.n)}</b> ${lbl(nextMine.a)}`) : '';
+
+  const up = upHTML(t);
+  if (up !== upCache) { setHTML(upEl, up); upCache = up; }
+
+  for (const b of blocks) {
+    const x = BYID[b.dataset.fav];
+    if (!x) continue;
+    const on = t >= x.a && t < x.b;
+    b.classList.toggle('on', on);
+    b.classList.toggle('past', t >= x.b);
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
+  }
+  const rb = document.getElementById('ridesBlk');
+  if (rb) {
+    rb.classList.toggle('on', open);
+    rb.classList.toggle('past', t >= RIDES);
+    if (open) rb.querySelector('.pl').style.top = `${y(t) - (y(T0) + 1.5) - 2.5}px`;
+  }
+  const inside = t >= T0 && t < TEND;
+  nowline.hidden = !inside;
+  nowlbl.hidden = !inside;
+  if (inside) {
+    nowline.style.transform = `translateY(${y(t) - 1}px)`;
+    nowlbl.style.top = `${y(t)}px`;
+    nowlbl.textContent = pass(t) ? `${hm(t)} ${pass(t)}` : hm(t);
+  }
+  if (!sheet.hidden) renderPick();
+  checkAlerts(t);
+}
+
+document.getElementById('goNow').addEventListener('click', goNow);
+document.getElementById('goNow2').addEventListener('click', goNow);
+
+// Barra fina: es mostra quan el rellotge gran surt de la pantalla
+const clockEl = document.getElementById('clock');
+const minibar = document.getElementById('minibar');
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([e]) => { minibar.hidden = e.isIntersecting; }, { rootMargin: '-20px 0px 0px 0px' }).observe(clockEl);
+}
+
+// Mode prova (Configuración): només en aquest mòbil i sense notificacions del sistema
+const simOn = document.getElementById('simOn'), simRange = document.getElementById('simRange'), simOut = document.getElementById('simOut');
+const simCtl = document.getElementById('simCtl');
+function simBounds() { simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; }
+simBounds(); simRange.step = MIN; simRange.value = T('21:30');
+let realTold = null;
+function applySim() {
+  const was = sim !== null;
+  sim = simOn.checked ? +simRange.value : null;
+  simCtl.hidden = !simOn.checked;
+  if (simOn.checked) {
+    simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
+    simOut.textContent = `Simulando: ${lbl(+simRange.value)}`;
+  }
+  // Els avisos del Modo prueba no compten per als de veritat
+  if (!was && simOn.checked) { realTold = told; told = new Set(); }
+  if (was && !simOn.checked) { told = realTold || new Set(); realTold = null; }
+  document.getElementById('simBadge').hidden = !simOn.checked;
+  document.getElementById('simBadge2').hidden = !simOn.checked;
+  tick(true);
+  scrollToNow(false);
+}
+function setSim(v) {
+  simRange.value = Math.min(Math.max(v, +simRange.min), +simRange.max);
+  applySim();
+}
+simOn.addEventListener('change', applySim);
+simRange.addEventListener('input', applySim);
+document.getElementById('simSteps').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) setSim(+simRange.value + b.dataset.d * MIN); });
+document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) setSim(T(b.dataset.p)); });
+function exitSim() { simOn.checked = false; applySim(); }
+document.getElementById('simBadge').addEventListener('click', exitSim);
+document.getElementById('simBadge2').addEventListener('click', exitSim);
+
+// Notificacions (Configuración)
+const notifMsg = document.getElementById('notifMsg');
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function notifUI(text) {
+  const btn = document.getElementById('notifOn');
+  const ok = canNotify();
+  // Activades però sense registrar al servidor (p. ex. activades amb una versió anterior): cal un toc per registrar-se
+  const needPush = ok && canPush() && !pushActive;
+  btn.textContent = needPush ? 'Activar también con el móvil bloqueado' : ok ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  btn.classList.toggle('primary', needPush);
+  btn.setAttribute('aria-pressed', ok);
+  notifMsg.hidden = !text;
+  notifMsg.textContent = text || '';
+}
+const noNotifHelp = () => isIOS && !standalone()
+  ? 'En iPhone, primero añade la app a la pantalla de inicio (Compartir → Añadir a pantalla de inicio), ábrela desde el icono y vuelve aquí.'
+  : 'Este navegador no permite notificaciones.';
+const deniedHelp = () => isIOS
+  ? 'Las notificaciones están bloqueadas. Actívalas en Ajustes → Notificaciones → Midnight y vuelve a probar.'
+  : 'Las notificaciones están bloqueadas para esta web. Permítelas en los ajustes del sitio (el icono junto a la dirección) y vuelve a probar.';
+// Subscripció al servidor (Web Push). Només si hi ha servidor configurat i el navegador ho permet
+const canPush = () => !!(PUSH && PUSH.url && 'serviceWorker' in navigator && 'PushManager' in window);
+const b64uDec = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0)); };
+async function pushSubscription(create) {
+  const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, no) => setTimeout(() => no(new Error('sin service worker')), 10000))]);
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub && create) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+  return sub;
+}
+async function pushPost(path, body, keepalive) {
+  const r = await fetchT(PUSH.url + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive: !!keepalive }, 10000);
+  if (!r.ok) throw new Error('push ' + r.status);
+  return r.json();
+}
+let syncTimer = null, syncDirty = false;
+async function syncNow(keepalive) {
+  clearTimeout(syncTimer);
+  if (!pushActive || !syncDirty) return;
+  syncDirty = false;
+  try {
+    const sub = await pushSubscription(false);
+    if (!sub) { pushActive = false; return notifUI(); }
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes }, keepalive);
+  } catch (e) { syncDirty = true; }
+}
+function syncPush() {
+  if (!pushActive) return;
+  syncDirty = true;
+  clearTimeout(syncTimer);
+  // Els meus artistes i les preferències van al servidor (un cop has deixat de tocar, per no enviar-ho a cada ★)
+  syncTimer = setTimeout(() => syncNow(false), 1500);
+}
+// Si marques una ★ i bloqueges el mòbil de seguida, s'envia igualment abans que l'iPhone aturi l'app
+document.addEventListener('visibilitychange', () => { if (document.hidden) syncNow(true); });
+addEventListener('pagehide', () => syncNow(true));
+async function pushOn() {
+  const sub = await pushSubscription(true);
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+  pushActive = true;
+}
+async function pushOff() {
+  clearTimeout(syncTimer); syncDirty = false;
+  try {
+    const sub = await pushSubscription(false);
+    if (sub) { try { await pushPost('/unsub', { endpoint: sub.endpoint }); } catch (e) {} await sub.unsubscribe(); }
+  } catch (e) {}
+  pushActive = false;
+}
+document.getElementById('notifOn').addEventListener('click', async () => {
+  if (canNotify() && canPush() && !pushActive) {
+    notifUI('Conectando con el servidor de avisos…');
+    try { await pushOn(); return notifUI('Listo ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.'); }
+    catch (e) { return notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`); }
+  }
+  if (canNotify()) {
+    notifOn = false;
+    try { localStorage.setItem(NKEY, '0'); } catch (e) {}
+    await pushOff();
+    return notifUI('Notificaciones desactivadas en este móvil.');
+  }
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') return notifUI(deniedHelp());
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  if (canPush()) {
+    notifUI('Conectando con el servidor de avisos…');
+    try { await pushOn(); return notifUI('Activadas ✓ Te llegarán también con el móvil bloqueado.'); }
+    catch (e) { return notifUI(`Activadas, pero no se ha podido conectar con el servidor (${e && e.message ? e.message : 'error'}): solo llegarán con la app abierta. Vuelve a probar con cobertura.`); }
+  }
+  notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
+});
+document.getElementById('notifTest').addEventListener('click', async () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  if (Notification.permission === 'denied') return notifUI(deniedHelp());
+  if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
+  if (canPush() && !pushActive) return notifUI('Primero toca «Activar también con el móvil bloqueado».');
+  if (pushActive) {
+    // Prova de veritat: la envia el servidor. Bloqueja el mòbil just després de tocar per veure-la arribar
+    try {
+      const sub = await pushSubscription(false);
+      if (!sub) { pushActive = false; notifUI(); return notifUI('Este móvil ya no está registrado. Toca «Restablecer notificaciones».'); }
+      try { await (await caches.open('midnight-meta')).put('test', new Response(JSON.stringify(Date.now()))); } catch (e) {}
+      const r = await pushPost('/test', { endpoint: sub.endpoint });
+      return notifUI(r.ok ? 'Enviada desde el servidor. Bloquea el móvil: te llegará en unos segundos.' : `El servidor no ha podido enviarla (código ${r.status}). Toca «Restablecer notificaciones» y vuelve a probar.`);
+    } catch (e) {
+      return notifUI(e && e.message === 'push 404' ? 'El servidor no tiene registrado este móvil. Toca «Restablecer notificaciones».'
+        : 'No hay conexión con el servidor de avisos. Vuelve a probar con cobertura.');
+    }
+  }
+  const opts = { body: 'Si ves esto, las notificaciones funcionan ✓', tag: 'prueba', icon: 'icon-192.png' };
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prueba', opts); else new Notification('Midnight · prueba', opts); } catch (e) {}
+  notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
+});
+// Restablecer: es dona de baixa d'aquest mòbil i es torna a registrar de zero (per si es queden en un estat estrany).
+// La subscripció nova es fa just en tocar (l'iPhone només la permet com a resposta a un toc); la baixa al servidor, després.
+document.getElementById('notifReset').addEventListener('click', async () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  notifUI('Restableciendo…');
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') { notifOn = false; try { localStorage.setItem(NKEY, '0'); } catch (e) {} return notifUI(deniedHelp()); }
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  told = new Set();
+  if (!canPush()) return notifUI('Restablecidas. Te avisaremos de tus artistas mientras la app esté abierta.');
+  let old = null;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    old = await reg.pushManager.getSubscription();
+    if (old) await old.unsubscribe();
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes });
+    pushActive = true;
+    notifUI('Restablecidas ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.');
+  } catch (e) {
+    pushActive = false;
+    if (old) pushPost('/unsub', { endpoint: old.endpoint }).catch(() => {});
+    notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`);
+  }
+});
+
+notifUI();
+if (canPush()) {
+  document.getElementById('notifNote').innerHTML = '<b>Llegan también con el móvil bloqueado.</b> En iPhone, con la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo) y las notificaciones activadas aquí.';
+  document.getElementById('howLocked').textContent = ' Si las activas, llegan también con el móvil bloqueado.';
+  // Si aquest mòbil ja estava subscrit, es torna a enviar l'estat al servidor
+  if (notifOn && 'Notification' in window && Notification.permission === 'granted')
+    pushSubscription(false).then(sub => { if (sub) { pushActive = true; notifUI(); syncPush(); } }).catch(() => {});
+}
+const prefBefore = document.getElementById('prefBefore'), prefChanges = document.getElementById('prefChanges');
+prefBefore.value = String(prefs.before);
+prefChanges.checked = prefs.changes;
+prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); syncPush(); });
+prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
+
+// Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
+const BUILD = '';
+document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
+document.getElementById('appUpdate').addEventListener('click', async () => {
+  const msg = document.getElementById('updMsg');
+  if (!ONLINE) return location.reload();
+  msg.hidden = false; msg.textContent = 'Buscando la última versión…';
+  let latest = '';
+  try {
+    const r = await fetchT(`./?t=${Date.now()}`, { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    latest = ((await r.text()).match(/const BUILD = '([^']*)'/) || [])[1] || '';
+  } catch (e) {
+    msg.textContent = 'Sin conexión: sigues con la versión guardada. Vuelve a probar cuando tengas cobertura.';
+    return;
+  }
+  await pullChanges();
+  if (latest && latest === BUILD) { msg.textContent = `Ya tienes la última versión (${BUILD}). El horario también está al día.`; return; }
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
+  if (dirty) { msg.textContent = 'Hay una versión nueva, pero tienes cambios sin publicar en Organización: publícalos o sal antes de actualizar.'; return; }
+  msg.textContent = 'Hay una versión nueva. Actualizando…';
+  location.reload();
+});
+
+// Pantalla encesa (es recorda: si la tenies activada, es torna a activar en obrir l'app)
+const WKEY = 'bitp-wake-v1';
+let lock = null, wantWake = false;
+const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
+function wakeUI(on, hint) {
+  wakeBtn.setAttribute('aria-pressed', on);
+  wakeBtn.textContent = on ? 'Pantalla encendida ✓ (toca para desactivar)' : 'Mantener la pantalla encendida';
+  wakeHint.hidden = !hint;
+  wakeHint.textContent = hint || '';
+}
+function saveWake() { try { localStorage.setItem(WKEY, wantWake ? '1' : '0'); } catch (e) {} }
+async function acquire(quiet) {
+  try {
+    lock = await navigator.wakeLock.request('screen');
+    lock.addEventListener('release', () => { lock = null; if (!wantWake) wakeUI(false); });
+    wakeUI(true);
+  } catch (e) {
+    lock = null;
+    if (quiet) return wakeUI(false);
+    wantWake = false; saveWake();
+    wakeUI(false, e && e.name === 'NotAllowedError'
+      ? 'No se ha podido activar. Si tienes el modo ahorro de batería, desactívalo y vuelve a probar.'
+      : 'No se ha podido activar en este momento. Vuelve a probar.');
+  }
+}
+if (!('wakeLock' in navigator)) {
+  wakeBtn.disabled = true;
+  wakeUI(false, 'Este navegador no permite mantener la pantalla encendida.');
+} else {
+  wakeBtn.addEventListener('click', async () => {
+    if (wantWake && lock) {
+      wantWake = false; saveWake();
+      try { await lock.release(); } catch (e) {}
+      lock = null; wakeUI(false);
+    } else { wantWake = true; saveWake(); acquire(false); }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && wantWake && !lock) acquire(true);
+  });
+  try { wantWake = localStorage.getItem(WKEY) === '1'; } catch (e) {}
+  if (wantWake) acquire(true);
+}
+
+// El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
+function fitClock() {
+  clockEl.style.fontSize = '100px';
+  const w = clockEl.scrollWidth, target = clockEl.parentElement.clientWidth;
+  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.22).toFixed(1) + 'px';
+}
+addEventListener('orientationchange', () => setTimeout(fitClock, 300));
+let lastW = innerWidth;
+addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); } });  // la barra de Safari canvia l'alçada, no l'amplada
+if (document.fonts) document.fonts.ready.then(fitClock);
+
+// Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
+// A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
+const REPO = 'paupuig92/midnight-webapp';
+const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+const CKEY = 'bitp-changes-v1';
+let stamp = '', notice = '';
+const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}`).join('~');
+function applyChanges(d, quiet) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return;
+  const st = String(d.updated || '').slice(0, 40);
+  if (!st || st === stamp) return;
+  const wasLoaded = stamp !== '', oldNotice = notice, oldKey = setsKey();
+  const prev = { SETS, ALL, BYID, TEND, H };
+  const oldFavSets = ALL.filter(x => favs.has(x.id)).map(x => ({ id: x.id, n: x.n, a: x.a, b: x.b }));
+  const newNotice = typeof d.notice === 'string' ? d.notice.slice(0, 500) : '';
+  const hasSets = d.sets && typeof d.sets === 'object' && !Array.isArray(d.sets);
+  try {
+    load(hasSets ? d.sets : DEFAULT_RAW);
+    buildGrid();
+  } catch (e) {
+    ({ SETS, ALL, BYID, TEND, H } = prev);  // dades dolentes: l'app es queda amb l'horari que tenia
+    buildGrid();
+    return;
+  }
+  stamp = st;
+  notice = newNotice;
+  const nt = document.getElementById('notice');
+  nt.hidden = !notice;
+  nt.innerHTML = notice ? `<b>Aviso de la organización</b>${html(notice)}` : '';
+  const up = document.getElementById('updated');
+  up.hidden = !hasSets;
+  up.textContent = hasSets && okDate(d.updated) ? `Horario actualizado por la organización: ${fmtDay.format(new Date(d.updated))}.` : hasSets ? 'Horario actualizado por la organización.' : '';
+  document.getElementById('chgLegend').hidden = !ALL.some(x => x.chg);
+  simBounds();
+  paintFavs();
+  renderPick();
+  refresh();
+
+  // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa del que ha canviat
+  if (!wasLoaded || quiet || !prefs.changes) return;
+  const schedChanged = setsKey() !== oldKey;
+  if (notice && notice !== oldNotice) {
+    toast(`<b>Aviso de la organización</b><br>${html(notice)}`, 'org', null, 30000);
+    sysNotify('Aviso de la organización', notice, 'aviso-' + st);
+  } else if (!notice && oldNotice && !schedChanged) {
+    toast('La organización ha quitado el aviso.', 'info', null, 6000);
+  }
+  if (schedChanged) {
+    const msg = !hasSets ? 'La organización ha vuelto al horario del cartel.' : 'La organización ha cambiado el horario. Los cambios salen en rosa.';
+    toast(`<b>${msg}</b>`, 'org', null, 20000);
+    sysNotify('Cambio de horario', msg, 'horario-' + st);
+    // Els meus artistes: cancel·lats o amb una altra hora (si el tenien al calendari, l'han de tornar a afegir)
+    const gone = oldFavSets.filter(o => !BYID[o.id]);
+    const moved = oldFavSets.filter(o => BYID[o.id] && (BYID[o.id].a !== o.a || BYID[o.id].b !== o.b));
+    if (gone.length) toast(`★ Cancelado: <b>${gone.map(o => html(o.n)).join(', ')}</b>`, 'mine', null, 30000);
+    if (moved.length) toast(`★ Cambio de hora: <b>${moved.map(o => `${html(o.n)} → ${lbl(BYID[o.id].a)}`).join(', ')}</b>`, 'mine', null, 30000);
+  }
+}
+function fetchT(url, opts = {}, ms = 10000) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
+}
+// Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
+let pubStamp = '', pubUntil = 0;
+let pulling = false, pullFails = 0;
+async function pullChanges() {
+  if (!ONLINE || pulling) return;
+  pulling = true;
+  try {
+    const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
+    pullFails = r.ok || r.status === 404 ? 0 : pullFails + 1;
+    if (r.ok) {
+      const d = await r.json();
+      const st = d && String(d.updated || '');
+      if (pubStamp && Date.now() < pubUntil && st !== pubStamp) { /* encara és el d'abans */ }
+      else {
+        if (st === pubStamp) pubStamp = '';
+        applyChanges(d);
+        if (st === stamp) try { localStorage.setItem(CKEY, JSON.stringify(d)); } catch (e) {}
+      }
+    }
+  } catch (e) { pullFails++; }
+  pulling = false;
+  const off = pullFails >= 2;
+  if (off !== document.body.classList.contains('offline')) { document.body.classList.toggle('offline', off); tick(true); }
+}
+
+// Organització: editor protegit amb contrasenya.
+// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
+// clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
+const ADMIN = /*ADMIN*/null/*ADMIN*/;
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = u => btoa(String.fromCharCode(...u));
+async function unlock(pw) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const k = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, base, 256));
+  const hk = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = async data => new Uint8Array(await crypto.subtle.sign('HMAC', hk, data));
+  if (b64e(await mac(new TextEncoder().encode('check'))) !== ADMIN.check) throw new Error('pw');
+  const ct = b64d(ADMIN.ct), nonce = b64d(ADMIN.nonce), out = new Uint8Array(ct.length);
+  for (let i = 0; i * 32 < ct.length; i++) {
+    const block = await mac(new Uint8Array([...nonce, i >> 24 & 255, i >> 16 & 255, i >> 8 & 255, i & 255]));
+    for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ block[j];
+  }
+  return new TextDecoder().decode(out);
+}
+let token = null, draft = null, edStage = STAGES[0].id;
+const adminEl = document.getElementById('admin');
+adminEl.hidden = !(ONLINE && ADMIN);
+
+// Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
+const code = t => { const s = hm(t); return s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+const TIMES = [];
+for (let t = T0; t <= T('05:55'); t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+
+function rawNow() {
+  const raw = {};
+  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub }));
+  return raw;
+}
+function renderEditor(badIdx) {
+  document.getElementById('edStage').value = edStage;
+  const list = draft.sets[edStage];
+  document.getElementById('edRows').innerHTML = list.map((r, i) => `<div class="edrow${i === badIdx ? ' bad' : ''}" data-i="${i}">
+    <div class="edtimes">${timeSel('a', r.a, r.n)}<span>–</span>${timeSel('b', r.b, r.n)}</div>
+    <input class="n" type="text" value="${html(r.n)}" aria-label="Artista" placeholder="Artista" maxlength="120" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done">
+    <div class="edmore">
+      <select class="t" aria-label="Importancia: ${esc(r.n || 'actuación nueva')}">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select>
+      <input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo: ${esc(r.n || 'actuación nueva')}" placeholder="Subtítulo (opcional)" maxlength="80" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <button type="button" class="del" aria-label="Quitar ${html(r.n)}">Quitar</button>
+    </div></div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
+  if (badIdx != null) { const el = document.querySelector(`#edRows .edrow[data-i="${badIdx}"]`); if (el) el.scrollIntoView({ block: 'center' }); }
+}
+const DKEY = 'bitp-draft-v1';
+let dirty = false, baseStamp = '';
+function markDirty() {
+  dirty = true;
+  try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, draft })); } catch (e) {}
+}
+function clearDraft() {
+  dirty = false;
+  try { sessionStorage.removeItem(DKEY); } catch (e) {}
+}
+addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+function edMsg(text, bad) {
+  const m = document.getElementById('edMsg');
+  m.textContent = text;
+  m.classList.toggle('bad', !!bad);
+}
+document.getElementById('pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = document.getElementById('pwMsg');
+  const go = e.target.querySelector('button');
+  msg.hidden = false; msg.textContent = 'Comprobando…';
+  go.disabled = true;
+  try {
+    token = await unlock(document.getElementById('pw').value);
+    document.getElementById('pw').value = '';
+    msg.hidden = true;
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(DKEY) || 'null'); } catch (err) {}
+    if (saved && saved.draft && saved.draft.sets) {
+      draft = saved.draft; baseStamp = saved.base; dirty = true;
+      for (const st of STAGES) if (!Array.isArray(draft.sets[st.id])) draft.sets[st.id] = [];
+    } else {
+      draft = { notice, sets: rawNow() }; baseStamp = stamp; dirty = false;
+    }
+    document.getElementById('edNotice').value = draft.notice || '';
+    document.getElementById('pwForm').hidden = true;
+    document.getElementById('editor').hidden = false;
+    openPanel('');
+    renderEditor();
+    edMsg(saved && saved.draft ? 'Hemos recuperado los cambios que aún no habías publicado.' : '');
+  } catch (err) {
+    msg.textContent = 'Contraseña incorrecta.';
+  }
+  go.disabled = false;
+});
+// Menú d'Organización: un apartat obert cada vegada
+function openPanel(id) {
+  for (const b of document.querySelectorAll('.orgmenu [data-panel]')) {
+    const on = b.dataset.panel === id;
+    b.setAttribute('aria-expanded', on);
+    document.getElementById(b.dataset.panel).hidden = !on;
+  }
+}
+document.querySelector('.orgmenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-panel]');
+  if (!b) return;
+  openPanel(b.getAttribute('aria-expanded') === 'true' ? '' : b.dataset.panel);
+  edMsg('');
+});
+document.getElementById('edSave2').addEventListener('click', () => document.getElementById('edSave').click());
+document.getElementById('edStage').addEventListener('change', e => { edStage = e.target.value; renderEditor(); });
+document.getElementById('edRows').addEventListener('change', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  for (const k of ['a', 'b', 't']) if (e.target.classList.contains(k)) r[k] = k === 't' ? +e.target.value : e.target.value;
+  markDirty();
+});
+document.getElementById('edRows').addEventListener('input', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  if (e.target.classList.contains('n')) r.n = e.target.value;
+  if (e.target.classList.contains('sub')) r.sub = e.target.value;
+  markDirty();
+});
+document.getElementById('edRows').addEventListener('click', e => {
+  const b = e.target.closest('.del');
+  if (!b) return;
+  draft.sets[edStage].splice(+b.closest('.edrow').dataset.i, 1);
+  markDirty();
+  renderEditor();
+});
+document.getElementById('edAdd').addEventListener('click', () => {
+  const list = draft.sets[edStage];
+  const last = list[list.length - 1];
+  const a = last ? last.b : '12:00';
+  const ia = TIMES.findIndex(([c]) => c === a);
+  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '' });
+  markDirty();
+  renderEditor();
+  const rows = document.querySelectorAll('#edRows .n');
+  rows[rows.length - 1].focus();
+});
+document.getElementById('edNotice').addEventListener('input', e => { draft.notice = e.target.value; markDirty(); });
+
+// Publicar: changes.json en un commit (API de dades de Git), comprovant abans
+// que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
+const GH = 'https://api.github.com/repos/' + REPO;
+const gh = async (path, opts = {}) => {
+  const r = await fetchT(GH + path, { ...opts, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...(opts.headers || {}) }, cache: 'no-store' }, 15000);
+  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; throw err; }
+  return r.status === 204 ? null : r.json();
+};
+async function remoteChanges() {
+  try {
+    const cur = await gh(`/contents/docs/changes.json?ref=main&t=${Date.now()}`);
+    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+async function commitFiles(files, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ref = await gh('/git/ref/heads/main');
+    const head = await gh(`/git/commits/${ref.object.sha}`);
+    const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
+    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
+    try { return await gh('/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); }
+    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
+    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+  }
+  throw new Error('GitHub ocupado');
+}
+async function publish(data) {
+  const remote = await remoteChanges();
+  const rs = remote ? String(remote.updated || '') : 'cartel';
+  if (rs !== baseStamp && !confirm(`Otra persona ha publicado cambios mientras editabas${okDate(rs) ? ` (${fmtDay.format(new Date(rs))})` : ''}.\n\nSi publicas, sus cambios se sustituirán por los tuyos. ¿Publicar igualmente?`)) {
+    throw new Error('cancelado');
+  }
+  // Primer s'aplica aquí (així es comprova que les dades són bones); si falla, es torna enrere
+  const prevStamp = stamp;
+  stamp = '';
+  applyChanges(data, true);
+  if (stamp !== data.updated) { stamp = prevStamp; throw new Error('datos'); }
+  const files = [{ path: 'docs/changes.json', content: JSON.stringify(data, null, 1) }];
+  await commitFiles(files, data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel');
+}
+async function save(data) {
+  const btns = document.querySelectorAll('#editor button');
+  btns.forEach(b => b.disabled = true);
+  edMsg('Publicando…');
+  const before = { raw: rawNow(), notice, stamp };
+  try {
+    await publish(data);
+    baseStamp = stamp;
+    pubStamp = stamp; pubUntil = Date.now() + 15 * MIN;
+    clearDraft();
+    try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
+    edMsg('Publicado. Lo verán todos los móviles en 1 o 2 minutos.');
+  } catch (err) {
+    // No s'ha publicat: aquest mòbil torna a l'horari que hi havia
+    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
+    edMsg(err.message === 'cancelado' ? 'No se ha publicado. Sal y vuelve a entrar para ver los cambios de la otra persona.'
+      : err.name === 'AbortError' ? 'No hay conexión suficiente para publicar. Tus cambios siguen aquí: vuelve a probar en un momento.'
+      : `No se ha podido publicar (${err.message}). Tus cambios siguen aquí: vuelve a probar.`, true);
+  }
+  btns.forEach(b => b.disabled = false);
+}
+document.getElementById('edSave').addEventListener('click', () => {
+  for (const s of STAGES) {
+    const list = draft.sets[s.id];
+    for (const [i, r] of list.entries()) {
+      r.n = String(r.n || '').trim();
+      if (!r.n) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`Falta el nombre de un artista en ${s.name}.`, true); }
+      if (!(T(r.b) > T(r.a))) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${r.n} (${s.name}): la hora de final tiene que ser después de la de inicio.`, true); }
+    }
+    // Dues actuacions alhora al mateix escenari: a la graella es taparien i una no sortiria a «Ahora suena»
+    const order = list.map((r, i) => [r, i]).sort((p, q) => T(p[0].a) - T(q[0].a));
+    for (let k = 1; k < order.length; k++) {
+      const [prev] = order[k - 1], [cur, i] = order[k];
+      if (T(cur.a) < T(prev.b)) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${cur.n} y ${prev.n} se solapan en ${s.name} (${lbl(T(cur.a))}). Cambia una de las dos horas.`, true); }
+    }
+  }
+  save({ v: 1, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
+});
+document.getElementById('edReset').addEventListener('click', () => {
+  if (!confirm('Se borrarán todos los cambios y el aviso, y volverá el horario del cartel para todos. ¿Continuar?')) return;
+  draft = { notice: '', sets: structuredClone(DEFAULT_RAW) };
+  document.getElementById('edNotice').value = '';
+  renderEditor();
+  save({ v: 1, updated: new Date().toISOString(), notice: '', sets: null });
+});
+document.getElementById('edClose').addEventListener('click', () => {
+  if (dirty && !confirm('Tienes cambios sin publicar. ¿Salir y perderlos?')) return;
+  clearDraft();
+  token = null; draft = null;
+  document.getElementById('editor').hidden = true;
+  document.getElementById('pwForm').hidden = false;
+});
+
+try { applyChanges(JSON.parse(localStorage.getItem(CKEY) || 'null')); } catch (e) {}
+paintFavs();
+paintMine();
+tick(true);
+fitClock();
+scrollToNow(false);
+setInterval(() => { if (!document.hidden) tick(); }, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
+pullChanges();
+setInterval(() => { if (!document.hidden) pullChanges(); }, 60000);
+</script>

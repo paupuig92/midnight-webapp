@@ -77,7 +77,7 @@ page = f"""<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Midnight">
-<meta name="description" content="Horario en directo del Bass in the Park 2026 · Montmeló">
+<meta name="description" content="Horario en directo · Midnight">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -123,19 +123,25 @@ for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
-# Horari del cartell (DEFAULT i STAGES d'index.html) → docs/cartel.json, per al servidor de notificacions
+# Dades del festival (bloc FEST d'index.html) → docs/cartel.json, per al servidor de notificacions
 import re
-block = src[src.index("const DEFAULT = {"):]
-block = block[len("const DEFAULT = "):block.index("\n};") + 2]
-block = re.sub(r"^\s*//.*$", "", block, flags=re.M)
-block = re.sub(r"(\w+):\s*\[", r'"\1": [', block)                                  # claus
-block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
-block = re.sub(r",(\s*[\]}])", r"\1", block)                                      # comes finals
-STAGE_NAMES = dict(re.findall(r"\{ id: '(\w+)', name: '([^']+)'", src))
-defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in json.loads(block).items()}
+def js_to_json(block):
+    """Converteix un literal JS senzill (com el bloc FEST) a JSON."""
+    block = re.sub(r"^\s*//.*$", "", block, flags=re.M)                               # comentaris de línia
+    block = re.sub(r"(?<=[,\[\]{}0-9'\"])[ \t]*//[^\n]*", "", block)                # comentaris al final de línia
+    block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
+    block = re.sub(r'([{,]\s*)(\w+)\s*:', r'\1"\2":', block)                        # claus
+    block = re.sub(r",(\s*[\]}])", r"\1", block)                                      # comes finals
+    return json.loads(block)
+fb = src[src.index("/* ==== FESTIVAL ==== */"):src.index("/* ==== /FESTIVAL ==== */")]
+fb = fb[fb.index("const FEST = ") + len("const FEST = "):fb.rindex("};") + 1]
+FEST = js_to_json(fb)
+defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in FEST["sets"].items()}
 (OUT / "cartel.json").write_text(json.dumps({
-    "stages": [{"id": k, "name": v} for k, v in STAGE_NAMES.items()],
+    "fest": FEST["id"], "name": FEST["name"], "date": FEST["date"], "start": FEST["start"], "end": FEST["end"],
+    "stages": [{"id": st["id"], "name": st["name"]} for st in FEST["stages"]],
     "sets": defaults}, ensure_ascii=False), encoding="utf-8")
+print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"])
 
 # Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
 if (OUT / "cal").exists():
@@ -160,7 +166,7 @@ if (OUT / "cal").exists():
 version = hashlib.sha1(page.encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
 const FILES = ['index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  'img/banner.jpg', 'img/ner.png', 'img/tox.png', 'img/pont.png', 'img/misa.png', 'img/ss.png'];
+  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{
