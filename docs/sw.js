@@ -1,4 +1,4 @@
-const VERSION = 'bitp-18795492';
+const VERSION = 'bitp-15ef285a';
 const FILES = ['index.html', 'ca.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/Blogh.otf", "img/Bricolage-Bold.ttf", "img/Bricolage-ExtraBold.ttf", "img/Bricolage-SemiCondensed-SemiBold.ttf", "img/banner.jpg", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
 
@@ -85,11 +85,12 @@ self.addEventListener('fetch', e => {
   if (url.searchParams.has('t')) return;
   // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
   if (e.request.mode === 'navigate') {
+    const page = url.pathname.endsWith('/ca.html') ? 'ca.html' : 'index.html';  // cada idioma, la seva còpia
     e.respondWith(caches.open(VERSION).then(async cache => {
-      const hit = await cache.match('index.html');
+      const hit = await cache.match(page);
       const net = fetch(e.request, { cache: 'no-cache' }).then(res => {
         // Un portal wifi o una pàgina d'error no s'han de guardar com si fossin l'app
-        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put('index.html', res.clone());
+        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put(page, res.clone());
         else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       });

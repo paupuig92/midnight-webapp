@@ -72,6 +72,7 @@ button { font: inherit; color: inherit; }
 .btn.go { color: var(--accent); border-color: var(--accent); font: 800 var(--fs-s)/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; }
 .btn.go:active { background: var(--accent); color: var(--accent-ink); }
 .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn.primary[aria-pressed="true"] { color: var(--accent-ink); }  /* si no, text taronja sobre taronja */
 .btn:disabled { opacity: .5; cursor: default; }
 .chip { min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--fav); border-color: var(--fav); color: #1a1400; }
@@ -95,8 +96,8 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
   transition: opacity .2s, transform .2s; }
 .totop[hidden] { display: grid !important; opacity: 0; transform: translateY(12px); pointer-events: none; }
 .clock { font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
-  font-variant-numeric: tabular-nums; color: var(--accent); text-shadow: 0 0 10px rgba(var(--accent-rgb), .3); }
-.clock small { font-size: .34em; color: var(--muted); text-shadow: none; margin-left: 4px; }
+  font-variant-numeric: tabular-nums; color: var(--accent); }
+.clock small { font: 700 .2em/1 var(--body); font-stretch: 100%; letter-spacing: 0; color: var(--muted); margin-left: .3em; }
 .statusrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
 .status .nw { white-space: nowrap; }
 .status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
@@ -141,10 +142,10 @@ i.imp { color: #0b0b0b; }
 .scale .imp { margin-right: 0; }
 
 /* Ahora suena */
-.rows { display: flex; flex-direction: column; gap: 6px; }
+.rows { display: flex; flex-direction: column; gap: 4px; }
 .row { order: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; align-items: center;
-  background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px 10px 0 10px; overflow: hidden; }
-.row.live { order: 0; border: 2px solid var(--accent); }
+  background: transparent; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; padding: 10px 10px 0 10px; overflow: hidden; }
+.row.live { order: 0; background: var(--panel); border-bottom: 0; border-radius: 8px; }
 .row.hide, .row.closed { display: none; }
 .row img.logo, .row svg.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); color: var(--ink); }
 .row svg.logo { filter: none; }
@@ -154,10 +155,10 @@ i.imp { color: #0b0b0b; }
 @keyframes pulse { 50% { opacity: .25; } }
 .row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
 .row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
-.row.idle .dj { color: var(--muted); font-size: var(--fs-m); }
+.row.idle .dj { color: var(--muted); font: 700 var(--fs-m)/1.2 var(--body); text-transform: none; }
 .row.idle.mine .dj { color: var(--ink); font-size: var(--fs-l); }
 .row .after { font-size: var(--fs-s); color: var(--muted); margin-top: 2px; }
-.row .after b { color: var(--ink); text-transform: uppercase; }
+.row .after b { color: var(--ink); font-weight: 700; }
 .row .right { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
 .row .left { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .row .left b { display: block; color: var(--accent); font-size: var(--fs-m); }
@@ -188,7 +189,6 @@ i.imp { color: #0b0b0b; }
 .pick .pastnote { color: var(--muted); font-size: var(--fs-xs); margin: 12px 0 0; }
 
 /* Mode "Solo mis artistas": a la graella la resta queda apagada (es pot tocar per afegir-la) */
-.mine-mode .blk:not(.fav) { opacity: .3; }
 .mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--accent-dim); }
 .mine-mode .blk:not(.fav) { opacity: .45; }
 
@@ -290,7 +290,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk.past { background: var(--bg); border-color: color-mix(in srgb, var(--rule) 55%, var(--bg)); }
 .blk.past .n, .blk.past .t, .blk.past .n i:not(.imp) { color: color-mix(in srgb, var(--muted) 62%, var(--bg)); }
 /* En directe: fons fosc i vora del festival (la franja d'importància i la línia d'ara es continuen veient) */
-.blk.on { border: 2px solid var(--accent); background: var(--accent-deep); box-shadow: 0 0 14px rgba(var(--accent-rgb), .45); z-index: 5; }
+.blk.on { border: 2px solid var(--accent); background: var(--accent-deep); z-index: 5; }
 .blk.on .n { color: var(--accent); }
 .blk.on .t, .blk.on .s { color: var(--ink); }
 /* Meu i sonant ara: el cas més important, ple */
@@ -306,7 +306,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .chgw { color: var(--chg); font-weight: 800; }
 .blk.on.fav .chgw { color: #5a004a; }
 .closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: var(--fs-xs); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
-.nowline { grid-column: 2 / 8; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.nowline { grid-column: 2 / 8; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; }
 .legend { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
 .legend.upd { color: var(--ink); }
 
@@ -367,20 +367,36 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .steps button { font: 700 var(--fs-s) var(--body); background: transparent; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
 .sim output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; font-size: var(--fs-m); }
 @media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } .orgmenu { grid-template-columns: 1fr 1fr; } }
-@media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } }
+@media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } .wrap { padding-top: 14px; } }
 @media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
 /* Il·lustracions del festival (FEST.deco, tot opcional). Només fora de la informació: mai a les files, la graella ni els avisos */
 .hdeco header.hero { position: relative; }
 .hdeco header.hero::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% + 2px); height: 28px; pointer-events: none;
   background: var(--deco-strip) round left top / auto 28px; background-repeat: round no-repeat; }
 .hico { height: 1.35em; width: auto; vertical-align: -.3em; margin-right: 6px; }
-.mascot { display: flex; align-items: center; gap: 16px; padding: 16px; margin-bottom: 10px; border: 2px solid var(--accent); border-radius: 12px; background: var(--panel); }
+.mascot { display: flex; align-items: center; gap: 16px; padding: 16px; margin-bottom: 10px; border: 0; border-radius: 12px; background: var(--panel); }
 .mascot[hidden], .empty img[hidden], .mascot img[hidden] { display: none; }
 .mascot img { width: 104px; height: 104px; object-fit: contain; flex: none; }
 .mascot .mtxt { min-width: 0; display: grid; gap: 4px; }
 .mascot .mk { font: 800 var(--fs-xs)/1.2 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .mascot .mbig { font: 900 30px/1 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
 .mascot .msub { color: var(--muted); font-size: var(--fs-s); line-height: 1.35; }
+.mascot .msub b { color: var(--ink); text-transform: uppercase; }
+.mascot .mtxt { flex: 1; }
+.mascot.during { padding: 12px 14px; gap: 12px; }
+.mascot.during img { width: 64px; height: 64px; }
+.mascot.during .mbig { font-size: 24px; }
+.mascot .mbig small { font: 700 var(--fs-s)/1 var(--body); color: var(--muted); }
+/* Barra de progrés del festival: ratlles que es mouen */
+.mprog { display: block; height: 10px; margin: 4px 0 2px; border-radius: 999px; background: var(--rule); overflow: hidden; }
+.mprog i { display: block; height: 100%; width: 0; border-radius: inherit; transition: width 1.6s cubic-bezier(.2, .8, .2, 1);
+  position: relative; overflow: hidden; background: var(--accent); }
+/* Les ratlles es mouen amb transform (la GPU ho fa sola, sense repintar cada fotograma): gasta molta menys bateria */
+.mprog i::before { content: ""; position: absolute; top: 0; bottom: 0; left: -28.28px; width: calc(100% + 56.56px);
+  background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, color-mix(in srgb, var(--accent) 70%, #fff) 10px 20px); background-size: 28.28px 100%;
+  animation: mprog 1.2s linear infinite; will-change: transform; }
+@keyframes mprog { to { transform: translateX(28.28px); } }
+@media (prefers-reduced-motion: reduce) { .mprog i { transition: none; } .mprog i::before { animation: none; } }
 .mascot a, .credit a { color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
 /* Peu: contacte */
 .credit { margin: 28px 0 8px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--fs-s); text-align: center; }
@@ -390,7 +406,50 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .sheet .body .note img { width: 64px; height: 64px; object-fit: contain; flex: none; }
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
 /* iPhone estret (SE, mini, 375 px): més lloc per als noms */
-@media (max-width: 400px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .row .star { width: 40px; height: 40px; } }
+@media (max-width: 380px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .row .star { width: 40px; height: 40px; } }
+/* revisió UI */
+body.locked .totop { opacity: 0; transform: translateY(12px); pointer-events: none; }
+.totop { width: 44px; height: 44px; font-size: 20px; }
+.statusrow[hidden] { display: none !important; }
+.statusrow { flex-wrap: nowrap; }
+.status { flex: 1 1 auto; }
+.status strong { white-space: nowrap; }
+@media (min-width: 760px) {
+  .sheet { left: 50%; right: auto; width: 720px; transform: translateX(-50%); border-inline: 1px solid var(--rule); box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .65); }
+}
+.blk.ridesblk.lane.on { border-width: 1.5px; border-color: var(--accent-dim); box-shadow: none; background: color-mix(in srgb, var(--accent) 7%, #000); }
+.minibar .mnext br { display: none; }
+.minibar .mnext b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim input[type=checkbox] { flex: none; }
+@media (min-width: 401px) { .row:not(#r-rides) .right:not(:has(.star)) { padding-right: 52px; } }
+.toast .x { width: 44px; height: 44px; }
+.howto summary { min-height: 44px; }
+#simSteps { display: grid; grid-template-columns: repeat(3, 1fr); }
+.btn.go[hidden] { display: none !important; }
+.legend[hidden] { display: none !important; }
+.empty.compact { font-size: var(--fs-s, 14px); padding: 2px 0 12px; margin: 0; }
+.empty.compact .linkbtn { min-height: 0; }
+.linkbtn { background: none; border: 0; padding: 0 0 0 4px; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; }
+.round.star { border-color: transparent; }
+.star[aria-pressed="true"] { border-color: transparent; }
+.round.star svg { display: block; }
+.totop { border: 1.5px solid var(--line, var(--rule)); color: var(--ink); }
+@media (min-width: 900px) { .rows, .closedline, .underrows, .upnext, #rowsEmpty { max-width: 760px; } }
+.tools .switch { width: 100%; justify-content: space-between; gap: 16px; border: 0; border-radius: 0; padding: 0; min-height: 48px; font: 700 var(--fs-m)/1.25 var(--body); text-align: left; color: var(--ink); }
+.tools .switch::after { content: ""; flex: none; width: 46px; height: 28px; border-radius: 14px; background: radial-gradient(circle at 14px 50%, var(--ink) 10px, transparent 10.5px), var(--rule); transition: background .15s; }
+.tools .switch[aria-pressed="true"] { color: var(--ink); }
+.tools .switch[aria-pressed="true"]::after { background: radial-gradient(circle at 32px 50%, var(--accent-ink) 10px, transparent 10.5px), var(--accent); }
+.tools .switch:disabled { opacity: .5; }
+.btn.quiet { border: 0; padding: 0; color: var(--accent); min-height: 44px; }
+.tools .row2:has(.quiet) { gap: 0 20px; }
+.install { gap: 8px !important; }
+.install[hidden], .instos[hidden] { display: none !important; }
+.instos { color: var(--ink); }
+.instos ol { margin: 4px 0 0; padding-left: 22px; color: var(--muted); }
+.instos li { margin: 4px 0; line-height: 1.4; }
+.instos li b { color: var(--ink); }
+.ishare { vertical-align: -3px; color: var(--accent); }
+footer.credit { padding-bottom: 72px; }  /* que la ↑ no tapi el mail */
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -399,7 +458,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
   <span class="mleft" id="mleft" hidden aria-label="Tiempo hasta que acaba el festival"></span>
   <span class="mnext" id="mnext"></span>
   <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
-  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas">☆</button>
+  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas"></button>
   <button class="btn go" id="goNow2" type="button">Ahora</button>
 </div>
 
@@ -423,8 +482,8 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
       <button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button>
     </div>
     <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
-    <div class="rows" id="rows"></div>
     <p class="empty" id="rowsEmpty" hidden></p>
+    <div class="rows" id="rows"></div>
     <p class="closedline" id="closedLine" hidden></p>
     <div class="underrows">
       <button class="btn" id="pickOpen" type="button">Elegir mis artistas <span id="pickCount"></span></button>
@@ -495,15 +554,15 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
     <h2>Configuración</h2>
     <p class="note" style="margin:0">Esto solo afecta a este móvil.</p>
     <div>
-      <button class="btn" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
+      <button class="btn switch" type="button" id="wake" aria-pressed="false">Mantener la pantalla encendida</button>
       <div class="hint" id="wakeHint" hidden></div>
     </div>
     <div class="notif" role="group" aria-labelledby="notifH">
       <h3 id="notifH">Notificaciones</h3>
       <div class="row2">
-        <button class="btn" type="button" id="notifOn">Activar notificaciones</button>
-        <button class="btn" type="button" id="notifTest">Enviar una de prueba</button>
-        <button class="btn" type="button" id="notifReset">Restablecer notificaciones</button>
+        <button class="btn switch" type="button" id="notifOn" aria-pressed="false">Recibir notificaciones</button>
+        <button class="btn quiet" type="button" id="notifTest">Enviar una de prueba</button>
+        <button class="btn quiet" type="button" id="notifReset">Restablecer notificaciones</button>
       </div>
       <div class="hint" id="notifMsg" hidden></div>
       <label class="cfgsel" for="prefBefore">Avisarme de mis artistas
@@ -515,7 +574,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
       <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div>
-      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
+      <button class="btn quiet" type="button" id="appUpdate">Actualizar la app</button>
       <div class="hint" id="updMsg" hidden></div>
       <p class="note" id="appVer" style="margin:0"></p>
     </div>
@@ -537,6 +596,25 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
         </div>
       </div>
     </details>
+    <div class="install" id="installBox">
+      <h3>Añadir la app a la pantalla de inicio</h3>
+      <p class="note" style="margin:0">Así se abre a pantalla completa, como una app, y en iPhone es la única forma de recibir notificaciones.</p>
+      <div class="instos" id="instIOS">
+        <b>iPhone (Safari)</b>
+        <ol>
+          <li>Toca <b>Compartir</b> <svg class="ishare" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> (en iOS 26, dentro del menú <b>···</b>).</li>
+          <li>Baja y toca <b>Añadir a pantalla de inicio</b>.</li>
+          <li>Toca <b>Añadir</b> y abre la app desde el icono nuevo.</li>
+        </ol>
+      </div>
+      <div class="instos" id="instAnd">
+        <b>Android (Chrome)</b>
+        <ol>
+          <li>Toca el menú <b>⋮</b> de arriba a la derecha.</li>
+          <li>Toca <b>Añadir a pantalla de inicio</b> o <b>Instalar aplicación</b>.</li>
+        </ol>
+      </div>
+    </div>
   </section>
   <footer class="credit">¿Alguna sugerencia o mejora? <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></footer>
 </div>
@@ -544,16 +622,16 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 <div class="sheet pick" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH" hidden>
   <header>
     <h2 id="sheetH">Mis artistas <span id="sheetCount"></span></h2>
-    <button class="btn primary" id="sheetDone2" type="button">Listo</button>
+    <button class="btn" id="sheetDone2" type="button">Listo</button>
   </header>
   <div class="body">
-    <p class="note">Marca con ☆ los artistas que cubres. Con «Solo mis artistas» solo te saldrán estos. Se guardan en este móvil.</p>
+    <p class="note">Marca los artistas que cubres: los verás destacados y te avisaremos antes de que empiecen.</p>
     <div id="pickList"></div>
   </div>
   <div class="foot"><button class="btn primary" id="sheetDone" type="button">Listo</button></div>
 </div>
 
-<button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden>↑</button>
+<button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
@@ -653,7 +731,7 @@ const FEST = {
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
   document.documentElement.style.setProperty(k, v);
 for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.style.setProperty(k, v);  // colors de base propis (opcional)
-if (FEST.fonts) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
+if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
   `@font-face{font-family:"${f.family}";src:url("img/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
 document.title = FEST.name;
 if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
@@ -731,12 +809,15 @@ const IMPC = FEST.impColors !== false;
 const impc = t => !IMPC && t ? (t >= 4 ? ' main' : t <= 2 ? ' minor' : '') : '';
 const imp = t => IMPC && t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5">${t}</i>` : '';
 // Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
+// Durades: «2 h 5 min», «8 h», sense zeros i sense partir número i unitat
+const NB = '\u00a0';
 function dur(ms) {
   const m = Math.max(0, Math.ceil(ms / MIN));
-  if (m >= 1440) return `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} h`;
-  if (m >= 60) return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
-  return `${m} min`;
+  if (m >= 1440) return `${Math.floor(m / 1440)}${NB}d ${Math.floor(m % 1440 / 60)}${NB}h`;
+  if (m >= 60) return `${Math.floor(m / 60)}${NB}h${m % 60 ? ` ${m % 60}${NB}min` : ''}`;
+  return `${m}${NB}min`;
 }
+const STARI = on => `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
 const inDur = ms => ms <= 0 ? 'ya' : `en ${dur(ms)}`;
 const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nuevo' : `Cambio · antes ${esc(x.was)}`}</span>`;
 
@@ -780,7 +861,7 @@ try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]').filter(x => 
 function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
 const star = x => {
   const on = favs.has(x.id);
-  return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+  return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Quitar de mis artistas' : 'Añadir a mis artistas'}: ${esc(x.n)}">${STARI(on)}</button>`;
 };
 
 const RIDE_SVG = '<svg viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
@@ -837,6 +918,7 @@ function buildGrid() {
   blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
   nowline = document.getElementById('nowline');
   nowlbl = document.getElementById('nowlbl');
+  requestAnimationFrame(fitBlocks);  // també quan arriben canvis de l'organització
 }
 // Encaix: si el nom no cap al bloc, treu subtítol, després hora, i al final talla a 2 línies
 function fitBlocks() {
@@ -850,7 +932,6 @@ function fitBlocks() {
 }
 function edgeFade() { tlwrap.parentElement.classList.toggle('atend', tlwrap.scrollLeft + tlwrap.clientWidth >= tlwrap.scrollWidth - 4); }
 buildGrid();
-requestAnimationFrame(fitBlocks);
 tlwrap.addEventListener('scroll', edgeFade, { passive: true });
 edgeFade();
 if (!DST) document.getElementById('gridLegend').textContent = 'Línea roja = ahora.';
@@ -891,7 +972,7 @@ rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).joi
 const rowCache = {};
 
 function rowHTML(s, t) {
-  if (mineOnly) return rowMine(s, t);
+  if (filt) return rowMine(s, t);
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
@@ -899,14 +980,14 @@ function rowHTML(s, t) {
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
-      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> <span class="when">· ${lbl(nxt.a)}</span>` : 'Después: cierra el escenario'}</div></div>
-    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Después: cierra el escenario'}</div></div>
+    <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj">Abre a las ${lbl(nxt.a)}</div>
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
-    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para abrir</span></div></div>`, null];
+    <div class="right"><div class="left"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>`, null];
   return ['closed', '', null];
 }
 
@@ -919,14 +1000,14 @@ function rowMine(s, t) {
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
-      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> <span class="when">· ${lbl(nxt.a)}</span>` : 'Es tu último aquí'}</div></div>
-    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>quedan</span></div>${star(cur)}</div>
+      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Es tu último aquí'}</div></div>
+    <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle mine', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${chgTag(nxt)}
       <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
-    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>para empezar</span></div>${star(nxt)}</div>`, null, nxt];
+    <div class="right"><div class="left"><span>empieza en</span><b>${dur(nxt.a - t)}</b></div>${star(nxt)}</div>`, null, nxt];
   return ['hide', '', null];
 }
 
@@ -968,9 +1049,9 @@ const upEl = document.getElementById('upnext');
 let upCache = '';
 function upHTML(t) {
   let list = ALL.filter(x => x.a > t);
-  if (mineOnly) list = list.filter(x => favs.has(x.id));
+  if (filt) list = list.filter(x => favs.has(x.id));
   if (!list.length) {
-    if (mineOnly) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido tus artistas: toca «Elegir mis artistas».'}</li>`;
+    if (filt) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido artistas: toca «Elegir mis artistas».'}</li>`;
     return '<li class="empty">No quedan más actuaciones.</li>';
   }
   let out = '', last = null;
@@ -1066,9 +1147,14 @@ document.addEventListener('click', e => {
   if (favs.has(id)) {
     setFav(id, false);
     // Treure'l sense voler (sobretot amb «Solo mis artistas», on la fila desapareix) es pot desfer
-    toast(`Quitado de tus artistas: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, true) }, 6000);
-  } else setFav(id, true);
+    toast(`Quitado: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, true) }, 6000);
+  } else {
+    setFav(id, true);
+    // Un toc a la graella sense voler també afegeix: que es vegi i es pugui desfer
+    toast(`Añadido: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Deshacer', fn: () => setFav(id, false) }, 5000);
+  }
 });
+document.addEventListener('click', e => { if (e.target.closest('[data-seeall]')) toggleMine(); });
 const MKEY = FEST.key + '-mine-v1';
 let mineOnly = false;
 try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
@@ -1077,7 +1163,7 @@ function paintMine() {
   document.getElementById('mineOnly').setAttribute('aria-pressed', mineOnly);
   const m2 = document.getElementById('mineOnly2');
   m2.setAttribute('aria-pressed', mineOnly);
-  m2.textContent = mineOnly ? '★' : '☆';
+  m2.innerHTML = STARI(mineOnly);
 }
 function toggleMine() {
   mineOnly = !mineOnly;
@@ -1092,13 +1178,18 @@ document.getElementById('mineOnly2').addEventListener('click', toggleMine);
 // Rellotge cada segon; la resta només quan canvia el minut (o quan cal), per gastar menys bateria
 let lastMin = -1;
 let nextMine = null;
+let filt = false;
+let FIRST = null;  // primer concert del festival (per a la targeta d'abans)  // «Solo mis artistas» de veritat: si ja han tocat tots, es torna a veure tot
 function tick(force) {
   const t = now();
+  const hasFav = ALL.some(x => favs.has(x.id));
+  FIRST = ALL.reduce((a, x) => x.a >= T0 && (!a || x.a < a.a) ? x : a, null);
+  filt = mineOnly && (!hasFav || ALL.some(x => favs.has(x.id) && x.b > t));
   document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
   document.getElementById('mclock').textContent = hm(t);
   const ml = document.getElementById('mleft');
   ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
-  if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(' min', '′').replace(' h ', 'h');
+  if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
@@ -1110,7 +1201,7 @@ function tick(force) {
     st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : dayLabel} a las <strong>${lbl(T0)}</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
   } else if (t < TEND) {
     const nextA = Math.min(...ALL.filter(x => x.a > t).map(x => x.a));
-    st.innerHTML = `<strong>En marcha</strong> · <span class="nw">${live ? `${live} sonando` : isFinite(nextA) ? `pausa hasta las ${lbl(nextA)}` : 'última recta'}</span> · <span class="endleft">⏳ quedan <b>${dur(TEND - t)}</b></span> <span class="endat">hasta las ${lbl(TEND)}</span>`;
+    st.innerHTML = `<strong>En marcha</strong> · <span class="nw">${live ? `${live} sonando` : isFinite(nextA) ? `pausa hasta las ${lbl(nextA)}` : 'última recta'}</span> · <span class="endat">hasta las ${lbl(TEND)}</span>`;
   } else {
     st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
@@ -1142,7 +1233,7 @@ function tick(force) {
   if (RIDE_LIST.length) {
     const rr = document.getElementById('r-rides'), rn = html(RIDES_NAME);
     const later = RIDE_LIST.filter(r => t < r.a).sort((p, q) => p.a - q.a);
-    const rstate = mineOnly ? 'hide' : openR.length ? 'live' : later.length ? 'idle' : 'closed';
+    const rstate = filt ? 'hide' : openR.length ? 'live' : later.length ? 'idle' : 'closed';
     const rpic = (openR[0] || later[0] || {}).img;  // la il·lustració de la que està oberta (o de la propera)
     const ricon = rpic ? `<img class="logo" src="${esc(rpic)}" alt="">` : RIDE_SVG.replace('<svg ', '<svg class="logo" ');
     const last = Math.max(...openR.map(r => r.b));
@@ -1150,8 +1241,8 @@ function tick(force) {
     const byEnd = [...new Set(openR.map(r => r.b))].sort((p, q) => p - q)
       .map(e => `${openR.filter(r => r.b === e).map(r => html(r.name)).join(' · ')} hasta las ${lbl(e)}`).join('<br>');
     const soon = later[0] ? ` · ${html(later[0].name)}: abre a las ${lbl(later[0].a)}` : '';
-    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">${openR.length === 1 ? 'Abierta' : `${openR.length} abiertas`}</div><div class="after">${byEnd}${soon}</div></div><div class="right"><div class="left"><b>${dur(last - t)}</b><span>quedan</span></div></div><div class="bar"><div></div></div>`
-      : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abren a las ${lbl(later[0].a)}</div><div class="after">${later.map(r => html(r.name)).join(' · ')}</div></div><div class="right"><div class="left"><b>${dur(later[0].a - t)}</b><span>para abrir</span></div></div>`
+    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">${openR.length === 1 ? 'Abierta' : `${openR.length} abiertas`}</div><div class="after">${byEnd}${soon}</div></div><div class="right"><div class="left"><span>quedan</span><b>${dur(last - t)}</b></div></div><div class="bar"><div></div></div>`
+      : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abren a las ${lbl(later[0].a)}</div><div class="after">${later.map(r => html(r.name)).join(' · ')}</div></div><div class="right"><div class="left"><span>abren en</span><b>${dur(later[0].a - t)}</b></div></div>`
       : '';
     if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
     if (rstate === 'live') { const a0 = Math.min(...openR.map(r => r.a)); rr.querySelector('.bar > div').style.width = ((t - a0) / (last - a0) * 100).toFixed(1) + '%'; }
@@ -1159,28 +1250,43 @@ function tick(force) {
   }
 
   const cl = document.getElementById('closedLine');
-  cl.hidden = mineOnly || !closed.length;
+  cl.hidden = filt || !closed.length;
   cl.innerHTML = closed.length ? `<b>Cerrados:</b> ${closed.map(html).join(' · ')}` : '';
 
   const re = document.getElementById('rowsEmpty');
   const anyRow = [...rowsEl.children].some(r => !r.classList.contains('hide') && !r.classList.contains('closed'));
-  re.hidden = anyRow || !mineOnly;
-  const none = !ALL.some(x => favs.has(x.id));
-  (re.querySelector('span') || re).textContent = none ? 'Aún no has elegido tus artistas. Toca «Elegir mis artistas» y márcalos con ☆.' : 'Ya no te quedan artistas por cubrir.';
-  const rimg = re.querySelector('img'), rsrc = none ? DECO.empty : DECO.done;
+  const done = mineOnly && !filt;  // els teus ja han tocat: es veu tot, amb un avís
+  re.hidden = done ? t >= TEND : anyRow || !filt;
+  re.classList.toggle('compact', done);
+  const none = !hasFav;
+  const rtxt = done ? 'Tus artistas ya han tocado. Esto es lo que suena ahora. <button class="linkbtn" type="button" data-seeall>Ver todo</button>' : none ? 'Aún no has elegido artistas. Toca «Elegir mis artistas».' : 'Ya no te queda nadie por cubrir.';
+  const rsp = re.querySelector('span') || re;
+  if (rsp.innerHTML !== rtxt) rsp.innerHTML = rtxt;
+  const rimg = re.querySelector('img'), rsrc = done ? '' : none ? DECO.empty : DECO.done;
   if (rimg) { rimg.hidden = !rsrc; if (rsrc && rimg.getAttribute('src') !== rsrc) rimg.src = rsrc; }
-  // Targeta abans de començar (compte enrere) i quan s'ha acabat (gràcies + contacte). Durant el festival no surt
-  const ms = document.getElementById('mascot'), msrc = t < T0 ? DECO.before : DECO.end;
-  ms.hidden = (t >= T0 && t < TEND) || !re.hidden;
+  // Targeta: abans (compte enrere), durant (frase + barra de progrés + proper concert gran) i al final (gràcies + contacte)
+  const during = t >= T0 && t < TEND;
+  const ms = document.getElementById('mascot'), msrc = t < T0 ? DECO.before : during ? (DECO.during || DECO.done) : DECO.end;
+  ms.hidden = !re.hidden && !done;
+  ms.classList.toggle('during', during);
+  document.getElementById('status').closest('.statusrow').hidden = !ms.hidden;  // la targeta ja diu el mateix: no repetir-ho sota el rellotge
   if (!ms.hidden && t >= TEND) cl.hidden = true;  // tot tancat: ja ho diu la targeta
   if (!ms.hidden) {
-    const mh = t < T0
-      ? `<span class="mk">Muy pronto</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">para que empiece ${html(FEST.name)} · a las ${lbl(T0)}</span>`
-      : `<span class="mk">Se ha acabado</span><span class="mbig">¡Gracias!</span><span class="msub">Gracias por usar la app. Cualquier duda o mejora: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
+    const pct = Math.min(100, Math.max(0, (t - T0) / (TEND - T0) * 100));
+    const mh = during
+      ? `<span class="mk">Quedan</span><span class="mbig">${dur(TEND - t)} <small>de festival</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
+        + `<span class="msub">Hasta las ${lbl(TEND)}</span>`
+      : t < T0
+      ? `<span class="mk">Muy pronto</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
+      : `<span class="mk">Fin de fiesta</span><span class="mbig">Hasta la próxima</span><span class="msub">Gracias por venir. Dudas o mejoras: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
     if (ms.dataset.k !== mh) {
+      const old = ms.querySelector('.mprog i'), w0 = old && old.style.width;
       ms.dataset.k = mh;
       const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc) mi.src = msrc;
       ms.querySelector('.mtxt').innerHTML = mh;
+      // la barra creix des d'on era (o des de zero en obrir l'app)
+      const nb = ms.querySelector('.mprog i');
+      if (nb) { const w = nb.style.width; nb.style.width = w0 || '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { nb.style.width = w; })); }
     }
   }
 
@@ -1211,6 +1317,8 @@ function tick(force) {
   const inside = t >= T0 && t < TEND;
   nowline.hidden = !inside;
   nowlbl.hidden = !inside;
+  document.getElementById('gridLegend').hidden = !inside || !DST;  // sense canvi d'hora, la pestanya vermella ja ho diu
+  for (const id of ['goNow', 'goNow2']) document.getElementById(id).hidden = t >= TEND;
   if (inside) {
     nowline.style.transform = `translateY(${y(t) - 1}px)`;
     nowlbl.style.top = `${y(t)}px`;
@@ -1281,13 +1389,18 @@ document.getElementById('simBadge2').addEventListener('click', exitSim);
 const notifMsg = document.getElementById('notifMsg');
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+// Guia per afegir l'app a la pantalla d'inici: no surt si ja s'ha obert des de l'icona; a iPhone només la d'iPhone, a Android només la d'Android
+document.getElementById('installBox').hidden = standalone();
+if (isIOS) document.getElementById('instAnd').hidden = true;
+else if (/Android/i.test(navigator.userAgent)) document.getElementById('instIOS').hidden = true;
 function notifUI(text) {
   const btn = document.getElementById('notifOn');
   const ok = canNotify();
   // Activades però sense registrar al servidor (p. ex. activades amb una versió anterior): cal un toc per registrar-se
   const needPush = ok && canPush() && !pushActive;
-  btn.textContent = needPush ? 'Activar también con el móvil bloqueado' : ok ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  btn.textContent = needPush ? 'Activar también con el móvil bloqueado' : 'Recibir notificaciones';
   btn.classList.toggle('primary', needPush);
+  btn.classList.toggle('switch', !needPush);
   btn.setAttribute('aria-pressed', ok);
   notifMsg.hidden = !text;
   notifMsg.textContent = text || '';
@@ -1338,6 +1451,7 @@ async function pushOn() {
   await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
   pushActive = true;
 }
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sin respuesta')), ms))]);
 async function pushOff() {
   clearTimeout(syncTimer); syncDirty = false;
   try {
@@ -1349,7 +1463,7 @@ async function pushOff() {
 document.getElementById('notifOn').addEventListener('click', async () => {
   if (canNotify() && canPush() && !pushActive) {
     notifUI('Conectando con el servidor de avisos…');
-    try { await pushOn(); return notifUI('Listo ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.'); }
+    try { await withTimeout(pushOn(), 20000); return notifUI('Hecho. También llegarán con el móvil bloqueado.'); }
     catch (e) { return notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`); }
   }
   if (canNotify()) {
@@ -1366,7 +1480,7 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   try { localStorage.setItem(NKEY, '1'); } catch (e) {}
   if (canPush()) {
     notifUI('Conectando con el servidor de avisos…');
-    try { await pushOn(); return notifUI('Activadas ✓ Te llegarán también con el móvil bloqueado.'); }
+    try { await withTimeout(pushOn(), 20000); return notifUI('Activadas, también con el móvil bloqueado.'); }
     catch (e) { return notifUI(`Activadas, pero no se ha podido conectar con el servidor (${e && e.message ? e.message : 'error'}): solo llegarán con la app abierta. Vuelve a probar con cobertura.`); }
   }
   notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
@@ -1374,7 +1488,7 @@ document.getElementById('notifOn').addEventListener('click', async () => {
 document.getElementById('notifTest').addEventListener('click', async () => {
   if (!('Notification' in window)) return notifUI(noNotifHelp());
   if (Notification.permission === 'denied') return notifUI(deniedHelp());
-  if (!canNotify()) return notifUI('Primero toca «Activar notificaciones».');
+  if (!canNotify()) return notifUI('Primero activa «Recibir notificaciones».');
   if (canPush() && !pushActive) return notifUI('Primero toca «Activar también con el móvil bloqueado».');
   if (pushActive) {
     // Prova de veritat: la envia el servidor. Bloqueja el mòbil just després de tocar per veure-la arribar
@@ -1389,7 +1503,7 @@ document.getElementById('notifTest').addEventListener('click', async () => {
         : 'No hay conexión con el servidor de avisos. Vuelve a probar con cobertura.');
     }
   }
-  const opts = { body: 'Si ves esto, las notificaciones funcionan ✓', tag: 'prueba', icon: 'icon-192.png' };
+  const opts = { body: 'Las notificaciones funcionan.', tag: 'prueba', icon: 'icon-192.png' };
   try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prueba', opts); else new Notification('Midnight · prueba', opts); } catch (e) {}
   notifUI('Enviada. Si no la ves, revisa los ajustes de notificaciones.');
 });
@@ -1413,7 +1527,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
     await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes });
     pushActive = true;
-    notifUI('Restablecidas ✓ Te llegarán también con el móvil bloqueado. Prueba «Enviar una de prueba» y bloquea el móvil.');
+    notifUI('Restablecidas. También llegarán con el móvil bloqueado.');
   } catch (e) {
     pushActive = false;
     if (old) pushPost('/unsub', { endpoint: old.endpoint }).catch(() => {});
@@ -1465,7 +1579,7 @@ let lock = null, wantWake = false;
 const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
 function wakeUI(on, hint) {
   wakeBtn.setAttribute('aria-pressed', on);
-  wakeBtn.textContent = on ? 'Pantalla encendida ✓ (toca para desactivar)' : 'Mantener la pantalla encendida';
+  wakeBtn.textContent = 'Mantener la pantalla encendida';
   wakeHint.hidden = !hint;
   wakeHint.textContent = hint || '';
 }

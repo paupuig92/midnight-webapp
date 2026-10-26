@@ -86,7 +86,7 @@ def _css(v): return str(v).replace("<", "")
 _vars = {"--accent": FEST.get("accent"), "--accent-rgb": FEST.get("accentRgb"), "--accent-dim": FEST.get("accentDim"),
          "--accent-deep": FEST.get("accentDeep"), "--accent-ink": FEST.get("accentInk"), **FEST.get("theme", {})}
 BG = _css(FEST.get("theme", {}).get("--bg", "#040704"))
-FESTCSS = "<style>/* colors i lletres del festival */\n" + "".join(
+FESTCSS = "<style data-fest>/* colors i lletres del festival */\n" + "".join(
     f'@font-face{{font-family:"{_css(f["family"])}";src:url("img/{_css(f["file"])}");font-weight:{_css(f.get("weight", 400))};font-display:swap}}\n'
     for f in FEST.get("fonts", [])) + ":root{" + ";".join(f"{k}:{_css(v)}" for k, v in _vars.items() if v) + "}</style>"
 
@@ -124,10 +124,27 @@ img {{ max-width: 100%; }}
 // Sense connexió: guarda l'app al mòbil la primera vegada que s'obre
 if ('serviceWorker' in navigator) {{
   const had = !!navigator.serviceWorker.controller;
-  navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {{}});
-  // Si s'ha publicat una versió nova mentre l'app estava oberta, s'ofereix recarregar
-  navigator.serviceWorker.addEventListener('controllerchange', () => {{
+  let reg = null, lastCheck = Date.now(), lastShown = Date.now(), lastTouch = 0;
+  navigator.serviceWorker.register('sw.js').then(r => {{ reg = r; }}).catch(() => {{}});
+  // Busca versió nova: cada 2 min amb l'app a la vista i en tornar-hi (l'iPhone reprèn l'app sense recarregar-la).
+  // Només baixa sw.js (uns pocs KB, i res si no ha canviat): gasta molt poca bateria i dades
+  const check = min => {{
+    if (document.hidden || !reg || Date.now() - lastCheck < min) return;
+    lastCheck = Date.now(); reg.update().catch(() => {{}});
+  }};
+  setInterval(() => check(110000), 120000);
+  document.addEventListener('visibilitychange', () => {{ if (!document.hidden) {{ lastShown = Date.now(); check(30000); }} }});
+  for (const ev of ['pointerdown', 'keydown', 'scroll']) addEventListener(ev, () => {{ lastTouch = Date.now(); }}, {{ passive: true }});
+  // Si s'ha publicat una versió nova mentre l'app estava oberta: si no l'estàs tocant, es posa al dia sola; si no, s'ofereix
+  navigator.serviceWorker.addEventListener('controllerchange', async () => {{
     if (!had) return;
+    // La pàgina ja és la nova (s'ha carregat de la xarxa): no cal avisar
+    // (controllerchange salta abans que el SW nou esborri la cache vella: es mira la més nova)
+    try {{ const ks = (await caches.keys()).filter(k => k.startsWith('bitp-'));
+      const r = await (await caches.open(ks[ks.length - 1])).match(location.pathname.endsWith('ca.html') ? 'ca.html' : 'index.html');
+      if (r && (await r.text()).includes("const BUILD = '" + BUILD + "'")) return; }} catch (e) {{}}
+    const busy = (typeof dirty !== 'undefined' && dirty) || document.body.classList.contains('locked') || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {{}}).tagName || '');
+    if (!busy && (document.hidden || Date.now() - lastShown < 15000 || Date.now() - lastTouch > 60000)) return location.reload();
     const t = document.createElement('div');
     t.className = 'toast info';
     t.innerHTML = '<div class="msg">Hay una versión nueva de la app.</div><button type="button" class="act">Actualizar</button>';
@@ -279,11 +296,12 @@ self.addEventListener('fetch', e => {{
   if (url.searchParams.has('t')) return;
   // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
   if (e.request.mode === 'navigate') {{
+    const page = url.pathname.endsWith('/ca.html') ? 'ca.html' : 'index.html';  // cada idioma, la seva còpia
     e.respondWith(caches.open(VERSION).then(async cache => {{
-      const hit = await cache.match('index.html');
+      const hit = await cache.match(page);
       const net = fetch(e.request, {{ cache: 'no-cache' }}).then(res => {{
         // Un portal wifi o una pàgina d'error no s'han de guardar com si fossin l'app
-        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put('index.html', res.clone());
+        if (res.ok && !res.redirected && (res.headers.get('content-type') || '').includes('text/html')) cache.put(page, res.clone());
         else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       }});
