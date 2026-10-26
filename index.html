@@ -153,6 +153,10 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .minibar .mnext b { color: var(--fav); }
 .minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
 .minibar .btn { min-height: 36px; padding: 0 10px; }
+/* logo del festival al mig de la barra (FEST.miniLogo); al mòbil ocupa el lloc del «★ proper artista» */
+.minibar .mlogo { position: absolute; left: 50%; bottom: 7px; box-sizing: border-box; height: calc(var(--barh) - 14px); width: auto; max-width: 36vw; padding: 3px 9px; border-radius: 7px; background: var(--mlogo-bg, linear-gradient(#fe5e08, #fe8e04)); object-fit: contain; translate: -50% 0; pointer-events: none; }
+@media (max-width: 439px) { .minibar:has(.mlogo:not([hidden])) .mnext { visibility: hidden; } }
+@media (max-width: 374px) { .minibar:has(.mlogo:not([hidden])) .mleft { display: none; } .minibar .mlogo { max-width: 30vw; padding: 3px 6px; } }
 
 h2 { margin: 0; font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
 h2 span { color: var(--accent); }
@@ -714,9 +718,8 @@ body.tvon { overflow: hidden; }
 .tvone .o-cue { margin-top: auto; }
 .tvone .o-cue .fx { font-size: 1em; }
 .tvst .btn { border-color: var(--sc, var(--line)); }
-.mapbox { overflow: auto; border-radius: 12px; border: 1px solid var(--rule); background: var(--panel); overscroll-behavior: contain; }
+.mapbox { box-sizing: border-box; overflow: auto; border-radius: 12px; border: 1px solid var(--rule); background: var(--panel); overscroll-behavior: contain; }
 .mapbox img { display: block; width: 100%; height: auto; cursor: zoom-in; }
-.mapbox.z { height: min(70vh, 560px); }
 .mapbox.z img { width: 230%; max-width: none; cursor: zoom-out; }
 .tvx { min-height: 40px; padding: 0 16px; font-size: max(13px, .7em); color: var(--muted); }
 @media (orientation: portrait) {
@@ -735,6 +738,7 @@ body.tvon { overflow: hidden; }
   <span class="mclock" id="mclock"></span>
   <span class="mleft" id="mleft" hidden aria-label="Tiempo hasta que acaba el festival"></span>
   <span class="mnext" id="mnext"></span>
+  <img class="mlogo" id="mlogo" alt="" hidden>
   <button class="sim-badge" id="simBadge2" type="button" hidden>PRUEBA ✕</button>
   <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Solo mis artistas"></button>
   <button class="btn go" id="goNow2" type="button">Ahora</button>
@@ -980,6 +984,8 @@ const FEST = {
   banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
   // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
   bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
+  // «A continuación» sense el farciment: aquests escenaris i importàncies no hi surten (sí a «Ahora suena», a l'horari, als preferits i a la pantalla d'un escenari)
+  nextHide: { stages: ['photo'], imp: [1] },
   date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
   dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
   start: '12:00', end: '05:00',
@@ -1499,11 +1505,13 @@ document.getElementById('sheetDone').addEventListener('click', closeSheet);
 document.getElementById('sheetDone2').addEventListener('click', closeSheet);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
 
-// A continuación: les 6 properes, agrupades per hora d'inici
+// A continuación: les 6 properes, agrupades per hora d'inici (sense el que diu FEST.nextHide, tret dels preferits)
+const NH = FEST.nextHide || {};
+const inNext = x => favs.has(x.id) || !((NH.stages || []).includes(x.s.id) || (NH.imp || []).includes(x.t));
 const upEl = document.getElementById('upnext');
 let upCache = '';
 function upHTML(t) {
-  let list = ALL.filter(x => x.a > t);
+  let list = ALL.filter(x => x.a > t && (filt || inNext(x)));
   if (filt) list = list.filter(x => favs.has(x.id));
   if (!list.length) {
     if (filt) return `<li class="empty">${favs.size ? 'No te quedan artistas por empezar.' : 'Aún no has elegido artistas: toca «Elegir mis artistas».'}</li>`;
@@ -1767,7 +1775,7 @@ function tick(force) {
   nextMine = ALL.find(x => favs.has(x.id) && x.b > t);
   document.getElementById('mnext').innerHTML = nextMine
     ? (nextMine.a <= t ? `<b>★ ${html(nextMine.n)}</b><br>ahora` : `<b>★ ${html(nextMine.n)}</b><br>${lbl(nextMine.a)}`) : '';
-  if (nextMine && innerWidth < 440) document.getElementById('mleft').hidden = true;
+  if (nextMine && innerWidth < 440 && document.getElementById('mlogo').hidden) document.getElementById('mleft').hidden = true;
 
   const up = upHTML(t);
   if (up !== upCache) { setHTML(upEl, up); upCache = up; }
@@ -2172,7 +2180,7 @@ function tvRender(t) {
   al.hidden = !msgs.length;
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
-  const up = [...ALL, ...GONE].filter(x => x.a > t && (!tvStage || x.s.id === tvStage)).sort((x, y) => x.a - y.a).slice(0, 12);
+  const up = [...ALL, ...GONE].filter(x => x.a > t && (tvStage ? x.s.id === tvStage : inNext(x))).sort((x, y) => x.a - y.a).slice(0, 12);
   document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lbl(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
     : `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No quedan más actuaciones.</li>';
@@ -2210,10 +2218,14 @@ if (FEST.map) {
   document.getElementById('mapa').hidden = false;
   mi.addEventListener('click', e => {
     const r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    box.style.height = box.classList.contains('z') ? '' : box.getBoundingClientRect().height + 'px';  // el requadre no canvia de mida, només s'amplia la imatge
     box.classList.toggle('z');
     if (box.classList.contains('z')) { box.scrollLeft = fx * mi.offsetWidth - box.clientWidth / 2; box.scrollTop = fy * mi.offsetHeight - box.clientHeight / 2; }
   });
 }
+// Logo a la barra fina (per defecte, el títol del banner animat)
+{ const ml = FEST.miniLogo || (FEST.bannerAnim && FEST.bannerAnim.title), mi = document.getElementById('mlogo');
+  if (ml) { mi.src = ml; mi.alt = FEST.name; mi.hidden = false; if (FEST.bannerAnim && FEST.bannerAnim.bg) mi.style.setProperty('--mlogo-bg', FEST.bannerAnim.bg); } }
 mascotPerfil();
 let tvUiT = 0;
 function tvUi() { tvEl.classList.add('ui'); clearTimeout(tvUiT); tvUiT = setTimeout(() => tvEl.classList.remove('ui'), 3000); }
