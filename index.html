@@ -49,6 +49,11 @@
 html, body { background: var(--bg); color: var(--ink); }
 /* Sense zoom sense voler: ni doble toc ni pinça */
 html { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+/* Que la pàgina no es pugui arrossegar de costat encara que alguna cosa sobresurti (clip, no hidden: no trenca els sticky) */
+html, body { overflow-x: clip; max-width: 100%; }
+html { overscroll-behavior-x: none; }  /* ni rebot de costat */
+/* Amb overflow a l'html, el «body.locked» ja no arriba a la finestra: el bloqueig (full de Mis artistas obert) es fa a l'html */
+html:has(> body.locked) { overflow: hidden; }
 body {
   font-family: var(--body);
   font-size: var(--fs-m);
@@ -409,6 +414,18 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
 /* iPhone estret (SE, mini, 375 px): més lloc per als noms */
 @media (max-width: 380px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .row .star { width: 40px; height: 40px; } }
+/* revisió iPhone */
+.tlbox { isolation: isolate; }  /* la vora difuminada (z 9) i la capçalera de la graella no passen per sobre de la minibarra ni de la franja de dalt */
+.toast .msg, .notice { overflow-wrap: anywhere; }
+.minibar .mclock { min-width: 2.8em; }  /* xifres d'amplada variable: que la resta de la barra no balli cada minut */
+.minibar .round, .minibar .btn { position: relative; }
+.minibar .round::after, .minibar .btn::after, .row .star::after { content: ""; position: absolute; inset: -4px; }  /* zona de toc de 44 px sense canviar com es veu */
+.row .star { position: relative; }
+.credit a { display: inline-block; padding: 12px 0; }
+.tl, .minibar, button, .btn, .chip { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+img { -webkit-touch-callout: none; }
+.btn:not(.go):active, .chip:active, .round:active, .totop:active, .toast button:active { opacity: .6; }
+.instov { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 /* revisió UI */
 body.locked .totop { opacity: 0; transform: translateY(12px); pointer-events: none; }
 .totop { width: 44px; height: 44px; font-size: 20px; }
@@ -1684,12 +1701,24 @@ if (!('wakeLock' in navigator)) {
   if (wantWake) acquire(true);
 }
 
+// iPhone: sense cap «touchstart», Safari no aplica :active (els botons no responen en tocar-los)
+document.addEventListener('touchstart', () => {}, { passive: true });
 // El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
+// La lletra del cartell pot tenir xifres d'amplada variable (a Blogh el «4» fa quasi el doble que l'«1»): es mida amb l'hora més ampla
+// possible, així cap minut no surt de la pantalla (abans: obert a les 11:11, a les 15:58 ja no hi cabia) i la mida no salta cada minut
 function fitClock() {
-  clockEl.style.fontSize = '100px';
-  const w = clockEl.scrollWidth, target = clockEl.parentElement.clientWidth;
-  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.22).toFixed(1) + 'px';
+  const c = clockEl, keep = c.innerHTML, target = c.parentElement.clientWidth;
+  c.style.fontSize = '100px';
+  const dw = {};
+  for (const d of '0123456789') { c.textContent = d.repeat(4); dw[d] = c.getBoundingClientRect().width; }
+  const big = set => [...set].reduce((a, d) => dw[d] > dw[a] ? d : a);
+  const n9 = '0123456789', n5 = '012345';
+  c.innerHTML = `${big('012')}${big(n9)}:${big(n5)}${big(n9)}<small>${big(n5)}${big(n9)}</small>`;
+  const w = c.getBoundingClientRect().width;
+  c.innerHTML = keep;
+  if (w && target) c.style.fontSize = Math.min(100 * target / w * 0.97, 240, innerHeight * 0.22).toFixed(1) + 'px';  // 3 % de marge: a l'iPhone la lletra pot acabar de carregar després
 }
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => fitClock());
 addEventListener('orientationchange', () => setTimeout(fitClock, 300));
 let lastW = innerWidth;
 addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); fitBlocks(); edgeFade(); } });  // la barra de Safari canvia l'alçada, no l'amplada
@@ -1698,7 +1727,7 @@ if (document.fonts) document.fonts.ready.then(() => { fitClock(); fitBlocks(); }
 // Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
 // A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
 const REPO = 'paupuig92/midnight-webapp';
-const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+const ONLINE = !/claude(usercontent)?\.(ai|com)$/.test(location.hostname);  // a tot arreu menys a la vista prèvia de Claude (GitHub, Cloudflare, domini propi)
 const CKEY = FEST.key + '-changes-v1';
 let stamp = '', notice = '';
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
