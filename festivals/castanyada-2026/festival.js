@@ -11,9 +11,36 @@ const FEST = {
   start: '12:00', end: '05:00',
   accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
   // Colors de base propis (opcional): els del Bass eren verdosos
-  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428' },
-  // Columna extra que no és un escenari (null si no n'hi ha)
-  rides: { name: 'Atracciones', from: '12:00', to: '00:00' },
+  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428',
+    '--display': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
+  // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
+  fonts: [
+    { family: 'Blogh', file: 'Blogh.otf', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
+    { family: 'Bricolage', file: 'Bricolage-Bold.ttf', weight: 700 },
+    { family: 'Bricolage', file: 'Bricolage-ExtraBold.ttf', weight: '800 900' },
+    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.ttf', weight: '600 900' },
+  ],
+  // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
+  deco: {
+    strip: 'img/deco-strip.png',      // garlanda que penja sota la capçalera (es repeteix)
+    before: 'img/deco-before.png',    // abans de començar
+    end: 'img/deco-end.png',          // quan s'ha acabat
+    empty: 'img/deco-empty.png',      // «Solo mis artistas» sense cap artista triat
+    done: 'img/deco-done.png',        // «Solo mis artistas» quan ja no en queda cap per cobrir
+    sheet: 'img/deco-sheet.png',      // full «Mis artistas»
+    heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
+  },
+  // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
+  impColors: false,             // la importància (0–5) es veu per la mida: 5 = concert destacat, 1 = entre concerts
+  ridesName: 'Atracciones',
+  // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
+  rides: [
+    { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
+    { name: 'Calçot mecànic', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
+    { name: 'Túnel del Terror', from: '18:30', to: '00:30', img: 'img/ride-tunel.png' },
+  ],
+  // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
+  colorLogos: true,
   // Escenaris: el logo és img/<id>.png
   stages: [
     { id: 'principal', name: 'Escenari Principal' },
@@ -24,21 +51,21 @@ const FEST = {
   // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
   sets: {
     principal: [
-      ['12:30', '13:10', 'Juls', 0],
-      ['13:30', '14:10', 'Ven’nus', 0],
-      ['14:30', '15:30', '31 FAM', 0],
-      ['16:00', '17:15', 'Els Amics de les Arts', 0],
-      ['17:45', '19:00', 'Els Pets', 0],
-      ['19:30', '20:40', 'La Ludwig Band', 0],
-      ['21:10', '22:30', 'Lax’n’Busto', 0],
-      ['22:30', '23:00', 'DJ K-Zu', 0],
-      ['23:00', '00:15', 'Els Catarres', 0],
-      ['00:15', '00:45', 'DJ K-Zu', 0],
-      ['00:45', '01:55', 'The Tyets', 0],
-      ['01:55', '02:25', 'Anna Gisbert', 0],
-      ['02:25', '03:35', 'Figa Flawas', 0],
-      ['03:35', '04:00', 'Anna Gisbert', 0],
-      ['04:00', '05:00', 'Doctor Prats', 0],
+      ['12:30', '13:10', 'Juls', 5],
+      ['13:30', '14:10', 'Ven’nus', 5],
+      ['14:30', '15:30', '31 FAM', 5],
+      ['16:00', '17:15', 'Els Amics de les Arts', 5],
+      ['17:45', '19:00', 'Els Pets', 5],
+      ['19:30', '20:40', 'La Ludwig Band', 5],
+      ['21:10', '22:30', 'Lax’n’Busto', 5],
+      ['22:30', '23:00', 'DJ K-Zu', 1],
+      ['23:00', '00:15', 'Els Catarres', 5],
+      ['00:15', '00:45', 'DJ K-Zu', 1],
+      ['00:45', '01:55', 'The Tyets', 5],
+      ['01:55', '02:25', 'Anna Gisbert', 1],
+      ['02:25', '03:35', 'Figa Flawas', 5],
+      ['03:35', '04:00', 'Anna Gisbert', 1],
+      ['04:00', '05:00', 'Doctor Prats', 5],
     ],
     festa: [
       ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],

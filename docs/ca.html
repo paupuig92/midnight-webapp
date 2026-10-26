@@ -1,0 +1,1940 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0604">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Midnight">
+<meta name="description" content="Horario en directo · Midnight">
+<script></script>
+<script>/* iPhone: Safari no fa cas de user-scalable=no, així es bloqueja la pinça */
+document.addEventListener('gesturestart', e => e.preventDefault());</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+/* El que a l'artifact posa la plataforma */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Midnight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+/* Layout: cartell petit + rellotge a tot l'ample, "Ahora suena" just a sota, "A continuación", graella tipus cartell, Organización i Configuración al final.
+   Colors: la marca Midnight (vermell) i els significats fixos (groc = meu, magenta = canvi, vermell = ara) no canvien mai;
+   l'accent és el color de cada festival (FEST al començament del script). */
+:root {
+  /* Marca i base (fixos) */
+  --mid-red: #e8253a;
+  --bg: #040704;
+  --panel: #0b120b;
+  --ink: #ecfbe9;
+  --muted: #a3bba0;
+  --rule: #35702d;
+  --line: #4a7f42;
+  --paper: #f3f5f0;
+  /* Significats fixos */
+  --now: #ff4040;
+  --fav: #ffd23d;
+  --chg: #ff4fd8;
+  /* Color del festival (el canvia FEST) */
+  --accent: #3dff2b;
+  --accent-rgb: 61, 255, 43;
+  --accent-dim: #2a8f1f;
+  --accent-deep: #0f2a0c;
+  --accent-ink: #041204;
+  /* Importància (del full de l'organització): 5 vermell … 1 blau; sempre amb el número a dins */
+  --t5: #e8553d;
+  --t4: #f08a2e;
+  --t3: #d9a23a;
+  --t2: #6fbf5f;
+  --t1: #6f8cf0;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --title: var(--display);  /* rellotge i títols: la lletra de cartell del festival, si en té */
+  --cond: var(--display);   /* noms dins la graella: millor estreta */
+  /* Escala de text: 11 / 13 / 15 / 18 / 24 */
+  --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
+  --gut: 48px;
+  --barh: 52px;
+  --top: calc(var(--barh) + env(safe-area-inset-top, 0px));
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+/* Sense zoom sense voler: ni doble toc ni pinça */
+html { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--body);
+  font-size: var(--fs-m);
+  line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+body.locked { overflow: hidden; }
+.wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+section { scroll-margin-top: calc(var(--top) + 8px); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--fav); outline-offset: 2px; }
+.mdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mid-red); flex: none; }
+
+/* Botons: dos components. .btn (pastilla 44 px; .primary = color del festival) i .chip (filtres) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s)/1.1 var(--body); cursor: pointer; text-decoration: none; text-align: center; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.go { color: var(--accent); border-color: var(--accent); font: 800 var(--fs-s)/1 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; }
+.btn.go:active { background: var(--accent); color: var(--accent-ink); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.chip { min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fav); border-color: var(--fav); color: #1a1400; }
+.round { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
+.star { font-size: 20px; line-height: 1; color: var(--muted); }
+.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
+.acts { display: flex; gap: 10px; align-items: center; }
+
+/* Capçalera */
+.banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 175; object-fit: cover; object-position: center 78%; border-radius: 8px; margin-top: 12px; }
+header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--accent); padding-block: 0 12px; }
+.brandline { display: flex; align-items: center; gap: 7px; font: 800 var(--fs-xs)/1.2 var(--display); font-stretch: 112%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.brandline b { color: var(--ink); }
+/* Firma de la Midnight Suite (en Pau): una màscara, així agafa el color del festival */
+.firma { margin-left: auto; width: 64px; height: 28px; flex: none; background: var(--muted);
+  -webkit-mask: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACDCAYAAAA3QCb6AAApr0lEQVR42u2deZAcx3Xmf9U9PRcGmCFA3AfBC7wP8RQlUqIoUYetk7oPi7Zsr+Vdr9e7dmw4FI7YCNvhtb3hXcsreVcWKe/qtk5KtLiiKMm6KUKUeIgXSJAg7oO4B8DcU/vH+9KVnVPVXQ0MBtODfBEVc3R3dVVl5pff+/K9l0mapkQ7LksKfneWBj/zrBPoBbqBGlAFOnRU9Z5JnaMKdAELgD7v/e7nOLAf2AMcAkZ0XVUdk3rPODABjALH9HeZe2Qa7jdatBMbdBGwjgukWnloNWCeQGYRsAwYEFD1A0uAhcD8AMB6PDBK9HuPQKvmXUsCVHRNwwKrXcCgwCgVOA0JoI7pfUeAF4Cd+nnIe21YgJeewDMiAli0CFgzD06JBp3/oCoClk6BR7cAab5AaL6YUL/AaKHA6gy91uMB2QKdq6bzJifhXkaDY0w/jwCHdRwVYA3q9yGB1oTeP+IBmft5BDign+5cI02YaBpBLFoErOl38/IezCJgLXAesEpsaYWO5QKfTs+1q+ioekzJDdoiYJoO1yop6drhuZ0TOd+f6rXJ4PdJvWdcQLUL2AJsAJ4AngR2CPzGIhOLFgFresApCQZnqC8tAVYC5wCrgbOBNfr/Yo9NVUt8X1rCtZwudpU2OWdaAkCOxw4A24DngE3AXgHaILBPoLZNLmir7REt2mkHWI0YVIcA6EwxqMuBa4FL9T+nHdUKACAtAYw+o8l7bUKHz2LCz1W870oCN9IxO9+cyJ54R7UEQLXC9PLuY1jXm3h/7wF+ATwA/BLY7LmiwwVtFYEr2mkFWEUgNU9AtEJu3hq5eKt1rAGWNnBd0gaAlKchHcOE7cNiHSMeKI3pGPY0piEN5oP6OaLXUs9Fc+J8l36fj+lkA2KIE2I3I3qP0916dbjFAHeeDs99rQoMW2F07mejz41jQv9msa0DuscXgKeBp/T/kRxAjMwrAlY6l4EqvLn50p4uFYO6AjhX2pQLLej0WEpa4LblAdSYBuOIB1D7pOVsl86zn0ykdiA0LqAa0jkcuxrVew6XHKRV3cM8spVGx2wmdE+9egbuGJB7eyamv1U8NtZFtojgQikWeKDnwi9qDUAs77orARPz9bDDwEbgu8APpYXt9PS1yL4iYKVzCaBCDaQqtnQhsE6u3rnAWdKmBpowhiLmNCHQ2Sdm4MIDtnk6zX4PcFw4wdg0sMRmmlWr5lY4a2QhEOP6zk693qWjB9Pulot9LtNzXOaBngu/mNcEyJIG97YPE++fFmhtki62B9jtAVgSTEwRwCJgtSWTQqB0K/A64CoNtJ5ghs9jASEDGBcLGJNLtwPYKmB6VoNpq0BrH40DMcsC0PGA0fGI5ifa+P1ip6s0MSzx3NLV2GLFcrEyn5ElOXpe2AYTYp0uFOOwnvVPgfuAhzQJlOkL0SJgzQpdymdCZwqUVmmgXAO8WMyqVqC3VAoG8W4B0x4B0R7g+UB3GRSAjTdxGdNpBIiTrfGVfU+Ru+eDktMIV4nZOo1wkddWy8XgWmG4gwKrHwOPadLYoTYbjXpXBKzZzqZWCpheDlypvxcEbslkA9fRBUEeU6d/GngYiynaKbDaJ3AqO5hPm/7Twn3PxwJoB8TE1gAXq83OIVso8FdiQ9Dx286tLh5Um30fuEeuZBoZVwSsU2kVD3hq0qEuxlb31mEC+oVyRcrO1HvUuR+STrJR/9vbwLWLmklrINYsrqqHTAs7W8B1kde2ZzSYDMI23S538QfAzzTh7Pf6T2RcEbBmnFEtBN4I3KaZuZ8sNSZ0A/zZeFwalGNRTwAPqoM/KhcvMqeZdT2LVhDXYprjtZqILpAL2Ut9gG4ea3aR9zsEXJ8DfkR93FtsxwhYJ6Vjp54usgbTpF4i1+8S8nWpcFAcwITaJ8hSRp7HQgz2eiwqyfne2LFnpq2LWNgCTOdahmlgFwCXiVGvlfvYqP2HsCDVrwP3inENE0MiImCdJEZVUed8LfAGgVQ/mUibMjVQ0cU07RdQPagZ9kFMLG8GjtFmH6v22de5wEuBlwFXYyuRvVjIRZHLeBQLifhn4FOatCLbioA1bZ10ody964CbxKyW5LgTYSrIVkws/zmmSz0rXWMw6PSRRbU/+1qMha1cKdfxWrGw+Q2AawgLSP1HMa4j6g+T8VFHwDoeoKqKRb1djOp8zZ55wOI+NyTX7lHgO+qQT1IfoBlZ1NwBsLx2XIbF2/0Ktlq8wnMX05w+sxH4PHAHFksXmVYErFLmZrcubFXoRuAVwA3qhEVAhWbHR7BYnPuxeJzNHlBVCmbmaHOLfbn2rZDF3t2EaZ0XNXAVdwBfBe4UG4+TWgSsUjNlD/A24HbgRXIHGwHVqNy8fwG+jK0EHYls6rQHr3Al+Qbg9dgCzVkFTH0/VjXiw8C3Yt+JgFU0KzrN4HyB1TuwJOSkgf4wgZUjuU9u38PYSl/ebBstuoxgCzRXAW+Ru3g2UzMbhrEk678Gvk2M15r11jHDs2CKLVe/QazqOnWsIqAaEjB9D/gCFs08lNNBYweLFoY2HBITfwxbJXynpIcF3vu7xcJ69D8ftKKdhgzLZ1ULsKXo12HBnxc0AKpDwHp1oB9hNZJi1HK04+17XZiu9W4sTGa11/dcgcF7gQ9h2mgU4k9DwPIb/Tzg16UrnIuVM8kDqlFMPHcxMw81oPzRorXaD1cD/17AtYp60X4Q+AbwZ1iQcQSt0wSwfGDpw1b/3qmZbVkBq0qxBNZvAndjEcoHiPpUtOlnW8uAPwB+DQuB8F3Jg8DHgT/HytlE0Jpl1nESOoZr4EuB92F61TnSC4rcvweATwqsDgfnih0m2omaz6R2Af9Dv9+OBSW71weAm7GFnW/Gxza3AcsBTD8WyPde4BbqRU4fqA5gKzRfw8ITNur/UaOKdrLMbeKxG/jfcgtvwzQu19/WYTrro1i8VmRZcxCwXKOuBX4bC1U4N6exE0yneh64Cwvcezp4PaZKRJsJ0HoO+CxWluhKb1Ltx3IVvy3AijaHAMvXq64Cfgd4K1ZVMq/42gvqCF/AlpwPBfpCnMmizZSLCBYucw8WozVAti3ZBVia2N3xUc0dwPLZ06uB35f/P49sudhPUt4CfBETNTcE54hAFW2mASvBsiTuxYJLB7z+2ENxeli0NgQs17BdwJuB/4BlzHfkgNU4Vt7lU1j+1k5iiEK0U2/+RLo3ALLplEuinWLA8sHqN4D/iAmVYYMncvl+BPwvLF9rjChiRps9LMtta5a3/dqxHE8iWpsBlmu8bixkwYFVuAI4jq36/TNWpvYXsfGjzVLrJKvq4Pfho/HRtDdgObCpAb8J/CcsvioNgGgMS1T+pMBqT3QBo81SlzDFtKqB4LUJbCelaG0KWD5YfQD4Q2xlJdSrJsSm7sQE9oPEqo7RZqe5HZhuxHbu8c3t2B2tDQHL16TeC/wxFm/l4ll8sHoQWwX8vBo9xlVFm43mJtHLsCDRhUFf30ZWvihaGwGW78q9CfijArBydYXuxHSro0S9KtrsNZem82osfrDq9eWj2L6Gj8fH1J4MKwV+FfgvWDBdGoDVUSz47u8FWhMRrKK1Abu6Civsd0bQV7dhsVnPeP0/WhsAlgOdVwJ/gpUwDjWrw1jU+oexQmlJBKtos9icRLGWLHYw7KsPYRuaTMa+3D6A5RrqFuAvsMqgeWD1aeC/YbmBcSUwWjswqz6svMzbqa8gkmC61T1kK9uxL8/CRiwCq/OxOKs8sDqKRa3/d4GV0wBiA0ebzcyqEwvJeTdTyx0NY7tEx7IybQRYfmzKv8NyA/OqLdwL/E9ss9IKpltFizZbwSqVN3E7VnF0SU6/Xg/8A5agH9lVGzGsDix84Z2iz3ju3iTwU+Bj2A7LMWwhWjuAVSfwfnkM5zI1hewp4KNen45gNUutI6dxbxFgLQtcwRQTJO/AKjIm8fFFm+WT8SS2ff2/AT6I7S1AIG9swCqQfj326fYBLNe460SZL2eqbvU08I/AV7BcwTgTRZutrMp5A6uA38KKSq7I6dNbsdjBz2AaVuzTbQJYKSacvxd4FZmI7jrATuBL1Eewx4aNNltdQLAwnN/DAp4X5YDVFk3An4h9ur0AyzXUS7DaVuHqyWEsL/BjwL7YsNFmMatKsTSbW7Bt5W7BivGFYLVR/fkOLN819uk2AqwUS2T+Xay+dV4g3R2izzGROdpsZlUXCajejOlV/i7OvrTxEY9ZxT7dZoBVw4LofhVbTfFdwT1iVy6KPTZstNkEVH581c3YSuBrgDM9kPIZ2CNYVsbnMM0qglUbAtZq4OXYdlxhIN2XBFj+MnC0aLOFVaXAYmwV8D1YyEIXU8MWxoGfAH+LrQZOxAm4fQFrLfXbdqOZZ4No8544E0WbhUDVi23P9X55CAsDVuVAaz/wZWwfwlj5dg4A1ghWvzqhfpPTz2H6VZyJos0moKpiC0RvwzbsPU+yRt6u4rsx/fVvsY0m4i5NcwCwnhJdvlAN/yxWgeFOsoz1aNFOFVC5CbMDK8n9aoHV9diKNuSnj/0CS87/FLbSHb2EOQJY+8SmKtiegt/FNpCMsSnRZgOjcjuKvwN4vSbWM8nfVdyxqrvFrNZ7rmEEq7nQMdL0X9t8MSZY7iDWAop26oAKz/VbDtwAvAury9bvvTdcCNqD7Sb+RU26BwLwizbHACtvhosWbSYZlbPLgbdiWReXeEA1Sb3WCrb35WPAP0nK2K3/RxdwjgNWLMAXbaZBynfVqthq9Y3YnpevINsvMM3po4nkjM8D/xertODvNRD78Ry0joBiR5sb7lQ7sCl31MSibsVSaS6XK5gUMCofsDZj+YA/zwHAaHMcsKK1tzuVzmLgSnKu80wsleYaLEr9xVhhPR+UKk3OO0pWcC+CVQSsaG0CVhWsIsEYlsw7W9kUwEpMQL8VC/xcgu283Om9L49V5bHJRVjdti3E8JsIWNHaAqwWYwL1lVi80fexXV+GZxGb6gPWyN27BbgJC/jsyHHzQobYCIgWkOUNRouAFW0Wm6tT/j6s9O9SLGPhFjGWz86gW+iDjA9UZwmcbhSgrhIrcgGfkzkgdxQT4HsCICtyCUdjV4iAFa092NXFWIG61fp/J3A18AbgLk5e8G8S/PSBp19AdQmmTd2E7cBUDcAW6jWqw8DDwI8wXepSLKzhrOAz/vduxIR3iItGEbCizWp21YkJ1SsCZlPR//oEWCcLLH2QqGFpMy8Rm7oMW+lbiCUpFwHOhFzXrcD3sFiqn+p/vZjW9QcCvZr3+TGB1VewbeaiRcCKNsvZVS8mYNeoXyVL1K4d0/h9eOd3ruhigdJSMairsZ2UzwvAJS1wHTdj4Qg/0/EolqDs3ncMS7HZi9Vkv073PISJ7PdgKWVjxEDnCFjRZr1NYvpN3p6QE1gNqBMBKR+gHMgkwAViPk44PwPTpObrKAKp0PW7G6tNtTFwKf3vArhfAHWZmOOkPvMLgdrxuoMxUDoCVrQZtGGs1tNIzmuHW3QHk4C9+cJ5r0DpbIHGS8WkzqVel/IHfxL87wWBzKMCmoeAx8WWID863T/Xdh0V/T2R8z1JzmfTBgw1zXFxo0XAijbN5gbXKJZHN5YzaA8E/y/LMtzPATGpK+WKXYjFOy3AKnr0eCwvZGX+dR7DyhLfA3wDKwo5lAMezQI+K8H7WgEncsAp0X2Mc+rCP6JFwDptzA28Ix4w+QP2WOAq5jER393rxsINVoo5XYHFTF2GhSIUgWYYiX5A7tseXdsO4AfAt8gCWvPitJrdZ5rzOfd7DdPSVogNHsNE/D3es6l49zyA1X2/Xiz0a8CDkWlFwIp28m2ogEn1qW0nNFgncsCmhoVDXIut7l2igX+GBn4vmXg+mcN4fNAbFEj8DKtBtU3sZQR4UmBVyXE3y7DJDn2PW1Dwz3Mu8G5MU1uu6x0Gdsn1/H/Ajz23eRFWUvnXxSDHsQWDPwWeiKAVASvaybXxHN0n0UC+BFuFm1A7zxO7WIilw7g8vuswfaqjBSZ1VExqm44NWImXZ7FVvT5MkD9Xx3rgly3eWxWrhXWDAPE7wDPeNa0D/i22+W8Y7X4xtrHKy7Dk6O/p/l4D/JrYI1g1iNfoXv6a+jLK0SJgRZtmm09WgsV3+y4Efke60aT+vhwLwuyXBjVfbKqrQAMKNakJMbqtmHjuQhKewkR1Xwi/Giu6dwOmez0B/BVwXwlAcK+/FvhjspSjq7B6V9t1H2/ScSb5BSerYo8LxCATbDfoC4L7HcAqmT6AbVYRLQJWtGnSrfBcvIXSmpYG7AoN0rcLMCpiVIvIT3Fplmx8SG7demx1b6tcrq0CEh8gJvVdt2F11/v02nK9dzO2kWlRcT1/F/L/jAWhOhf3Nrmw+7AFgMuxWLDUcxMr3j25+7qQLByin3oNz933aizwNVoErGgnCFAEus+EBvCbsA0Zlua83zGHgeB/kw2+I89GBVT/AHwTE9KbXePZ0pT6qF/Vu1hA9EwTsJqP7TN4Y8CYFmGpOmPSqjqCa/AZVnhfC0rc51DschGworUOTnkraBW5bmeICbwC26n7SuqjyvP0J4KBXKYMi2Mng1hu3z3Y6lslOF9egOgSsb9wM9M+MaIqpr3lbSKR6h5f5LGwStBfi/rs4wLXHgHjmoL79xmhA/HNYozRImBFKwCnpGDg+wGbK7AdYy4SQ1mHhR4s91hDUTWDRkGVezGB3OldAwXXOiQgOEb5GulV6kMQ8JjhIFkEfpGOVWsCqv79ut+fxETzuzBN6/eB23VfzXYtH5Sb+lzsmhGwImOq/zstAKkKlsw8X3rKWkwcPp9stW0Z+RU4yzCmg9jmDJsxwfwBLPJ8IZan97aCvjBKFj/VbOXMF7HzrvMQsCkHrEPrJisZ0wiI/TLJd2KC/DCmlf1E7mN/g+fjs0gXtxUtAtZp6cqlDdyzmoBitUBoORacuVZ/LxJ76tMxj/q4p5ClNbIJLB7p2wKpxzXA/ditZdKcFuewkbz7o4H+1CPG1pVzjq0ei0kaPKNFwecbPfsJuayfFVi52LNDAtqJBn3cXdcYFvAaI94jYM1ZYILi3DfHmDo08Aaky/RjAvlK6SvnYcvzK/V6tQET8IMmi9yj0MbFND4C3Ev9il6FbLXRD0nIs1bqpF+KxXZ15jC1rQKSZmxtFc1FcnffBwRYOz0AS8XSmtV4d+cYE8uKgHVqvRCasGmANAJW64wpjPXpF0s5QyxlmYBpuf52NaG6dczT0RsM7DxmViE/Rw+KBXQ3EDdhm4p+TYBR8T476b13BfUblOaxGEoASAUL1Lw0h0GNCKxGmjC0+XKFe0u2104yLc4BVEXPf4DiBYnw2o941xaDRmdmok9Ltk3d+TpO04eX9/ckxStrVTGmPrJVsMUBU1oi0HJsqrNkg/jfEzKoYQ2mQWlQW7GCdYd1DddgwZHdOffl4p4cWIWJypO6xivIDz5Fr3eWeK6pAPplgWvpA+RkCUZ/IRYgOr/JLOyY0R6PtTnrUpuspj7ZmQZMdKSE2xvBpwUmlAM4eZptV9C/qurLVU8+qar/7wDGO+bwQw3DA9Im6O0G6AC20nSm2McqDcblHii5igVOZ+oocNeKOn+lAUualP7yHBaz9BwmkG8Qm3CVGFxayZ9hQZRpMECXClAbre5doCNpIBnMKwlY63QdSQFTnB8Aa/isqljpmqt1b82AxoHNWPAsl+s65pc8R9werPGkXoYR5WVJVNSmLhxnkSbyM9UvzyFb7a4FssekJpFEY3JQ8sZnOmbRw8n7f1ryHM1cN/fwqnoAferQDnAW6kEuEyi5aporNPD7SnT8vL0Bi8TxcTGDQ1jk9l4xqBfEGnZg+W3b9dqRnPsZwQrhbSfLjfO/axkWp9UntpUwtcrBLQKaIiZSJQt5SBsM9g4sJ7FoB5uqnvGArjdvUCzC8v+WlQAad/0Lqa+4mmIxXBe20A8rJd3eucySiqpn+P25wwMg98y7vInb5ar2aWLq0hhzuasu28KB1yKKdds8uw442nGSH0orqFwWpGgASl1C7H79PMNjS0s0GBbrtR495D793qGGcIJ5J1M3TmgU85SUGGSO2j6NxQ5tEHvaJOY01GC2T3J0qo6C97sqBxfKNXqcqZHgZ2Grg2c16Mxu+/gub8ZLCzrTTWR1skKg7hTwr9K15A2Wi7FyNq24ZW6VNdUksBLbgGNFC8JuhXK1w+aaFps3jmoCm36BzYDGy2LPy1gkjdGRgJqnyzp3ruJJKZ3qF105nkgz5ub3ox6g1jHNDymlcRLtZNBREo8GdgtgHEU8JtdoUDOg/wDcQ3APdpEGxGKPJS30HmS/3jOvxXtKSwKSK1Y36DGnI1hVg4NiOC+INT2vY5/eX/S80gYN614fIBOW867NlY95ivrcuUlpV1fq80VA3C0Gtpxsd5qwMy3H4riuVfukOeDagaXsXIQlQIcF9Xqw6P3lLbbPQixJepe0urdi8Ve1Fs5RNiC2XYEpDVz8CvV5qQsF8OfJVTuTLK1rQGNnoTc2TxQz0gJsaDTJH8SqddzdMc1ghW7+LN34PI82VsUgxj2/1rlkvXr/Uj2gDk9wPqwZsMNjQS5kwJ27k2wVrsejr0kBOymrbTR6z5gGyZEAjDZJHN/uuXkjFOeq5V1b2sJzbxRcuVQD+mEdeO7XKwXujbSLbrmb1+ne8lYsXyLXcnHBc3V/r8LyA7+s5+PXuboZSzXqbaFtUP96M7b4kJItfhR1/rzzTrYJYCUlgckJ2g5oFmlsuXg/ty+km0gGvEl+vj5b8ZhSleK81qSBhlVG8imyEUkhu6Th/sT1m45pBKtVmiWvxyK03XJ+p/cQxgRY3R5Q1ciPjJ5OK8uUytpBPdCDcuWc5vSMhPFnBFThTB7WLm8FnPJsuMmA7Jartkkz1RZNKO8RkNVKzHzrgHfovn6e4wrepvYuCgb1NbPrBUyfIItmvwj4DbmDRa5vM7dw2QnoN2OzFJiKPJeQMdU8jWiFwOkMz+tY4pGBpZ7b3srYCfNCy6y4D8nrOCYAGvf+divf7u9h7zjqgZXTdF312BMOa/D1hw+R7TrcdRwglBa4ExwHUictvLdVG9cD3S7AGtIxIWBeoE7i4ntGvVm8rD5V1kZKPNMVWGWHTqzY3pVym1YwdWUxD2h6saoQY1gxvAd0H9cLaF5FFjdVtM184rHv31IfWa8Z/fU6RyeNI+3LaqF5n5kgKyfdE0gDo5z6UIZG7Z964LRYz/BsuXBrqc+O8KvEdniaVDdZ+EBaYkLPG+PjelZJjr475gHRXh175GHsJdsUxU30bqHJVcx1RKYp1kyXS/g6zcK14xh4rSD3bLAK2U4y3R5zPEfa1QE10KCnYx3DdrhxDfWCZpMJsujsPA0rLQGeZUB9nQbqiHSt3qAzJmR1rtbmuHcOWJZjNdqHxK5eRn1lhlTneF7X5kIrur1nd6XE8Z36e42eZdjeR/Rs5jXRTYr6iAsiddVK96iNLqU+MHXsFAFWUTu7mL9uAfsieS+rsZzS87FQlNUUh4m0yjSTAMCH1D9dLulutZfrt06emVD/PqDjoMbAYfX3Ix67Gqf5amweBtQxy+kQ0JxwVyN/V5PjYUiNRLpmM+zJBrsK2WpjSn2Zkomcw6XWjKqxD3kz0A6J2Vvkcm1TByi7BVWVckvDVek7YeKwG9TbgQ9jFURvBT4oN8IHrT65lxepE7rVWL8djggcvqpO+2IJ4Vd491P1NJOkgNltwUouD2lwXtIi4/KDcL+OVTudAD7A1Ej8SU5sD8fjAanJAKi6xJou1v2u0fNxq91u8chpvl1NJIVKztjw+yLedYxqQj0QuGAOhFyw8vN6nw/wE7QWEtJMYG86SXdMw+CdxCoA7CKLoWmVzjcLF6CE1lLWZaCFTt/ovis5oFBr8XvG9Ny2S1x8SgP1aXWQZnsLdlGuHlZCfjRyRcDyf4CP6/enxKh+W0xkkvpVpSUNvmMztkHqXfrcBgH7eRpoaYNB5a5nK/BpbKedcWltTqOZJD9AN2TqE2IE9wL/VZNBRQOyM+fzEycRnHzG5w9IV5ljFbaw8SIB1hqKK16UceEcSxpUex5TPxrST5cYvl+AtN/zDJwm66SMUZrnWDYbo0yTXjstgOUu4D7gDmkaK48DcZNpQunpYlrTwc7SEgzQ7VyzGktJcVR6twTuz9B4C6puilNnkhIsdb90qb/Td1c1u35Y7txt5Oc75i1e7MB2qfkXDc6qwOcrYlgvzelv4cA7CHwJ+KjOh65nja6lrwTr3i+d7dMCz0FvguknP09xbJqBqmiADoih3qT2Xit3eEBHZwBwRcAQtu24AOmgx5BcMPIuTzdyfWufx5ZOdCxMCxDNNGDtB/5Gg+ty6SXHPJ3GZyVuudRFxrq4K+cPu8+MePrPhD7notNraiT3+nigB1R0DS66utfTBVxw26Q+6wTzDnXoAV3bJNnKReq5M77O4ERNF0pR0f9qnr7VaPbx6XknWZDrOnXoxcCfi/XkgVZecGuiGXKDzr8ucN2OqENvwjap+KQ6sGMmLnH6L9TRbyQLGOzwruOAZuZhMZf7sDIvLwTn+rHO9WZsJdClaPhlZI5iAbRfE9vb4TGMZ7DifDuAN+p+/H67T+x0s44nBViPBV5Al55nV44gP3KC4JS31+M8PTcXK7hK7ugN0vEWNBj8eXmlk5pUDnngs0/PxemPu/X/YfXrQf0cLXB7E5ov+Myq3MrpjMM6qA73tRa/vzNYiQh97bzvqlBux2AHHB0eyPgrKQ6QXCKwi13p9mbe8UAvcgmZPdRHBS/wDpcE7XQepz10U7wKNhnMzvM0E78L+HuBTFJC0wPbpeaj6shvFDtZoAH9oEDkfoHBBFOrnybYtlx/okF2vUR259odltu6Qed029AfyTnXuNy79WS5ixdpYlurSeN+LM5mvQZYEoD543LtHsG29bpKbbkJ+KF0s4c1gMOdsFOv/XpznuGwruF4dSh/UFekRb1cbXee+oYTqV24QZX8YGBfiB/2JtV9es7P6niOLNavbC2v5FSzo9kEWOHOvM0GVOp15vEW/OM00ByKXMrUA5xW6P72Fu+76oFhjSw1yN/SvVeD3JWfcXrMYo/RLWZqxQUX2/ZGgcNnW7iurWI8OzXYf6jv2SYGsj0AhKL4qUMCt59Jn3S1qkZ0rl3U5zkWua5uQntAoNQv6WCpvmMjWdWFvCj/RCD5Bd3PZQKHzfp7fwOXzC/Ul3dtw2IiZVhUKAzX9DxcOaHLsEDaG8jfMRvq65uF/XtILGmDjq1qw6163i6DYqRFptR2wHSyAavooZRNXm6k/6RNdIJmOtHJMgecoWDbrNSuq4nlAv3OEXt5iWbnnqATXqoZ+xvqsCFDq+YsFLjl6ETX85WCZ9Msv8w/3xYdlGiPRudKdW0Hqc8rTJq4JY7V/JKpm7KWiWObIAtWxTvfQabuBtSoj80Xc7pc2ty5AquFAuJ+infMLgpc3i+2+Igmh/vFogZL9us5A0gzCVgnooGdrM/NRCO2EsLh62L7xHa+I0C5DHiLtJ413vXXsJIrV0nQzmN44XXUPECqnMCMW2bF93iKsSUlBOpWriUt2QZJjti+m2w1Ni82qipdcaXc2Ut1XCyXtpUds532t1va0zZsNXgjWRJ8uCltUjCRn5YWK47ODOimTWbHfdh26o+pk3+A+tWsdVg6zSZ18Cr1sV7kCLTTlf5zMgbIiQy8472WLvLTUpxsEALVSizU4Br9PJss3Wwe9ZHjYbhGkuN27pVr/7B0xEeZuhktxwHkEbCizTjAuYWEvVhZ46sxoduxIxdp/jgWguDOcbjAnRmOHX2K9TO1WkdCpifuJAuwvQZLyHZ5sfMLJoUkh0kd0bl26KerFLtFE84mTVAEIDedE0wErGgnHcTcat16uYhrycqtpJjo/RosKPN5/d+l+oQz81FiFU3/mbhSPAM5/X8dFo2/TW75y6VRLfZYbt6KXujuHcBWXR/Cdir6JbaiV1TL3mdRsa0iYLXt4BrGAh5vZWp9KDegNpMtfe+jXtSeoHEhwNPVVuQAVkUM6p1kBQ8HgokkLy7KifW7NXk8Knf+CTGp/YGrftqK5BGw5rY5N2Mj8F0sF2+B17mXAm/XTP4TT4MJQW8yDoh/BaRJTLu6gizJ2jdXgdYFAvtgEupRo5ogNmArei5MYzNTw3OOtwJHtAhYbWcTWACuqx/lBlIHFnn+Lg0cV84mD/hOd6ByrlYfpv+9jqzmfBK8t8cDFn9lzuV6bsF0qI3e8ZxeS4PvjAwqAtZpZW7QPIUVujtH7MANgn65izuxOJ1wO6uUrAbX6ehS+5rQ+Zg+9Tas4kNXg+ftTxYjWHDtA9hGrY8IpA4wdVU2/M5oEbBOW/seFqV+EVmBOzBR+K3SUS4sYFin0wzvC9hVLAThxVilh5cJ1Bt9dgRb1dsod/tJbEX2SSzwdrKBqxeZVASsyLLIkph/IpdmbdBuV0k3qZ3mz8pP5TkHS2V6nUB+SQGr8oF9Hyaafx9LZ3qMqaEiUY+KgBWtpD2iAbWS+h1ukgCs/OhxVyd/LrspfqDnGWTFAl9DfR5fUW2zQ3K7v48lZz9IfT5j2U1Eo0XAiubZJqws8XWU22zB7bJcncOA5cCkAwvzeDtWHeEsLDi0TJXaZ7Aabl8hS56OEeYRsKKdoFs4hFVMeFcJwHKfcRtdzmVWtVyu8vux1dRa4LI1y398EiufvJ+puxlFi4AV7QRsAyYCX1NiQDuWlcyxZ+Bc3Cq2O9P7sPSZlWT1pWgCVv5K6hYsSyAhrvBFwIo2rSzrEFZy5Fbqt+dqNLjnGrOaxGLO3gL8plhVZwGregGLmxrFgm1XMXVHp0PU5wNGi4AVbZpsEgtv+AG2x2BPAWi5/3XMoYHoGNEKbDef92ArptUC9+9pTER/RIB2Axbe4O8C5PbQixYBK9pJYlkbgG9iq2FrS7hPc6FtHVgtA/4QuB0rMRyyKrdLzo8xEf1+rJLFtVj4RzUAth3UJ41Hi4AVbZptAovJeq4EYHVQbr/CdgCrfuCP5Ab257CqI1hIwhewdKYd3utLsWJ7C6hfxHgcWyWMFgEr2kliWWBJto9gYnNCcy2r3cGqG/hdrKBhf3C/41h1hG9h1S1+imlWbsWvhlUFvZQsxCPBysh8D4vB8p9ttAhY0aZ5EI9i+W27sWX9osHWzjFYDpBqAqrfwwJD/Xsdl9v3EWwvxMEA6FzRw/PJ4rLcKuNTWKnpYZrvrB0tAla0E7SHsOJwy5i7K1wpJpZ/EAtb8FfzxrDo9L/Bdnb2wchnYFfluM5HsRLFz0R21Z5WiY+gLd3C72OVA4oGXbVN29YxnsVY+MJ5OW7v/cCfYgsQ7jPhlmUXYEX51gbPbwu2K80oMZwhAla0GRnQI3Jpnm0AarU2HZDu+m8GXkn9phGJwPoTWIhHJfiMu99OrJzMq6kPZTiELVr8LHajCFjRZtY2eG5NHjCFW9i3CxiDaU43iiX5r+3CNui4m+I9FVNsG/jXktUJc/Y8loqzi6hdRcCKNqMM5BDZ8n3ewKvRvmENPViNr04y7WoC+DkWurA/577dyuASbCv7y7z3JJjutR6L04rWxhZF9/Z0CyfI389urvTJgQCUxrFUm81M3VzUaVgVLL/wNurjtSax8Ie7MN0vsqvIsKKdAhulPpnXt/E2HpSuRLHvJlbFnlaSlSNOvd97Md3qdixv0Ne1ngM+hm3qEcEqMqxop8iOYlHbvQUsrF1tCNObbqK+7tUVcvcqWCyVyy+8Su+9hfpy0QlWQvqLwCcFgnFlMAJWtFNke7EA0rNzXmvHsAbHFo9isWa/guUNOka0FivUtxrTsxKB2PVY4b6O4DyDmED/cZ0zsqsIWNFOoT2OBUEux1JY/C2maOPBmWJxZq/S4cpCu23kF2OriBVMqwp3Z65gIvu3gb/CKrZGsJojFjWs9hzQCVYx8y6sSoEPUAkmyI+08b09KlduM1PLFvdiWtZy/e7vEFTBtL37gL8UqFciWEXAinbqbRz4BlYjy7VlBdsFZj1Zvae0Te/tbuCrZJuVJuTXXK94rx3Gyst8SM8gVhONLmG0WcRE9gF/R1aZ4CAWBf5PGvTt6Ar59/ZhsaybMa1uKaZrOTfwKLbh6SYs7eYXAvGt0Q2cm5akaWzTdm4/DcpFGtCj2DL+kTkwYP3rXyVAvhwrF7NK9/okFgz6kFzj4ZzPRouAFW2WDmzm2IAN72M+VqWiDwt/2E2WBE7gMkabg/b/AblpqZfqPIXZAAAAAElFTkSuQmCC") center / contain no-repeat; mask: url("data:image/png;base64,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") center / contain no-repeat; }
+/* Botó per tornar a dalt */
+.totop { position: fixed; z-index: 12; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--accent); background: color-mix(in srgb, var(--bg) 88%, transparent); color: var(--accent);
+  font: 800 22px/1 var(--body); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; box-shadow: 0 4px 14px rgba(0,0,0,.5);
+  transition: opacity .2s, transform .2s; }
+.totop[hidden] { display: grid !important; opacity: 0; transform: translateY(12px); pointer-events: none; }
+.clock { font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--accent); text-shadow: 0 0 10px rgba(var(--accent-rgb), .3); }
+.clock small { font-size: .34em; color: var(--muted); text-shadow: none; margin-left: 4px; }
+.statusrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.status .nw { white-space: nowrap; }
+.status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
+.status strong { color: var(--ink); font-weight: 700; }
+/* Comptador fins al final del festival */
+.endleft { display: inline-block; padding: 1px 8px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); white-space: nowrap; }
+.endleft b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.endat { white-space: nowrap; }
+.minibar .mleft { flex: none; color: var(--accent); font-size: var(--fs-xs); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.statusrow .btn { flex: none; padding: 0 14px; margin-left: auto; }
+.dstnote { color: var(--ink); font-size: var(--fs-s); font-weight: 700; display: flex; gap: 7px; align-items: baseline; }
+.dstnote::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--now); flex: none; }
+.notice { box-sizing: border-box; background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); border-radius: 6px; padding: 10px 12px; font-size: var(--fs-m); font-weight: 600; white-space: pre-line; }
+.notice b { display: block; font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; color: var(--mid-red); }
+.sim-badge { align-self: flex-start; min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer; color: #fff; font: 800 var(--fs-xs)/1 var(--body); letter-spacing: .06em;
+  background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); }
+
+/* Barra fina fixa (surt quan el rellotge gran ja no es veu) */
+.minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--accent);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4px); padding-bottom: 4px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  min-height: var(--barh); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+.minibar .mclock { font: 900 22px/1 var(--title); font-stretch: 125%; color: var(--accent); font-variant-numeric: tabular-nums; }
+.minibar .mnext { flex: 1; min-width: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.minibar .round { width: 38px; height: 38px; }
+.minibar .mnext b { color: var(--fav); }
+.minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
+.minibar .btn { min-height: 36px; padding: 0 10px; }
+
+h2 { margin: 0; font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h2 span { color: var(--accent); }
+.shead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dj i:not(.imp), .who i:not(.imp), .blk .n i:not(.imp), .after b i:not(.imp), .nm i:not(.imp) { font-style: normal; color: var(--accent); }
+i.imp { color: #0b0b0b; }
+
+/* Importància: quadrat de color amb el número (no es confon amb la ★ ni amb els canvis) */
+.imp { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 3px; background: var(--tc); color: #0b0b0b; font: 800 10px/1 var(--body);
+  margin-right: 6px; vertical-align: .1em; flex: none; font-style: normal; text-transform: none; }
+.scale { display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap; color: var(--muted); font-size: var(--fs-xs); margin-top: 10px; }
+.scale .imp { margin-right: 0; }
+
+/* Ahora suena */
+.rows { display: flex; flex-direction: column; gap: 6px; }
+.row { order: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; column-gap: 10px; align-items: center;
+  background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px 10px 0 10px; overflow: hidden; }
+.row.live { order: 0; border: 2px solid var(--accent); }
+.row.hide, .row.closed { display: none; }
+.row img.logo, .row svg.logo { width: 56px; height: 30px; object-fit: contain; filter: invert(1) hue-rotate(180deg); color: var(--ink); }
+.row svg.logo { filter: none; }
+.row .mid { min-width: 0; padding-bottom: 8px; }
+.row .sn { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row.live .sn::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; animation: pulse 1.6s ease-in-out 8; }
+@keyframes pulse { 50% { opacity: .25; } }
+.row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
+.row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+.row.idle .dj { color: var(--muted); font-size: var(--fs-m); }
+.row.idle.mine .dj { color: var(--ink); font-size: var(--fs-l); }
+.row .after { font-size: var(--fs-s); color: var(--muted); margin-top: 2px; }
+.row .after b { color: var(--ink); text-transform: uppercase; }
+.row .right { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
+.row .left { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.row .left b { display: block; color: var(--accent); font-size: var(--fs-m); }
+.row .left span { font-size: var(--fs-xs); color: var(--muted); }
+.row .bar { grid-column: 1 / -1; height: 4px; margin: 0 -10px; background: var(--rule); }
+.row .bar > div { height: 100%; background: var(--accent); width: 0; }
+.closedline { color: var(--muted); font-size: var(--fs-s); margin: 8px 2px 0; }
+.closedline b { color: var(--ink); font-weight: 700; }
+.underrows { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Full per triar els meus artistes (a sobre de tot, amb «Listo») */
+.sheet { position: fixed; inset: 0; z-index: 12; background: var(--bg); display: flex; flex-direction: column; }
+.sheet[hidden] { display: none !important; }
+.sheet header { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--accent);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+.sheet header h2 { font-size: var(--fs-l); }
+.sheet header h2 span { color: var(--fav); }
+.sheet .body { flex: 1; overflow: auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 90px) max(16px, env(safe-area-inset-left, 0px)); overscroll-behavior: contain; }
+.sheet .foot { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); display: flex; justify-content: center;
+  padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 14px); }
+.sheet .foot .btn { min-width: 60%; }
+.pick h3 { margin: 16px 0 4px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pick ul { list-style: none; margin: 0; padding: 0; }
+.pick li { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.pick li .tm { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.pick li .nm { font: 800 var(--fs-s)/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
+.pick li.on .nm { color: var(--fav); }
+.pick .pastnote { color: var(--muted); font-size: var(--fs-xs); margin: 12px 0 0; }
+
+/* Mode "Només els meus artistes": a la graella la resta queda apagada (es pot tocar per afegir-la) */
+.mine-mode .blk:not(.fav) { opacity: .3; }
+.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--accent-dim); }
+.mine-mode .blk:not(.fav) { opacity: .45; }
+
+/* A continuación: agrupat per hora */
+.upnext { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.upnext li.grp { display: flex; gap: 8px; align-items: baseline; padding: 12px 0 4px; border: 0; font-variant-numeric: tabular-nums; }
+.upnext li.grp b { font-size: var(--fs-m); }
+.upnext li.grp span { font-size: var(--fs-s); color: var(--accent); }
+.upnext li.it { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.upnext li.fav .who { color: var(--fav); }
+.upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
+.upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
+.upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
+.upnext .where { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
+.empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
+.note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.howto { margin-top: 8px; color: var(--muted); font-size: var(--fs-s); }
+.howto summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+.howto p { margin: 6px 0 0; }
+
+/* Canvis de l'organització: magenta (un color que no fa servir res més) */
+.chgtag { display: inline-block; margin-top: 3px; font: 800 var(--fs-xs)/1.3 var(--body); letter-spacing: .03em; text-transform: uppercase; color: #2a0022; background: var(--chg); border-radius: 3px; padding: 1px 6px; }
+.who .chgtag, .nm .chgtag { display: table; }
+
+/* Graella */
+.tlbox { position: relative; }
+.tlbox::after { content: ""; position: absolute; top: 2px; right: 2px; bottom: 2px; width: 22px; border-radius: 0 6px 6px 0; pointer-events: none;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--bg) 85%, transparent)); z-index: 9; }
+.tlbox.atend::after { display: none; }
+.gut span.near { visibility: hidden; }
+.after .when { white-space: nowrap; }
+.tl-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px;
+  border: 2px solid var(--rule); border-radius: 8px; background: var(--bg); overscroll-behavior-x: contain; overscroll-behavior-y: auto;
+  scroll-snap-type: x proximity; scroll-padding-left: var(--gut); scroll-margin-top: calc(var(--top) + 8px); }
+.tl { display: grid; grid-template-columns: var(--gut) repeat(5, minmax(108px, 1fr)) minmax(92px, .8fr) 14px; min-width: calc(var(--gut) + 5 * 108px + 92px + 14px); position: relative; }
+.hd { position: sticky; top: 0; z-index: 7; padding: 8px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  background: var(--paper); border-left: 2px solid var(--bg); scroll-snap-align: start; }
+.hd img { display: block; width: 100%; height: 34px; object-fit: contain; }
+/* Logos en color (personatges del festival): més grans, amb el nom a sota i sense invertir a les files */
+.colorlogos .hd { height: 72px; padding: 4px 4px 3px; }
+.hd.color { flex-direction: column; gap: 2px; }
+.hd.color img { height: 46px; }
+.hd.color span { color: #111; font: 900 9px/1.05 var(--cond); font-stretch: 100%; letter-spacing: .03em; text-transform: uppercase; text-align: center; }
+.colorlogos .row img.logo, .colorlogos .upnext img.logo { filter: none; height: 40px; }
+.colorlogos .blk.ridesblk > span { top: 82px; }
+.colorlogos .blk.ridesblk > span.t { top: 98px; }
+.hd.rides { flex-direction: column; gap: 1px; color: #111; text-align: center; font: 900 10px/1.1 var(--display); font-stretch: 105%; letter-spacing: .04em; text-transform: uppercase; }
+.hd.rides svg { width: 34px; height: 24px; }
+.blk.ridesblk { cursor: default; border-style: solid; justify-content: flex-start; overflow: visible; }
+/* El bloc fa 13 h: el text es queda enganxat a dalt mentre es desplaça la graella */
+.blk.ridesblk > span { position: sticky; top: 60px; }
+.blk.ridesblk > span.n { padding-top: 6px; }
+.blk.ridesblk > span.t { top: 76px; }
+.blk.ridesblk .n { font-size: 12px; }
+.corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
+.corner { left: 0; }
+.gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
+.gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
+.gut span[data-n] { color: var(--now); }
+body.offline .status::after { content: " · sense connexió (horari desat)"; color: var(--muted); }
+.gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
+.gut .nowlbl { left: 2px; right: 2px; text-align: center; background: #e8253a; color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
+.col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
+.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); cursor: pointer; touch-action: manipulation;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 9px; overflow: hidden; gap: 1px; }
+.blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
+.blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
+.blk .n { font: 900 12px/1.08 var(--cond); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
+.blk .s { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk.tiny .s { display: none; }
+.blk.tiny .t { font-size: 10px; }
+.blk.tiny .n { line-height: 1; }
+/* Importància per mida (impColors: false): concerts destacats, el que hi ha entre concerts més discret */
+.blk.main { border-width: 2px; }
+.blk.main .n { font-size: 14px; }
+.blk.main:not(.on):not(.past):not(.fav) { background: color-mix(in srgb, var(--accent) 14%, #000); }
+.blk.minor:not(.on):not(.fav) { background: transparent; border-style: dashed; border-color: color-mix(in srgb, var(--muted) 45%, var(--bg)); }
+.blk.minor .n { font-size: 10.5px; font-weight: 700; }
+.blk.minor.on .n { font-size: 12px; }
+.blk.minor:not(.on):not(.fav) .n { color: var(--muted); }
+.row .dj.minor { font-size: var(--fs-m); color: var(--muted); }
+.nmc.minor, .nm.minor { font-size: .85em; color: var(--muted); }
+/* Si el nom no hi cap: primer fora subtítol, després l'hora, i al final 2 línies amb … */
+.blk.fit-s .s, .blk.fit-t .t { display: none; }
+.blk.fit-z { gap: 0; padding-top: 1px; padding-bottom: 1px; }
+.blk.fit-z { padding-left: 7px; padding-right: 3px; }
+.blk.fit-z .n { font-size: 10.5px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blk.fit-z .t { font-size: 9.5px; line-height: 1; }
+.blk.fit-c .n { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.blk.past { background: var(--bg); border-color: color-mix(in srgb, var(--rule) 55%, var(--bg)); }
+.blk.past .n, .blk.past .t, .blk.past .n i:not(.imp) { color: color-mix(in srgb, var(--muted) 62%, var(--bg)); }
+/* En directe: fons fosc i vora del festival (la franja d'importància i la línia d'ara es continuen veient) */
+.blk.on { border: 2px solid var(--accent); background: var(--accent-deep); box-shadow: 0 0 14px rgba(var(--accent-rgb), .45); z-index: 5; }
+.blk.on .n { color: var(--accent); }
+.blk.on .t, .blk.on .s { color: var(--ink); }
+/* Meu i sonant ara: el cas més important, ple */
+.blk.on.fav { background: var(--accent); }
+.blk.on.fav .n, .blk.on.fav .n i:not(.imp), .blk.on.fav .t, .blk.on.fav .s { color: var(--accent-ink); }
+.blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); opacity: .7; z-index: 0; display: none; }
+.blk.on .pl { display: block; }
+.blk.fav { border-color: var(--fav); }
+.blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
+.blk.on.fav::after { color: var(--accent-ink); }
+.blk.chg { border-style: dashed; border-color: var(--chg); box-shadow: inset 0 0 0 2px var(--chg); }
+.blk.chg.on { box-shadow: inset 0 0 0 2px var(--chg), 0 0 14px rgba(var(--accent-rgb), .45); }
+.chgw { color: var(--chg); font-weight: 800; }
+.blk.on.fav .chgw { color: #5a004a; }
+.closedtag { position: absolute; left: 3px; right: 3px; text-align: center; font-size: var(--fs-xs); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.nowline { grid-column: 2 / 8; grid-row: 2; align-self: start; height: 0; border-top: 2px solid var(--now); z-index: 4; position: relative; pointer-events: none; box-shadow: 0 0 8px var(--now); }
+.legend { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
+.legend.upd { color: var(--ink); }
+
+/* Avisos emergents: groc = meus artistes, paper i vermell = organització, fosc = informació */
+.toasts { position: fixed; z-index: 13; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.toast { pointer-events: auto; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; gap: 8px; align-items: center;
+  border-radius: 10px; padding: 8px 8px 8px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.6); font-size: var(--fs-m); }
+.toast.mine { background: var(--fav); color: #1a1400; }
+.toast.org { background: var(--paper); color: #111; border-left: 6px solid var(--mid-red); }
+.toast.info { background: color-mix(in srgb, var(--panel) 80%, var(--line)); color: var(--ink); border: 1.5px solid var(--line); }
+.toast b { text-transform: uppercase; }
+.toast .msg { flex: 1; min-width: 0; }
+.toast .act { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; font-weight: 800; cursor: pointer; }
+.toast .x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(127,127,127,.18); font-size: 18px; cursor: pointer; }
+
+/* Organización i Configuración */
+.admin, .tools { border-top: 1px solid var(--rule); padding-top: 16px; }
+.tools { display: flex; flex-direction: column; gap: 16px; color: var(--muted); font-size: var(--fs-s); }
+.tools > div, .tools > details { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.tools h3, .admin h3 { margin: 0; color: var(--ink); font-size: var(--fs-s); font-weight: 700; }
+.cfgsel { display: flex; flex-direction: column; gap: 6px; color: var(--ink); font-weight: 700; font-size: var(--fs-s); margin-top: 6px; }
+.cfgsel select { font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 10px; max-width: 260px; }
+.cfgchk { display: flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 600; font-size: var(--fs-s); min-height: 44px; }
+.cfgchk input { width: 24px; height: 24px; flex: none; accent-color: var(--accent); }
+.hint { color: var(--ink); font-size: var(--fs-s); border-left: 3px solid var(--mid-red); padding-left: 8px; }
+.row2 { display: flex; flex-wrap: wrap; gap: 8px; }
+.langsel .btn[aria-current="true"] { border-color: var(--accent); color: var(--accent); }
+.admin label { display: block; color: var(--ink); font-size: var(--fs-s); font-weight: 700; margin: 10px 0 6px; }
+.admin input[type=text], .admin input[type=password], .admin select, .admin textarea {
+  font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 44px; box-sizing: border-box; width: 100%; }
+.admin textarea { resize: vertical; }
+.pwrow { display: flex; gap: 8px; }
+.pwrow input { flex: 1; min-width: 0; }
+.orgmenu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.orgmenu .btn { padding: 0 8px; }
+.orgmenu .btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.panel { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; }
+.edrows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.edrow { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px; }
+.edrow.bad { border-color: var(--now); }
+.edtimes { display: flex; align-items: center; gap: 6px; }
+.edtimes select { flex: 1; min-width: 0; }
+.edtimes span { color: var(--muted); }
+.edmore { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 6px; }
+.edrow .del { border: 1.5px solid var(--line); background: transparent; color: var(--t5); border-radius: 999px; padding: 0 12px; min-height: 44px; font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.edbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.edmsg { margin-top: 10px; font-size: var(--fs-s); color: var(--accent); min-height: 1.2em; }
+.edmsg.bad { color: var(--now); }
+.linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: var(--fs-s); padding: 10px 0; cursor: pointer; }
+.simbox summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.sim { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 44px; font-weight: 600; }
+.sim input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); }
+.sim input[type=range] { width: 100%; accent-color: var(--accent); }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.steps button { font: 700 var(--fs-s) var(--body); background: transparent; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.sim output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; font-size: var(--fs-m); }
+@media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } .orgmenu { grid-template-columns: 1fr 1fr; } }
+@media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } }
+@media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
+/* Il·lustracions del festival (FEST.deco, tot opcional). Només fora de la informació: mai a les files, la graella ni els avisos */
+.hdeco header.hero { position: relative; }
+.hdeco header.hero::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% + 2px); height: 28px; pointer-events: none;
+  background: var(--deco-strip) round left top / auto 28px; background-repeat: round no-repeat; }
+.hico { height: 1.35em; width: auto; vertical-align: -.3em; margin-right: 6px; }
+.mascot { display: flex; align-items: center; gap: 16px; padding: 16px; margin-bottom: 10px; border: 2px solid var(--accent); border-radius: 12px; background: var(--panel); }
+.mascot[hidden], .empty img[hidden], .mascot img[hidden] { display: none; }
+.mascot img { width: 104px; height: 104px; object-fit: contain; flex: none; }
+.mascot .mtxt { min-width: 0; display: grid; gap: 4px; }
+.mascot .mk { font: 800 var(--fs-xs)/1.2 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.mascot .mbig { font: 900 30px/1 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
+.mascot .msub { color: var(--muted); font-size: var(--fs-s); line-height: 1.35; }
+.mascot a, .credit a { color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
+/* Peu: contacte */
+.credit { margin: 28px 0 8px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--fs-s); text-align: center; }
+.empty.withdeco { display: flex; align-items: center; gap: 12px; }
+.empty img { width: 84px; height: 84px; object-fit: contain; flex: none; }
+.sheet .body .note.withdeco { display: flex; align-items: center; gap: 12px; }
+.sheet .body .note img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+@media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
+</style>
+<style>/* colors i lletres del festival */
+@font-face{font-family:"Blogh";src:url("img/Blogh.otf");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-Bold.ttf");font-weight:700;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-ExtraBold.ttf");font-weight:800 900;font-display:swap}
+@font-face{font-family:"Bricolage Cond";src:url("img/Bricolage-SemiCondensed-SemiBold.ttf");font-weight:600 900;font-display:swap}
+:root{--accent:#ff7a1a;--accent-rgb:255, 122, 26;--accent-dim:#8f430f;--accent-deep:#2e1606;--accent-ink:#1a0b02;--bg:#0a0604;--panel:#160e09;--ink:#fdf4e3;--muted:#c9b29a;--rule:#6b3d1c;--line:#8a5428;--display:"Bricolage", "Archivo", sans-serif;--title:"Blogh", "Bricolage", sans-serif;--cond:"Bricolage Cond", "Bricolage", sans-serif}</style>
+</head>
+<body>
+
+
+<div class="minibar" id="minibar" hidden>
+  <span class="mclock" id="mclock"></span>
+  <span class="mleft" id="mleft" hidden aria-label="Temps fins que acaba el festival"></span>
+  <span class="mnext" id="mnext"></span>
+  <button class="sim-badge" id="simBadge2" type="button" hidden>PROVA ✕</button>
+  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Només els meus artistes">☆</button>
+  <button class="btn go" id="goNow2" type="button">Ara</button>
+</div>
+
+<div class="wrap">
+  <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
+  <header class="hero">
+    <div class="brandline"><b>Midnight</b> — <span id="festName">Bass in the Park</span><i class="firma" role="img" aria-label="Puig"></i></div>
+    <button class="sim-badge" id="simBadge" type="button" hidden>MODE PROVA ✕ Sortir</button>
+    <div class="clock" id="clock">--:--<small>--</small></div>
+    <div class="statusrow">
+      <div class="status" id="status"></div>
+      <button class="btn go" id="goNow" type="button">Anar a ara</button>
+    </div>
+    <div class="dstnote" id="dstnote" hidden></div>
+    <div class="notice" id="notice" role="status" hidden></div>
+  </header>
+
+  <section id="ahora">
+    <div class="shead">
+      <h2>Ara <span>sona</span></h2>
+      <button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Només els meus artistes</button>
+    </div>
+    <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
+    <div class="rows" id="rows"></div>
+    <p class="empty" id="rowsEmpty" hidden></p>
+    <p class="closedline" id="closedLine" hidden></p>
+    <div class="underrows">
+      <button class="btn" id="pickOpen" type="button">Triar els meus artistes <span id="pickCount"></span></button>
+    </div>
+    <div class="scale" aria-label="Importància, de 5 (més) a 1 (menys)">Importància:
+      <i class="imp" style="--tc:var(--t5)">5</i><i class="imp" style="--tc:var(--t4)">4</i><i class="imp" style="--tc:var(--t3)">3</i><i class="imp" style="--tc:var(--t2)">2</i><i class="imp" style="--tc:var(--t1)">1</i>
+      de més a menys</div>
+  </section>
+
+  <section id="siguiente">
+    <div class="shead"><h2>A <span>continuació</span></h2></div>
+    <ul class="upnext" id="upnext"></ul>
+    <p class="note">☆ = els meus artistes</p>
+    <details class="howto">
+      <summary>Com funcionen els avisos</summary>
+      <p>Amb l’app oberta i la pantalla encesa, t’avisem dels teus artistes abans que comencin i quan comencen. Quant abans, i si vols notificacions, ho tries a Configuració.<span id="howLocked"> Amb el mòbil bloquejat no arriben.</span></p>
+    </details>
+  </section>
+
+  <section id="horario">
+    <h2 style="margin-bottom:10px">Horari</h2>
+    <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
+    <p class="legend" id="gridLegend">Línia vermella = ara. Les 2:00 surten dues vegades pel canvi d’hora (1a i 2a).</p>
+    <p class="legend upd" id="updated" hidden></p>
+    <p class="legend" id="chgLegend" hidden><span class="chgtag">Canvi</span> = canviat per l’organització (vora rosa a l’horari).</p>
+  </section>
+
+  <section class="admin" id="admin" hidden>
+    <h2>Organització</h2>
+    <form id="pwForm" class="pwform">
+      <label for="pw">Canvis d’última hora (només organització)</label>
+      <div class="pwrow">
+        <input type="password" id="pw" autocomplete="current-password" placeholder="Contrasenya" required>
+        <button type="submit" class="btn">Entrar</button>
+      </div>
+      <div class="hint" id="pwMsg" hidden></div>
+    </form>
+    <div id="editor" class="editor" hidden>
+      <div class="orgmenu">
+        <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horari</button>
+        <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Avís per a tothom</button>
+        <button type="button" class="btn" id="edClose">Sortir</button>
+      </div>
+
+      <div class="panel" id="pHorario" hidden>
+        <label for="edStage">Escenari</label>
+        <select id="edStage">
+        </select>
+        <div id="edRows" class="edrows"></div>
+        <button type="button" class="btn" id="edAdd">+ Afegir actuació</button>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave">Desar i publicar</button></div>
+        <p class="note">Ningú veu els canvis mentre edites. Quan toques «Desar i publicar», els veuran tots els mòbils en 1 o 2 minuts.</p>
+        <button type="button" class="linkbtn" id="edReset">Tornar a l’horari del cartell</button>
+      </div>
+
+      <div class="panel" id="pAviso" hidden>
+        <label for="edNotice">Avís per a tothom (surt a dalt, sota l’hora)</label>
+        <textarea id="edNotice" rows="3" placeholder="Ex.: Els Pets comencen 30 min tard"></textarea>
+        <div class="edbar"><button type="button" class="btn primary" id="edSave2">Desar i publicar</button></div>
+        <p class="note">Per treure l’avís, esborra el text i publica. Ho veuran tots en 1 o 2 minuts.</p>
+      </div>
+
+      <div class="edmsg" id="edMsg" role="status"></div>
+    </div>
+  </section>
+
+  <section class="tools" id="config">
+    <h2>Configuració</h2>
+    <p class="note" style="margin:0">Això només afecta aquest mòbil.</p>
+    <div>
+      <button class="btn" type="button" id="wake" aria-pressed="false">Mantenir la pantalla encesa</button>
+      <div class="hint" id="wakeHint" hidden></div>
+    </div>
+    <div class="notif" role="group" aria-labelledby="notifH">
+      <h3 id="notifH">Notificacions</h3>
+      <div class="row2">
+        <button class="btn" type="button" id="notifOn">Activar les notificacions</button>
+        <button class="btn" type="button" id="notifTest">Enviar-ne una de prova</button>
+        <button class="btn" type="button" id="notifReset">Restablir les notificacions</button>
+      </div>
+      <div class="hint" id="notifMsg" hidden></div>
+      <label class="cfgsel" for="prefBefore">Avisar-me dels meus artistes
+        <select id="prefBefore">
+          <option value="0">No avisar</option><option value="5">5 min abans</option><option value="10">10 min abans</option><option value="15">15 min abans</option><option value="20">20 min abans</option><option value="30">30 min abans</option>
+        </select>
+      </label>
+      <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisar-me dels canvis d’horari i dels avisos de l’organització</label>
+      <p class="note" style="margin:0" id="notifNote"><b>Amb el mòbil bloquejat no arriben:</b> només amb l’app oberta a la pantalla (per a això, «Mantenir la pantalla encesa»). A l’iPhone, les notificacions necessiten l’app afegida a la pantalla d’inici (iOS 16.4 o més nou).</p>
+    </div>
+    <div>
+      <button class="btn" type="button" id="appUpdate">Actualitzar l’app</button>
+      <div class="hint" id="updMsg" hidden></div>
+      <p class="note" id="appVer" style="margin:0"></p>
+    </div>
+    <div class="langsel" role="group" aria-label="Idioma / Idioma">
+      <h3>Idioma</h3>
+      <div class="row2"><a class="btn" href="index.html" data-lang="es" hreflang="es">Castellano</a><a class="btn" href="ca.html" data-lang="ca" hreflang="ca">Català</a></div>
+    </div>
+    <details class="simbox">
+      <summary>Mode prova (simular una hora del festival)</summary>
+      <div class="sim">
+        <label><input type="checkbox" id="simOn"> Simular una hora (només en aquest mòbil, sense notificacions)</label>
+        <div id="simCtl" class="sim" hidden>
+          <input type="range" id="simRange" aria-label="Hora simulada">
+          <div class="steps" id="simSteps">
+            <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+          </div>
+          <div class="steps" id="simPresets"></div>
+          <output id="simOut"></output>
+        </div>
+      </div>
+    </details>
+  </section>
+  <footer class="credit">Algun suggeriment o millora? <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></footer>
+</div>
+
+<div class="sheet pick" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH" hidden>
+  <header>
+    <h2 id="sheetH">Els meus artistes <span id="sheetCount"></span></h2>
+    <button class="btn primary" id="sheetDone2" type="button">Fet</button>
+  </header>
+  <div class="body">
+    <p class="note">Marca amb ☆ els artistes que cobreixes. Amb «Només els meus artistes» només et sortiran aquests. Es desen en aquest mòbil.</p>
+    <div id="pickList"></div>
+  </div>
+  <div class="foot"><button class="btn primary" id="sheetDone" type="button">Fet</button></div>
+</div>
+
+<button class="totop" id="toTop" type="button" aria-label="Tornar a dalt" hidden>↑</button>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+document.documentElement.lang = 'ca';
+
+/* ==== FESTIVAL ==== */
+// Tot el que canvia d'un festival a un altre és dins d'aquest bloc. Cada festival en té una còpia a
+// festivals/<id>/festival.js, i `python3 festival.py <id>` la posa aquí i copia els seus logos a img/.
+const FEST = {
+  id: 'castanyada-2026',        // també separa els canvis de l'organització (changes.json) d'un festival a un altre
+  key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
+  name: 'La Castanyada',
+  banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
+  date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
+  dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
+  start: '12:00', end: '05:00',
+  accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
+  // Colors de base propis (opcional): els del Bass eren verdosos
+  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428',
+    '--display': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
+  // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
+  fonts: [
+    { family: 'Blogh', file: 'Blogh.otf', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
+    { family: 'Bricolage', file: 'Bricolage-Bold.ttf', weight: 700 },
+    { family: 'Bricolage', file: 'Bricolage-ExtraBold.ttf', weight: '800 900' },
+    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.ttf', weight: '600 900' },
+  ],
+  // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
+  deco: {
+    strip: 'img/deco-strip.png',      // garlanda que penja sota la capçalera (es repeteix)
+    before: 'img/deco-before.png',    // abans de començar
+    end: 'img/deco-end.png',          // quan s'ha acabat
+    empty: 'img/deco-empty.png',      // «Només els meus artistes» sense cap artista triat
+    done: 'img/deco-done.png',        // «Només els meus artistes» quan ja no en queda cap per cobrir
+    sheet: 'img/deco-sheet.png',      // full «Mis artistas»
+    heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
+  },
+  // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
+  impColors: false,             // la importància (0–5) es veu per la mida: 5 = concert destacat, 1 = entre concerts
+  ridesName: 'Atraccions',
+  // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
+  rides: [
+    { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
+    { name: 'Calçot mecànic', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
+    { name: 'Túnel del Terror', from: '18:30', to: '00:30', img: 'img/ride-tunel.png' },
+  ],
+  // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
+  colorLogos: true,
+  // Escenaris: el logo és img/<id>.png
+  stages: [
+    { id: 'principal', name: 'Escenari Principal' },
+    { id: 'festa', name: 'Escenari Festa Major' },
+    { id: 'photo', name: 'Photocall' },
+  ],
+  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
+  sets: {
+    principal: [
+      ['12:30', '13:10', 'Juls', 5],
+      ['13:30', '14:10', 'Ven’nus', 5],
+      ['14:30', '15:30', '31 FAM', 5],
+      ['16:00', '17:15', 'Els Amics de les Arts', 5],
+      ['17:45', '19:00', 'Els Pets', 5],
+      ['19:30', '20:40', 'La Ludwig Band', 5],
+      ['21:10', '22:30', 'Lax’n’Busto', 5],
+      ['22:30', '23:00', 'DJ K-Zu', 1],
+      ['23:00', '00:15', 'Els Catarres', 5],
+      ['00:15', '00:45', 'DJ K-Zu', 1],
+      ['00:45', '01:55', 'The Tyets', 5],
+      ['01:55', '02:25', 'Anna Gisbert', 1],
+      ['02:25', '03:35', 'Figa Flawas', 5],
+      ['03:35', '04:00', 'Anna Gisbert', 1],
+      ['04:00', '05:00', 'Doctor Prats', 5],
+    ],
+    festa: [
+      ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
+      ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
+      ['17:15', '17:45', 'Lo Pau de Ponts', 0],
+      ['19:00', '19:30', 'Lo Pau de Ponts', 0, 'Havaneres i cremat popular'],
+      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
+    ],
+    photo: [
+      ['17:40', '18:00', 'Cabronàs', 0],
+      ['18:00', '18:20', 'Nena Posseïda', 0],
+      ['18:20', '18:40', 'Cabronàs i entitats', 0],
+      ['18:40', '19:00', 'Nena Posseïda', 0],
+      ['19:00', '19:20', 'Cabronàs i entitats', 0],
+      ['19:20', '19:40', 'Nena Posseïda', 0],
+      ['19:40', '20:00', 'Cabronàs i entitats', 0],
+      ['20:00', '20:20', 'Nena Posseïda', 0],
+      ['20:40', '21:00', 'Nena Posseïda', 0],
+    ],
+  },
+};
+/* ==== /FESTIVAL ==== */
+
+for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
+  document.documentElement.style.setProperty(k, v);
+for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.style.setProperty(k, v);  // colors de base propis (opcional)
+if (FEST.fonts) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
+  `@font-face{font-family:"${f.family}";src:url("img/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
+document.title = FEST.name;
+if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
+document.getElementById('festName').textContent = FEST.name;
+document.getElementById('banner').alt = FEST.banner;
+// Il·lustracions (FEST.deco): les que no hi són, simplement no surten
+const DECO = FEST.deco || {};
+if (DECO.strip) { document.documentElement.classList.add('hdeco'); document.documentElement.style.setProperty('--deco-strip', `url("${DECO.strip}")`); }
+for (const [id, src] of Object.entries(DECO.heads || {})) {
+  const h = document.querySelector(`#${id} h2`);
+  if (h) h.insertAdjacentHTML('afterbegin', `<img class="hico" src="${src}" alt="">`);
+}
+if (DECO.sheet) { const n = document.querySelector('#sheet .body .note'); n.classList.add('withdeco'); n.insertAdjacentHTML('afterbegin', `<img src="${DECO.sheet}" alt="">`); }
+if (DECO.empty || DECO.done) { const re = document.getElementById('rowsEmpty'); re.classList.add('withdeco'); re.innerHTML = '<img alt="" hidden><span></span>'; }
+
+// Hora local (Europe/Madrid) → instant. Si aquella nit es canvia l'hora, les 2:xx passen dues vegades:
+// "02:30a" és la primera, "02:30b" (o sense lletra) la segona.
+const fmtWall = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+function wallOf(ms) {
+  const p = Object.fromEntries(fmtWall.formatToParts(ms).map(x => [x.type, +x.value]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+}
+const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
+function T(s) {
+  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  if (!m) return NaN;
+  const h = +m[1], mi = +m[2], f = m[3];
+  if (h > 23 || mi > 59) return NaN;
+  const [Y, M, D] = FEST.date;
+  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  // Espanya és UTC+1 o UTC+2: es miren les dues possibilitats
+  const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
+  return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
+}
+
+const STAGES = FEST.stages;
+const DEFAULT = FEST.sets;
+
+const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
+// Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
+const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
+  [id, arr.map(([a, b, n, t, sub], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '' }))]));
+const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
+
+const T0 = T(FEST.start), TEND0 = T(FEST.end);
+// Atraccions (abans només n'hi havia una, com a objecte)
+const RIDE_LIST = [].concat(FEST.rides || []).map((r, i) => ({ ...r, i, a: T(r.from), b: T(r.to) }));
+const RIDES_NAME = FEST.ridesName || (RIDE_LIST.length === 1 ? RIDE_LIST[0].name : 'Atraccions');
+// Nit del canvi d'hora (si n'hi ha): W0 = 2:00 (1a), DUP = 2:00 (2a), W1 = 3:00
+const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00') : W0;
+const MIN = 60000, PX = 1.6, PAD = 12;
+let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
+const y = t => PAD + (t - T0) / MIN * PX;
+
+// Idioma: aquesta és la versió en castellà; build_web.py en genera la catalana (ca.html) amb i18n_ca.py
+const LANG = 'ca';
+const LOC = 'ca-ES';
+const fmtHM = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const fmtS = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', second: '2-digit' });
+const fmtD = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' });
+const fmtDay = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+// «el sábado 31.10» / «el dissabte 31.10»
+const dayLabel = `el ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(T0)} ${String(FEST.date[2]).padStart(2, '0')}.${String(FEST.date[1]).padStart(2, '0')}`;
+const okDate = s => typeof s === 'string' && !isNaN(new Date(s));
+const hm = t => fmtHM.format(t);
+// Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
+const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
+const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
+const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = html;
+// El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
+const deco = n => html(n).replace(/ (B2B|VS|&amp;) /gi, ' <i>$1</i> ');
+// Importància: amb colors i número (FEST.impColors, per defecte) o només amb la mida (impColors: false)
+const IMPC = FEST.impColors !== false;
+const impc = t => !IMPC && t ? (t >= 4 ? ' main' : t <= 2 ? ' minor' : '') : '';
+const imp = t => IMPC && t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importància ${t} de 5">${t}</i>` : '';
+// Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
+function dur(ms) {
+  const m = Math.max(0, Math.ceil(ms / MIN));
+  if (m >= 1440) return `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} h`;
+  if (m >= 60) return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
+  return `${m} min`;
+}
+const inDur = ms => ms <= 0 ? 'ja' : `d’aquí a ${dur(ms)}`;
+const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nou' : `Canvi · abans ${esc(x.was)}`}</span>`;
+
+// Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
+// i, si alguna cosa peta, l'horari d'abans es queda tal com era (no es pot deixar l'app a mitges).
+let SETS = {}, ALL = [], BYID = {};
+const okRaw = r => r && typeof r === 'object' && typeof r.id === 'string' && /^[\w-]{1,40}$/.test(r.id)
+  && Number.isFinite(T(r.a)) && Number.isFinite(T(r.b)) && (typeof r.n === 'string' || typeof r.n === 'number');
+function load(raw) {
+  const sets = {};
+  for (const s of STAGES) {
+    const list = raw && Object.prototype.hasOwnProperty.call(raw, s.id) && Array.isArray(raw[s.id]) ? raw[s.id] : [];
+    sets[s.id] = list.filter(okRaw)
+      .map(r => {
+        const d = Object.prototype.hasOwnProperty.call(DEFMAP, r.id) ? DEFMAP[r.id] : null;
+        const a = T(r.a), b = T(r.b), n = String(r.n).trim().slice(0, 120);
+        // chg: 'new' (afegida), 'time' (hora canviada), 'name' (nom canviat) o '' (com al cartell)
+        const timeChg = d && (T(d.a) !== a || T(d.b) !== b), nameChg = d && String(d.n) !== n;
+        const chg = !d ? 'new' : timeChg ? 'time' : nameChg ? 'name' : '';
+        const was = !d ? '' : [timeChg ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : '', nameChg ? d.n : ''].filter(Boolean).join(' · ');
+        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), chg, was };
+      })
+      .filter(x => x.n && x.b > x.a)
+      .sort((x, y) => x.a - y.a);
+  }
+  const all = STAGES.flatMap(s => sets[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
+  SETS = sets; ALL = all;
+  BYID = Object.fromEntries(all.map(x => [x.id, x]));
+  TEND = Math.max(TEND0, ...all.map(x => x.b));
+  H = (TEND - T0) / MIN * PX;
+}
+load(DEFAULT_RAW);
+
+let sim = null;
+const now = () => sim ?? Date.now();
+
+// Preferits (al mòbil de cadascú; si no hi ha emmagatzematge, només en memòria)
+const FKEY = FEST.key + '-favs-v1';
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem(FKEY) || '[]').filter(x => typeof x === 'string')); } catch (e) {}
+function saveFavs() { try { localStorage.setItem(FKEY, JSON.stringify([...favs])); } catch (e) {} }
+const star = x => {
+  const on = favs.has(x.id);
+  return `<button type="button" class="round star" data-fav="${esc(x.id)}" aria-pressed="${on}" aria-label="${on ? 'Treure dels meus artistes' : 'Afegir als meus artistes'}: ${esc(x.n)}">${on ? '★' : '☆'}</button>`;
+};
+
+const RIDE_SVG = '<svg viewBox="0 0 40 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="13" r="10"/><path d="M20 3v20M10 13h20M13 6l14 14M27 6L13 20M14 29l6-16 6 16"/></g></svg>';
+
+// Graella (es torna a dibuixar quan arriben canvis de l'organització)
+const tl = document.getElementById('tl');
+const tlwrap = document.getElementById('tlwrap');
+let blocks = [], nowline, nowlbl;
+function buildGrid() {
+  let g = '<div class="corner"></div>';
+  for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color"><img src="img/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  for (const r of RIDE_LIST) g += r.img && FEST.colorLogos ? `<div class="hd color"><img src="${esc(r.img)}" alt=""><span>${html(r.name)}</span></div>`
+    : `<div class="hd rides">${r.img ? `<img src="${esc(r.img)}" alt="">` : RIDE_SVG}${html(r.name)}</div>`;
+  g += '<div class="hdend"></div>';
+  g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
+  for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+  g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
+  STAGES.forEach((s, i) => {
+    const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
+    g += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
+    for (const x of SETS[s.id]) {
+      const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
+      const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
+      const tc = IMPC && x.t ? `--tc:var(--t${x.t});` : '';
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importància ${x.t} de 5` : ''}${x.chg === 'new' ? ', afegit per l’organització' : x.chg ? `, canviat (abans ${x.was})` : ''}`;
+      g += `<button type="button" class="blk${tiny}${impc(x.t)}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NOU' : 'CANVI'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+    }
+    const last = SETS[s.id][SETS[s.id].length - 1];
+    if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sense actuacions</div>`;
+    else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Tancat</div>`;
+    g += '</div>';
+  });
+  // Atraccions: una columna per a cadascuna, no són artistes (no es poden marcar com a meus)
+  for (const r of RIDE_LIST) {
+    const rt = y(r.a), rh = y(r.b) - rt, rn = html(r.name);
+    g += `<div class="col" style="grid-column:${STAGES.length + 2 + r.i};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
+      + `<div class="blk ridesblk" id="ridesBlk-${r.i}" role="img" aria-label="${rn}: oberta de ${lbl(r.a)} a ${lbl(r.b)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Oberta</span><span class="t">${lbl(r.a)}–${lbl(r.b)}</span></div>`
+      + `<div class="closedtag" style="top:${y(r.b) + 10}px">Tancada</div></div>`;
+  }
+  g += '<div class="nowline" id="nowline" hidden></div>';
+  tl.innerHTML = g;
+  // Tantes columnes com escenaris i atraccions
+  const NS = STAGES.length, NR = RIDE_LIST.length;
+  tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ` repeat(${NR}, minmax(92px, .8fr))` : ''} 14px`;
+  tl.style.minWidth = `calc(var(--gut) + ${NS * 108 + NR * 92 + 14}px)`;
+  tl.querySelector('.nowline').style.gridColumn = `2 / ${NS + NR + 2}`;
+  document.querySelector('.scale').hidden = !IMPC || !ALL.some(x => x.t);  // sense importàncies, sense llegenda
+  blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
+  nowline = document.getElementById('nowline');
+  nowlbl = document.getElementById('nowlbl');
+}
+// Encaix: si el nom no cap al bloc, treu subtítol, després hora, i al final talla a 2 línies
+function fitBlocks() {
+  for (const b of tl.querySelectorAll('.blk:not(.ridesblk)')) {
+    b.classList.remove('fit-s', 'fit-z', 'fit-t', 'fit-c');
+    for (const c of ['fit-s', 'fit-z', 'fit-t', 'fit-c']) {
+      if (b.scrollHeight <= b.clientHeight + 1) break;
+      b.classList.add(c);
+    }
+  }
+}
+function edgeFade() { tlwrap.parentElement.classList.toggle('atend', tlwrap.scrollLeft + tlwrap.clientWidth >= tlwrap.scrollWidth - 4); }
+buildGrid();
+requestAnimationFrame(fitBlocks);
+tlwrap.addEventListener('scroll', edgeFade, { passive: true });
+edgeFade();
+if (!DST) document.getElementById('gridLegend').textContent = 'Línia vermella = ara.';
+
+function paintFavs() {
+  for (const b of blocks) {
+    const on = favs.has(b.dataset.fav);
+    b.classList.toggle('fav', on);
+    b.setAttribute('aria-pressed', on);
+  }
+  const n = ALL.filter(x => favs.has(x.id)).length;
+  document.getElementById('pickCount').textContent = n ? `(${n})` : '';
+  document.getElementById('sheetCount').textContent = n ? `(${n})` : '';
+}
+
+function scrollToNow(smooth) {
+  const t = now();
+  const head = tl.querySelector('.hd').offsetHeight;
+  const top = t < T0 || t >= TEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
+  tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+}
+function goNow() {
+  tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollToNow(true);
+}
+
+// Si es torna a dibuixar una llista mentre una ★ té el focus (VoiceOver, teclat), el focus es manté
+function setHTML(el, h) {
+  const a = document.activeElement;
+  const k = a && el.contains(a) && a.dataset ? a.dataset.fav : null;
+  el.innerHTML = h;
+  if (k) { const b = el.querySelector(`[data-fav="${CSS.escape(k)}"]`); if (b) b.focus(); }
+}
+
+// Ahora suena: una fila per escenari
+const rowsEl = document.getElementById('rows');
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + (RIDE_LIST.length ? '<div class="row" id="r-rides"></div>' : '');
+const rowCache = {};
+
+function rowHTML(s, t) {
+  if (mineOnly) return rowMine(s, t);
+  const list = SETS[s.id];
+  const cur = list.find(x => t >= x.a && t < x.b);
+  const nxt = list.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
+      <div class="after">${nxt ? `Després: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> <span class="when">· ${lbl(nxt.a)}</span>` : 'Després: tanca l’escenari'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>queden</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj">Obre a les ${lbl(nxt.a)}</div>
+      <div class="after">Primer: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>per obrir</span></div></div>`, null];
+  return ['closed', '', null];
+}
+
+// Només els meus: si el que sona ara és meu, surt en directe; si no, el meu pròxim en aquest escenari; si no en queda cap, no surt
+function rowMine(s, t) {
+  const mine = SETS[s.id].filter(x => favs.has(x.id));
+  const cur = mine.find(x => t >= x.a && t < x.b);
+  const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
+  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  if (cur) return ['live', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${chgTag(cur)}
+      <div class="after">${nxt ? `El teu següent aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b> <span class="when">· ${lbl(nxt.a)}</span>` : 'És l’últim teu aquí'}</div></div>
+    <div class="right"><div class="left"><b>${dur(cur.b - t)}</b><span>queden</span></div>${star(cur)}</div>
+    <div class="bar"><div></div></div>`, cur];
+  if (nxt) return ['idle mine', `${logo}
+    <div class="mid"><div class="sn">${s.name}</div>
+      <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${chgTag(nxt)}
+      <div class="after">Comença a les <b>${lbl(nxt.a)}</b></div></div>
+    <div class="right"><div class="left"><b>${dur(nxt.a - t)}</b><span>per començar</span></div>${star(nxt)}</div>`, null, nxt];
+  return ['hide', '', null];
+}
+
+// Full per triar els meus artistes (no surten les actuacions que ja han passat, si no són meves)
+const sheet = document.getElementById('sheet');
+function renderPick() {
+  if (sheet.hidden) return;
+  const t = now();
+  let past = 0;
+  const h = STAGES.map(s => {
+    const items = SETS[s.id].filter(x => x.b > t || favs.has(x.id));
+    past += SETS[s.id].length - items.length;
+    if (!items.length) return '';
+    return `<h3>${s.name}</h3><ul>${items.map(x =>
+      `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm${impc(x.t)}">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${star(x)}</span></li>`).join('')}</ul>`;
+  }).join('');
+  setHTML(document.getElementById('pickList'), (h || '<p class="empty">Ja no queden actuacions.</p>')
+    + (past ? `<p class="pastnote">No hi surt${past === 1 ? '' : 'en'} ${past} ${past === 1 ? 'actuació que ja ha passat' : 'actuacions que ja han passat'}.</p>` : ''));
+}
+function openSheet() {
+  sheet.hidden = false;
+  document.body.classList.add('locked');
+  renderPick();
+  document.getElementById('sheetDone2').focus();
+}
+function closeSheet() {
+  sheet.hidden = true;
+  document.body.classList.remove('locked');
+  document.getElementById('ahora').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('pickOpen').focus({ preventScroll: true });
+}
+document.getElementById('pickOpen').addEventListener('click', openSheet);
+document.getElementById('sheetDone').addEventListener('click', closeSheet);
+document.getElementById('sheetDone2').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+
+// A continuación: les 6 properes, agrupades per hora d'inici
+const upEl = document.getElementById('upnext');
+let upCache = '';
+function upHTML(t) {
+  let list = ALL.filter(x => x.a > t);
+  if (mineOnly) list = list.filter(x => favs.has(x.id));
+  if (!list.length) {
+    if (mineOnly) return `<li class="empty">${favs.size ? 'No et queden artistes per començar.' : 'Encara no has triat els teus artistes: toca «Triar els meus artistes».'}</li>`;
+    return '<li class="empty">No queden més actuacions.</li>';
+  }
+  let out = '', last = null;
+  for (const x of list.slice(0, 6)) {
+    if (x.a !== last) { out += `<li class="grp"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
+    out += `<li class="it${favs.has(x.id) ? ' fav' : ''}">
+    <img class="logo" src="img/${x.s.id}.png" alt="">
+    <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${chgTag(x)}</div>
+    <span class="acts">${star(x)}</span></li>`;
+  }
+  return out;
+}
+
+// Avisos emergents. kind: 'mine' (groc, els meus artistes), 'org' (organització), 'info'. action: { label, fn }
+const toasts = document.getElementById('toasts');
+function toast(msg, kind = 'mine', action = null, ms = 10000) {
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Tancar l’avís">✕</button>`;
+  el.querySelector('.x').addEventListener('click', () => el.remove());
+  if (action) el.querySelector('.act').addEventListener('click', () => { el.remove(); action.fn(); });
+  toasts.appendChild(el);
+  while (toasts.children.length > 2) toasts.firstElementChild.remove();
+  setTimeout(() => el.remove(), ms);
+  try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+// Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
+const NKEY = FEST.key + '-notif-v1';
+let notifOn = false;
+try { notifOn = localStorage.getItem(NKEY) === '1'; } catch (e) {}
+const canNotify = () => notifOn && 'Notification' in window && Notification.permission === 'granted';
+// Preferències d'avís (Configuración): quants minuts abans dels meus artistes, i si avisar dels canvis de l'organització
+const PKEY = FEST.key + '-prefs-v1';
+let prefs = { before: 10, changes: true };
+try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; } catch (e) {}
+prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
+prefs.changes = prefs.changes !== false;
+function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
+// Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
+const PUSH = {"url": "https://midnight-push.midnightgroup.workers.dev", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
+let pushActive = false;
+async function sysNotify(title, body, tag) {
+  if (sim !== null || !canNotify() || pushActive) return;
+  const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
+  try {
+    const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration();
+    if (reg) return await reg.showNotification(title, opts);
+    new Notification(title, opts);
+  } catch (e) {}
+}
+// Què s'ha avisat ja: es guarda al mòbil (si l'iPhone tanca l'app i es torna a obrir, no es repeteix)
+const TKEY = FEST.key + '-told-v1';
+let told = new Set();
+try { told = new Set(JSON.parse(localStorage.getItem(TKEY) || '[]')); } catch (e) {}
+function remember(k) { told.add(k); if (sim === null) try { localStorage.setItem(TKEY, JSON.stringify([...told].slice(-300))); } catch (e) {} }
+function checkAlerts(t) {
+  for (const id of favs) {
+    const x = BYID[id];
+    if (!x) continue;
+    const left = x.a - t, k = `${id}@${x.a}`;  // si l'organització canvia l'hora, es torna a avisar
+    if (!prefs.before) continue;
+    if (left > 0 && left <= prefs.before * MIN && !told.has(k + ':pre')) {
+      remember(k + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> comença ${inDur(left)} a ${x.s.name} (${lbl(x.a)})`);
+      sysNotify(`${x.n} comença ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
+    }
+    if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
+      remember(k + ':go'); remember(k + ':pre');
+      toast(`★ <b>${deco(x.n)}</b> comença ara a ${x.s.name}`);
+      sysNotify(`${x.n} comença ara`, x.s.name, k + ':go');
+    }
+  }
+}
+
+
+function refresh() {
+  for (const k in rowCache) rowCache[k] = '';
+  upCache = '';
+  tick(true);
+}
+function setFav(id, on) {
+  if (on) favs.add(id); else favs.delete(id);
+  saveFavs();
+  syncPush();
+  paintFavs();
+  renderPick();
+  refresh();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-fav]');
+  if (!b) return;
+  const id = b.dataset.fav, x = BYID[id];
+  if (favs.has(id)) {
+    setFav(id, false);
+    // Treure'l sense voler (sobretot amb «Només els meus artistes», on la fila desapareix) es pot desfer
+    toast(`Tret dels teus artistes: <b>${x ? deco(x.n) : ''}</b>`, 'info', { label: 'Desfer', fn: () => setFav(id, true) }, 6000);
+  } else setFav(id, true);
+});
+const MKEY = FEST.key + '-mine-v1';
+let mineOnly = false;
+try { mineOnly = localStorage.getItem(MKEY) === '1'; } catch (e) {}
+function paintMine() {
+  document.body.classList.toggle('mine-mode', mineOnly);
+  document.getElementById('mineOnly').setAttribute('aria-pressed', mineOnly);
+  const m2 = document.getElementById('mineOnly2');
+  m2.setAttribute('aria-pressed', mineOnly);
+  m2.textContent = mineOnly ? '★' : '☆';
+}
+function toggleMine() {
+  mineOnly = !mineOnly;
+  try { localStorage.setItem(MKEY, mineOnly ? '1' : '0'); } catch (e) {}
+  paintMine();
+  refresh();
+  if (mineOnly && !ALL.some(x => favs.has(x.id))) openSheet();
+}
+document.getElementById('mineOnly').addEventListener('click', toggleMine);
+document.getElementById('mineOnly2').addEventListener('click', toggleMine);
+
+// Rellotge cada segon; la resta només quan canvia el minut (o quan cal), per gastar menys bateria
+let lastMin = -1;
+let nextMine = null;
+function tick(force) {
+  const t = now();
+  document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
+  document.getElementById('mclock').textContent = hm(t);
+  const ml = document.getElementById('mleft');
+  ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
+  if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(' min', '′').replace(' h ', 'h');
+  const minute = Math.floor(t / MIN);
+  if (!force && minute === lastMin) return;
+  lastMin = minute;
+
+  const st = document.getElementById('status');
+  const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
+  if (t < T0) {
+    const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
+    st.innerHTML = `Comença ${today ? 'avui' : tomorrow ? 'demà' : dayLabel} a les <strong>${lbl(T0)}</strong> · falten <strong>${dur(T0 - t)}</strong>`;
+  } else if (t < TEND) {
+    const nextA = Math.min(...ALL.filter(x => x.a > t).map(x => x.a));
+    st.innerHTML = `<strong>En marxa</strong> · <span class="nw">${live ? `${live} sonant` : isFinite(nextA) ? `pausa fins a les ${lbl(nextA)}` : 'última recta'}</span> · <span class="endleft">⏳ queden <b>${dur(TEND - t)}</b></span> <span class="endat">fins a les ${lbl(TEND)}</span>`;
+  } else {
+    st.innerHTML = '<strong>S’ha acabat.</strong> Fins a la propera!';
+  }
+  const dn = document.getElementById('dstnote');
+  const p = pass(t);
+  dn.hidden = !p && !(DST && t >= W0 - 30 * MIN && t < W0);
+  dn.textContent = p === '1ª' ? 'Són les 2 per 1a vegada: a les 3:00 es canvia l’hora i tornen a ser les 2:00.'
+    : p === '2ª' ? 'Ja s’ha canviat l’hora: són les 2 per 2a vegada.'
+    : 'Aquesta nit es canvia l’hora: a les 3:00 tornen a ser les 2:00.';
+
+  const closed = [];
+  for (const s of STAGES) {
+    const [state, inner, cur, nx] = rowHTML(s, t);
+    const r = document.getElementById('r-' + s.id);
+    const key = state + inner;
+    if (rowCache[s.id] !== key) {
+      r.className = 'row ' + state;
+      setHTML(r, inner);
+      rowCache[s.id] = key;
+    }
+    // Amb «Només els meus artistes», els pròxims surten per ordre d'hora
+    r.style.order = state === 'idle mine' && nx ? String(10 + Math.round((nx.a - t) / MIN)) : '';
+    if (state === 'closed') closed.push(s.name);
+    if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
+  }
+
+  // Atraccions: una fila com un escenari més (no surt amb «Només els meus artistes»; tancades, a la línia de tancats)
+  const openR = RIDE_LIST.filter(r => t >= r.a && t < r.b);
+  if (RIDE_LIST.length) {
+    const rr = document.getElementById('r-rides'), rn = html(RIDES_NAME);
+    const later = RIDE_LIST.filter(r => t < r.a).sort((p, q) => p.a - q.a);
+    const rstate = mineOnly ? 'hide' : openR.length ? 'live' : later.length ? 'idle' : 'closed';
+    const rpic = (openR[0] || later[0] || {}).img;  // la il·lustració de la que està oberta (o de la propera)
+    const ricon = rpic ? `<img class="logo" src="${esc(rpic)}" alt="">` : RIDE_SVG.replace('<svg ', '<svg class="logo" ');
+    const last = Math.max(...openR.map(r => r.b));
+    // Agrupades per hora de tancament: «Burro · Calçot hasta las 00:00 · Túnel hasta las 00:30»
+    const byEnd = [...new Set(openR.map(r => r.b))].sort((p, q) => p - q)
+      .map(e => `${openR.filter(r => r.b === e).map(r => html(r.name)).join(' · ')} fins a les ${lbl(e)}`).join('<br>');
+    const soon = later[0] ? ` · ${html(later[0].name)}: obre a les ${lbl(later[0].a)}` : '';
+    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">${openR.length === 1 ? 'Oberta' : `${openR.length} obertes`}</div><div class="after">${byEnd}${soon}</div></div><div class="right"><div class="left"><b>${dur(last - t)}</b><span>queden</span></div></div><div class="bar"><div></div></div>`
+      : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Obren a les ${lbl(later[0].a)}</div><div class="after">${later.map(r => html(r.name)).join(' · ')}</div></div><div class="right"><div class="left"><b>${dur(later[0].a - t)}</b><span>per obrir</span></div></div>`
+      : '';
+    if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
+    if (rstate === 'live') { const a0 = Math.min(...openR.map(r => r.a)); rr.querySelector('.bar > div').style.width = ((t - a0) / (last - a0) * 100).toFixed(1) + '%'; }
+    if (rstate === 'closed' && t >= T0) closed.push(RIDES_NAME);
+  }
+
+  const cl = document.getElementById('closedLine');
+  cl.hidden = mineOnly || !closed.length;
+  cl.innerHTML = closed.length ? `<b>Tancats:</b> ${closed.map(html).join(' · ')}` : '';
+
+  const re = document.getElementById('rowsEmpty');
+  const anyRow = [...rowsEl.children].some(r => !r.classList.contains('hide') && !r.classList.contains('closed'));
+  re.hidden = anyRow || !mineOnly;
+  const none = !ALL.some(x => favs.has(x.id));
+  (re.querySelector('span') || re).textContent = none ? 'Encara no has triat els teus artistes. Toca «Triar els meus artistes» i marca’ls amb ☆.' : 'Ja no et queden artistes per cobrir.';
+  const rimg = re.querySelector('img'), rsrc = none ? DECO.empty : DECO.done;
+  if (rimg) { rimg.hidden = !rsrc; if (rsrc && rimg.getAttribute('src') !== rsrc) rimg.src = rsrc; }
+  // Targeta abans de començar (compte enrere) i quan s'ha acabat (gràcies + contacte). Durant el festival no surt
+  const ms = document.getElementById('mascot'), msrc = t < T0 ? DECO.before : DECO.end;
+  ms.hidden = (t >= T0 && t < TEND) || !re.hidden;
+  if (!ms.hidden && t >= TEND) cl.hidden = true;  // tot tancat: ja ho diu la targeta
+  if (!ms.hidden) {
+    const mh = t < T0
+      ? `<span class="mk">Molt aviat</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">perquè comenci ${html(FEST.name)} · a les ${lbl(T0)}</span>`
+      : `<span class="mk">S’ha acabat</span><span class="mbig">Gràcies!</span><span class="msub">Gràcies per fer servir l’app. Qualsevol dubte o millora: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
+    if (ms.dataset.k !== mh) {
+      ms.dataset.k = mh;
+      const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc) mi.src = msrc;
+      ms.querySelector('.mtxt').innerHTML = mh;
+    }
+  }
+
+  // Barra fina: el meu proper artista
+  nextMine = ALL.find(x => favs.has(x.id) && x.b > t);
+  document.getElementById('mnext').innerHTML = nextMine
+    ? (nextMine.a <= t ? `<b>★ ${html(nextMine.n)}</b><br>ahora` : `<b>★ ${html(nextMine.n)}</b><br>${lbl(nextMine.a)}`) : '';
+  if (nextMine && innerWidth < 440) document.getElementById('mleft').hidden = true;
+
+  const up = upHTML(t);
+  if (up !== upCache) { setHTML(upEl, up); upCache = up; }
+
+  for (const b of blocks) {
+    const x = BYID[b.dataset.fav];
+    if (!x) continue;
+    const on = t >= x.a && t < x.b;
+    b.classList.toggle('on', on);
+    b.classList.toggle('past', t >= x.b);
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
+  }
+  for (const r of RIDE_LIST) {
+    const rb = document.getElementById('ridesBlk-' + r.i), on = t >= r.a && t < r.b;
+    if (!rb) continue;
+    rb.classList.toggle('on', on);
+    rb.classList.toggle('past', t >= r.b);
+    if (on) rb.querySelector('.pl').style.top = `${y(t) - (y(r.a) + 1.5) - 2.5}px`;
+  }
+  const inside = t >= T0 && t < TEND;
+  nowline.hidden = !inside;
+  nowlbl.hidden = !inside;
+  if (inside) {
+    nowline.style.transform = `translateY(${y(t) - 1}px)`;
+    nowlbl.style.top = `${y(t)}px`;
+    nowlbl.textContent = pass(t) ? `${hm(t)} ${pass(t)}` : hm(t);
+  }
+  for (const g of nowlbl.parentElement.children) if (g !== nowlbl) g.classList.toggle('near', inside && Math.abs(parseFloat(g.style.top) - y(t)) < 14);
+  if (!sheet.hidden) renderPick();
+  checkAlerts(t);
+}
+
+document.getElementById('goNow').addEventListener('click', goNow);
+document.getElementById('goNow2').addEventListener('click', goNow);
+
+// Barra fina: es mostra quan el rellotge gran surt de la pantalla
+const clockEl = document.getElementById('clock');
+const minibar = document.getElementById('minibar');
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([e]) => { minibar.hidden = e.isIntersecting; }, { rootMargin: '-20px 0px 0px 0px' }).observe(clockEl);
+  // Tornar a dalt: surt quan ja has baixat més d'una pantalla
+  const toTop = document.getElementById('toTop');
+  addEventListener('scroll', () => { toTop.hidden = scrollY < innerHeight; }, { passive: true });
+  toTop.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Mode prova (Configuración): només en aquest mòbil i sense notificacions del sistema
+const simOn = document.getElementById('simOn'), simRange = document.getElementById('simRange'), simOut = document.getElementById('simOut');
+const simCtl = document.getElementById('simCtl');
+function simBounds() { simRange.min = T0 - 30 * MIN; simRange.max = TEND + 30 * MIN; }
+simBounds(); simRange.step = MIN; simRange.value = Math.round((T0 + TEND0) / 2 / MIN) * MIN;
+let realTold = null;
+function applySim() {
+  const was = sim !== null;
+  sim = simOn.checked ? +simRange.value : null;
+  simCtl.hidden = !simOn.checked;
+  if (simOn.checked) {
+    simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
+    simOut.textContent = `Simulant: ${lbl(+simRange.value)}`;
+  }
+  // Els avisos del Modo prueba no compten per als de veritat
+  if (!was && simOn.checked) { realTold = told; told = new Set(); }
+  if (was && !simOn.checked) { told = realTold || new Set(); realTold = null; }
+  document.getElementById('simBadge').hidden = !simOn.checked;
+  document.getElementById('simBadge2').hidden = !simOn.checked;
+  tick(true);
+  scrollToNow(false);
+}
+function setSim(v) {
+  simRange.value = Math.min(Math.max(v, +simRange.min), +simRange.max);
+  applySim();
+}
+simOn.addEventListener('change', applySim);
+simRange.addEventListener('input', applySim);
+document.getElementById('simSteps').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) setSim(+simRange.value + b.dataset.d * MIN); });
+// Moments típics per provar: abans d'obrir, obertura, meitat, canvi d'hora (si n'hi ha) i tancament
+for (const a of document.querySelectorAll('.langsel [data-lang]')) {
+  if (a.dataset.lang === LANG) a.setAttribute('aria-current', 'true');
+  a.addEventListener('click', () => { try { localStorage.setItem('midnight-lang', a.dataset.lang); } catch (e) {} });
+}
+document.getElementById('simPresets').innerHTML = [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000,
+  ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0]
+  .map(t => `<button type="button" data-t="${t}">${lbl(t)}</button>`).join('');
+document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setSim(+b.dataset.t); });
+function exitSim() { simOn.checked = false; applySim(); }
+document.getElementById('simBadge').addEventListener('click', exitSim);
+document.getElementById('simBadge2').addEventListener('click', exitSim);
+
+// Notificacions (Configuración)
+const notifMsg = document.getElementById('notifMsg');
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function notifUI(text) {
+  const btn = document.getElementById('notifOn');
+  const ok = canNotify();
+  // Activades però sense registrar al servidor (p. ex. activades amb una versió anterior): cal un toc per registrar-se
+  const needPush = ok && canPush() && !pushActive;
+  btn.textContent = needPush ? 'Activar també amb el mòbil bloquejat' : ok ? 'Notificacions activades ✓ (toca per desactivar)' : 'Activar les notificacions';
+  btn.classList.toggle('primary', needPush);
+  btn.setAttribute('aria-pressed', ok);
+  notifMsg.hidden = !text;
+  notifMsg.textContent = text || '';
+}
+const noNotifHelp = () => isIOS && !standalone()
+  ? 'A l’iPhone, primer afegeix l’app a la pantalla d’inici (Compartir → Afegir a la pantalla d’inici), obre-la des de la icona i torna aquí.'
+  : 'Aquest navegador no permet notificacions.';
+const deniedHelp = () => isIOS
+  ? 'Les notificacions estan bloquejades. Activa-les a Configuració → Notificacions → Midnight i torna-ho a provar.'
+  : 'Les notificacions estan bloquejades per a aquesta web. Permet-les a la configuració del lloc (la icona al costat de l’adreça) i torna-ho a provar.';
+// Subscripció al servidor (Web Push). Només si hi ha servidor configurat i el navegador ho permet
+const canPush = () => !!(PUSH && PUSH.url && 'serviceWorker' in navigator && 'PushManager' in window);
+const b64uDec = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0)); };
+async function pushSubscription(create) {
+  const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, no) => setTimeout(() => no(new Error('sin service worker')), 10000))]);
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub && create) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+  return sub;
+}
+async function pushPost(path, body, keepalive) {
+  const r = await fetchT(PUSH.url + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive: !!keepalive }, 10000);
+  if (!r.ok) throw new Error('push ' + r.status);
+  return r.json();
+}
+let syncTimer = null, syncDirty = false;
+async function syncNow(keepalive) {
+  clearTimeout(syncTimer);
+  if (!pushActive || !syncDirty) return;
+  syncDirty = false;
+  try {
+    const sub = await pushSubscription(false);
+    if (!sub) { pushActive = false; return notifUI(); }
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes }, keepalive);
+  } catch (e) { syncDirty = true; }
+}
+function syncPush() {
+  if (!pushActive) return;
+  syncDirty = true;
+  clearTimeout(syncTimer);
+  // Els meus artistes i les preferències van al servidor (un cop has deixat de tocar, per no enviar-ho a cada ★)
+  syncTimer = setTimeout(() => syncNow(false), 1500);
+}
+// Si marques una ★ i bloqueges el mòbil de seguida, s'envia igualment abans que l'iPhone aturi l'app
+document.addEventListener('visibilitychange', () => { if (document.hidden) syncNow(true); });
+addEventListener('pagehide', () => syncNow(true));
+async function pushOn() {
+  const sub = await pushSubscription(true);
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+  pushActive = true;
+}
+async function pushOff() {
+  clearTimeout(syncTimer); syncDirty = false;
+  try {
+    const sub = await pushSubscription(false);
+    if (sub) { try { await pushPost('/unsub', { endpoint: sub.endpoint }); } catch (e) {} await sub.unsubscribe(); }
+  } catch (e) {}
+  pushActive = false;
+}
+document.getElementById('notifOn').addEventListener('click', async () => {
+  if (canNotify() && canPush() && !pushActive) {
+    notifUI('Connectant amb el servidor d’avisos…');
+    try { await pushOn(); return notifUI('Fet ✓ T’arribaran també amb el mòbil bloquejat. Prova «Enviar-ne una de prova» i bloqueja el mòbil.'); }
+    catch (e) { return notifUI(`No s’ha pogut connectar amb el servidor d’avisos (${e && e.name === 'NotAllowedError' ? 'permís denegat' : e && e.message ? e.message : 'error'}). Torna-ho a provar amb cobertura.`); }
+  }
+  if (canNotify()) {
+    notifOn = false;
+    try { localStorage.setItem(NKEY, '0'); } catch (e) {}
+    await pushOff();
+    return notifUI('Notificacions desactivades en aquest mòbil.');
+  }
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') return notifUI(deniedHelp());
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  if (canPush()) {
+    notifUI('Connectant amb el servidor d’avisos…');
+    try { await pushOn(); return notifUI('Activades ✓ T’arribaran també amb el mòbil bloquejat.'); }
+    catch (e) { return notifUI(`Activades, però no s’ha pogut connectar amb el servidor (${e && e.message ? e.message : 'error'}): només arribaran amb l’app oberta. Torna-ho a provar amb cobertura.`); }
+  }
+  notifUI('Activades. T’avisarem dels teus artistes mentre l’app estigui oberta.');
+});
+document.getElementById('notifTest').addEventListener('click', async () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  if (Notification.permission === 'denied') return notifUI(deniedHelp());
+  if (!canNotify()) return notifUI('Primer toca «Activar les notificacions».');
+  if (canPush() && !pushActive) return notifUI('Primer toca «Activar també amb el mòbil bloquejat».');
+  if (pushActive) {
+    // Prova de veritat: la envia el servidor. Bloqueja el mòbil just després de tocar per veure-la arribar
+    try {
+      const sub = await pushSubscription(false);
+      if (!sub) { pushActive = false; notifUI(); return notifUI('Aquest mòbil ja no està registrat. Toca «Restablir les notificacions».'); }
+      try { await (await caches.open('midnight-meta')).put('test', new Response(JSON.stringify(Date.now()))); } catch (e) {}
+      const r = await pushPost('/test', { endpoint: sub.endpoint });
+      return notifUI(r.ok ? 'Enviada des del servidor. Bloqueja el mòbil: t’arribarà en uns segons.' : `El servidor no l’ha pogut enviar (codi ${r.status}). Toca «Restablir les notificacions» i torna-ho a provar.`);
+    } catch (e) {
+      return notifUI(e && e.message === 'push 404' ? 'El servidor no té registrat aquest mòbil. Toca «Restablir les notificacions».'
+        : 'No hi ha connexió amb el servidor d’avisos. Torna-ho a provar amb cobertura.');
+    }
+  }
+  const opts = { body: 'Si veus això, les notificacions funcionen ✓', tag: 'prueba', icon: 'icon-192.png' };
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.showNotification('Midnight · prova', opts); else new Notification('Midnight · prova', opts); } catch (e) {}
+  notifUI('Enviada. Si no la veus, revisa la configuració de notificacions.');
+});
+// Restablecer: es dona de baixa d'aquest mòbil i es torna a registrar de zero (per si es queden en un estat estrany).
+// La subscripció nova es fa just en tocar (l'iPhone només la permet com a resposta a un toc); la baixa al servidor, després.
+document.getElementById('notifReset').addEventListener('click', async () => {
+  if (!('Notification' in window)) return notifUI(noNotifHelp());
+  notifUI('Restablint…');
+  let perm = Notification.permission;
+  if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+  if (perm !== 'granted') { notifOn = false; try { localStorage.setItem(NKEY, '0'); } catch (e) {} return notifUI(deniedHelp()); }
+  notifOn = true;
+  try { localStorage.setItem(NKEY, '1'); } catch (e) {}
+  told = new Set();
+  if (!canPush()) return notifUI('Restablertes. T’avisarem dels teus artistes mentre l’app estigui oberta.');
+  let old = null;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    old = await reg.pushManager.getSubscription();
+    if (old) await old.unsubscribe();
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes });
+    pushActive = true;
+    notifUI('Restablertes ✓ T’arribaran també amb el mòbil bloquejat. Prova «Enviar-ne una de prova» i bloqueja el mòbil.');
+  } catch (e) {
+    pushActive = false;
+    if (old) pushPost('/unsub', { endpoint: old.endpoint }).catch(() => {});
+    notifUI(`No s’ha pogut connectar amb el servidor d’avisos (${e && e.name === 'NotAllowedError' ? 'permís denegat' : e && e.message ? e.message : 'error'}). Torna-ho a provar amb cobertura.`);
+  }
+});
+
+notifUI();
+if (canPush()) {
+  document.getElementById('notifNote').innerHTML = '<b>Arriben també amb el mòbil bloquejat.</b> A l’iPhone, amb l’app afegida a la pantalla d’inici (iOS 16.4 o més nou) i les notificacions activades aquí.';
+  document.getElementById('howLocked').textContent = ' Si les actives, arriben també amb el mòbil bloquejat.';
+  // Si aquest mòbil ja estava subscrit, es torna a enviar l'estat al servidor
+  if (notifOn && 'Notification' in window && Notification.permission === 'granted')
+    pushSubscription(false).then(sub => { if (sub) { pushActive = true; notifUI(); syncPush(); } }).catch(() => {});
+}
+const prefBefore = document.getElementById('prefBefore'), prefChanges = document.getElementById('prefChanges');
+prefBefore.value = String(prefs.before);
+prefChanges.checked = prefs.changes;
+prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); syncPush(); });
+prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
+
+// Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
+const BUILD = '26/10 13:58';
+document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
+document.getElementById('appUpdate').addEventListener('click', async () => {
+  const msg = document.getElementById('updMsg');
+  if (!ONLINE) return location.reload();
+  msg.hidden = false; msg.textContent = 'Buscant l’última versió…';
+  let latest = '';
+  try {
+    const r = await fetchT(`./?t=${Date.now()}`, { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    latest = ((await r.text()).match(/const BUILD = '([^']*)'/) || [])[1] || '';
+  } catch (e) {
+    msg.textContent = 'Sense connexió: continues amb la versió desada. Torna-ho a provar quan tinguis cobertura.';
+    return;
+  }
+  await pullChanges();
+  if (latest && latest === BUILD) { msg.textContent = `Ja tens l’última versió (${BUILD}). L’horari també està al dia.`; return; }
+  try { const reg = 'serviceWorker' in navigator && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
+  if (dirty) { msg.textContent = 'Hi ha una versió nova, però tens canvis sense publicar a Organització: publica’ls o surt abans d’actualitzar.'; return; }
+  msg.textContent = 'Hi ha una versió nova. Actualitzant…';
+  location.reload();
+});
+
+// Pantalla encesa (es recorda: si la tenies activada, es torna a activar en obrir l'app)
+const WKEY = FEST.key + '-wake-v1';
+let lock = null, wantWake = false;
+const wakeBtn = document.getElementById('wake'), wakeHint = document.getElementById('wakeHint');
+function wakeUI(on, hint) {
+  wakeBtn.setAttribute('aria-pressed', on);
+  wakeBtn.textContent = on ? 'Pantalla encesa ✓ (toca per desactivar)' : 'Mantenir la pantalla encesa';
+  wakeHint.hidden = !hint;
+  wakeHint.textContent = hint || '';
+}
+function saveWake() { try { localStorage.setItem(WKEY, wantWake ? '1' : '0'); } catch (e) {} }
+async function acquire(quiet) {
+  try {
+    lock = await navigator.wakeLock.request('screen');
+    lock.addEventListener('release', () => { lock = null; if (!wantWake) wakeUI(false); });
+    wakeUI(true);
+  } catch (e) {
+    lock = null;
+    if (quiet) return wakeUI(false);
+    wantWake = false; saveWake();
+    wakeUI(false, e && e.name === 'NotAllowedError'
+      ? 'No s’ha pogut activar. Si tens el mode estalvi de bateria, desactiva’l i torna-ho a provar.'
+      : 'No s’ha pogut activar ara mateix. Torna-ho a provar.');
+  }
+}
+if (!('wakeLock' in navigator)) {
+  wakeBtn.disabled = true;
+  wakeUI(false, 'Aquest navegador no permet mantenir la pantalla encesa.');
+} else {
+  wakeBtn.addEventListener('click', async () => {
+    if (wantWake && lock) {
+      wantWake = false; saveWake();
+      try { await lock.release(); } catch (e) {}
+      lock = null; wakeUI(false);
+    } else { wantWake = true; saveWake(); acquire(false); }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && wantWake && !lock) acquire(true);
+  });
+  try { wantWake = localStorage.getItem(WKEY) === '1'; } catch (e) {}
+  if (wantWake) acquire(true);
+}
+
+// El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
+function fitClock() {
+  clockEl.style.fontSize = '100px';
+  const w = clockEl.scrollWidth, target = clockEl.parentElement.clientWidth;
+  if (w) clockEl.style.fontSize = Math.min(100 * target / w, 240, innerHeight * 0.22).toFixed(1) + 'px';
+}
+addEventListener('orientationchange', () => setTimeout(fitClock, 300));
+let lastW = innerWidth;
+addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); fitBlocks(); edgeFade(); } });  // la barra de Safari canvia l'alçada, no l'amplada
+if (document.fonts) document.fonts.ready.then(() => { fitClock(); fitBlocks(); });
+
+// Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
+// A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
+const REPO = 'paupuig92/midnight-webapp';
+const ONLINE = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+const CKEY = FEST.key + '-changes-v1';
+let stamp = '', notice = '';
+// Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
+const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
+const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}`).join('~');
+function applyChanges(d, quiet) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return;
+  if (!sameFest(d)) d = { updated: 'cartel', notice: '', sets: null };  // són d'un altre festival: horari del cartell
+  const st = String(d.updated || '').slice(0, 40);
+  if (!st || st === stamp) return;
+  const wasLoaded = stamp !== '', oldNotice = notice, oldKey = setsKey();
+  const prev = { SETS, ALL, BYID, TEND, H };
+  const oldFavSets = ALL.filter(x => favs.has(x.id)).map(x => ({ id: x.id, n: x.n, a: x.a, b: x.b }));
+  const newNotice = typeof d.notice === 'string' ? d.notice.slice(0, 500) : '';
+  const hasSets = d.sets && typeof d.sets === 'object' && !Array.isArray(d.sets);
+  try {
+    load(hasSets ? d.sets : DEFAULT_RAW);
+    buildGrid();
+  } catch (e) {
+    ({ SETS, ALL, BYID, TEND, H } = prev);  // dades dolentes: l'app es queda amb l'horari que tenia
+    buildGrid();
+    return;
+  }
+  stamp = st;
+  notice = newNotice;
+  const nt = document.getElementById('notice');
+  nt.hidden = !notice;
+  nt.innerHTML = notice ? `<b>Avís de l’organització</b>${html(notice)}` : '';
+  const up = document.getElementById('updated');
+  up.hidden = !hasSets;
+  up.textContent = hasSets && okDate(d.updated) ? `Horari actualitzat per l’organització: ${fmtDay.format(new Date(d.updated))}.` : hasSets ? 'Horari actualitzat per l’organització.' : '';
+  document.getElementById('chgLegend').hidden = !ALL.some(x => x.chg);
+  simBounds();
+  paintFavs();
+  renderPick();
+  refresh();
+
+  // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa del que ha canviat
+  if (!wasLoaded || quiet || !prefs.changes) return;
+  const schedChanged = setsKey() !== oldKey;
+  if (notice && notice !== oldNotice) {
+    toast(`<b>Avís de l’organització</b><br>${html(notice)}`, 'org', null, 30000);
+    sysNotify('Avís de l’organització', notice, 'aviso-' + st);
+  } else if (!notice && oldNotice && !schedChanged) {
+    toast('L’organització ha tret l’avís.', 'info', null, 6000);
+  }
+  if (schedChanged) {
+    const msg = !hasSets ? 'L’organització ha tornat a l’horari del cartell.' : 'L’organització ha canviat l’horari. Els canvis surten en rosa.';
+    toast(`<b>${msg}</b>`, 'org', null, 20000);
+    sysNotify('Canvi d’horari', msg, 'horario-' + st);
+    // Els meus artistes: cancel·lats o amb una altra hora (si el tenien al calendari, l'han de tornar a afegir)
+    const gone = oldFavSets.filter(o => !BYID[o.id]);
+    const moved = oldFavSets.filter(o => BYID[o.id] && (BYID[o.id].a !== o.a || BYID[o.id].b !== o.b));
+    if (gone.length) toast(`★ Cancel·lat: <b>${gone.map(o => html(o.n)).join(', ')}</b>`, 'mine', null, 30000);
+    if (moved.length) toast(`★ Canvi d’hora: <b>${moved.map(o => `${html(o.n)} → ${lbl(BYID[o.id].a)}`).join(', ')}</b>`, 'mine', null, 30000);
+  }
+}
+function fetchT(url, opts = {}, ms = 10000) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
+}
+// Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
+let pubStamp = '', pubUntil = 0;
+let pulling = false, pullFails = 0;
+async function pullChanges() {
+  if (!ONLINE || pulling) return;
+  pulling = true;
+  try {
+    const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
+    pullFails = r.ok || r.status === 404 ? 0 : pullFails + 1;
+    if (r.ok) {
+      const d = await r.json();
+      const st = d && String(d.updated || '');
+      if (pubStamp && Date.now() < pubUntil && st !== pubStamp) { /* encara és el d'abans */ }
+      else {
+        if (st === pubStamp) pubStamp = '';
+        applyChanges(d);
+        if (st === stamp) try { localStorage.setItem(CKEY, JSON.stringify(d)); } catch (e) {}
+      }
+    }
+  } catch (e) { pullFails++; }
+  pulling = false;
+  const off = pullFails >= 2;
+  if (off !== document.body.classList.contains('offline')) { document.body.classList.toggle('offline', off); tick(true); }
+}
+
+// Organització: editor protegit amb contrasenya.
+// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
+// clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
+const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1500000, "nonce": "ulVjz7izyQaRF0Xb0jiiIA==", "ct": "GDCgR8q4YZwOMNKkpz1/QfNNlmRaoFDfDabwKwy5M3sR5ZROI9jrAso4w16sjKMRyK9YTlZ1KkfJCMXgLvt0G38hS56j2WI58IygMoK2UsM8dWtVJR3kR9lrIUno", "check": "rVFVhV2Hb3Z9a0OybsqNQ9zsR0G1WVFz/g4llbQ9hA0="};
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = u => btoa(String.fromCharCode(...u));
+async function unlock(pw) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const k = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, base, 256));
+  const hk = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = async data => new Uint8Array(await crypto.subtle.sign('HMAC', hk, data));
+  if (b64e(await mac(new TextEncoder().encode('check'))) !== ADMIN.check) throw new Error('pw');
+  const ct = b64d(ADMIN.ct), nonce = b64d(ADMIN.nonce), out = new Uint8Array(ct.length);
+  for (let i = 0; i * 32 < ct.length; i++) {
+    const block = await mac(new Uint8Array([...nonce, i >> 24 & 255, i >> 16 & 255, i >> 8 & 255, i & 255]));
+    for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ block[j];
+  }
+  return new TextDecoder().decode(out);
+}
+let token = null, draft = null, edStage = STAGES[0].id;
+const adminEl = document.getElementById('admin');
+adminEl.hidden = !(ONLINE && ADMIN);
+
+// Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
+const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+const TIMES = [];
+for (let t = T0; t <= TEND0 + 55 * MIN; t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Comença' : 'Acaba'}: ${esc(who || 'actuació nova')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+
+function rawNow() {
+  const raw = {};
+  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub }));
+  return raw;
+}
+function renderEditor(badIdx) {
+  document.getElementById('edStage').value = edStage;
+  const list = draft.sets[edStage];
+  document.getElementById('edRows').innerHTML = list.map((r, i) => `<div class="edrow${i === badIdx ? ' bad' : ''}" data-i="${i}">
+    <div class="edtimes">${timeSel('a', r.a, r.n)}<span>–</span>${timeSel('b', r.b, r.n)}</div>
+    <input class="n" type="text" value="${html(r.n)}" aria-label="Artista" placeholder="Artista" maxlength="120" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done">
+    <div class="edmore">
+      <select class="t" aria-label="Importància: ${esc(r.n || 'actuació nova')}">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importància ${v}` : 'Sense color'}</option>`).join('')}</select>
+      <input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítol: ${esc(r.n || 'actuació nova')}" placeholder="Subtítol (opcional)" maxlength="80" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <button type="button" class="del" aria-label="Treure ${html(r.n)}">Treure</button>
+    </div></div>`).join('') || '<p class="empty">Aquest escenari no té actuacions.</p>';
+  if (badIdx != null) { const el = document.querySelector(`#edRows .edrow[data-i="${badIdx}"]`); if (el) el.scrollIntoView({ block: 'center' }); }
+}
+const DKEY = FEST.key + '-draft-v1';
+let dirty = false, baseStamp = '', baseRaw = null, baseNotice = '';
+// La versió publicada de la qual parteix l'edició (per combinar-la si algú altre publica mentrestant)
+function setBase(st, raw, nt) { baseStamp = st; baseRaw = structuredClone(raw); baseNotice = nt || ''; }
+function markDirty() {
+  dirty = true;
+  try { sessionStorage.setItem(DKEY, JSON.stringify({ base: baseStamp, baseRaw, baseNotice, draft })); } catch (e) {}
+}
+// Combina tres versions de l'horari: de la qual partia (base), la meva i la publicada per una altra persona.
+// Cada actuació (per id): si només l'ha canviada un, guanya aquell canvi; si l'han canviada tots dos, guanya la meva.
+const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || '')]) : '';
+function merge3(base, mine, theirs, bn, mn, tn) {
+  const sets = {}, clash = [];
+  for (const s of STAGES) {
+    const by = l => Object.fromEntries((Array.isArray(l) ? l : []).map(r => [r.id, r]));
+    const B = by(base[s.id]), M = by(mine[s.id]), O = by(theirs[s.id]);
+    sets[s.id] = [];
+    for (const id of new Set([...Object.keys(O), ...Object.keys(M)])) {
+      const b = norm(B[id]), m = norm(M[id]), o = norm(O[id]);
+      let r;
+      if (m === b) r = O[id]; else if (o === b || o === m) r = M[id];
+      else { r = M[id]; clash.push((M[id] || O[id]).n); }
+      if (r) sets[s.id].push({ ...r });
+    }
+    sets[s.id].sort((x, y) => T(x.a) - T(y.a));
+  }
+  const notice = mn === bn ? tn : mn;
+  if (mn !== bn && tn !== bn && mn !== tn) clash.push('Avís per a tothom');
+  return { sets, notice, clash };
+}
+const rawOf = d => d && sameFest(d) && d.sets && typeof d.sets === 'object' && !Array.isArray(d.sets) ? d.sets : DEFAULT_RAW;
+const noticeOf = d => d && sameFest(d) && typeof d.notice === 'string' ? d.notice : '';
+function clearDraft() {
+  dirty = false;
+  try { sessionStorage.removeItem(DKEY); } catch (e) {}
+}
+addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+function edMsg(text, bad) {
+  const m = document.getElementById('edMsg');
+  m.textContent = text;
+  m.classList.toggle('bad', !!bad);
+}
+document.getElementById('pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = document.getElementById('pwMsg');
+  const go = e.target.querySelector('button');
+  msg.hidden = false; msg.textContent = 'Comprovant…';
+  go.disabled = true;
+  try {
+    token = await unlock(document.getElementById('pw').value);
+    document.getElementById('pw').value = '';
+    msg.hidden = true;
+    msg.hidden = false; msg.textContent = 'Carregant l’últim horari publicat…';
+    // La web (GitHub Pages) pot servir un changes.json de fa uns minuts: per editar es llegeix l'original de GitHub,
+    // si no, s'editaria un horari vell i en publicar s'esborraria el que ha fet una altra persona
+    try {
+      const remote = await remoteChanges();
+      if (remote && sameFest(remote)) applyChanges(remote, true);
+      else if (stamp && stamp !== 'cartel') applyChanges({ v: 1, fest: FEST.id, updated: 'cartel', notice: '', sets: null }, true);
+    } catch (err) {}
+    msg.hidden = true;
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(DKEY) || 'null'); } catch (err) {}
+    if (saved && saved.draft && saved.draft.sets && saved.baseRaw) {
+      draft = saved.draft; setBase(saved.base, saved.baseRaw, saved.baseNotice); dirty = true;
+      for (const st of STAGES) if (!Array.isArray(draft.sets[st.id])) draft.sets[st.id] = [];
+    } else {
+      saved = null;
+      draft = { notice, sets: rawNow() }; setBase(stamp || 'cartel', draft.sets, notice); dirty = false;
+    }
+    document.getElementById('edNotice').value = draft.notice || '';
+    document.getElementById('pwForm').hidden = true;
+    document.getElementById('editor').hidden = false;
+    openPanel('');
+    renderEditor();
+    edMsg(saved && saved.draft ? 'Hem recuperat els canvis que encara no havies publicat.' : '');
+  } catch (err) {
+    msg.textContent = 'Contrasenya incorrecta.';
+  }
+  go.disabled = false;
+});
+// Menú d'Organización: un apartat obert cada vegada
+function openPanel(id) {
+  for (const b of document.querySelectorAll('.orgmenu [data-panel]')) {
+    const on = b.dataset.panel === id;
+    b.setAttribute('aria-expanded', on);
+    document.getElementById(b.dataset.panel).hidden = !on;
+  }
+}
+document.querySelector('.orgmenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-panel]');
+  if (!b) return;
+  openPanel(b.getAttribute('aria-expanded') === 'true' ? '' : b.dataset.panel);
+  edMsg('');
+});
+document.getElementById('edSave2').addEventListener('click', () => document.getElementById('edSave').click());
+document.getElementById('edStage').innerHTML = STAGES.map(s => `<option value="${s.id}">${html(s.name)}</option>`).join('');
+document.getElementById('edStage').addEventListener('change', e => { edStage = e.target.value; renderEditor(); });
+document.getElementById('edRows').addEventListener('change', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  for (const k of ['a', 'b', 't']) if (e.target.classList.contains(k)) r[k] = k === 't' ? +e.target.value : e.target.value;
+  markDirty();
+});
+document.getElementById('edRows').addEventListener('input', e => {
+  const row = e.target.closest('.edrow');
+  if (!row) return;
+  const r = draft.sets[edStage][+row.dataset.i];
+  if (e.target.classList.contains('n')) r.n = e.target.value;
+  if (e.target.classList.contains('sub')) r.sub = e.target.value;
+  markDirty();
+});
+document.getElementById('edRows').addEventListener('click', e => {
+  const b = e.target.closest('.del');
+  if (!b) return;
+  draft.sets[edStage].splice(+b.closest('.edrow').dataset.i, 1);
+  markDirty();
+  renderEditor();
+});
+document.getElementById('edAdd').addEventListener('click', () => {
+  const list = draft.sets[edStage];
+  const last = list[list.length - 1];
+  const a = last ? last.b : FEST.start;
+  const ia = TIMES.findIndex(([c]) => c === a);
+  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '' });
+  markDirty();
+  renderEditor();
+  const rows = document.querySelectorAll('#edRows .n');
+  rows[rows.length - 1].focus();
+});
+document.getElementById('edNotice').addEventListener('input', e => { draft.notice = e.target.value; markDirty(); });
+
+// Publicar: changes.json en un commit (API de dades de Git), comprovant abans
+// que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
+const GH = 'https://api.github.com/repos/' + REPO;
+const gh = async (path, opts = {}) => {
+  const r = await fetchT(GH + path, { ...opts, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...(opts.headers || {}) }, cache: 'no-store' }, 15000);
+  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; throw err; }
+  return r.status === 204 ? null : r.json();
+};
+async function remoteChanges() {
+  try {
+    const cur = await gh(`/contents/docs/changes.json?ref=main&t=${Date.now()}`);
+    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+async function commitFiles(files, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ref = await gh('/git/ref/heads/main');
+    const head = await gh(`/git/commits/${ref.object.sha}`);
+    const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
+    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
+    try { return await gh('/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); }
+    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
+    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+  }
+  throw new Error('GitHub ocupado');
+}
+async function publish(data) {
+  const remote = await remoteChanges();
+  const rs = remote && sameFest(remote) ? String(remote.updated || '') : 'cartel';
+  if (rs !== (baseStamp || 'cartel')) {
+    const when = okDate(rs) ? ` (${fmtDay.format(new Date(rs))})` : '';
+    if (!data.sets) {
+      if (!confirm(`Una altra persona ha publicat canvis mentre editaves${when}.\n\nSi tornes a l’horari del cartell, també s’esborraran els seus canvis. Continuar?`)) throw new Error('cancelado');
+    } else {
+      // Es combinen els canvis de tots dos; el resultat es mostra a l'editor perquè es revisi abans de publicar
+      const m = merge3(baseRaw || DEFAULT_RAW, data.sets, rawOf(remote), baseNotice, data.notice, noticeOf(remote));
+      draft = { notice: m.notice, sets: m.sets };
+      setBase(rs, rawOf(remote), noticeOf(remote));
+      markDirty();
+      document.getElementById('edNotice').value = draft.notice || '';
+      renderEditor();
+      const e = new Error('combinado'); e.when = when; e.clash = m.clash; throw e;
+    }
+  }
+  // Primer s'aplica aquí (així es comprova que les dades són bones); si falla, es torna enrere
+  const prevStamp = stamp;
+  stamp = '';
+  applyChanges(data, true);
+  if (stamp !== data.updated) { stamp = prevStamp; throw new Error('datos'); }
+  const files = [{ path: 'docs/changes.json', content: JSON.stringify(data, null, 1) }];
+  await commitFiles(files, data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel');
+}
+async function save(data) {
+  const btns = document.querySelectorAll('#editor button');
+  btns.forEach(b => b.disabled = true);
+  edMsg('Publicant…');
+  const before = { raw: rawNow(), notice, stamp };
+  try {
+    await publish(data);
+    setBase(stamp, data.sets || DEFAULT_RAW, data.notice);
+    pubStamp = stamp; pubUntil = Date.now() + 15 * MIN;
+    clearDraft();
+    try { localStorage.setItem(CKEY, JSON.stringify(data)); } catch (e) {}
+    edMsg('Publicat. Ho veuran tots els mòbils en 1 o 2 minuts.');
+  } catch (err) {
+    // No s'ha publicat: aquest mòbil torna a l'horari que hi havia
+    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, fest: FEST.id, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
+    edMsg(err.message === 'combinado' ? `Una altra persona ha publicat canvis mentre editaves${err.when}. Els hem ajuntat amb els teus${err.clash.length ? ` (a ${err.clash.slice(0, 3).join(', ')} havíeu tocat el mateix: es queda el teu)` : ''}. Revisa-ho i torna a prémer «Desar i publicar».`
+      : err.message === 'cancelado' ? 'No s’ha publicat.'
+      : err.name === 'AbortError' ? 'No hi ha prou connexió per publicar. Els teus canvis continuen aquí: torna-ho a provar d’aquí a un moment.'
+      : `No s’ha pogut publicar (${err.message}). Els teus canvis continuen aquí: torna-ho a provar.`, true);
+  }
+  btns.forEach(b => b.disabled = false);
+}
+document.getElementById('edSave').addEventListener('click', () => {
+  for (const s of STAGES) {
+    const list = draft.sets[s.id];
+    for (const [i, r] of list.entries()) {
+      r.n = String(r.n || '').trim();
+      if (!r.n) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`Falta el nom d’un artista a ${s.name}.`, true); }
+      if (!(T(r.b) > T(r.a))) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${r.n} (${s.name}): l’hora de final ha de ser després de la d’inici.`, true); }
+    }
+    // Dues actuacions alhora al mateix escenari: a la graella es taparien i una no sortiria a «Ahora suena»
+    const order = list.map((r, i) => [r, i]).sort((p, q) => T(p[0].a) - T(q[0].a));
+    for (let k = 1; k < order.length; k++) {
+      const [prev] = order[k - 1], [cur, i] = order[k];
+      if (T(cur.a) < T(prev.b)) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${cur.n} i ${prev.n} es trepitgen a ${s.name} (${lbl(T(cur.a))}). Canvia una de les dues hores.`, true); }
+    }
+  }
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
+});
+document.getElementById('edReset').addEventListener('click', () => {
+  if (!confirm('S’esborraran tots els canvis i l’avís, i tornarà l’horari del cartell per a tothom. Continuar?')) return;
+  draft = { notice: '', sets: structuredClone(DEFAULT_RAW) };
+  document.getElementById('edNotice').value = '';
+  renderEditor();
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: '', sets: null });
+});
+document.getElementById('edClose').addEventListener('click', () => {
+  if (dirty && !confirm('Tens canvis sense publicar. Sortir i perdre’ls?')) return;
+  clearDraft();
+  token = null; draft = null;
+  document.getElementById('editor').hidden = true;
+  document.getElementById('pwForm').hidden = false;
+});
+
+try { applyChanges(JSON.parse(localStorage.getItem(CKEY) || 'null')); } catch (e) {}
+paintFavs();
+paintMine();
+tick(true);
+fitClock();
+scrollToNow(false);
+setInterval(() => { if (!document.hidden) tick(); }, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
+pullChanges();
+setInterval(() => { if (!document.hidden) pullChanges(); }, 60000);
+</script>
+
+<script>
+// Sense connexió: guarda l'app al mòbil la primera vegada que s'obre
+if ('serviceWorker' in navigator) {
+  const had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+  // Si s'ha publicat una versió nova mentre l'app estava oberta, s'ofereix recarregar
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!had) return;
+    const t = document.createElement('div');
+    t.className = 'toast info';
+    t.innerHTML = '<div class="msg">Hi ha una versió nova de l’app.</div><button type="button" class="act">Actualitzar</button>';
+    t.querySelector('.act').onclick = () => location.reload();
+    document.getElementById('toasts').appendChild(t);
+  });
+}
+</script>
+</body>
+</html>

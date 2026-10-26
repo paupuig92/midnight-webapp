@@ -67,17 +67,43 @@ head += "</style>"
 head = "\n".join(l for l in head.splitlines()
                  if 'name="claude:viewport-fit-sides"' not in l and 'name="viewport"' not in l)
 
+# Dades del festival (bloc FEST d'index.html) → docs/cartel.json, per al servidor de notificacions
+import re
+def js_to_json(block):
+    """Converteix un literal JS senzill (com el bloc FEST) a JSON."""
+    block = re.sub(r"^\s*//.*$", "", block, flags=re.M)                               # comentaris de línia
+    block = re.sub(r"(?<=[,\[\]{}0-9'\"])[ \t]*//[^\n]*", "", block)                # comentaris al final de línia
+    block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
+    block = re.sub(r'([{,]\s*)(\w+)\s*:', r'\1"\2":', block)                        # claus
+    block = re.sub(r",(\s*[\]}])", r"\1", block)                                      # comes finals
+    return json.loads(block)
+fb = src[src.index("/* ==== FESTIVAL ==== */"):src.index("/* ==== /FESTIVAL ==== */")]
+fb = fb[fb.index("const FEST = ") + len("const FEST = "):fb.rindex("};") + 1]
+FEST = js_to_json(fb)
+
+# Colors i lletres del festival ja al <head>: si no, el primer instant es veuen els colors per defecte (els del Bass)
+def _css(v): return str(v).replace("<", "")
+_vars = {"--accent": FEST.get("accent"), "--accent-rgb": FEST.get("accentRgb"), "--accent-dim": FEST.get("accentDim"),
+         "--accent-deep": FEST.get("accentDeep"), "--accent-ink": FEST.get("accentInk"), **FEST.get("theme", {})}
+BG = _css(FEST.get("theme", {}).get("--bg", "#040704"))
+FESTCSS = "<style>/* colors i lletres del festival */\n" + "".join(
+    f'@font-face{{font-family:"{_css(f["family"])}";src:url("img/{_css(f["file"])}");font-weight:{_css(f.get("weight", 400))};font-display:swap}}\n'
+    for f in FEST.get("fonts", [])) + ":root{" + ";".join(f"{k}:{_css(v)}" for k, v in _vars.items() if v) + "}</style>"
+
 page = f"""<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#040704">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="{BG}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Midnight">
 <meta name="description" content="Horario en directo · Midnight">
+<script>/*LANGREDIRECT*/</script>
+<script>/* iPhone: Safari no fa cas de user-scalable=no, així es bloqueja la pinça */
+document.addEventListener('gesturestart', e => e.preventDefault());</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -90,6 +116,7 @@ img {{ max-width: 100%; }}
 [hidden] {{ display: none !important; }}
 </style>
 {head}
+{FESTCSS}
 </head>
 <body>
 {body}
@@ -114,7 +141,20 @@ if ('serviceWorker' in navigator) {{
 """
 
 OUT.mkdir(exist_ok=True)
+# Català: la mateixa pàgina traduïda (i18n_ca.py). Qui ha triat català s'hi redirigeix des d'index.html
+import re as _re
+import importlib.util as _iu
+_spec = _iu.spec_from_file_location("i18n_ca", ROOT / "i18n_ca.py"); i18n_ca = _iu.module_from_spec(_spec); _spec.loader.exec_module(i18n_ca)
+page_ca = i18n_ca.translate(page).replace('<html lang="es">', '<html lang="ca">').replace("/*LANGREDIRECT*/", "")
+page = page.replace("/*LANGREDIRECT*/", "try { if (localStorage.getItem('midnight-lang') === 'ca') location.replace('ca.html' + location.hash); } catch (e) {}")
+# Avís de textos que semblen en castellà i no s'han traduït (cal afegir-los a i18n_ca.py)
+_body = page_ca[page_ca.index("<body>"):]
+_left = sorted(set(_re.findall(r"[^<>`'\"\n]{0,30}(?:ción|ñ|¿|¡|\bmóvil|\bpara\b|\bhorario|\bquedan|\bmis\b|\btus\b|\bcon\b)[^<>`'\"\n]{0,30}", _body)))
+_left = [x for x in _left if "//" not in x and "Montmeló" not in x and "horario" not in x and "Configuración)" not in x and "Organización:" not in x]
+if _left:
+    print("Compte, textos potser sense traduir al català:", *_left[:15], sep="\n  ")
 (OUT / "index.html").write_text(page, encoding="utf-8")
+(OUT / "ca.html").write_text(page_ca, encoding="utf-8")
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(ROOT / "img", OUT / "img")
@@ -123,19 +163,7 @@ for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
-# Dades del festival (bloc FEST d'index.html) → docs/cartel.json, per al servidor de notificacions
-import re
-def js_to_json(block):
-    """Converteix un literal JS senzill (com el bloc FEST) a JSON."""
-    block = re.sub(r"^\s*//.*$", "", block, flags=re.M)                               # comentaris de línia
-    block = re.sub(r"(?<=[,\[\]{}0-9'\"])[ \t]*//[^\n]*", "", block)                # comentaris al final de línia
-    block = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: json.dumps(m.group(1)), block)  # cometes simples
-    block = re.sub(r'([{,]\s*)(\w+)\s*:', r'\1"\2":', block)                        # claus
-    block = re.sub(r",(\s*[\]}])", r"\1", block)                                      # comes finals
-    return json.loads(block)
-fb = src[src.index("/* ==== FESTIVAL ==== */"):src.index("/* ==== /FESTIVAL ==== */")]
-fb = fb[fb.index("const FEST = ") + len("const FEST = "):fb.rindex("};") + 1]
-FEST = js_to_json(fb)
+# Dades del festival → docs/cartel.json, per al servidor de notificacions
 defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in FEST["sets"].items()}
 (OUT / "cartel.json").write_text(json.dumps({
     "fest": FEST["id"], "name": FEST["name"], "date": FEST["date"], "start": FEST["start"], "end": FEST["end"],
@@ -153,20 +181,20 @@ if (OUT / "cal").exists():
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#040704",
-  "theme_color": "#040704",
+  "background_color": "BG",
+  "theme_color": "BG",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
-""", encoding="utf-8")
+""".replace("BG", BG), encoding="utf-8")
 
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
-version = hashlib.sha1(page.encode()).hexdigest()[:8]
+version = hashlib.sha1((page + page_ca).encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
-const FILES = ['index.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")))[1:-1]}];
+const FILES = ['index.html', 'ca.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
+  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp", ".otf", ".ttf", ".woff2")))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{
