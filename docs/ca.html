@@ -425,7 +425,7 @@ body.offline .status::after { content: " · sense connexió (horari desat)"; col
 /* Les ratlles es mouen amb transform (la GPU ho fa sola, sense repintar cada fotograma): gasta molta menys bateria */
 .mprog i::before { content: ""; position: absolute; top: 0; bottom: 0; left: -28.28px; width: calc(100% + 56.56px);
   background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, color-mix(in srgb, var(--accent) 70%, #fff) 10px 20px); background-size: 28.28px 100%;
-  animation: mprog 1.2s linear infinite; will-change: transform; }
+  animation: mprog 1.2s linear 6; will-change: transform; }
 @keyframes mprog { to { transform: translateX(28.28px); } }
 @media (prefers-reduced-motion: reduce) { .mprog i { transition: none; } .mprog i::before { animation: none; } }
 .mascot a, .credit a { color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
@@ -516,6 +516,109 @@ body { padding-top: var(--edge); }
 .instov .arrow { align-self: flex-end; margin: 6px 14px 0 0; color: var(--accent); animation: instbob 1s ease-in-out infinite alternate; }
 @keyframes instbob { to { transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .instov .arrow { animation: none; } }
+
+/* Color de cada escenari (--sc) */
+.row { box-shadow: inset 3px 0 0 var(--sc, transparent); padding-left: 13px; }
+.row .sn { font-size: 13px; color: var(--sc, var(--muted)); letter-spacing: .05em; }
+.upnext li.it { box-shadow: inset 3px 0 0 var(--sc); padding-left: 10px; }
+.upnext .where { color: var(--sc); font: 800 11.5px/1.3 var(--display); text-transform: uppercase; letter-spacing: .05em; }
+.hd, .colorlogos .hd { border-bottom: 4px solid var(--sc, var(--accent)); }
+.colorlogos .hd.color span { color: var(--sc); }
+.col .blk:not(.on):not(.fav):not(.chg):not(.past) { border-color: color-mix(in srgb, var(--sc) 55%, #000); }
+.pick h3 { color: var(--sc, var(--muted)); font-size: 13px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--sc, var(--rule)); padding-bottom: 4px; }
+.pick h3 img { width: 34px; height: 28px; object-fit: contain; }
+/* Mis artistas: filtrar i triar, junts */
+.mygrp { display: inline-flex; }
+.mygrp .chip:first-child { border-radius: 999px 0 0 999px; }
+.mygrp .chip + .chip { border-radius: 0 999px 999px 0; margin-left: -1.5px; padding: 0 14px 0 12px; }
+/* Resposta en tocar */
+.btn, .chip, .round { transition: transform .12s ease-out, opacity .12s ease-out; }
+.btn:active, .chip:active, .round:active { transform: scale(.96); }
+@media (prefers-reduced-motion: reduce) { .btn, .chip, .round { transition: none; } .btn:active, .chip:active, .round:active { transform: none; } }
+
+/* Configuració per blocs */
+.tools > .cgrp { background: var(--panel); border-radius: 12px; padding: 12px 16px 14px; gap: 12px; align-items: stretch; }
+.cgrp .ch { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cgrp > div, .cgrp > details { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.cgrp > div + div, .cgrp > div + details { border-top: 1px solid var(--rule); padding-top: 12px; }
+.cgrp > div[hidden] { display: none; }
+.cgrp > .row2 { flex-direction: row; flex-wrap: wrap; align-items: center; border-top: 0 !important; padding-top: 0 !important; }
+.cgrp > .hint { border-top: 0 !important; padding-top: 0 !important; }
+
+.whosel { display: flex; gap: 8px; margin: 2px 0 8px; }
+.whosel label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; color: var(--ink); font-weight: 700; cursor: pointer; }
+.whosel label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.whosel input { accent-color: var(--accent); margin: 0; }
+
+/* Últimos avisos (de l'organització), damunt la targeta */
+.feed { background: color-mix(in srgb, var(--now) 13%, var(--panel)); border: 1.5px solid var(--now); border-radius: 12px; padding: 10px 14px 12px; margin-bottom: 12px; }
+.feed .fh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.feed .fh b { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--now); }
+.feed .fh b::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 6px; vertical-align: .08em; }
+.feed .fx { position: relative; width: 32px; height: 32px; margin: -6px -8px -6px 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 15px; cursor: pointer; }
+.feed .fx::after { content: ""; position: absolute; inset: -6px; }
+.feed ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.feed li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: baseline; color: var(--ink); font-size: var(--fs-s); overflow-wrap: anywhere; white-space: pre-line; }
+.feed li time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--now); font-size: var(--fs-xs); }
+.feed li + li { border-top: 1px solid color-mix(in srgb, var(--now) 30%, transparent); padding-top: 6px; }
+
+/* Importància: quadrat amb el número, més gran on es mira de lluny */
+.row .dj .imp, .upnext .nmc .imp { width: 20px; height: 20px; border-radius: 4px; font-size: 12px; vertical-align: .18em; margin-right: 6px; }
+.tv .imp { width: 1.05em; height: 1.05em; border-radius: .18em; font-size: .62em; vertical-align: .22em; margin-right: .4em; }
+
+/* Modo pantalla: per a un monitor o una tele (hora gran, què sona i què ve, sense favorits) */
+body.tvon { overflow: hidden; }
+.tv { position: fixed; inset: 0; z-index: 60; background: var(--bg); color: var(--ink); overflow: hidden; display: grid; gap: 2.2vmin 3vmin;
+  padding: max(3vmin, env(safe-area-inset-top)) max(3.5vmin, env(safe-area-inset-right)) max(3vmin, env(safe-area-inset-bottom)) max(3.5vmin, env(safe-area-inset-left));
+  grid-template: "top top" auto "now next" minmax(0, 1fr) / minmax(0, 1.45fr) minmax(0, 1fr); font-size: clamp(10px, min(calc(.9vw + .9vh), 2.6vh), 42px); }
+.tv[hidden] { display: none; }
+.tvtop { grid-area: top; display: flex; align-items: center; gap: 3vmin; min-width: 0; border-bottom: 2px solid var(--rule); padding-bottom: 1.6vmin; }
+.tvclock { font-family: var(--title); font-weight: 900; font-stretch: 125%; line-height: .85; white-space: nowrap; color: var(--accent); flex: none; width: max-content; font-variant-numeric: tabular-nums; }
+.tvclock small { font-size: .3em; color: var(--muted); margin-left: .12em; }
+.tvinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .5em; align-items: flex-end; text-align: right; }
+.tvinfo img { max-width: 100%; max-height: 11vh; width: auto; object-fit: contain; }
+.tvstatus { font-weight: 700; font-size: 1.15em; color: var(--muted); }
+.tvstatus b { color: var(--ink); }
+.tvprog { width: min(100%, 22em); height: .4em; border-radius: 1em; background: var(--rule); overflow: hidden; }
+.tvprog i { display: block; height: 100%; background: var(--accent); width: 0; transition: width 1.2s ease; }
+.tv h2 { font-size: 1.1em; margin: 0 0 .5em; color: var(--muted); }
+.tvnow { grid-area: now; display: flex; flex-direction: column; gap: 1.4vmin; min-height: 0; }
+.tvcard { --c: var(--sc, var(--accent)); flex: 1 1 0; min-height: 0; max-height: 11em; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 1em;
+  background: var(--panel); border-radius: .5em; padding: .5em 1em .5em .7em; border-left: .3em solid var(--c); position: relative; overflow: hidden; }
+.tvcard img { width: 3.6em; height: 3.6em; object-fit: contain; }
+.tvcard .tsn { font: 800 .85em/1.1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
+.tvcard.live .tsn::before { content: ""; display: inline-block; width: .55em; height: .55em; border-radius: 50%; background: var(--now); margin-right: .4em; vertical-align: .05em; }
+.tvcard .tdj { font: 900 2em/1.05 var(--display); font-stretch: 108%; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvcard .tdj .sub { font: 600 .4em var(--body); color: var(--muted); letter-spacing: .03em; }
+.tvcard .taf { color: var(--muted); font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvcard .taf b { color: var(--ink); }
+.tvcard .tleft { text-align: right; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.tvcard .tleft span { display: block; font-size: .8em; color: var(--muted); }
+.tvcard .tleft b { font-size: 1.5em; color: var(--accent); white-space: nowrap; }
+.tvcard .tbar { position: absolute; left: 0; right: 0; bottom: 0; height: .22em; background: var(--rule); }
+.tvcard .tbar i { display: block; height: 100%; width: 0; background: var(--c); transition: width 1.2s ease; }
+.tvcard.idle .tdj { font-size: 1.5em; color: var(--muted); }
+.tvcard.closed { opacity: .45; flex-grow: .6; }
+.tvcard.closed .tdj { font-size: 1.2em; color: var(--muted); }
+.tvrides { color: var(--muted); font-size: .95em; }
+.tvrides b { color: var(--ink); }
+.tvnext { grid-area: next; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.tvnext ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; min-height: 0; }
+.tvnext li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); column-gap: .8em; align-items: baseline; padding: .55em 0; border-bottom: 1px solid var(--rule); }
+.tvnext li .tt { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
+.tvnext li .tn { font: 900 1.25em/1.1 var(--display); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvnext li .tw { grid-column: 2; font-size: .85em; font-weight: 700; color: var(--sc, var(--muted)); }
+.tvnext li .tw span { color: var(--muted); font-weight: 600; }
+.tvnext li.empty { display: block; color: var(--muted); }
+.tvx { min-height: 40px; padding: 0 16px; font-size: max(13px, .7em); color: var(--muted); }
+@media (orientation: portrait) {
+  .tv { grid-template: "top" auto "now" auto "next" minmax(0, 1fr) / minmax(0, 1fr); font-size: clamp(12px, min(calc(1.6vw + .6vh), 2vh), 40px); }
+  .tvtop { flex-direction: column; align-items: stretch; }
+  .tvclock { align-self: flex-start; }
+  .tvinfo { align-items: flex-start; text-align: left; }
+  .tvcard { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) { .tvprog i, .tvcard .tbar i { transition: none; } }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Blogh";src:url("img/Blogh.otf");font-weight:100 900;font-display:swap}
@@ -537,6 +640,15 @@ body { padding-top: var(--edge); }
   <button class="btn go" id="goNow2" type="button">Ara</button>
 </div>
 
+<div class="tv" id="tv" hidden aria-label="Mode pantalla">
+  <div class="tvtop">
+    <div class="tvclock" id="tvClock"></div>
+    <div class="tvinfo"><button class="btn tvx" id="tvX" type="button">Sortir de la pantalla</button><img src="img/banner.jpg" alt=""><div class="tvstatus" id="tvStatus"></div><div class="tvprog"><i id="tvProg"></i></div></div>
+  </div>
+  <section class="tvnow"><h2>Ara <span>sona</span></h2><div id="tvNow" class="tvnow" style="flex:1"></div><div class="tvrides" id="tvRides" hidden></div></section>
+  <section class="tvnext"><h2>A <span>continuació</span></h2><ol id="tvNext"></ol></section>
+</div>
+
 <div class="wrap">
   <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
   <header class="hero">
@@ -554,15 +666,13 @@ body { padding-top: var(--edge); }
   <section id="ahora">
     <div class="shead">
       <h2>Ara <span>sona</span></h2>
-      <button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Només els meus artistes</button>
+      <div class="mygrp" role="group" aria-label="Els meus artistes"><button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Només els meus artistes</button><button class="chip" id="pickOpen" type="button">Triar <span id="pickCount"></span></button></div>
     </div>
+    <div class="feed" id="feed" hidden role="status"><div class="fh"><b>Últims avisos</b><button type="button" class="fx" id="feedX" aria-label="Tancar avisos">✕</button></div><ul id="feedList"></ul></div>
     <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
     <p class="empty" id="rowsEmpty" hidden></p>
     <div class="rows" id="rows"></div>
     <p class="closedline" id="closedLine" hidden></p>
-    <div class="underrows">
-      <button class="btn" id="pickOpen" type="button">Triar els meus artistes <span id="pickCount"></span></button>
-    </div>
     <div class="scale" aria-label="Importància, de 5 (més) a 1 (menys)">Importància:
       <i class="imp" style="--tc:var(--t5)">5</i><i class="imp" style="--tc:var(--t4)">4</i><i class="imp" style="--tc:var(--t3)">3</i><i class="imp" style="--tc:var(--t2)">2</i><i class="imp" style="--tc:var(--t1)">1</i>
       de més a menys</div>
@@ -590,6 +700,10 @@ body { padding-top: var(--edge); }
     <h2>Organització</h2>
     <form id="pwForm" class="pwform">
       <label for="pw">Canvis d’última hora (només organització)</label>
+      <div class="whosel" role="radiogroup" aria-label="Qui ets">
+        <label><input type="radio" name="who" value="prod" checked> Producció</label>
+        <label><input type="radio" name="who" value="mkt"> Màrqueting</label>
+      </div>
       <div class="pwrow">
         <input type="password" id="pw" autocomplete="current-password" placeholder="Contrasenya" required>
         <button type="submit" class="btn">Entrar</button>
@@ -615,7 +729,7 @@ body { padding-top: var(--edge); }
       </div>
 
       <div class="panel" id="pAviso" hidden>
-        <label for="edNotice">Avís per a tothom (surt a dalt, sota l’hora)</label>
+        <label for="edNotice">Avís per a tothom (surt en vermell a «Últims avisos»)</label>
         <textarea id="edNotice" rows="3" placeholder="Ex.: Els Pets comencen 30 min tard"></textarea>
         <div class="edbar"><button type="button" class="btn primary" id="edSave2">Desar i publicar</button></div>
         <p class="note">Per treure l’avís, esborra el text i publica. Ho veuran tots en 1 o 2 minuts.</p>
@@ -628,12 +742,19 @@ body { padding-top: var(--edge); }
   <section class="tools" id="config">
     <h2>Configuració</h2>
     <p class="note" style="margin:0">Això només afecta aquest mòbil.</p>
-    <div>
-      <button class="btn switch" type="button" id="wake" aria-pressed="false">Mantenir la pantalla encesa</button>
-      <div class="hint" id="wakeHint" hidden></div>
+    <div class="cgrp">
+      <h3 class="ch">Pantalla</h3>
+      <div>
+        <button class="btn switch" type="button" id="wake" aria-pressed="false">Mantenir la pantalla encesa</button>
+        <div class="hint" id="wakeHint" hidden></div>
+      </div>
+      <div class="tvbox">
+        <button class="btn" type="button" id="tvOpen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Mode pantalla</button>
+        <p class="note" style="margin:0">Per deixar-la en un monitor o una tele: l’hora en gran, què sona a cada escenari i el que ve. Sense preferits.</p>
+      </div>
     </div>
-    <div class="notif" role="group" aria-labelledby="notifH">
-      <h3 id="notifH">Notificacions</h3>
+    <div class="notif cgrp" role="group" aria-labelledby="notifH">
+      <h3 id="notifH" class="ch">Notificacions</h3>
       <div class="row2">
         <button class="btn switch" type="button" id="notifOn" aria-pressed="false">Rebre notificacions</button>
         <button class="btn quiet" type="button" id="notifTest">Enviar-ne una de prova</button>
@@ -648,52 +769,58 @@ body { padding-top: var(--edge); }
       <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisar-me dels canvis d’horari i dels avisos de l’organització</label>
       <p class="note" style="margin:0" id="notifNote"><b>Amb el mòbil bloquejat no arriben:</b> només amb l’app oberta a la pantalla (per a això, «Mantenir la pantalla encesa»). A l’iPhone, les notificacions necessiten l’app afegida a la pantalla d’inici (iOS 16.4 o més nou).</p>
     </div>
-    <div>
-      <button class="btn" type="button" id="appUpdate">Actualitzar l’app</button>
-      <div class="hint" id="updMsg" hidden></div>
-      <p class="note" id="appVer" style="margin:0"></p>
-    </div>
-    <div class="langsel" role="group" aria-label="Idioma / Idioma">
-      <h3>Idioma</h3>
+    <div class="langsel cgrp" role="group" aria-label="Idioma / Idioma">
+      <h3 class="ch">Idioma</h3>
       <div class="row2"><a class="btn" href="./" data-lang="es" hreflang="es">Castellano</a><a class="btn" href="ca" data-lang="ca" hreflang="ca">Català</a></div>
     </div>
-    <details class="simbox">
-      <summary>Mode prova (simular una hora del festival)</summary>
-      <div class="sim">
-        <label><input type="checkbox" id="simOn"> Simular una hora (només en aquest mòbil, sense notificacions)</label>
-        <div id="simCtl" class="sim" hidden>
-          <input type="range" id="simRange" aria-label="Hora simulada">
-          <div class="steps" id="simSteps">
-            <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
-          </div>
-          <div class="steps" id="simPresets"></div>
-          <output id="simOut"></output>
+    <div class="cgrp">
+      <h3 class="ch">App</h3>
+      <div class="install" id="installBox">
+        <button class="btn" type="button" id="instBtn" aria-expanded="false">Afegir a la pantalla d’inici</button>
+        <p class="note" style="margin:0">Així s’obre a pantalla completa, com una app, i a l’iPhone és l’única manera de rebre notificacions.</p>
+        <div class="insthow" id="instHow" hidden>
+        <div class="instos" id="instIOS">
+          <b>iPhone (Safari)</b>
+          <ol>
+            <li>Toca <b>Comparteix</b> <svg class="ishare" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> (a l’iOS 26, dins del menú <b>···</b>).</li>
+            <li>Baixa i toca <b>Afegeix a la pantalla d’inici</b>.</li>
+            <li>Toca <b>Afegeix</b> i obre l’app des de la icona nova.</li>
+          </ol>
+        </div>
+        <div class="instos" id="instAnd">
+          <b>Android (Chrome)</b>
+          <ol>
+            <li>Toca el menú <b>⋮</b> de dalt a la dreta.</li>
+            <li>Toca <b>Afegeix a la pantalla d’inici</b> o <b>Instal·la l’aplicació</b>.</li>
+          </ol>
+        </div>
         </div>
       </div>
-    </details>
-    <div class="sharebox">
-      <button class="btn" type="button" id="shareBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Compartir l’app</button>
+      <div class="sharebox">
+        <button class="btn" type="button" id="shareBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Compartir l’app</button>
+      </div>
+      <div>
+        <button class="btn" type="button" id="appUpdate">Actualitzar l’app</button>
+        <div class="hint" id="updMsg" hidden></div>
+        <p class="note" id="appVer" style="margin:0"></p>
+      </div>
     </div>
-    <div class="install" id="installBox">
-      <button class="btn" type="button" id="instBtn" aria-expanded="false">Afegir a la pantalla d’inici</button>
-      <p class="note" style="margin:0">Així s’obre a pantalla completa, com una app, i a l’iPhone és l’única manera de rebre notificacions.</p>
-      <div class="insthow" id="instHow" hidden>
-      <div class="instos" id="instIOS">
-        <b>iPhone (Safari)</b>
-        <ol>
-          <li>Toca <b>Comparteix</b> <svg class="ishare" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> (a l’iOS 26, dins del menú <b>···</b>).</li>
-          <li>Baixa i toca <b>Afegeix a la pantalla d’inici</b>.</li>
-          <li>Toca <b>Afegeix</b> i obre l’app des de la icona nova.</li>
-        </ol>
-      </div>
-      <div class="instos" id="instAnd">
-        <b>Android (Chrome)</b>
-        <ol>
-          <li>Toca el menú <b>⋮</b> de dalt a la dreta.</li>
-          <li>Toca <b>Afegeix a la pantalla d’inici</b> o <b>Instal·la l’aplicació</b>.</li>
-        </ol>
-      </div>
-      </div>
+    <div class="cgrp">
+      <h3 class="ch">Proves</h3>
+      <details class="simbox">
+        <summary>Mode prova (simular una hora del festival)</summary>
+        <div class="sim">
+          <label><input type="checkbox" id="simOn"> Simular una hora (només en aquest mòbil, sense notificacions)</label>
+          <div id="simCtl" class="sim" hidden>
+            <input type="range" id="simRange" aria-label="Hora simulada">
+            <div class="steps" id="simSteps">
+              <button type="button" data-d="-60">−1 h</button><button type="button" data-d="-5">−5 min</button><button type="button" data-d="-1">−1 min</button><button type="button" data-d="1">+1 min</button><button type="button" data-d="5">+5 min</button><button type="button" data-d="60">+1 h</button>
+            </div>
+            <div class="steps" id="simPresets"></div>
+            <output id="simOut"></output>
+          </div>
+        </div>
+      </details>
     </div>
   </section>
   <footer class="credit">Algun suggeriment o millora? <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></footer>
@@ -868,6 +995,10 @@ function T(s) {
 }
 
 const STAGES = FEST.stages;
+// Cada escenari té el seu color (a tot arreu: files, llista de propers, graella, triar artistes). Colors freds: el vermell, el taronja, el groc i el magenta ja volen dir «en directe», festival, «els meus» i «canviat»
+const STAGE_PAL = ['#4cc9ff', '#b79bff', '#3ee6a0', '#d6f36b'];
+// Si la importància va per colors (impColors), els escenaris no en porten (es confondrien): el nom en gris, com abans
+STAGES.forEach((s, i) => { s.color = s.color || (FEST.impColors !== false ? 'var(--muted)' : STAGE_PAL[i % STAGE_PAL.length]); });
 const DEFAULT = FEST.sets;
 
 const STAGE = Object.fromEntries(STAGES.map(s => [s.id, s]));
@@ -972,7 +1103,7 @@ const tlwrap = document.getElementById('tlwrap');
 let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
-  for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color"><img src="img/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color" style="--sc:${s.color}"><img src="img/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd" style="--sc:${s.color}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
   // Atraccions: totes en una sola columna, una franja per atracció
   const RIMG = FEST.ridesImg || (RIDE_LIST.find(r => r.img) || {}).img;
   if (RIDE_LIST.length) g += RIMG && FEST.colorLogos ? `<div class="hd color"><img src="${esc(RIMG)}" alt=""><span>${html(RIDES_NAME)}</span></div>`
@@ -983,7 +1114,7 @@ function buildGrid() {
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
   STAGES.forEach((s, i) => {
     const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
-    g += `<div class="col" style="grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}">`;
+    g += `<div class="col" style="--sc:${s.color};grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}background-color:color-mix(in srgb, var(--sc) 6%, transparent)">`;
     for (const x of SETS[s.id]) {
       const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
@@ -1068,8 +1199,15 @@ function setHTML(el, h) {
 
 // Ahora suena: una fila per escenari
 const rowsEl = document.getElementById('rows');
-rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}"></div>`).join('') + (RIDE_LIST.length ? '<div class="row" id="r-rides"></div>' : '');
+rowsEl.innerHTML = STAGES.map(s => `<div class="row" id="r-${s.id}" style="--sc:${s.color}"></div>`).join('') + (RIDE_LIST.length ? '<div class="row" id="r-rides" style="--sc:var(--muted)"></div>' : '');
 const rowCache = {};
+// Moviment: només transform/opacitat, un sol tipus de corba, i res si el mòbil té «Reducir movimiento».
+// Es dispara des del JS (no amb CSS) perquè les files es refan cada minut i una animació CSS es repetiria
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const EASE = 'cubic-bezier(.2,.8,.2,1)';
+const anim = (el, kf, o) => (!el || RM.matches || !el.animate) ? null : el.animate(kf, { easing: EASE, fill: 'backwards', ...o });
+const RISE = [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }];
+let booted = false;
 
 function rowHTML(s, t) {
   if (filt) return rowMine(s, t);
@@ -1121,7 +1259,7 @@ function renderPick() {
     const items = SETS[s.id].filter(x => x.b > t || favs.has(x.id));
     past += SETS[s.id].length - items.length;
     if (!items.length) return '';
-    return `<h3>${s.name}</h3><ul>${items.map(x =>
+    return `<h3 style="--sc:${s.color}"><img src="img/${s.id}.png" alt="">${s.name}</h3><ul>${items.map(x =>
       `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm${impc(x.t)}">${imp(x.t)}${deco(x.n)}${chgTag(x)}</span><span class="acts">${star(x)}</span></li>`).join('')}</ul>`;
   }).join('');
   setHTML(document.getElementById('pickList'), (h || '<p class="empty">Ja no queden actuacions.</p>')
@@ -1129,6 +1267,7 @@ function renderPick() {
 }
 function openSheet() {
   sheet.hidden = false;
+  anim(sheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });  // «translate» i no «transform»: a l'ordinador el full ja porta un translateX
   document.body.classList.add('locked');
   renderPick();
   document.getElementById('sheetDone2').focus();
@@ -1157,7 +1296,7 @@ function upHTML(t) {
   let out = '', last = null;
   for (const x of list.slice(0, 6)) {
     if (x.a !== last) { out += `<li class="grp"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
-    out += `<li class="it${favs.has(x.id) ? ' fav' : ''}">
+    out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
     <img class="logo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${chgTag(x)}</div>
     <span class="acts">${star(x)}</span></li>`;
@@ -1171,11 +1310,13 @@ function toast(msg, kind = 'mine', action = null, ms = 10000) {
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Tancar l’avís">✕</button>`;
-  el.querySelector('.x').addEventListener('click', () => el.remove());
+  const bye = () => { const a = anim(el, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(12px)' }], { duration: 160, fill: 'forwards' }); a ? a.onfinish = () => el.remove() : el.remove(); };
+  el.querySelector('.x').addEventListener('click', bye);
   if (action) el.querySelector('.act').addEventListener('click', () => { el.remove(); action.fn(); });
   toasts.appendChild(el);
+  anim(el, RISE, { duration: 240 });
   while (toasts.children.length > 2) toasts.firstElementChild.remove();
-  setTimeout(() => el.remove(), ms);
+  setTimeout(bye, ms);
   try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
 // Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
@@ -1239,6 +1380,12 @@ function setFav(id, on) {
   paintFavs();
   renderPick();
   refresh();
+  popStar(id);
+}
+function popStar(id) {
+  if (RM.matches) return;
+  const q = CSS.escape(id);
+  document.querySelectorAll(`.star[data-fav="${q}"] svg`).forEach(s => s.animate && s.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 320, easing: 'cubic-bezier(.3,1.6,.5,1)' }));
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-fav]');
@@ -1287,12 +1434,15 @@ function tick(force) {
   filt = mineOnly && (!hasFav || ALL.some(x => favs.has(x.id) && x.b > t));
   document.getElementById('clock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
   document.getElementById('mclock').textContent = hm(t);
+  if (tvOn) tvClock(t);
   const ml = document.getElementById('mleft');
   ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
   if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
+  if (FEEDK) paintFeed();
+  if (tvOn) tvRender(t);
 
   const st = document.getElementById('status');
   const live = STAGES.filter(s => SETS[s.id].some(x => t >= x.a && t < x.b)).length;
@@ -1318,9 +1468,13 @@ function tick(force) {
     const r = document.getElementById('r-' + s.id);
     const key = state + inner;
     if (rowCache[s.id] !== key) {
+      const id = cur ? cur.id : nx ? 'n' + nx.id : state, prev = r.dataset.cur;
       r.className = 'row ' + state;
       setHTML(r, inner);
       rowCache[s.id] = key;
+      // Canvi d'artista: el nou entra des de baix (no es repeteix cada minut perquè l'id no canvia)
+      if (booted && prev !== id) { anim(r.querySelector('.mid'), RISE, { duration: 380 }); anim(r.querySelector('.right'), RISE, { duration: 380, delay: 60 }); }
+      r.dataset.cur = id;
     }
     // Amb «Només els meus artistes», els pròxims surten per ordre d'hora
     r.style.order = state === 'idle mine' && nx ? String(10 + Math.round((nx.a - t) / MIN)) : '';
@@ -1668,7 +1822,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '26/10 16:50';
+const BUILD = '26/10 17:19';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -1739,8 +1893,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 // El rellotge ocupa tot l'ample (limitat per l'alçada en apaïsat)
 // La lletra del cartell pot tenir xifres d'amplada variable (a Blogh el «4» fa quasi el doble que l'«1»): es mida amb l'hora més ampla
 // possible, així cap minut no surt de la pantalla (abans: obert a les 11:11, a les 15:58 ja no hi cabia) i la mida no salta cada minut
-function fitClock() {
-  const c = clockEl, keep = c.innerHTML, target = c.parentElement.clientWidth;
+function fitClock(c = clockEl, target = c.parentElement.clientWidth, hmax = .22, wmax = 240) {
+  const keep = c.innerHTML;
   c.style.fontSize = '100px';
   const dw = {};
   for (const d of '0123456789') { c.textContent = d.repeat(4); dw[d] = c.getBoundingClientRect().width; }
@@ -1749,23 +1903,119 @@ function fitClock() {
   c.innerHTML = `${big('012')}${big(n9)}:${big(n5)}${big(n9)}<small>${big(n5)}${big(n9)}</small>`;
   const w = c.getBoundingClientRect().width;
   c.innerHTML = keep;
-  if (w && target) c.style.fontSize = Math.min(100 * target / w * 0.97, 240, innerHeight * 0.22).toFixed(1) + 'px';  // 3 % de marge: a l'iPhone la lletra pot acabar de carregar després
+  if (w && target) c.style.fontSize = Math.min(100 * target / w * 0.97, wmax, innerHeight * hmax).toFixed(1) + 'px';  // 3 % de marge: a l'iPhone la lletra pot acabar de carregar després
 }
 if (document.fonts) document.fonts.addEventListener('loadingdone', () => fitClock());
 addEventListener('orientationchange', () => setTimeout(fitClock, 300));
 let lastW = innerWidth;
-addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); fitBlocks(); edgeFade(); } });  // la barra de Safari canvia l'alçada, no l'amplada
+addEventListener('resize', () => { if (tvOn) { fitTv(); tvRender(now()); } if (innerWidth !== lastW) { lastW = innerWidth; fitClock(); fitBlocks(); edgeFade(); } });  // la barra de Safari canvia l'alçada, no l'amplada
 if (document.fonts) document.fonts.ready.then(() => { fitClock(); fitBlocks(); });
+
+// Modo pantalla: per deixar-ho en un monitor (hora gran, què sona a cada escenari i què ve; sense favorits).
+// Es recorda durant la sessió, així si l'app s'actualitza sola torna a sortir en mode pantalla
+var tvOn = false;
+const tvEl = document.getElementById('tv'), TVKEY = FEST.key + '-tv';
+const stc = s => s.color ? ` style="--sc:${esc(s.color)}"` : '';
+function tvClock(t) {
+  document.getElementById('tvClock').innerHTML = `${hm(t)}<small>${fmtS.format(t).padStart(2, '0')}</small>`;
+}
+function fitTv() {
+  const c = document.getElementById('tvClock'), land = innerWidth > innerHeight;
+  fitClock(c, land ? innerWidth * .6 : tvEl.clientWidth * .94, land ? .4 : .2, 900);
+}
+function tvRender(t) {
+  const st = document.getElementById('tvStatus'), pr = document.getElementById('tvProg');
+  pr.style.width = t <= T0 ? '0' : Math.min(100, (t - T0) / (TEND - T0) * 100).toFixed(1) + '%';
+  st.innerHTML = t < T0 ? `Obre a les <b>${lbl(T0)}</b> · queden <b>${dur(T0 - t)}</b>`
+    : t < TEND ? `Queden <b>${dur(TEND - t)}</b> de festival · fins a les ${lbl(TEND)}` : '<b>S’ha acabat.</b> Gràcies per venir!';
+  document.getElementById('tvNow').innerHTML = STAGES.map(s => {
+    const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
+    const head = `<img src="img/${s.id}.png" alt=""><div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
+    if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
+      <div class="taf">${nxt ? `Després: <b>${deco(nxt.n)}</b> a les ${lbl(nxt.a)}` : 'Després: tanca l’escenari'}</div></div>
+      <div class="tleft"><span>queden</span><b>${dur(cur.b - t)}</b></div><div class="tbar"><i style="width:${((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1)}%"></i></div></div>`;
+    if (nxt) return `<div class="tvcard idle"${stc(s)}>${head}<div class="tdj">Obre a les ${lbl(nxt.a)}</div><div class="taf">Primer: <b>${deco(nxt.n)}</b></div></div>
+      <div class="tleft"><span>obre en</span><b>${dur(nxt.a - t)}</b></div></div>`;
+    return `<div class="tvcard closed"${stc(s)}>${head}<div class="tdj">Tancat</div></div></div>`;
+  }).join('');
+  const rd = document.getElementById('tvRides'), open = RIDE_LIST.filter(r => t >= r.a && t < r.b);
+  rd.hidden = !open.length;
+  rd.innerHTML = open.length ? `<b>${html(RIDES_NAME)}:</b> ${open.map(r => html(r.name)).join(' · ')}` : '';
+  const up = ALL.filter(x => x.a > t).slice(0, 12);
+  document.getElementById('tvNext').innerHTML = up.map(x => `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span></span></li>`).join('')
+    || '<li class="empty">No queden més actuacions.</li>';
+  // Només els que hi caben sencers (en una tele no es pot fer scroll)
+  const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
+  while (ol.children.length > 1 && ol.lastElementChild.getBoundingClientRect().bottom > bot + 1) ol.lastElementChild.remove();
+}
+let tvUiT = 0;
+function tvUi() { tvEl.classList.add('ui'); clearTimeout(tvUiT); tvUiT = setTimeout(() => tvEl.classList.remove('ui'), 3000); }
+function tvOpen() {
+  tvOn = true; tvEl.hidden = false; document.body.classList.add('tvon');
+  try { sessionStorage.setItem(TVKEY, '1'); } catch (e) {}
+  const t = now(); tvClock(t); fitTv(); tvRender(t); tvUi();
+  const fs = document.documentElement.requestFullscreen;
+  if (fs && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+  if ('wakeLock' in navigator && !lock) acquire(true);  // un monitor no s'ha d'apagar
+}
+function tvClose() {
+  tvOn = false; tvEl.hidden = true; document.body.classList.remove('tvon');
+  try { sessionStorage.removeItem(TVKEY); } catch (e) {}
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  if (lock && !wantWake) { lock.release().catch(() => {}); lock = null; }
+  tick(true);
+}
+document.getElementById('tvOpen').addEventListener('click', tvOpen);
+document.getElementById('tvX').addEventListener('click', tvClose);
+tvEl.addEventListener('pointerdown', tvUi);
+tvEl.addEventListener('pointermove', tvUi);
+document.addEventListener('keydown', e => { if (tvOn && e.key === 'Escape' && !document.fullscreenElement) tvClose(); });
+document.addEventListener('visibilitychange', () => { if (tvOn && document.visibilityState === 'visible' && 'wakeLock' in navigator && !lock) acquire(true); });
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => { if (tvOn) fitTv(); });
+try { if (sessionStorage.getItem(TVKEY) === '1' || /[?&]pantalla\b/.test(location.search)) setTimeout(tvOpen, 0); } catch (e) {}
 
 // Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
 // A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
 const REPO = 'paupuig92/midnight-webapp';
 const ONLINE = !/claude(usercontent)?\.(ai|com)$/.test(location.hostname);  // a tot arreu menys a la vista prèvia de Claude (GitHub, Cloudflare, domini propi)
 const CKEY = FEST.key + '-changes-v1';
-let stamp = '', notice = '';
+let stamp = '', notice = '', noticeBy = '', noticeById = '';
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
 const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}`).join('~');
+// Últimos avisos: els 3 darrers de les últimes 6 hores (i l'aviso actiu de l'organització), en vermell damunt la targeta
+var FEEDK = FEST.key + '-feed-v1';  // «var»: tick() hi mira abans que s'arribi aquí
+var feed = [], feedSeen = 0;
+try { feed = JSON.parse(localStorage.getItem(FEEDK) || '[]').filter(f => f && f.t && f.m); feedSeen = +localStorage.getItem(FEEDK + '-x') || 0; } catch (e) {}
+function feedAdd(m) {
+  feed.unshift({ t: Date.now(), m });
+  feed = feed.slice(0, 6);
+  try { localStorage.setItem(FEEDK, JSON.stringify(feed)); } catch (e) {}
+}
+var feedKey = '';
+function paintFeed() {
+  const el = document.getElementById('feed');
+  if (!el) return;
+  const items = feed.filter(f => Date.now() - f.t < 6 * 3600000).slice(0, 3).map(f => `<li><time>${hm(f.t)}</time><span>${f.m}</span></li>`);
+  if (notice && !feed.slice(0, 3).some(f => f.m.includes(html(notice)))) items.unshift(`<li><time>Avís</time><span><b>${html(noticeBy || 'Organització')}:</b> ${html(notice)}</span></li>`);
+  const newest = Math.max(0, ...feed.map(f => f.t));
+  const show = items.length && newest >= feedSeen || (notice && !feedSeen);
+  const key = items.join('') + show;
+  if (key === feedKey) return;
+  const was = el.hidden;
+  feedKey = key;
+  el.hidden = !show;
+  document.getElementById('feedList').innerHTML = items.join('');
+  if (was && show && typeof anim === 'function') anim(el, RISE, { duration: 320 });
+}
+document.getElementById('feedX').addEventListener('click', () => {
+  feedSeen = Date.now() + 1;
+  try { localStorage.setItem(FEEDK + '-x', String(feedSeen)); } catch (e) {}
+  document.getElementById('feed').hidden = true; feedKey = '';
+});
+// Als changes.json va l'id (prod / mkt), no el nom: el nom es tradueix i no ha de canviar les dades
+const WHO_L = { prod: 'Producció', mkt: 'Màrqueting' };
+const WHO_OK = w => Object.hasOwn(WHO_L, w) ? WHO_L[w] : '';
 function applyChanges(d, quiet) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return;
   if (!sameFest(d)) d = { updated: 'cartel', notice: '', sets: null };  // són d'un altre festival: horari del cartell
@@ -1786,12 +2036,16 @@ function applyChanges(d, quiet) {
   }
   stamp = st;
   notice = newNotice;
+  const by = WHO_OK(d.by);
+  noticeById = notice ? (WHO_OK(d.noticeBy) ? d.noticeBy : WHO_OK(d.by) ? d.by : '') : '';
+  noticeBy = WHO_OK(noticeById);
+  const org = by || 'L’organització';
   const nt = document.getElementById('notice');
-  nt.hidden = !notice;
-  nt.innerHTML = notice ? `<b>Avís de l’organització</b>${html(notice)}` : '';
+  nt.hidden = true;  // ara surt al requadre «Últimos avisos»
+  nt.innerHTML = '';
   const up = document.getElementById('updated');
   up.hidden = !hasSets;
-  up.textContent = hasSets && okDate(d.updated) ? `Horari actualitzat per l’organització: ${fmtDay.format(new Date(d.updated))}.` : hasSets ? 'Horari actualitzat per l’organització.' : '';
+  up.textContent = hasSets && okDate(d.updated) ? `Horari actualitzat per ${by || 'l’organització'}: ${fmtDay.format(new Date(d.updated))}.` : hasSets ? `Horari actualitzat per ${by || 'l’organització'}.` : '';
   document.getElementById('chgLegend').hidden = !ALL.some(x => x.chg);
   simBounds();
   paintFavs();
@@ -1799,16 +2053,22 @@ function applyChanges(d, quiet) {
   refresh();
 
   // Si l'app ja tenia un horari i n'arriba un de nou (no a la primera càrrega), s'avisa del que ha canviat
-  if (!wasLoaded || quiet || !prefs.changes) return;
   const schedChanged = setsKey() !== oldKey;
+  if (wasLoaded && !quiet) {
+    // Queda apuntat a «Últimos avisos» (encara que no es vulguin avisos emergents)
+    if (notice && notice !== oldNotice) feedAdd(`<b>${html(noticeBy || 'Organització')}:</b> ${html(notice)}`);
+    if (schedChanged) feedAdd(!hasSets ? `<b>${html(org)}</b> ha tornat a l’horari del cartell.` : `<b>${html(org)}</b> ha canviat l’horari. Els canvis surten en rosa.`);
+  }
+  paintFeed();
+  if (!wasLoaded || quiet || !prefs.changes) return;
   if (notice && notice !== oldNotice) {
-    toast(`<b>Avís de l’organització</b><br>${html(notice)}`, 'org', null, 30000);
+    toast(`<b>Avís de ${html(noticeBy || 'l’organització')}</b><br>${html(notice)}`, 'org', null, 30000);
     sysNotify('Avís de l’organització', notice, 'aviso-' + st);
   } else if (!notice && oldNotice && !schedChanged) {
     toast('L’organització ha tret l’avís.', 'info', null, 6000);
   }
   if (schedChanged) {
-    const msg = !hasSets ? 'L’organització ha tornat a l’horari del cartell.' : 'L’organització ha canviat l’horari. Els canvis surten en rosa.';
+    const msg = !hasSets ? `${org} ha tornat a l’horari del cartell.` : `${org} ha canviat l’horari. Els canvis surten en rosa.`;
     toast(`<b>${msg}</b>`, 'org', null, 20000);
     sysNotify('Canvi d’horari', msg, 'horario-' + st);
     // Els meus artistes: cancel·lats o amb una altra hora (si el tenien al calendari, l'han de tornar a afegir)
@@ -1868,6 +2128,11 @@ async function unlock(pw) {
   return new TextDecoder().decode(out);
 }
 let token = null, draft = null, edStage = STAGES[0].id;
+// Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
+const WKEY2 = FEST.key + '-who-v1';
+const whoNow = () => (document.querySelector('input[name=who]:checked') || {}).value || 'prod';
+try { const w = localStorage.getItem(WKEY2); const r = document.querySelector(`input[name=who][value="${w}"]`); if (r) r.checked = true; } catch (e) {}
+document.querySelectorAll('input[name=who]').forEach(r => r.addEventListener('change', () => { try { localStorage.setItem(WKEY2, r.value); } catch (e) {} }));
 const adminEl = document.getElementById('admin');
 adminEl.hidden = !(ONLINE && ADMIN);
 
@@ -2081,7 +2346,7 @@ async function publish(data) {
   applyChanges(data, true);
   if (stamp !== data.updated) { stamp = prevStamp; throw new Error('datos'); }
   const files = [{ path: 'docs/changes.json', content: JSON.stringify(data, null, 1) }];
-  await commitFiles(files, data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel');
+  await commitFiles(files, `${data.by ? data.by + ': ' : ''}${data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel'}`);
 }
 async function save(data) {
   const btns = document.querySelectorAll('#editor button');
@@ -2120,14 +2385,15 @@ document.getElementById('edSave').addEventListener('click', () => {
       if (T(cur.a) < T(prev.b)) { edStage = s.id; openPanel('pHorario'); renderEditor(i); return edMsg(`${cur.n} i ${prev.n} es trepitgen a ${s.name} (${lbl(T(cur.a))}). Canvia una de les dues hores.`, true); }
     }
   }
-  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: String(draft.notice || '').trim(), sets: draft.sets });
+  const nt = String(draft.notice || '').trim();
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: nt, noticeBy: nt && nt === String(notice || '').trim() ? noticeById || whoNow() : whoNow(), sets: draft.sets });
 });
 document.getElementById('edReset').addEventListener('click', () => {
   if (!confirm('S’esborraran tots els canvis i l’avís, i tornarà l’horari del cartell per a tothom. Continuar?')) return;
   draft = { notice: '', sets: structuredClone(DEFAULT_RAW) };
   document.getElementById('edNotice').value = '';
   renderEditor();
-  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), notice: '', sets: null });
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: '', sets: null });
 });
 document.getElementById('edClose').addEventListener('click', () => {
   if (dirty && !confirm('Tens canvis sense publicar. Sortir i perdre’ls?')) return;
@@ -2142,6 +2408,10 @@ paintFavs();
 paintMine();
 tick(true);
 fitClock();
+// Entrada en obrir l'app (un sol cop)
+[...rowsEl.children].filter(r => r.offsetParent).forEach((r, i) => anim(r, RISE, { duration: 420, delay: 60 + i * 60 }));
+[...upEl.children].forEach((li, i) => anim(li, RISE, { duration: 360, delay: 260 + i * 35 }));
+booted = true;
 scrollToNow(false);
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
