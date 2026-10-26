@@ -226,11 +226,13 @@ if (OUT / "cal").exists():
 }
 """.replace("BG", BG), encoding="utf-8")
 
+# Fonts: només les que fa servir el festival (al img/ hi poden quedar fitxers vells)
+_fontfiles = {f["file"] for f in FEST.get("fonts", [])}
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
 version = hashlib.sha1((page + page_ca).encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp", ".otf", ".ttf", ".woff2")))[1:-1]}];
+  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp") or f.name in _fontfiles))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{
@@ -256,7 +258,7 @@ self.addEventListener('push', e => {{
     // Prova demanada des de Configuración (la pàgina hi deixa la marca abans de demanar-la)
     const test = await metaGet('test', 0);
     if (test && Date.now() - test < 3 * 60000) {{
-      items.push({{ title: 'Midnight · prueba', body: 'Las notificaciones llegan también con el móvil bloqueado ✓', tag: 'prueba-' + test }});
+      items.push({{ title: 'Midnight · prova', body: 'Les notificacions arriben també amb el mòbil bloquejat ✓', tag: 'prueba-' + test }});
       await metaPut('test', 0);
     }}
     try {{
@@ -271,7 +273,7 @@ self.addEventListener('push', e => {{
     await metaPut('shown', [...shown, ...fresh.map(i => i.tag)].slice(-200));
     // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
     if (!fresh.length) fresh = [items.length ? items[items.length - 1]
-      : {{ title: 'Midnight', body: got ? 'Abre la app para ver tu horario.' : 'Sin conexión: abre la app para ver tu horario.', tag: 'midnight' }}];
+      : {{ title: 'Midnight', body: got ? 'Obre l’app per veure el teu horari.' : 'Sense connexió: obre l’app per veure el teu horari.', tag: 'midnight' }}];
     await Promise.all(fresh.slice(0, 4).map(i => self.registration.showNotification(i.title, {{ body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' }})));
   }})());
 }});

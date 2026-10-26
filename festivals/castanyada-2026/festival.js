@@ -15,10 +15,10 @@ const FEST = {
     '--display': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
   // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
   fonts: [
-    { family: 'Blogh', file: 'Blogh.otf', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
-    { family: 'Bricolage', file: 'Bricolage-Bold.ttf', weight: 700 },
-    { family: 'Bricolage', file: 'Bricolage-ExtraBold.ttf', weight: '800 900' },
-    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.ttf', weight: '600 900' },
+    { family: 'Blogh', file: 'Blogh.woff2', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
+    { family: 'Bricolage', file: 'Bricolage-Bold.woff2', weight: 700 },
+    { family: 'Bricolage', file: 'Bricolage-ExtraBold.woff2', weight: '800 900' },
+    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.woff2', weight: '600 900' },
   ],
   // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
   deco: {
@@ -35,6 +35,7 @@ const FEST = {
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
   ridesName: 'Atracciones',
+  map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
     { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },

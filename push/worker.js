@@ -88,8 +88,8 @@ function dueFor(sub, all, from, to) {
     const x = all[id];
     if (!x) continue;
     const pre = x.a - sub.before * MIN;
-    if (pre > from && pre <= to) items.push({ title: `${x.n} · en ${sub.before} min`, body: x.stage, tag: `${id}@${x.a}:pre` });
-    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · empieza ahora`, body: x.stage, tag: `${id}@${x.a}:go` });
+    if (pre > from && pre <= to) items.push({ title: `${x.n} · d’aquí a ${sub.before} min`, body: x.stage, tag: `${id}@${x.a}:pre` });
+    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · comença ara`, body: x.stage, tag: `${id}@${x.a}:go` });
   }
   return items;
 }
@@ -251,8 +251,8 @@ export class Store {
           const schedChanged = last.key !== undefined ? last.key !== sch.key : !newNotice;
           const ev = {
             stamp: sch.stamp, notice: sch.notice, key: sch.key, at: now, silent: !newNotice && !schedChanged,
-            title: newNotice ? 'Aviso de la organización' : 'Cambio de horario',
-            body: newNotice ? sch.notice.slice(0, 180) : 'La organización ha cambiado el horario.',
+            title: newNotice ? 'Avís de l’organització' : 'Canvi d’horari',
+            body: newNotice ? sch.notice.slice(0, 180) : 'L’organització ha canviat l’horari.',
           };
           this.put('last', ev);
           if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint FROM subs WHERE changes = 1').toArray()) targets.set(sub.id, sub.endpoint);

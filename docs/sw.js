@@ -1,6 +1,6 @@
-const VERSION = 'bitp-91bb538d';
+const VERSION = 'bitp-20714ed9';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  "img/Blogh.otf", "img/Bricolage-Bold.ttf", "img/Bricolage-ExtraBold.ttf", "img/Bricolage-SemiCondensed-SemiBold.ttf", "img/banner.jpg", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
+  "img/Blogh.woff2", "img/Bricolage-Bold.woff2", "img/Bricolage-ExtraBold.woff2", "img/Bricolage-SemiCondensed-SemiBold.woff2", "img/banner.jpg", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/mapa.jpg", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {
@@ -26,7 +26,7 @@ self.addEventListener('push', e => {
     // Prova demanada des de Configuración (la pàgina hi deixa la marca abans de demanar-la)
     const test = await metaGet('test', 0);
     if (test && Date.now() - test < 3 * 60000) {
-      items.push({ title: 'Midnight · prueba', body: 'Las notificaciones llegan también con el móvil bloqueado ✓', tag: 'prueba-' + test });
+      items.push({ title: 'Midnight · prova', body: 'Les notificacions arriben també amb el mòbil bloquejat ✓', tag: 'prueba-' + test });
       await metaPut('test', 0);
     }
     try {
@@ -41,7 +41,7 @@ self.addEventListener('push', e => {
     await metaPut('shown', [...shown, ...fresh.map(i => i.tag)].slice(-200));
     // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
     if (!fresh.length) fresh = [items.length ? items[items.length - 1]
-      : { title: 'Midnight', body: got ? 'Abre la app para ver tu horario.' : 'Sin conexión: abre la app para ver tu horario.', tag: 'midnight' }];
+      : { title: 'Midnight', body: got ? 'Obre l’app per veure el teu horari.' : 'Sense connexió: obre l’app per veure el teu horari.', tag: 'midnight' }];
     await Promise.all(fresh.slice(0, 4).map(i => self.registration.showNotification(i.title, { body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' })));
   })());
 });

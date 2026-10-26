@@ -544,8 +544,12 @@ body { padding-top: var(--edge); }
 .cgrp > div[hidden] { display: none; }
 .cgrp > .row2 { flex-direction: row; flex-wrap: wrap; align-items: center; border-top: 0 !important; padding-top: 0 !important; }
 .cgrp > .hint { border-top: 0 !important; padding-top: 0 !important; }
+.cgrp > .whosel { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.tvbox .tvst { flex-direction: row; flex-wrap: wrap; gap: 8px; }
 
-.whosel { display: flex; gap: 8px; margin: 2px 0 8px; }
+.whosel { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; }
+/* Perfil «Solo horarios»: sense prioritats, efectes, mode pantalla ni editor (la pantalla oberta amb ?pantalla sí que els mostra) */
+body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):not(.tvon) .fxg, body:not(.pro) .tvbox, body:not(.pro) .scale { display: none !important; }
 .whosel label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; color: var(--ink); font-weight: 700; cursor: pointer; }
 .whosel label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .whosel input { accent-color: var(--accent); margin: 0; }
@@ -577,6 +581,8 @@ body { padding-top: var(--edge); }
 .chgbox li + li { border-top: 1px solid color-mix(in srgb, var(--chg) 30%, transparent); padding-top: 6px; }
 .chgbox li time { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--chg); }
 .chgbox li b { font: 900 var(--fs-m)/1.15 var(--display); text-transform: uppercase; }
+.chgbox li.gone b { text-decoration: line-through; text-decoration-thickness: 2px; opacity: .75; }
+.chgbox li.gone small { color: var(--now); font-weight: 700; }
 .chgbox li i { font-style: normal; font-weight: 700; font-size: var(--fs-xs); color: var(--sc, var(--muted)); text-transform: uppercase; letter-spacing: .04em; }
 .chgbox li small { display: block; color: var(--muted); font-size: var(--fs-xs); }
 .chgbox li.more { display: block; color: var(--muted); font-size: var(--fs-xs); }
@@ -668,8 +674,39 @@ body.tvon { overflow: hidden; }
 .tvnext li .tw { grid-column: 2; font-size: .85em; font-weight: 700; color: var(--sc, var(--muted)); }
 .tvnext li .tw span { color: var(--muted); font-weight: 600; }
 .tvnext li.empty { display: block; color: var(--muted); }
+.tv.alert { grid-template: "top top" auto "alert alert" auto "now next" minmax(0, 1fr) / minmax(0, 1.45fr) minmax(0, 1fr); }
+.tvalert { grid-area: alert; background: color-mix(in srgb, var(--now) 18%, var(--panel)); border: .12em solid var(--now); border-radius: .5em; padding: .5em .9em; font-size: 1.25em; font-weight: 700; line-height: 1.25; display: flex; flex-direction: column; gap: .3em; }
+.tvalert[hidden] { display: none; }
+.tvalert b { color: var(--now); }
+.tvalert div { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tvnext li.gone .tn { text-decoration: line-through; opacity: .6; }
+.tvnext li .tw .tvchg { color: #160a33; }
+.tvnext li.gone .tw .tvchg { background: var(--now); color: #fff; }
+.tv.one .tvnow > h2, .tv.one .tvrides { display: none; }
+.tvone { --c: var(--sc, var(--accent)); flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .5em; background: var(--panel); border-radius: .6em; border-left: .35em solid var(--c); padding: .8em 1.1em 1em; position: relative; overflow: hidden; }
+.tvone .o-st { display: flex; align-items: center; gap: .5em; font: 800 1.2em/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
+.tvone .o-st img { width: 2.6em; height: 2.6em; object-fit: contain; }
+.tvone .o-lbl { font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.tvone .o-dj { font: 900 3.4em/1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: anywhere; }
+.tvone .o-dj .sub { font: 600 .3em var(--body); color: var(--muted); letter-spacing: .03em; }
+.tvone .o-cd { display: flex; align-items: baseline; gap: .5em; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.tvone .o-cd span { color: var(--muted); font-weight: 700; }
+.tvone .o-cd b { font: 900 3em/1 var(--title); color: var(--accent); }
+.tvone .o-cd small { color: var(--muted); font-size: 1em; }
+.tvone .tbar { height: .35em; background: var(--rule); border-radius: 1em; overflow: hidden; }
+.tvone .tbar i { display: block; height: 100%; background: var(--c); transition: width 1.2s ease; }
+.tvone .o-next, .tvone .o-cue { font-size: 1.3em; border-top: 1px solid var(--rule); padding-top: .45em; display: flex; flex-wrap: wrap; align-items: center; gap: .4em; }
+.tvone .o-next span, .tvone .o-cue span { color: var(--muted); font-weight: 700; margin-right: .2em; }
+.tvone .o-cue { margin-top: auto; }
+.tvone .o-cue .fx { font-size: 1em; }
+.tvst .btn { border-color: var(--sc, var(--line)); }
+.mapbox { overflow: auto; border-radius: 12px; border: 1px solid var(--rule); background: var(--panel); overscroll-behavior: contain; }
+.mapbox img { display: block; width: 100%; height: auto; cursor: zoom-in; }
+.mapbox.z { height: min(70vh, 560px); }
+.mapbox.z img { width: 230%; max-width: none; cursor: zoom-out; }
 .tvx { min-height: 40px; padding: 0 16px; font-size: max(13px, .7em); color: var(--muted); }
 @media (orientation: portrait) {
+  .tv.alert { grid-template: "top" auto "alert" auto "now" auto "next" minmax(0, 1fr) / minmax(0, 1fr); }
   .tv { grid-template: "top" auto "now" auto "next" minmax(0, 1fr) / minmax(0, 1fr); font-size: clamp(12px, min(calc(1.6vw + .6vh), 2vh), 40px); }
   .tvtop { flex-direction: column; align-items: stretch; }
   .tvclock { align-self: flex-start; }
@@ -679,10 +716,10 @@ body.tvon { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .tvprog i, .tvcard .tbar i { transition: none; } }
 </style>
 <style data-fest>/* colors i lletres del festival */
-@font-face{font-family:"Blogh";src:url("img/Blogh.otf");font-weight:100 900;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-Bold.ttf");font-weight:700;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-ExtraBold.ttf");font-weight:800 900;font-display:swap}
-@font-face{font-family:"Bricolage Cond";src:url("img/Bricolage-SemiCondensed-SemiBold.ttf");font-weight:600 900;font-display:swap}
+@font-face{font-family:"Blogh";src:url("img/Blogh.woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-Bold.woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-ExtraBold.woff2");font-weight:800 900;font-display:swap}
+@font-face{font-family:"Bricolage Cond";src:url("img/Bricolage-SemiCondensed-SemiBold.woff2");font-weight:600 900;font-display:swap}
 :root{--accent:#ff7a1a;--accent-rgb:255, 122, 26;--accent-dim:#8f430f;--accent-deep:#2e1606;--accent-ink:#1a0b02;--bg:#0a0604;--panel:#160e09;--ink:#fdf4e3;--muted:#c9b29a;--rule:#6b3d1c;--line:#8a5428;--display:"Bricolage", "Archivo", sans-serif;--title:"Blogh", "Bricolage", sans-serif;--cond:"Bricolage Cond", "Bricolage", sans-serif}</style>
 </head>
 <body>
@@ -703,6 +740,7 @@ body.tvon { overflow: hidden; }
     <div class="tvclock" id="tvClock"></div>
     <div class="tvinfo"><button class="btn tvx" id="tvX" type="button">Salir de la pantalla</button><img src="img/banner.jpg" alt=""><div class="tvstatus" id="tvStatus"></div><div class="tvprog"><i id="tvProg"></i></div></div>
   </div>
+  <div class="tvalert" id="tvAlert" hidden></div>
   <section class="tvnow"><h2>Ahora <span>suena</span></h2><div id="tvNow" class="tvnow" style="flex:1"></div><div class="tvrides" id="tvRides" hidden></div></section>
   <section class="tvnext"><h2>A <span>continuación</span></h2><ol id="tvNext"></ol></section>
 </div>
@@ -755,14 +793,16 @@ body.tvon { overflow: hidden; }
     <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde lila en el horario).</p>
   </section>
 
+  <section id="mapa" hidden>
+    <h2 style="margin-bottom:10px">Mapa <span>del recinto</span></h2>
+    <div class="mapbox" id="mapBox"><img id="mapImg" alt="Mapa del recinto" decoding="async"></div>
+    <p class="legend">Toca el mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
+  </section>
+
   <section class="admin" id="admin" hidden>
     <h2>Organización</h2>
     <form id="pwForm" class="pwform">
       <label for="pw">Cambios de última hora (solo organización)</label>
-      <div class="whosel" role="radiogroup" aria-label="Quién eres">
-        <label><input type="radio" name="who" value="prod" checked> Producción</label>
-        <label><input type="radio" name="who" value="mkt"> Marketing</label>
-      </div>
       <div class="pwrow">
         <input type="password" id="pw" autocomplete="current-password" placeholder="Contraseña" required>
         <button type="submit" class="btn">Entrar</button>
@@ -800,6 +840,15 @@ body.tvon { overflow: hidden; }
   <section class="tools" id="config">
     <h2>Configuración</h2>
     <p class="note" style="margin:0">Esto solo afecta a este móvil.</p>
+    <div class="cgrp" role="group" aria-labelledby="profH">
+      <h3 id="profH" class="ch">Perfil</h3>
+      <div class="whosel" role="radiogroup" aria-label="Perfil">
+        <label><input type="radio" name="prof" value="" checked> Solo horarios</label>
+        <label><input type="radio" name="prof" value="prod"> Producción</label>
+        <label><input type="radio" name="prof" value="mkt"> Marketing</label>
+      </div>
+      <p class="note" style="margin:0">Producción y Marketing ven también las prioridades, los efectos, el modo pantalla y la entrada a «Organización».</p>
+    </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
       <div>
@@ -809,6 +858,8 @@ body.tvon { overflow: hidden; }
       <div class="tvbox">
         <button class="btn" type="button" id="tvOpen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Modo pantalla</button>
         <p class="note" style="margin:0">Para dejarla en un monitor o una tele: la hora en grande, qué suena en cada escenario y lo que viene. Sin favoritos.</p>
+        <div class="row2 tvst" id="tvStages"></div>
+        <p class="note" style="margin:0">Un solo escenario (backstage): qué suena, cuánto queda, el cambio y el próximo efecto en grande.</p>
       </div>
     </div>
     <div class="notif cgrp" role="group" aria-labelledby="notifH">
@@ -930,10 +981,10 @@ const FEST = {
     '--display': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
   // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
   fonts: [
-    { family: 'Blogh', file: 'Blogh.otf', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
-    { family: 'Bricolage', file: 'Bricolage-Bold.ttf', weight: 700 },
-    { family: 'Bricolage', file: 'Bricolage-ExtraBold.ttf', weight: '800 900' },
-    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.ttf', weight: '600 900' },
+    { family: 'Blogh', file: 'Blogh.woff2', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
+    { family: 'Bricolage', file: 'Bricolage-Bold.woff2', weight: 700 },
+    { family: 'Bricolage', file: 'Bricolage-ExtraBold.woff2', weight: '800 900' },
+    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.woff2', weight: '600 900' },
   ],
   // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
   deco: {
@@ -950,6 +1001,7 @@ const FEST = {
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
   ridesName: 'Atracciones',
+  map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
     { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
@@ -1124,7 +1176,7 @@ const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nue
 
 // Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
 // i, si alguna cosa peta, l'horari d'abans es queda tal com era (no es pot deixar l'app a mitges).
-let SETS = {}, ALL = [], BYID = {};
+let SETS = {}, ALL = [], BYID = {}, GONE = [];
 const okRaw = r => r && typeof r === 'object' && typeof r.id === 'string' && /^[\w-]{1,40}$/.test(r.id)
   && Number.isFinite(T(r.a)) && Number.isFinite(T(r.b)) && (typeof r.n === 'string' || typeof r.n === 'number');
 function load(raw) {
@@ -1147,10 +1199,38 @@ function load(raw) {
   const all = STAGES.flatMap(s => sets[s.id]).sort((x, y) => x.a - y.a || STAGES.indexOf(x.s) - STAGES.indexOf(y.s));
   SETS = sets; ALL = all;
   BYID = Object.fromEntries(all.map(x => [x.id, x]));
+  // Cancel·lats: eren al cartell i ja no hi són (surten al requadre lila i a la pantalla)
+  GONE = raw === DEFAULT_RAW ? [] : STAGES.flatMap(s => (DEFAULT_RAW[s.id] || []).filter(r => !BYID[r.id])
+    .map(r => ({ id: r.id, s, a: T(r.a), b: T(r.b), n: String(r.n), gone: true }))).sort((x, y) => x.a - y.a);
   TEND = Math.max(TEND0, ...all.map(x => x.b));
   H = (TEND - T0) / MIN * PX;
 }
 load(DEFAULT_RAW);
+
+// Perfil (Configuració): '' = només horaris; prod / mkt = també prioritats, efectes, mode pantalla i editor.
+// Es pot donar amb l'enllaç: ?perfil=produccio o ?perfil=marketing
+const PROFK = FEST.key + '-perfil-v1';
+const PROF_OK = v => v === 'prod' || v === 'mkt' ? v : '';
+let PROF = '';
+try { PROF = PROF_OK(localStorage.getItem(PROFK)); } catch (e) {}
+{
+  const q = (location.search.match(/[?&]perfil=([\w-]+)/) || [])[1];
+  if (q) {
+    PROF = PROF_OK({ produccio: 'prod', produccion: 'prod', marketing: 'mkt', marqueting: 'mkt' }[q.toLowerCase()] || q);
+    try { localStorage.setItem(PROFK, PROF); } catch (e) {}
+  }
+}
+document.body.classList.toggle('pro', !!PROF);
+document.querySelectorAll('input[name=prof]').forEach(r => {
+  r.checked = r.value === PROF;
+  r.addEventListener('change', () => {
+    PROF = PROF_OK(r.value);
+    try { localStorage.setItem(PROFK, PROF); } catch (e) {}
+    document.body.classList.toggle('pro', !!PROF);
+    document.getElementById('admin').hidden = !(ONLINE && ADMIN && PROF);
+    if (!PROF && tvOn) tvClose();
+  });
+});
 
 let sim = null;
 const now = () => sim ?? Date.now();
@@ -1271,8 +1351,8 @@ function setHTML(el, h) {
 let chgKey = '';
 function paintChg(t) {
   const el = document.getElementById('chgBox');
-  const list = ALL.filter(x => x.chg && x.b > t);
-  const items = list.slice(0, 5).map(x => `<li style="--sc:${x.s.color}"><time>${lbl(x.a)}</time><span><b>${deco(x.n)}</b> <i>${html(x.s.name)}</i><small>${x.chg === 'new' ? 'Nuevo en el horario' : `Antes: ${esc(x.was)}`}</small></span></li>`).join('');
+  const list = [...ALL.filter(x => x.chg), ...GONE].filter(x => x.b > t).sort((x, y) => x.a - y.a);
+  const items = list.slice(0, 5).map(x => `<li style="--sc:${x.s.color}"${x.gone ? ' class="gone"' : ''}><time>${lbl(x.a)}</time><span><b>${deco(x.n)}</b> <i>${html(x.s.name)}</i><small>${x.gone ? 'Cancelado' : x.chg === 'new' ? 'Nuevo en el horario' : `Antes: ${esc(x.was)}`}</small></span></li>`).join('');
   const key = items + list.length;
   if (key === chgKey) return;
   const was = el.hidden;
@@ -1401,7 +1481,8 @@ function toast(msg, kind = 'mine', action = null, ms = 10000) {
   if (action) el.querySelector('.act').addEventListener('click', () => { el.remove(); action.fn(); });
   toasts.appendChild(el);
   anim(el, RISE, { duration: 240 });
-  while (toasts.children.length > 2) toasts.firstElementChild.remove();
+  // Com a molt 3; si sobra, marxa primer el més vell que no sigui de l'organització
+  while (toasts.children.length > 3) ([...toasts.children].find(c => !c.classList.contains('org')) || toasts.firstElementChild).remove();
   setTimeout(bye, ms);
   try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
@@ -1823,7 +1904,8 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   if (canNotify() && canPush() && !pushActive) {
     notifUI('Conectando con el servidor de avisos…');
     try { await withTimeout(pushOn(), 20000); return notifUI('Hecho. También llegarán con el móvil bloqueado.'); }
-    catch (e) { return notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`); }
+    catch (e) { if (e && e.message === 'push 429') return notifUI('El servidor de avisos está lleno: te avisaremos mientras la app esté abierta.');
+      return notifUI(`No se ha podido conectar con el servidor de avisos (${e && e.name === 'NotAllowedError' ? 'permiso denegado' : e && e.message ? e.message : 'error'}). Vuelve a probar con cobertura.`); }
   }
   if (canNotify()) {
     notifOn = false;
@@ -1840,7 +1922,7 @@ document.getElementById('notifOn').addEventListener('click', async () => {
   if (canPush()) {
     notifUI('Conectando con el servidor de avisos…');
     try { await withTimeout(pushOn(), 20000); return notifUI('Activadas, también con el móvil bloqueado.'); }
-    catch (e) { return notifUI(`Activadas, pero no se ha podido conectar con el servidor (${e && e.message ? e.message : 'error'}): solo llegarán con la app abierta. Vuelve a probar con cobertura.`); }
+    catch (e) { return notifUI(e && e.message === 'push 429' ? 'Activadas, pero el servidor de avisos está lleno: te avisaremos mientras la app esté abierta.' : `Activadas, pero no se ha podido conectar con el servidor (${e && e.message ? e.message : 'error'}): solo llegarán con la app abierta. Vuelve a probar con cobertura.`); }
   }
   notifUI('Activadas. Te avisaremos de tus artistas mientras la app esté abierta.');
 });
@@ -1909,7 +1991,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '26/10 17:53';
+const BUILD = '26/10 19:37';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -1969,10 +2051,10 @@ if (!('wakeLock' in navigator)) {
     } else { wantWake = true; saveWake(); acquire(false); }
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && wantWake && !lock) acquire(true);
+    if (document.visibilityState === 'visible' && wantWake && !lock && now() < TEND) acquire(true);
   });
   try { wantWake = localStorage.getItem(WKEY) === '1'; } catch (e) {}
-  if (wantWake) acquire(true);
+  if (wantWake && now() < TEND) acquire(true);  // passat el festival ja no s'encén sola
 }
 
 // iPhone: sense cap «touchstart», Safari no aplica :active (els botons no responen en tocar-los)
@@ -2015,7 +2097,9 @@ function tvRender(t) {
   pr.style.width = t <= T0 ? '0' : Math.min(100, (t - T0) / (TEND - T0) * 100).toFixed(1) + '%';
   st.innerHTML = t < T0 ? `Abre a las <b>${lbl(T0)}</b> · quedan <b>${dur(T0 - t)}</b>`
     : t < TEND ? `Quedan <b>${dur(TEND - t)}</b> de festival · hasta las ${lbl(TEND)}` : '<b>Se ha acabado.</b> ¡Gracias por venir!';
-  document.getElementById('tvNow').innerHTML = STAGES.map(s => {
+  tvEl.classList.toggle('one', !!tvStage);
+  if (tvStage) tvOne(t);
+  else document.getElementById('tvNow').innerHTML = STAGES.map(s => {
     const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
     const head = `<img src="img/${s.id}.png" alt=""><div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
     if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
@@ -2028,18 +2112,63 @@ function tvRender(t) {
   const rd = document.getElementById('tvRides'), open = RIDE_LIST.filter(r => t >= r.a && t < r.b);
   rd.hidden = !open.length;
   rd.innerHTML = open.length ? `<b>${html(RIDES_NAME)}:</b> ${open.map(r => html(r.name)).join(' · ')}` : '';
-  const up = ALL.filter(x => x.a > t).slice(0, 12);
-  document.getElementById('tvNext').innerHTML = up.map(x => `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
+  // Avisos de l'organització: l'actiu i el darrer de l'última mitja hora
+  const al = document.getElementById('tvAlert');
+  const msgs = [];
+  if (notice) msgs.push(`<b>${html(noticeBy || 'Organización')}:</b> ${html(notice)}`);
+  const lastF = feed.find(f => Date.now() - f.t < 30 * MIN);
+  if (lastF && !(notice && lastF.m.includes(html(notice)))) msgs.push(lastF.m);
+  al.hidden = !msgs.length;
+  tvEl.classList.toggle('alert', !!msgs.length);
+  al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
+  const up = [...ALL, ...GONE].filter(x => x.a > t && (!tvStage || x.s.id === tvStage)).sort((x, y) => x.a - y.a).slice(0, 12);
+  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lbl(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
+    : `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No quedan más actuaciones.</li>';
   // Només els que hi caben sencers (en una tele no es pot fer scroll)
   const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
   while (ol.children.length > 1 && ol.lastElementChild.getBoundingClientRect().bottom > bot + 1) ol.lastElementChild.remove();
 }
+// Un sol escenari (monitors de backstage): el que sona (o el pròxim, si és un canvi), el que ve i el proper efecte
+var tvStage = '';
+function tvOne(t) {
+  const s = STAGES.find(x => x.id === tvStage), list = SETS[s.id];
+  const cur = list.find(x => t >= x.a && t < x.b), big = cur || list.find(x => x.a > t);
+  const after = big ? list.find(x => x.a >= big.b) : null;
+  const cue = list.find(x => x.b > t && x.fx.length);
+  const pct = cur ? ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) : 0;
+  document.getElementById('tvNow').innerHTML = `<div class="tvone"${stc(s)}>
+    <div class="o-st"><img src="img/${s.id}.png" alt="">${html(s.name)}</div>
+    ${big ? `<div class="o-lbl">${cur ? 'Ahora' : 'Cambio · empieza a las ' + lbl(big.a)}</div>
+      <div class="o-dj">${imp(big.t)}${deco(big.n)}${big.sub ? ` <span class="sub">${html(big.sub)}</span>` : ''}${chgTag(big)}</div>
+      <div class="o-cd"><span>${cur ? 'quedan' : 'empieza en'}</span><b>${dur(cur ? cur.b - t : big.a - t)}</b>${cur ? `<small>acaba a las ${lbl(cur.b)}</small>` : ''}</div>
+      ${cur ? `<div class="tbar"><i style="width:${pct}%"></i></div>` : ''}` : '<div class="o-dj">Escenario cerrado</div>'}
+    ${after ? `<div class="o-next"><span>Después</span><b>${deco(after.n)}</b> a las ${lbl(after.a)}${after.a > big.b ? ` · cambio de ${dur(after.a - big.b)}` : ''}</div>` : ''}
+    ${cue ? `<div class="o-cue"><span>Próximo efecto</span>${fxTags(cue)}<b>${deco(cue.n)}</b> ${cue.a <= t ? 'ahora' : `a las ${lbl(cue.a)} · ${inDur(cue.a - t)}`}</div>` : ''}
+  </div>`;
+  // Si no hi cap (tele petita), es redueix la lletra fins que hi càpiga
+  const el = document.querySelector('.tvone');
+  for (let f = 1; f > .55 && el.scrollHeight > el.clientHeight + 2; f -= .05) el.style.fontSize = f.toFixed(2) + 'em';
+}
+document.getElementById('tvStages').innerHTML = STAGES.map(s => `<button class="btn" type="button" data-st="${s.id}"${stc(s)}>Solo ${html(s.name)}</button>`).join('');
+document.getElementById('tvStages').addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (b) tvOpen(b.dataset.st); });
+// Mapa del recinte: tocar amplia (al punt tocat) i es mou amb el dit; tornar a tocar el mostra sencer
+if (FEST.map) {
+  const box = document.getElementById('mapBox'), mi = document.getElementById('mapImg');
+  mi.src = FEST.map;
+  document.getElementById('mapa').hidden = false;
+  mi.addEventListener('click', e => {
+    const r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    box.classList.toggle('z');
+    if (box.classList.contains('z')) { box.scrollLeft = fx * mi.offsetWidth - box.clientWidth / 2; box.scrollTop = fy * mi.offsetHeight - box.clientHeight / 2; }
+  });
+}
 let tvUiT = 0;
 function tvUi() { tvEl.classList.add('ui'); clearTimeout(tvUiT); tvUiT = setTimeout(() => tvEl.classList.remove('ui'), 3000); }
-function tvOpen() {
+function tvOpen(st) {
+  tvStage = typeof st === 'string' && STAGES.some(x => x.id === st) ? st : '';
   tvOn = true; tvEl.hidden = false; document.body.classList.add('tvon');
-  try { sessionStorage.setItem(TVKEY, '1'); } catch (e) {}
+  try { sessionStorage.setItem(TVKEY, tvStage || '1'); } catch (e) {}
   const t = now(); tvClock(t); fitTv(); tvRender(t); tvUi();
   const fs = document.documentElement.requestFullscreen;
   if (fs && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
@@ -2052,14 +2181,18 @@ function tvClose() {
   if (lock && !wantWake) { lock.release().catch(() => {}); lock = null; }
   tick(true);
 }
-document.getElementById('tvOpen').addEventListener('click', tvOpen);
+document.getElementById('tvOpen').addEventListener('click', () => tvOpen());
 document.getElementById('tvX').addEventListener('click', tvClose);
 tvEl.addEventListener('pointerdown', tvUi);
 tvEl.addEventListener('pointermove', tvUi);
 document.addEventListener('keydown', e => { if (tvOn && e.key === 'Escape' && !document.fullscreenElement) tvClose(); });
 document.addEventListener('visibilitychange', () => { if (tvOn && document.visibilityState === 'visible' && 'wakeLock' in navigator && !lock) acquire(true); });
 if (document.fonts) document.fonts.addEventListener('loadingdone', () => { if (tvOn) fitTv(); });
-try { if (sessionStorage.getItem(TVKEY) === '1' || /[?&]pantalla\b/.test(location.search)) setTimeout(tvOpen, 0); } catch (e) {}
+// ?pantalla = tots els escenaris; ?pantalla=<id-escenari> = només aquest
+try {
+  const q = location.search.match(/[?&]pantalla(?:=([\w-]+))?/), ss = sessionStorage.getItem(TVKEY);
+  if (ss || q) setTimeout(() => tvOpen(ss && ss !== '1' ? ss : q && q[1] || ''), 0);
+} catch (e) {}
 
 // Canvis d'última hora: l'organització desa docs/changes.json al GitHub i tots els mòbils el llegeixen.
 // A l'artifact de Claude no es pot (no hi ha accés a la xarxa) i es queda amb l'horari del cartell.
@@ -2216,12 +2349,9 @@ async function unlock(pw) {
 }
 let token = null, draft = null, edStage = STAGES[0].id;
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
-const WKEY2 = FEST.key + '-who-v1';
-const whoNow = () => (document.querySelector('input[name=who]:checked') || {}).value || 'prod';
-try { const w = localStorage.getItem(WKEY2); const r = document.querySelector(`input[name=who][value="${w}"]`); if (r) r.checked = true; } catch (e) {}
-document.querySelectorAll('input[name=who]').forEach(r => r.addEventListener('change', () => { try { localStorage.setItem(WKEY2, r.value); } catch (e) {} }));
+const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
-adminEl.hidden = !(ONLINE && ADMIN);
+adminEl.hidden = !(ONLINE && ADMIN && PROF);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
 const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
@@ -2558,7 +2688,9 @@ scrollToNow(false);
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();
-setInterval(() => { if (!document.hidden) pullChanges(); }, 60000);
+// Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
+let pullN = 0;
+setInterval(() => { if (!document.hidden && (tvOn || ++pullN % 3 === 0)) pullChanges(); }, 60000);
 </script>
 
 <script>
