@@ -464,6 +464,17 @@ html.sa { --edge: min(34px, calc(env(safe-area-inset-top, 0px) * 100)); }
 body { padding-top: var(--edge); }
 .insthow[hidden] { display: none !important; }
 .insthow { display: flex; flex-direction: column; gap: 8px; }
+.instov { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .78); display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch;
+  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 8px); }
+.instov[hidden] { display: none !important; }
+.instov .card { background: var(--panel); border: 1.5px solid var(--accent); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; color: var(--ink); }
+.instov .card > b { font: 800 var(--fs-l)/1.2 var(--display); }
+.instov ol { margin: 0; padding-left: 22px; line-height: 1.45; color: var(--muted); }
+.instov li { margin: 6px 0; }
+.instov li b { color: var(--ink); }
+.instov .arrow { align-self: flex-end; margin: 6px 14px 0 0; color: var(--accent); animation: instbob 1s ease-in-out infinite alternate; }
+@keyframes instbob { to { transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .instov .arrow { animation: none; } }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -610,6 +621,9 @@ body { padding-top: var(--edge); }
         </div>
       </div>
     </details>
+    <div class="sharebox">
+      <button class="btn" type="button" id="shareBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Compartir la app</button>
+    </div>
     <div class="install" id="installBox">
       <button class="btn" type="button" id="instBtn" aria-expanded="false">Añadir a la pantalla de inicio</button>
       <p class="note" style="margin:0">Así se abre a pantalla completa, como una app, y en iPhone es la única forma de recibir notificaciones.</p>
@@ -648,6 +662,17 @@ body { padding-top: var(--edge); }
 </div>
 
 <button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div class="instov" id="instOv" hidden role="dialog" aria-modal="true" aria-labelledby="instOvT">
+  <div class="card">
+    <b id="instOvT">Añadir a la pantalla de inicio</b>
+    <ol>
+      <li>Toca <b>···</b> abajo a la derecha y después <b>Compartir</b> <svg class="ishare" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+      <li>Baja y toca <b>Añadir a pantalla de inicio</b>.</li>
+    </ol>
+    <button class="btn" type="button" id="instOvX">Entendido</button>
+  </div>
+  <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
@@ -1421,9 +1446,18 @@ else if (/Android/i.test(navigator.userAgent)) document.getElementById('instIOS'
 // El botó: a Android/Chrome obre la instal·lació del sistema; a l'iPhone (no es pot instal·lar des de la web) desplega els passos
 let instPrompt = null;
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); instPrompt = e; });
+document.getElementById('instOv').addEventListener('click', () => { document.getElementById('instOv').hidden = true; });
+// Compartir l'enllaç (WhatsApp, AirDrop…); si el navegador no ho permet, es copia
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const url = location.href.replace(/[?#].*$/, '').replace(/(index|ca)(\.html)?$/, '');
+  if (navigator.share) { try { await navigator.share({ title: FEST.name, text: `Horarios de ${FEST.name}`, url }); } catch (e) {} return; }
+  try { await navigator.clipboard.writeText(url); toast('Enlace copiado.', 'info', null, 3000); } catch (e) { toast(url, 'info', null, 8000); }
+});
 addEventListener('appinstalled', () => { document.getElementById('installBox').hidden = true; });
 document.getElementById('instBtn').addEventListener('click', async () => {
   if (instPrompt) { instPrompt.prompt(); instPrompt = null; return; }
+  // iPhone amb Safari: guia a pantalla completa amb una fletxa cap al botó ··· de baix a la dreta
+  if (isIOS && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent)) { document.getElementById('instOv').hidden = false; document.getElementById('instOvX').focus(); }
   const how = document.getElementById('instHow'), b = document.getElementById('instBtn');
   how.hidden = !how.hidden; b.setAttribute('aria-expanded', !how.hidden);
 });
