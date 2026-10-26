@@ -113,6 +113,24 @@ button { font: inherit; color: inherit; }
 /* Capçalera */
 .banner { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1100 / 175; object-fit: cover; object-position: center 78%; border-radius: 8px; margin-top: 12px; }
 header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--accent); padding-block: 0 12px; }
+/* Mascota de cada perfil al costat de «Ahora suena» (FEST.deco.prod / mkt / base; la que no hi és no surt) */
+#ahora { position: relative; }
+.mecanic { display: none; position: absolute; right: 2px; top: -22px; width: min(19vw, 76px); pointer-events: none; z-index: 1; }
+#ahora:has(.mecanic:not([hidden])) .shead { padding-right: 84px; }
+.mecanic:not([hidden]) { display: block; }
+.mecanic img { display: block; width: 100%; height: auto; transform-origin: 50% 90%; animation: mecRun .46s ease-in-out infinite alternate; }
+.mecanic::after { content: ""; display: block; width: 62%; height: 6px; margin: 2px auto 0; border-radius: 50%; background: rgba(0,0,0,.55); animation: mecShadow .46s ease-in-out infinite alternate; }
+@keyframes mecRun { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-7px) rotate(5deg); } }
+@keyframes mecShadow { from { transform: scaleX(1); opacity: .9; } to { transform: scaleX(.7); opacity: .5; } }
+/* Màrqueting fa fotos (sacsejada + flaix) i «Només horaris» brinda */
+.mecanic.m-mkt img { animation: mecSnap 2.4s ease-in-out infinite; transform-origin: 40% 60%; }
+.mecanic.m-mkt::before { content: ""; position: absolute; left: 4%; top: 22%; width: 34%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fff 0 25%, rgba(255,255,255,0) 70%); opacity: 0; animation: mecFlash 2.4s ease-out infinite; z-index: 1; }
+.mecanic.m-base img { animation: mecCheers 1.3s ease-in-out infinite alternate; transform-origin: 55% 95%; }
+.mecanic.m-mkt::after, .mecanic.m-base::after { animation: none; }
+@keyframes mecSnap { 0%, 70%, 100% { transform: none; } 74% { transform: translate(-1px, 2px) rotate(-3deg); } 80% { transform: translate(1px, -1px) rotate(2deg); } 86% { transform: none; } }
+@keyframes mecFlash { 0%, 72% { opacity: 0; transform: scale(.4); } 76% { opacity: 1; transform: scale(1.5); } 90%, 100% { opacity: 0; transform: scale(2); } }
+@keyframes mecCheers { from { transform: rotate(-4deg); } to { transform: rotate(5deg) translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .mecanic img, .mecanic::after, .mecanic::before { animation: none; } }
 .brandline { display: flex; align-items: center; gap: 7px; font: 800 var(--fs-xs)/1.2 var(--display); font-stretch: 112%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .brandline b { color: var(--ink); }
 /* Firma de la Midnight Suite (en Pau): una màscara, així agafa el color del festival */
@@ -126,7 +144,7 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .totop[hidden] { display: grid !important; opacity: 0; transform: translateY(12px); pointer-events: none; }
 .clock { font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 22vw; line-height: .9; white-space: nowrap; width: max-content; letter-spacing: -.01em;
   font-variant-numeric: tabular-nums; color: var(--accent); }
-.clock small { font: 700 .2em/1 var(--body); font-stretch: 100%; letter-spacing: 0; color: var(--muted); margin-left: .3em; }
+.clock small { font-size: .26em; letter-spacing: 0; color: var(--muted); margin-left: .12em; font-variant-numeric: tabular-nums; }
 .statusrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
 .status .nw { white-space: nowrap; }
 .status { color: var(--muted); font-size: var(--fs-s); min-width: 0; }
@@ -186,6 +204,13 @@ i.imp { color: #0b0b0b; }
 @keyframes pulse { 50% { opacity: .25; } }
 .row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
 .row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+/* si alguna fila porta logo de banda, totes fan la columna igual d'ampla perquè els textos quedin alineats */
+body:has(.row > img.band) .row { grid-template-columns: 76px minmax(0, 1fr) auto; }
+body:has(.row > img.band) .row > .logo { justify-self: center; }
+.row img.logo.band { width: 76px; height: 44px; filter: none; }
+@media (max-width: 380px) { body:has(.row > img.band) .row { grid-template-columns: 60px minmax(0, 1fr) auto; } .row img.logo.band { width: 60px; height: 40px; } }
+.tvcard img.band { width: 6.5em; height: 3.6em; }
+.tvone .o-st img.band { width: auto; max-width: 9em; height: 2.6em; }
 .row.idle .dj { color: var(--muted); font: 700 var(--fs-m)/1.2 var(--body); text-transform: none; }
 .row.idle.mine .dj { color: var(--ink); font-size: var(--fs-l); }
 .row .after { font-size: var(--fs-s); color: var(--muted); margin-top: 2px; }
@@ -398,6 +423,19 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .steps button { font: 700 var(--fs-s) var(--body); background: transparent; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
 .sim output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; font-size: var(--fs-m); }
 @media (max-width: 420px) { .edmore { grid-template-columns: 1fr 1fr; } .edmore .del { grid-column: 1 / -1; } .orgmenu { grid-template-columns: 1fr 1fr; } }
+/* Banner per capes (FEST.bannerAnim): només transform, cada capa a la GPU */
+.banim { position: relative; overflow: hidden; aspect-ratio: 1100 / 175; height: auto; border-radius: 8px; background: linear-gradient(#fe5e08, #fe8e04); contain: layout paint; }
+.banim img { position: absolute; display: block; width: auto; will-change: transform; }
+.banim .ba-t { left: 0; right: 0; margin: 0 auto; top: 9%; height: 82%; animation: baT 3.2s ease-in-out infinite alternate; }
+.banim .ba-s { top: 12%; height: 82%; transform-origin: 50% 85%; animation: baS .9s ease-in-out infinite alternate; }
+.banim .ba-l { left: 5%; scale: -1 1; }
+.banim .ba-r { right: 5%; animation-delay: -.45s; }
+@keyframes baT { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.04) rotate(1deg); } }
+@keyframes baS { from { transform: rotate(-8deg); } to { transform: rotate(6deg) translateY(-3%); } }
+.tvinfo .banim { width: min(100%, calc(11vh * 1100 / 175)); flex: none; }
+/* fora de pantalla o amb l'app en segon pla: tot quiet */
+.off, .off *, .off::before, .off::after, .off *::before, .off *::after { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) { .banim img { animation: none; } }
 @media (orientation: landscape) and (max-height: 500px) { .banner { display: none; } .wrap { padding-top: 14px; } }
 @media (prefers-reduced-motion: reduce) { .row.live .sn::before { animation: none; } }
 /* Il·lustracions del festival (FEST.deco, tot opcional). Només fora de la informació: mai a les files, la graella ni els avisos */
@@ -425,7 +463,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 /* Les ratlles es mouen amb transform (la GPU ho fa sola, sense repintar cada fotograma): gasta molta menys bateria */
 .mprog i::before { content: ""; position: absolute; top: 0; bottom: 0; left: -28.28px; width: calc(100% + 56.56px);
   background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, color-mix(in srgb, var(--accent) 70%, #fff) 10px 20px); background-size: 28.28px 100%;
-  animation: mprog 1.2s linear 6; will-change: transform; }
+  animation: mprog 1.6s linear infinite; will-change: transform; }
 @keyframes mprog { to { transform: translateX(28.28px); } }
 @media (prefers-reduced-motion: reduce) { .mprog i { transition: none; } .mprog i::before { animation: none; } }
 .mascot a, .credit a { color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
@@ -760,6 +798,7 @@ body.tvon { overflow: hidden; }
   </header>
 
   <section id="ahora">
+    <span class="mecanic" id="mecanic" aria-hidden="true" hidden><img alt="" width="120" height="144"></span>
     <div class="shead">
       <h2>Ahora <span>suena</span></h2>
       <div class="mygrp" role="group" aria-label="Mis artistas"><button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Solo mis artistas</button><button class="chip" id="pickOpen" type="button">Elegir <span id="pickCount"></span></button></div>
@@ -972,6 +1011,8 @@ const FEST = {
   key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
   name: 'La Castanyada',
   banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
+  // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
+  bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
   date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
   dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
   start: '12:00', end: '05:00',
@@ -995,12 +1036,23 @@ const FEST = {
     done: 'img/deco-done.png',        // «Solo mis artistas» quan ja no en queda cap per cobrir
     sheet: 'img/deco-sheet.png',      // full «Mis artistas»
     heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
+    // la cabra de «Quedan» canvia d'humor al llarg del festival: de la festa (12:00) al plor (05:00)
+    moods: ['img/deco-m-festa.png', 'img/deco-m-enamorat.png', 'img/deco-m-guai.png', 'img/deco-m-crack.png', 'img/deco-m-flipat.png', 'img/deco-m-xocat.png', 'img/deco-m-enfadat.png', 'img/deco-m-plora.png'],
+    prod: 'img/deco-mecanic.png',     // mascota que corre al costat del rellotge amb el perfil Producció
+    mkt: 'img/deco-foto.png',         // …la que fa fotos, amb Màrqueting
+    base: 'img/deco-got.png',         // …la que brinda, sense perfil («Només horaris»)
   },
   // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
   impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
   ridesName: 'Atracciones',
+  // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
+  logos: {
+    'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
+    'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
+    'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
+  },
   map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
@@ -1076,6 +1128,25 @@ if (MOVED && /github\.io$/.test(location.hostname)) {
 if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
 document.getElementById('festName').textContent = FEST.name;
 document.getElementById('banner').alt = FEST.banner;
+// Banner animat (FEST.bannerAnim): substitueix la imatge quieta a dalt i a la pantalla
+if (FEST.bannerAnim) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
+  const BA = FEST.bannerAnim, d = document.createElement('div'), tv = !im.classList.contains('banner');
+  d.className = tv ? 'banim tvban' : 'banner banim';
+  if (!tv) d.id = im.id;
+  d.setAttribute('role', 'img'); d.setAttribute('aria-label', FEST.banner);
+  if (BA.bg) d.style.background = BA.bg;
+  for (const [c, src] of [['ba-s ba-l', BA.side], ['ba-t', BA.title], ['ba-s ba-r', BA.side]]) {
+    if (!src) continue;
+    const i = document.createElement('img'); i.className = c; i.src = src; i.alt = ''; i.decoding = 'async'; d.append(i);
+  }
+  im.replaceWith(d);
+});
+// Les animacions només corren quan es veuen i amb l'app oberta (bateria)
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
+  document.querySelectorAll('.banim, #mecanic, #mascot').forEach(el => io.observe(el));
+}
+document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('off', document.hidden));
 // Il·lustracions (FEST.deco): les que no hi són, simplement no surten
 const DECO = FEST.deco || {};
 if (DECO.strip) { document.documentElement.classList.add('hdeco'); document.documentElement.style.setProperty('--deco-strip', `url("${DECO.strip}")`); }
@@ -1154,6 +1225,9 @@ const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
 const deco = n => html(n).replace(/ (B2B|VS|&amp;) /gi, ' <i>$1</i> ');
+// Logo de la banda (FEST.logos, pel nom): va al lloc de la icona de l'escenari; el nom sempre en text
+const LOGOS = FEST.logos || {};
+const bandImg = (x, cls) => x && Object.hasOwn(LOGOS, x.n) ? `<img class="${cls} band" src="${esc(LOGOS[x.n])}" alt="">` : '';
 // Importància: amb colors i número (FEST.impColors, per defecte) o només amb la mida (impColors: false)
 const IMPC = FEST.impColors !== false;
 const impc = t => (!IMPC || FEST.impSize) && t ? (t >= 4 ? ' main' : t <= 2 ? ' minor' : '') : '';
@@ -1221,12 +1295,21 @@ try { PROF = PROF_OK(localStorage.getItem(PROFK)); } catch (e) {}
   }
 }
 document.body.classList.toggle('pro', !!PROF);
+document.body.classList.toggle('prof-prod', PROF === 'prod');
+// Mascota del perfil al costat de «Ahora suena»
+function mascotPerfil() {
+  const k = PROF || 'base', src = (FEST.deco || {})[k], m = document.getElementById('mecanic'), i = m.querySelector('img');
+  m.hidden = !src; m.className = 'mecanic m-' + k;
+  if (src && i.getAttribute('src') !== src) i.src = src;
+}
 document.querySelectorAll('input[name=prof]').forEach(r => {
   r.checked = r.value === PROF;
   r.addEventListener('change', () => {
     PROF = PROF_OK(r.value);
     try { localStorage.setItem(PROFK, PROF); } catch (e) {}
     document.body.classList.toggle('pro', !!PROF);
+    document.body.classList.toggle('prof-prod', PROF === 'prod');
+    mascotPerfil();
     document.getElementById('admin').hidden = !(ONLINE && ADMIN && PROF);
     if (!PROF && tvOn) tvClose();
   });
@@ -1380,7 +1463,7 @@ function rowHTML(s, t) {
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
-  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1400,7 +1483,7 @@ function rowMine(s, t) {
   const mine = SETS[s.id].filter(x => favs.has(x.id));
   const cur = mine.find(x => t >= x.a && t < x.b);
   const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
-  const logo = `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1688,7 +1771,8 @@ function tick(force) {
   if (rimg) { rimg.hidden = !rsrc; if (rsrc && rimg.getAttribute('src') !== rsrc) rimg.src = rsrc; }
   // Targeta: abans (compte enrere), durant (frase + barra de progrés + proper concert gran) i al final (gràcies + contacte)
   const during = t >= T0 && t < TEND;
-  const ms = document.getElementById('mascot'), msrc = t < T0 ? DECO.before : during ? (DECO.during || DECO.done) : DECO.end;
+  const ms = document.getElementById('mascot'), moods = DECO.moods || [],
+    msrc = t < T0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
   ms.hidden = !re.hidden && !done;
   ms.classList.toggle('during', during);
   document.getElementById('status').closest('.statusrow').hidden = !ms.hidden;  // la targeta ja diu el mateix: no repetir-ho sota el rellotge
@@ -1704,7 +1788,7 @@ function tick(force) {
     if (ms.dataset.k !== mh) {
       const old = ms.querySelector('.mprog i'), w0 = old && old.style.width;
       ms.dataset.k = mh;
-      const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc) mi.src = msrc;
+      const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc && mi.getAttribute('src') !== msrc) mi.src = msrc;
       ms.querySelector('.mtxt').innerHTML = mh;
       // la barra creix des d'on era (o des de zero en obrir l'app)
       const nb = ms.querySelector('.mprog i');
@@ -1991,7 +2075,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '26/10 19:37';
+const BUILD = '26/10 20:24';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2101,7 +2185,7 @@ function tvRender(t) {
   if (tvStage) tvOne(t);
   else document.getElementById('tvNow').innerHTML = STAGES.map(s => {
     const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
-    const head = `<img src="img/${s.id}.png" alt=""><div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
+    const head = `${bandImg(cur, 'tlogo') || `<img src="img/${s.id}.png" alt="">`}<div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
     if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
       ${fxTags(cur)}<div class="taf">${nxt ? `Después: <b>${deco(nxt.n)}</b> a las ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
       <div class="tleft"><span>quedan</span><b>${dur(cur.b - t)}</b></div><div class="tbar"><i style="width:${((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1)}%"></i></div></div>`;
@@ -2138,7 +2222,7 @@ function tvOne(t) {
   const cue = list.find(x => x.b > t && x.fx.length);
   const pct = cur ? ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) : 0;
   document.getElementById('tvNow').innerHTML = `<div class="tvone"${stc(s)}>
-    <div class="o-st"><img src="img/${s.id}.png" alt="">${html(s.name)}</div>
+    <div class="o-st">${bandImg(big, 'olg') || `<img src="img/${s.id}.png" alt="">`}${html(s.name)}</div>
     ${big ? `<div class="o-lbl">${cur ? 'Ahora' : 'Cambio · empieza a las ' + lbl(big.a)}</div>
       <div class="o-dj">${imp(big.t)}${deco(big.n)}${big.sub ? ` <span class="sub">${html(big.sub)}</span>` : ''}${chgTag(big)}</div>
       <div class="o-cd"><span>${cur ? 'quedan' : 'empieza en'}</span><b>${dur(cur ? cur.b - t : big.a - t)}</b>${cur ? `<small>acaba a las ${lbl(cur.b)}</small>` : ''}</div>
@@ -2163,6 +2247,7 @@ if (FEST.map) {
     if (box.classList.contains('z')) { box.scrollLeft = fx * mi.offsetWidth - box.clientWidth / 2; box.scrollTop = fy * mi.offsetHeight - box.clientHeight / 2; }
   });
 }
+mascotPerfil();
 let tvUiT = 0;
 function tvUi() { tvEl.classList.add('ui'); clearTimeout(tvUiT); tvUiT = setTimeout(() => tvEl.classList.remove('ui'), 3000); }
 function tvOpen(st) {

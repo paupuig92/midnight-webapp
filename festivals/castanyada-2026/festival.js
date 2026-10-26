@@ -6,6 +6,8 @@ const FEST = {
   key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
   name: 'La Castanyada',
   banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
+  // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
+  bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
   date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
   dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
   start: '12:00', end: '05:00',
@@ -29,12 +31,23 @@ const FEST = {
     done: 'img/deco-done.png',        // «Solo mis artistas» quan ja no en queda cap per cobrir
     sheet: 'img/deco-sheet.png',      // full «Mis artistas»
     heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
+    // la cabra de «Quedan» canvia d'humor al llarg del festival: de la festa (12:00) al plor (05:00)
+    moods: ['img/deco-m-festa.png', 'img/deco-m-enamorat.png', 'img/deco-m-guai.png', 'img/deco-m-crack.png', 'img/deco-m-flipat.png', 'img/deco-m-xocat.png', 'img/deco-m-enfadat.png', 'img/deco-m-plora.png'],
+    prod: 'img/deco-mecanic.png',     // mascota que corre al costat del rellotge amb el perfil Producció
+    mkt: 'img/deco-foto.png',         // …la que fa fotos, amb Màrqueting
+    base: 'img/deco-got.png',         // …la que brinda, sense perfil («Només horaris»)
   },
   // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
   impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
   ridesName: 'Atracciones',
+  // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
+  logos: {
+    'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
+    'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
+    'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
+  },
   map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
