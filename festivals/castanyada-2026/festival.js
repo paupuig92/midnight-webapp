@@ -22,7 +22,7 @@ const FEST = {
   ],
   // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
   deco: {
-    strip: 'img/deco-strip.png',      // garlanda que penja sota la capçalera (es repeteix)
+    // strip: 'img/deco-strip.png',   // garlanda sota la capçalera (en Pau la va treure el 26-10)
     before: 'img/deco-before.png',    // abans de començar
     end: 'img/deco-end.png',          // quan s'ha acabat
     empty: 'img/deco-empty.png',      // «Solo mis artistas» sense cap artista triat
@@ -31,7 +31,9 @@ const FEST = {
     heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
   },
   // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
-  impColors: false,             // la importància (0–5) es veu per la mida: 5 = concert destacat, 1 = entre concerts
+  impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
+  impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
+  stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
   ridesName: 'Atracciones',
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
@@ -47,7 +49,7 @@ const FEST = {
     { id: 'festa', name: 'Escenari Festa Major' },
     { id: 'photo', name: 'Photocall' },
   ],
-  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol, efectes (FOC, CO2, SPARK, PIRO, CONFETI o un altre)]
   // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
   sets: {
     principal: [
@@ -57,7 +59,7 @@ const FEST = {
       ['16:00', '17:15', 'Els Amics de les Arts', 5],
       ['17:45', '19:00', 'Els Pets', 5],
       ['19:30', '20:40', 'La Ludwig Band', 5],
-      ['21:10', '22:30', 'Lax’n’Busto', 5],
+      ['21:10', '22:30', 'Lax’n’Busto', 5, '', ['FOC', 'CONFETI']],
       ['22:30', '23:00', 'DJ K-Zu', 1],
       ['23:00', '00:15', 'Els Catarres', 5],
       ['00:15', '00:45', 'DJ K-Zu', 1],
