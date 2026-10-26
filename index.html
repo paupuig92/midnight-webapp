@@ -396,7 +396,6 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
       <div class="panel" id="pHorario" hidden>
         <label for="edStage">Escenario</label>
         <select id="edStage">
-          <option value="ner">No Es Ruido</option><option value="tox">Toxik Parties</option><option value="pont">Pont Aeri</option><option value="misa">Misa Psicodélika</option><option value="ss">Migats Sound System</option>
         </select>
         <div id="edRows" class="edrows"></div>
         <button type="button" class="btn" id="edAdd">+ Añadir actuación</button>
@@ -1556,6 +1555,7 @@ document.querySelector('.orgmenu').addEventListener('click', e => {
   edMsg('');
 });
 document.getElementById('edSave2').addEventListener('click', () => document.getElementById('edSave').click());
+document.getElementById('edStage').innerHTML = STAGES.map(s => `<option value="${s.id}">${html(s.name)}</option>`).join('');
 document.getElementById('edStage').addEventListener('change', e => { edStage = e.target.value; renderEditor(); });
 document.getElementById('edRows').addEventListener('change', e => {
   const row = e.target.closest('.edrow');
