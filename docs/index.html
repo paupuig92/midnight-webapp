@@ -1377,7 +1377,7 @@ function tick(force) {
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(TEND - t)} <small>de festival</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
         + `<span class="msub">Hasta las ${lbl(TEND)}</span>`
       : t < T0
-      ? `<span class="mk">Muy pronto</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
+      ? `<span class="mk">Quedan</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
       : `<span class="mk">Fin de fiesta</span><span class="mbig">Hasta la próxima</span><span class="msub">Gracias por venir. Dudas o mejoras: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
     if (ms.dataset.k !== mh) {
       const old = ms.querySelector('.mprog i'), w0 = old && old.style.width;
@@ -1668,7 +1668,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '26/10 16:28';
+const BUILD = '26/10 16:50';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
