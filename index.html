@@ -42,7 +42,8 @@
   --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
   --gut: 48px;
   --barh: 52px;
-  --top: calc(var(--barh) + env(safe-area-inset-top, 0px));
+  --edge: 0px;  /* app de la pantalla d'inici a l'iPhone: franja extra sota la barra d'estat (on l'iOS 26 difumina) */
+  --top: calc(var(--barh) + env(safe-area-inset-top, 0px) + var(--edge));
   color-scheme: dark;
 }
 html, body { background: var(--bg); color: var(--ink); }
@@ -118,11 +119,11 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 /* iOS 26 difumina el que hi ha sota la barra d'estat si a dalt no hi ha una franja fixa i opaca: aquesta la fa sempre */
 /* iOS 26 només deixa de difuminar la vora de dalt si hi troba (provant amb «toc») una capa fixa, d'amplada completa i d'un sol color:
    per això sense pointer-events: none i sense cap pseudo-element a sobre. La minibarra, quan surt, fa el mateix paper */
-.topedge { position: fixed; top: 0; left: 0; right: 0; height: max(12px, env(safe-area-inset-top, 0px)); background: var(--bg); z-index: 8; }
+.topedge { position: fixed; top: 0; left: 0; right: 0; height: max(12px, calc(env(safe-area-inset-top, 0px) + var(--edge))); background: var(--bg); z-index: 8; }
 .minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--accent);
-  padding-top: calc(env(safe-area-inset-top, 0px) + 4px); padding-bottom: 4px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4px + var(--edge)); padding-bottom: 4px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  min-height: var(--barh); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+  min-height: calc(var(--barh) + var(--edge)); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
 .minibar .mclock { font: 900 22px/1 var(--title); font-stretch: 125%; color: var(--accent); font-variant-numeric: tabular-nums; }
 .minibar .mnext { flex: 1; min-width: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
 .minibar .round { width: 38px; height: 38px; }
@@ -456,6 +457,13 @@ footer.credit { padding-bottom: 72px; }  /* que la ↑ no tapi el mail */
 /* Capçalera de la graella amb logos en color: fosca, com la resta (abans era un bloc blanc) */
 .colorlogos .hd { background: var(--panel); border-left: 2px solid var(--bg); border-bottom: 2px solid var(--accent); }
 .colorlogos .hd.color span, .colorlogos .hd.rides { color: var(--ink); }
+/* iOS 26 difumina uns 40 pt a dalt de tot a l'app instal·lada: el contingut es baixa fins a sota d'aquesta franja */
+/* Només si l'app es va instal·lar amb la barra translúcida (hi ha marge a dalt): amb la nova («black») el marge és 0 i això també */
+@media (display-mode: standalone) { :root { --edge: min(34px, calc(env(safe-area-inset-top, 0px) * 100)); } }
+html.sa { --edge: min(34px, calc(env(safe-area-inset-top, 0px) * 100)); }
+body { padding-top: var(--edge); }
+.insthow[hidden] { display: none !important; }
+.insthow { display: flex; flex-direction: column; gap: 8px; }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -580,7 +588,7 @@ footer.credit { padding-bottom: 72px; }  /* que la ↑ no tapi el mail */
       <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div>
-      <button class="btn quiet" type="button" id="appUpdate">Actualizar la app</button>
+      <button class="btn" type="button" id="appUpdate">Actualizar la app</button>
       <div class="hint" id="updMsg" hidden></div>
       <p class="note" id="appVer" style="margin:0"></p>
     </div>
@@ -603,8 +611,9 @@ footer.credit { padding-bottom: 72px; }  /* que la ↑ no tapi el mail */
       </div>
     </details>
     <div class="install" id="installBox">
-      <h3>Añadir la app a la pantalla de inicio</h3>
+      <button class="btn" type="button" id="instBtn" aria-expanded="false">Añadir a la pantalla de inicio</button>
       <p class="note" style="margin:0">Así se abre a pantalla completa, como una app, y en iPhone es la única forma de recibir notificaciones.</p>
+      <div class="insthow" id="instHow" hidden>
       <div class="instos" id="instIOS">
         <b>iPhone (Safari)</b>
         <ol>
@@ -619,6 +628,7 @@ footer.credit { padding-bottom: 72px; }  /* que la ↑ no tapi el mail */
           <li>Toca el menú <b>⋮</b> de arriba a la derecha.</li>
           <li>Toca <b>Añadir a pantalla de inicio</b> o <b>Instalar aplicación</b>.</li>
         </ol>
+      </div>
       </div>
     </div>
   </section>
@@ -740,6 +750,7 @@ for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.
 if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
   `@font-face{font-family:"${f.family}";src:url("img/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
 document.title = FEST.name;
+if (navigator.standalone === true) document.documentElement.classList.add('sa');
 // Adreça nova (Cloudflare). Des de l'antiga (GitHub Pages): al navegador s'hi va directament; l'app de la pantalla d'inici avisa
 const HOME = 'https://midnight-app.midnightgroup.workers.dev/';
 const MOVED = false;  // es posa a true quan la nova adreça sigui la definitiva (app.midnight.es)
@@ -1407,6 +1418,15 @@ const standalone = () => matchMedia('(display-mode: standalone)').matches || nav
 document.getElementById('installBox').hidden = standalone();
 if (isIOS) document.getElementById('instAnd').hidden = true;
 else if (/Android/i.test(navigator.userAgent)) document.getElementById('instIOS').hidden = true;
+// El botó: a Android/Chrome obre la instal·lació del sistema; a l'iPhone (no es pot instal·lar des de la web) desplega els passos
+let instPrompt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); instPrompt = e; });
+addEventListener('appinstalled', () => { document.getElementById('installBox').hidden = true; });
+document.getElementById('instBtn').addEventListener('click', async () => {
+  if (instPrompt) { instPrompt.prompt(); instPrompt = null; return; }
+  const how = document.getElementById('instHow'), b = document.getElementById('instBtn');
+  how.hidden = !how.hidden; b.setAttribute('aria-expanded', !how.hidden);
+});
 function notifUI(text) {
   const btn = document.getElementById('notifOn');
   const ok = canNotify();

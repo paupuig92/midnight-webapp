@@ -146,7 +146,7 @@ PAIRS = [
     ("'Activadas, también con el móvil bloqueado.'", "'Activades, també amb el mòbil bloquejat.'"),
     ("'Las notificaciones funcionan.'", "'Les notificacions funcionen.'"),
     ("'Restablecidas. También llegarán con el móvil bloqueado.'", "'Restablertes. També arribaran amb el mòbil bloquejat.'"),
-    ("<h3>Añadir la app a la pantalla de inicio</h3>", "<h3>Afegir l’app a la pantalla d’inici</h3>"),
+    ('aria-expanded="false">Añadir a la pantalla de inicio</button>', 'aria-expanded="false">Afegir a la pantalla d’inici</button>'),
     ("Así se abre a pantalla completa, como una app, y en iPhone es la única forma de recibir notificaciones.", "Així s’obre a pantalla completa, com una app, i a l’iPhone és l’única manera de rebre notificacions."),
     ("Toca <b>Compartir</b>", "Toca <b>Comparteix</b>"),
     ("(en iOS 26, dentro del menú <b>···</b>).", "(a l’iOS 26, dins del menú <b>···</b>)."),

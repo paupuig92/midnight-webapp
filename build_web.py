@@ -98,7 +98,8 @@ page = f"""<!doctype html>
 <meta name="theme-color" content="{BG}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- «black» i no «black-translucent»: amb la barra translúcida, l'iOS 26 difumina sempre la franja de dalt (no hi ha manera de treure-ho des de la web) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Midnight">
 <meta name="description" content="Horario en directo · Midnight">
 <script>/*LANGREDIRECT*/</script>

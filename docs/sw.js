@@ -1,4 +1,4 @@
-const VERSION = 'bitp-3f93ee51';
+const VERSION = 'bitp-310ddc0e';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/Blogh.otf", "img/Bricolage-Bold.ttf", "img/Bricolage-ExtraBold.ttf", "img/Bricolage-SemiCondensed-SemiBold.ttf", "img/banner.jpg", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
 
