@@ -141,7 +141,7 @@ if ('serviceWorker' in navigator) {{
     // La pàgina ja és la nova (s'ha carregat de la xarxa): no cal avisar
     // (controllerchange salta abans que el SW nou esborri la cache vella: es mira la més nova)
     try {{ const ks = (await caches.keys()).filter(k => k.startsWith('bitp-'));
-      const r = await (await caches.open(ks[ks.length - 1])).match(location.pathname.endsWith('ca.html') ? 'ca.html' : 'index.html');
+      const r = await (await caches.open(ks[ks.length - 1])).match(/[/]ca([.]html)?$/.test(location.pathname) ? 'ca' : './');
       if (r && (await r.text()).includes("const BUILD = '" + BUILD + "'")) return; }} catch (e) {{}}
     const busy = (typeof dirty !== 'undefined' && dirty) || document.body.classList.contains('locked') || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {{}}).tagName || '');
     if (!busy && (document.hidden || Date.now() - lastShown < 15000 || Date.now() - lastTouch > 60000)) return location.reload();
@@ -163,7 +163,7 @@ import re as _re
 import importlib.util as _iu
 _spec = _iu.spec_from_file_location("i18n_ca", ROOT / "i18n_ca.py"); i18n_ca = _iu.module_from_spec(_spec); _spec.loader.exec_module(i18n_ca)
 page_ca = i18n_ca.translate(page).replace('<html lang="es">', '<html lang="ca">').replace("/*LANGREDIRECT*/", "")
-page = page.replace("/*LANGREDIRECT*/", "try { if (localStorage.getItem('midnight-lang') === 'ca') location.replace('ca.html' + location.hash); } catch (e) {}")
+page = page.replace("/*LANGREDIRECT*/", "try { if (localStorage.getItem('midnight-lang') === 'ca') location.replace('ca' + location.hash); } catch (e) {}")
 # Avís de textos que semblen en castellà i no s'han traduït (cal afegir-los a i18n_ca.py)
 _body = page_ca[page_ca.index("<body>"):]
 _left = sorted(set(_re.findall(r"[^<>`'\"\n]{0,30}(?:ción|ñ|¿|¡|\bmóvil|\bpara\b|\bhorario|\bquedan|\bmis\b|\btus\b|\bcon\b)[^<>`'\"\n]{0,30}", _body)))
@@ -172,6 +172,24 @@ if _left:
     print("Compte, textos potser sense traduir al català:", *_left[:15], sep="\n  ")
 (OUT / "index.html").write_text(page, encoding="utf-8")
 (OUT / "ca.html").write_text(page_ca, encoding="utf-8")
+# Cloudflare Pages: la pàgina, el service worker i els canvis sempre es comproven (versions noves a l'instant); GitHub Pages ho ignora
+(OUT / "_headers").write_text("""/
+  Cache-Control: no-cache
+/ca
+  Cache-Control: no-cache
+/*.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/changes.json
+  Cache-Control: no-store
+/cartel.json
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
+/img/*
+  Cache-Control: public, max-age=3600
+""", encoding="utf-8")
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(ROOT / "img", OUT / "img")
@@ -210,7 +228,7 @@ if (OUT / "cal").exists():
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
 version = hashlib.sha1((page + page_ca).encode()).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
-const FILES = ['index.html', 'ca.html', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
+const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp", ".otf", ".ttf", ".woff2")))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
@@ -296,7 +314,8 @@ self.addEventListener('fetch', e => {{
   if (url.searchParams.has('t')) return;
   // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
   if (e.request.mode === 'navigate') {{
-    const page = url.pathname.endsWith('/ca.html') ? 'ca.html' : 'index.html';  // cada idioma, la seva còpia
+    // Cada idioma, la seva còpia. Adreces sense «.html» (Cloudflare Pages redirigeix ca.html → ca; GitHub serveix totes dues)
+    const page = /[/]ca([.]html)?$/.test(url.pathname) ? 'ca' : './';
     e.respondWith(caches.open(VERSION).then(async cache => {{
       const hit = await cache.match(page);
       const net = fetch(e.request, {{ cache: 'no-cache' }}).then(res => {{

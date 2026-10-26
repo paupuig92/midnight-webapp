@@ -12,8 +12,9 @@
 // CARTEL (l'horari del cartell) el posa instala.sh a partir de docs/cartel.json.
 
 const CARTEL = /*CARTEL*/null/*CARTEL*/;
-const PAGES = 'https://paupuig92.github.io/midnight-webapp/';
-const ORIGINS = ['https://paupuig92.github.io', 'http://localhost:8765'];
+const PAGES = 'https://midnight-app.midnightgroup.workers.dev/';
+// L'adreça antiga (GitHub Pages) es manté perquè els mòbils que la tenien encara puguin parlar amb el servidor
+const ORIGINS = ['https://midnight-app.midnightgroup.workers.dev', 'https://paupuig92.github.io', 'http://localhost:8765'];
 const PUSH_HOSTS = /(^|\.)(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)$/;
 const MIN = 60000;
 const BATCH = 40, MAX_SUBS = 600;

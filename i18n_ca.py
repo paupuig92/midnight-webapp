@@ -129,6 +129,7 @@ PAIRS = [
     ("`${x.n} empieza ahora`", "`${x.n} comença ara`"),
     ("`Quitado de tus artistas: <b>", "`Tret dels teus artistes: <b>"),
     ("`Añadido a tus artistas: <b>", "`Afegit als teus artistes: <b>"),
+    ("<b>La app tiene una dirección nueva.</b> Ábrela y vuelve a añadirla a la pantalla de inicio: <a", "<b>L’app té una adreça nova.</b> Obre-la i torna-la a afegir a la pantalla d’inici: <a"),
     ('<p class="note">Marca los artistas que cubres: los verás destacados y te avisaremos antes de que empiecen.</p>', '<p class="note">Marca els artistes que cobreixes: els veuràs destacats i t’avisarem abans que comencin.</p>'),
     ('<span class="when">a las ', '<span class="when">a les '),
     ("'No te quedan artistas por empezar.' : 'Aún no has elegido artistas: toca «Elegir mis artistas».'", "'No et queden artistes per començar.' : 'Encara no has triat artistes: toca «Triar els meus artistes».'"),
