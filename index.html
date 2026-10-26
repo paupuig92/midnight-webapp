@@ -115,6 +115,8 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
   background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); }
 
 /* Barra fina fixa (surt quan el rellotge gran ja no es veu) */
+/* iOS 26 difumina el que hi ha sota la barra d'estat si a dalt no hi ha una franja fixa i opaca: aquesta la fa sempre */
+.topedge { position: fixed; top: 0; left: 0; right: 0; height: max(12px, env(safe-area-inset-top, 0px)); background: var(--bg); z-index: 8; pointer-events: none; }
 .minibar { position: fixed; top: 0; left: 0; right: 0; z-index: 9; background: var(--bg); border-bottom: 2px solid var(--accent);
   padding-top: calc(env(safe-area-inset-top, 0px) + 4px); padding-bottom: 4px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -241,6 +243,13 @@ i.imp { color: #0b0b0b; }
 .blk.ridesblk > span.n { padding-top: 6px; }
 .blk.ridesblk > span.t { top: 76px; }
 .blk.ridesblk .n { font-size: 12px; }
+/* Franja d'atracció: text vertical que es queda a la vista en baixar */
+.blk.ridesblk.lane { padding: 0; align-items: center; }
+.blk.ridesblk.lane::before { display: none; }
+.blk.ridesblk.lane .vt { position: sticky; top: 60px; padding: 8px 0; writing-mode: vertical-rl; white-space: nowrap; font-size: 11px; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+.colorlogos .blk.ridesblk.lane .vt { top: 82px; }
+.blk.ridesblk.lane .vt b { font: 900 12px/1 var(--cond); text-transform: uppercase; color: var(--ink); margin-bottom: 6px; display: inline-block; }
+.blk.ridesblk.lane.on .vt b { color: var(--accent); }
 .corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
 .corner { left: 0; }
 .gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
@@ -380,8 +389,11 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .sheet .body .note.withdeco { display: flex; align-items: center; gap: 12px; }
 .sheet .body .note img { width: 64px; height: 64px; object-fit: contain; flex: none; }
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
+/* iPhone estret (SE, mini, 375 px): més lloc per als noms */
+@media (max-width: 400px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .row .star { width: 40px; height: 40px; } }
 </style>
 
+<div class="topedge" aria-hidden="true"></div>
 <div class="minibar" id="minibar" hidden>
   <span class="mclock" id="mclock"></span>
   <span class="mleft" id="mleft" hidden aria-label="Tiempo hasta que acaba el festival"></span>
@@ -780,8 +792,10 @@ let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
   for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color"><img src="img/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
-  for (const r of RIDE_LIST) g += r.img && FEST.colorLogos ? `<div class="hd color"><img src="${esc(r.img)}" alt=""><span>${html(r.name)}</span></div>`
-    : `<div class="hd rides">${r.img ? `<img src="${esc(r.img)}" alt="">` : RIDE_SVG}${html(r.name)}</div>`;
+  // Atraccions: totes en una sola columna, una franja per atracció
+  const RIMG = FEST.ridesImg || (RIDE_LIST.find(r => r.img) || {}).img;
+  if (RIDE_LIST.length) g += RIMG && FEST.colorLogos ? `<div class="hd color"><img src="${esc(RIMG)}" alt=""><span>${html(RIDES_NAME)}</span></div>`
+    : `<div class="hd rides">${RIMG ? `<img src="${esc(RIMG)}" alt="">` : RIDE_SVG}${html(RIDES_NAME)}</div>`;
   g += '<div class="hdend"></div>';
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
   for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
@@ -802,19 +816,22 @@ function buildGrid() {
     else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
     g += '</div>';
   });
-  // Atraccions: una columna per a cadascuna, no són artistes (no es poden marcar com a meus)
-  for (const r of RIDE_LIST) {
-    const rt = y(r.a), rh = y(r.b) - rt, rn = html(r.name);
-    g += `<div class="col" style="grid-column:${STAGES.length + 2 + r.i};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`
-      + `<div class="blk ridesblk" id="ridesBlk-${r.i}" role="img" aria-label="${rn}: abierta de ${lbl(r.a)} a ${lbl(r.b)}" style="top:${rt + 1.5}px;height:${rh - 3}px"><i class="pl"></i><span class="n">Abierta</span><span class="t">${lbl(r.a)}–${lbl(r.b)}</span></div>`
-      + `<div class="closedtag" style="top:${y(r.b) + 10}px">Cerrada</div></div>`;
+  // Atraccions: no són artistes (no es poden marcar com a meus). Una columna, i dins una franja vertical per a cadascuna
+  if (RIDE_LIST.length) {
+    const NRL = RIDE_LIST.length;
+    g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`;
+    for (const r of RIDE_LIST) {
+      const rt = y(r.a), rh = y(r.b) - rt, rn = html(r.name);
+      g += `<div class="blk ridesblk lane" id="ridesBlk-${r.i}" role="img" aria-label="${rn}: abierta de ${lbl(r.a)} a ${lbl(r.b)}" style="top:${rt + 1.5}px;height:${rh - 3}px;left:calc(3px + ${r.i} * (100% - 6px) / ${NRL});right:auto;width:calc((100% - 6px) / ${NRL} - 3px)"><i class="pl"></i><span class="vt"><b>${rn}</b> ${lbl(r.a)}–${lbl(r.b)}</span></div>`;
+    }
+    g += `<div class="closedtag" style="top:${y(Math.max(...RIDE_LIST.map(r => r.b))) + 10}px">Cerradas</div></div>`;
   }
   g += '<div class="nowline" id="nowline" hidden></div>';
   tl.innerHTML = g;
   // Tantes columnes com escenaris i atraccions
-  const NS = STAGES.length, NR = RIDE_LIST.length;
-  tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ` repeat(${NR}, minmax(92px, .8fr))` : ''} 14px`;
-  tl.style.minWidth = `calc(var(--gut) + ${NS * 108 + NR * 92 + 14}px)`;
+  const NS = STAGES.length, NR = RIDE_LIST.length ? 1 : 0;
+  tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ' minmax(108px, 1fr)' : ''} 14px`;
+  tl.style.minWidth = `calc(var(--gut) + ${(NS + NR) * 108 + 14}px)`;
   tl.querySelector('.nowline').style.gridColumn = `2 / ${NS + NR + 2}`;
   document.querySelector('.scale').hidden = !IMPC || !ALL.some(x => x.t);  // sense importàncies, sense llegenda
   blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
