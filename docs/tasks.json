@@ -1,34 +1,44 @@
 {
  "v": 1,
  "fest": "castanyada-2026",
- "updated": "2026-10-28T14:07:20.000Z",
+ "updated": "2026-10-28T15:02:00.000Z",
  "by": "mkt",
- "team": "Martí\nCalvins\nLaia: Story\nMarta: Story",
+ "team": "Martí: marketing\nCalvins: marketing\nLaia: marketing, Story\nMarta: marketing, Story",
  "tasks": "# MARTÍ - CALVINS\n@Martí @Calvins\n- PARTIT POLÍTIC CABRÓ ROCK · Públic · Fuet · Algun xarrup o consumició per donar\n- BOTIFLOMETRE · Públic + VIP · Fuet · 20 barretines, 20 cintes CAT, 50 banderes ES + Pintacaras + Fuet\n- PARLA CATALÀ COLLONS · Públic i entrada · Micro amagat (Càmara oculta)\n- PUNTUANT OUTFITS ALBINA MODA · Públic · Micro normal o el que ella vulgui\n- PANELLETS LLUC CRUSELLAS · Públic · Micro amagat · Dolç Halloween + Ingredients (Pack fer panellets) + Pinya Pinyons\n\n# LAIA\n@Laia\n15:30 31 FAM · Missatges festivals · NOU DISC! + 10 ANYS + PRIMER COP A TOT ARREU\n15:30 31 FAM · Reel EMF - Martí\n15:30 31 FAM · JOC: Endevina qui és\n17:15 Els Amics de les Arts · Missatges festivals - NO EMF · NOU DISC! + PRIMER COP A FESTIUET\n17:15 Els Amics de les Arts · Test BOFIFLER\n19:00 Els Pets · Entrevista genèrica\n20:40 La Ludwig Band · Missatges festivals · PRIMER COP A TOT ARREU\n20:40 La Ludwig Band · Test BOFIFLER\n22:30 Lax'n'Busto · Missatges festivals - NO FESTIUET · REACCIÓ AL VÍDEO DEL CABRÓ CARROUSEL\n22:30 Lax'n'Busto · Test BOFIFLER\n22:30 Lax'n'Busto · JOC: Endevina qui és\n00:15 Els Catarres · Missatges festivals · DESTACAR CULTURA, TRADICIONS...\n00:15 Els Catarres · Test BOFIFLER\n00:15 Els Catarres · Puja Pack Català\n01:55 The Tyets · Missatges festivals · NOU DISC! + Tema Raquel Sans\n01:55 The Tyets · Puja Pack Català\n01:55 The Tyets · JOC: Endevina qui és\n- Miki Núñez · Missatge Cabró Rock · Tema Raquel Sans (???)\n03:35 Figa Flawas · Missatges festivals · NOU DISC! + Reacció de l'últim Cabró\n03:35 Figa Flawas · JOC: Endevina qui és\n05:00 Doctor Prats · Missatges festivals · Preguntar si treuran nova música\n05:00 Doctor Prats · Puja Pack Català\n\n# STORY MARTA_LAIA\n@Marta @Laia\n12:00 Entrada - Gent correns\n12:00 Entrada - Fuets Noel · IMPORTANT: PATROS!\n12:00-22:00 Photocall Enganxines (Obertura (12h a 22h))\n12:00-00:00 Atracció Calçot (De dia (12h a 00h))\n12:00-00:00 Atracció Burro (De dia (12h a 00h))\n14:10 Sardanes + Cobla 1\n15:30 Sardanes + Cobla 2\n- Estrella (De dia si es pot)\n- Negrita (De dia si es pot)\n- Foodtrucks (Atardecer)\n- Zona de descans (Tarda, atardecer)\n17:15 Lo Pau de Ponts - Garrotins\n18:00-20:00 Photocall Nena i Cabró (De 18 a 20h)\n18:00-00:00 Túnel del Terror (De nit (18h a 00h))\n18:20 Actuacions Gegants, Bastoners i Gitanes 1\n19:00 Actuacions Gegants, Bastoners i Gitanes 2\n19:00 Havaneres + Ron Cremat\n19:40 Actuació Castellers\n20:00 Emisió La Xarxa + (20h -> a les 20:40h comencen)\n20:40 Gran Aplec Cultura Catalana\n22:30 K-ZU Moment Viral (22:30 / 00:15)\n- Vídeos per IA (moments pel recinte \"naturals\")\n12:30 JULS\n13:30 VEN'NUS\n14:30 31 FAM\n16:00 Els Amics de les Arts\n17:45 Els Pets\n19:30 La Ludwig Band\n20:40 Gran Aplec de la Cultura Catalana\n21:10 Lax'n'Busto\n23:00 Els Catarres\n00:45 The Tyets (+ tema Miki Núñez)\n02:25 Figa Flawas\n04:00 Doctor Prats",
  "people": [
   {
    "k": "marti",
    "n": "Martí",
-   "r": []
+   "r": [
+    "marketing"
+   ],
+   "e": "mkt"
   },
   {
    "k": "calvins",
    "n": "Calvins",
-   "r": []
+   "r": [
+    "marketing"
+   ],
+   "e": "mkt"
   },
   {
    "k": "laia",
    "n": "Laia",
    "r": [
+    "marketing",
     "Story"
-   ]
+   ],
+   "e": "mkt"
   },
   {
    "k": "marta",
    "n": "Marta",
    "r": [
+    "marketing",
     "Story"
-   ]
+   ],
+   "e": "mkt"
   }
  ],
  "list": [

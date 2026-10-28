@@ -55,6 +55,7 @@ const okEndpoint = ep => { try { return typeof ep === 'string' && ep.length <= 6
 const cleanFavs = f => Array.isArray(f) ? [...new Set(f.filter(x => typeof x === 'string' && /^[\w-]{1,40}$/.test(x)))].slice(0, 80) : [];
 const cleanBefore = b => [0, 5, 10, 15, 20, 30].includes(+b) ? +b : 10;
 const cleanYo = y => typeof y === 'string' && /^[a-z0-9]{1,40}$/.test(y) ? y : '';
+const cleanTeam = t => ['prod', 'mkt', 'video', 'foto'].includes(t) ? t : '';
 const okTaskId = id => typeof id === 'string' && /^[\w-]{1,40}$/.test(id);
 const MAX_DONE = 5000;
 
@@ -81,7 +82,7 @@ async function fetchSchedule() {
     const c = await r.json();
     if (!c || typeof c !== 'object' || typeof c.updated !== 'string') return null;
     if (!sameFest(c)) return { sets: CARTEL.sets, stamp: 'cartel', notice: '' };  // són d'un altre festival
-    return { sets: c.sets && typeof c.sets === 'object' ? c.sets : CARTEL.sets, stamp: c.updated, notice: c.notice };
+    return { sets: c.sets && typeof c.sets === 'object' ? c.sets : CARTEL.sets, stamp: c.updated, notice: c.notice, noticeTeam: cleanTeam(c.noticeTeam) };
   } catch (e) { return null; }
 }
 
@@ -200,6 +201,8 @@ export class Store {
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
     if (!cols.includes('yo')) this.sql.exec("ALTER TABLE subs ADD COLUMN yo TEXT NOT NULL DEFAULT ''");
     if (!cols.includes('tb')) this.sql.exec('ALTER TABLE subs ADD COLUMN tb INTEGER NOT NULL DEFAULT 10');
+    // Equip del mòbil (prod / mkt / video / foto): els avisos de l'organització poden anar només a un equip
+    if (!cols.includes('team')) this.sql.exec("ALTER TABLE subs ADD COLUMN team TEXT NOT NULL DEFAULT ''");
     // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
@@ -222,10 +225,10 @@ export class Store {
     } catch (e) {}
     this.put('imported', true);
   }
-  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10) {
-    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb`,
-      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb);
+  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10, team = '') {
+    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb, team) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team`,
+      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team);
   }
   row(id) {
     const r = this.sql.exec('SELECT * FROM subs WHERE id = ?', id).toArray()[0];
@@ -237,20 +240,21 @@ export class Store {
     const b = req.method === 'POST' ? await req.json() : {};
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
-      let { favs, before, changes, yo, tb } = b;
+      let { favs, before, changes, yo, tb, team } = b;
       if (b.old && b.old !== b.endpoint) {
         const oldId = await idOf(b.old), prev = this.row(oldId);
         // Renovació de la subscripció (pushsubscriptionchange): conserva les preferències del registre vell
-        if (prev && favs === undefined) ({ favs, before, changes, yo, tb } = prev);
+        if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team } = prev);
         this.sql.exec('DELETE FROM subs WHERE id = ?', oldId);
       }
       const cur = this.row(id);
       const nf = cleanFavs(favs), nb = cleanBefore(before), nc = changes !== false;
       // Un mòbil antic (sense «yo») conserva el que ja hi havia
       const ny = yo === undefined ? (cur ? cur.yo : '') : cleanYo(yo), nt = tb === undefined ? (cur ? cur.tb : 10) : cleanBefore(tb);
-      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt) return json({ ok: true, id, same: true });
+      const ne = team === undefined ? (cur ? cur.team || '' : '') : cleanTeam(team);
+      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne) return json({ ok: true, id, same: true });
       if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) return json({ error: 'full' }, 429);
-      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt);
+      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne);
       return json({ ok: true, id });
     }
     if (url.pathname === '/unsub') { this.sql.exec('DELETE FROM subs WHERE id = ?', await idOf(b.endpoint)); return json({ ok: true }); }
@@ -292,7 +296,7 @@ export class Store {
       const tasks = (b.tasks || this.get('tasks') || {}).list || [];
       if (fresh) {
         const s = this.get('sets');
-        if (!s || s.stamp !== fresh.stamp) this.put('sets', { sets: fresh.sets, stamp: fresh.stamp, notice: fresh.notice });
+        if (!s || s.stamp !== fresh.stamp) this.put('sets', { sets: fresh.sets, stamp: fresh.stamp, notice: fresh.notice, noticeTeam: fresh.noticeTeam || '' });
       }
       const targets = new Map();
       for (const sub of this.sql.exec('SELECT * FROM subs').toArray()) {
@@ -306,13 +310,15 @@ export class Store {
         else if (sch.stamp !== last.stamp && !(Date.parse(sch.stamp) <= Date.parse(last.stamp))) {
           const newNotice = !!sch.notice && sch.notice !== last.notice;
           const schedChanged = last.key !== undefined ? last.key !== sch.key : !newNotice;
+          // Un avís només per a un equip: als altres mòbils només els arriba si a més ha canviat l'horari
+          const team = newNotice ? cleanTeam(fresh.noticeTeam) : '';
           const ev = {
-            stamp: sch.stamp, notice: sch.notice, key: sch.key, at: now, silent: !newNotice && !schedChanged,
+            stamp: sch.stamp, notice: sch.notice, key: sch.key, at: now, silent: !newNotice && !schedChanged, team, sched: schedChanged,
             title: newNotice ? 'Avís de l’organització' : 'Canvi d’horari',
             body: newNotice ? sch.notice.slice(0, 180) : 'L’organització ha canviat l’horari.',
           };
           this.put('last', ev);
-          if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint FROM subs WHERE changes = 1').toArray()) targets.set(sub.id, sub.endpoint);
+          if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint, team FROM subs WHERE changes = 1').toArray()) if (!team || sub.team === team || schedChanged) targets.set(sub.id, sub.endpoint);
         }
       }
       return json({ targets: [...targets].map(([id, endpoint]) => ({ id, endpoint })) });
@@ -325,7 +331,10 @@ export class Store {
       // 15 min: el mateix temps que Apple guarda el push si el mòbil no té cobertura (TTL 900 s); el mòbil no repeteix el que ja ha mostrat
       const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now)];
       const last = this.get('last');
-      if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
+      if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) {
+        if (!last.team || sub.team === last.team) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
+        else if (last.sched) items.push({ title: 'Canvi d’horari', body: 'L’organització ha canviat l’horari.', tag: 'org-' + last.stamp });
+      }
       return json({ items });
     }
     return json({ error: 'not found' }, 404);

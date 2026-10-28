@@ -178,7 +178,7 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
 .minibar .btn { min-height: 36px; padding: 0 10px; }
 /* logo del festival al mig de la barra (FEST.miniLogo); al mòbil ocupa el lloc del «★ proper artista» */
-.minibar .mlogo { position: absolute; left: 50%; bottom: 7px; box-sizing: border-box; height: calc(var(--barh) - 14px); width: auto; max-width: 36vw; padding: 3px 9px; border-radius: 7px; background: var(--mlogo-bg, linear-gradient(#fe5e08, #fe8e04)); object-fit: contain; translate: -50% 0; pointer-events: none; }
+.minibar .mlogo { position: absolute; left: 50%; bottom: 7px; box-sizing: border-box; height: calc(var(--barh) - 14px); width: auto; max-width: 36vw; padding: 3px 9px; border-radius: 7px; background: var(--mlogo-bg, linear-gradient(#fe5e08, #fe8e04)); object-fit: contain; translate: -50% 0; cursor: pointer; }
 @media (max-width: 439px) { .minibar:has(.mlogo:not([hidden])) .mnext { visibility: hidden; } }
 @media (max-width: 374px) { .minibar:has(.mlogo:not([hidden])) .mleft { display: none; } .minibar .mlogo { max-width: 30vw; padding: 3px 6px; } }
 
@@ -591,7 +591,7 @@ body { padding-top: var(--edge); }
 
 .whosel { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; }
 /* Perfil «Solo horarios»: sense prioritats, efectes, mode pantalla ni editor (la pantalla oberta amb ?pantalla sí que els mostra) */
-body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):not(.tvon) .fxg, body:not(.pro) .tvbox, body:not(.pro) .scale { display: none !important; }
+body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):not(.tvon) .fxg, body:not(.pro) .scale { display: none !important; }
 .whosel label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; color: var(--ink); font-weight: 700; cursor: pointer; }
 .whosel label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .whosel input { accent-color: var(--accent); margin: 0; }
@@ -606,6 +606,14 @@ body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):no
 .feed ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .feed li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: baseline; color: var(--ink); font-size: var(--fs-s); overflow-wrap: anywhere; white-space: pre-line; }
 .feed li time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--now); font-size: var(--fs-xs); }
+.feed .fpin:not([hidden]) { display: grid; gap: 2px; color: var(--ink); font-size: var(--fs-m, 16px); overflow-wrap: anywhere; white-space: pre-line; }
+.feed .fpin .fpt { font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--now); }
+.feed .fpin + .fh { margin-top: 10px; padding-top: 8px; border-top: 1.5px solid color-mix(in srgb, var(--now) 40%, transparent); }
+.feed .fpin + .fh[hidden] + ul:empty { display: none; }
+.feed .fmore { margin-top: 6px; font-size: var(--fs-xs); }
+.feed [hidden], .feedbell[hidden] { display: none !important; }
+.nteam { font-style: normal; font-weight: 600; color: var(--muted); }
+.feedbell:not([hidden]) { display: block; margin: -4px 0 12px auto; border: 1px solid var(--line, #333); border-radius: 99px; background: var(--panel); color: var(--ink); font: 600 var(--fs-xs)/1 inherit; padding: 8px 12px; cursor: pointer; }
 .feed li + li { border-top: 1px solid color-mix(in srgb, var(--now) 30%, transparent); padding-top: 6px; }
 
 /* Importància: quadrat amb el número, més gran on es mira de lluny */
@@ -761,7 +769,7 @@ body.tvon { overflow: hidden; }
 .plask { display: flex; flex-direction: column; gap: 8px; border: 1.5px dashed var(--line); border-radius: 12px; padding: 12px; }
 .plask p { margin: 0; }
 .plask select, .admin .gvsel { font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 10px; max-width: 280px; }
-.pllate { margin: 0 0 6px; color: var(--now); font-weight: 700; font-size: var(--fs-s); }
+.pllate { display: block; width: 100%; text-align: left; margin: 0 0 6px; padding: 10px 0; min-height: 44px; background: none; border: 0; color: var(--now); font: inherit; font-weight: 700; font-size: var(--fs-s); cursor: pointer; }
 .tklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .tklist li.grp { padding: 10px 0 2px; font-variant-numeric: tabular-nums; }
 .tklist li.grp b { font-size: var(--fs-s); color: var(--accent); }
@@ -780,9 +788,11 @@ li.tk.late .tkf { border: 1.5px solid var(--now); color: var(--now); }
 li.tk.late .tkchk { border-color: var(--now); }
 li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; }
 .tkimp { margin: 10px 0 4px; }
-.tkimp label { cursor: pointer; }
+.tkimp label { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 li.tk.free .tkt { color: var(--muted); }
 .tkwarn { margin: 6px 0 0; padding-left: 18px; color: var(--now); font-size: var(--fs-s); }
+.tkover-h { margin: 10px 0 0; font-size: var(--fs-s); font-weight: 700; color: #e0a030; }
+.tkwarn.tkover { color: #e0a030; }
 .admin textarea.tkta { font: 15px/1.45 ui-monospace, Menlo, monospace; }
 .gvppl { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .gvp { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
@@ -814,6 +824,81 @@ li.tk.free .tkt { color: var(--muted); }
 .tgrail.done { opacity: .5; }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
 .tgnow { position: absolute; left: var(--gut); right: 0; height: 0; border-top: 2px solid var(--now); z-index: 5; pointer-events: none; }
+#hola h2 { margin-bottom: 4px; }
+#hola .ch { margin: 14px 0 0; }
+.holagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
+.holagrid .btn { min-height: 56px; font-size: var(--fs-l); justify-content: center; }
+.holamini { grid-template-columns: 1fr; margin-top: 18px; }
+.holamini .btn { min-height: 44px; font-size: inherit; opacity: .8; }
+body:not([data-tab="equipo"]) #hola, body[data-tab="equipo"]:not(.needyo) #hola { display: none !important; }
+body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
+/* Pestanyes de baix */
+.tabbar { position: fixed; z-index: 14; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 4px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line, var(--rule));
+  padding: 6px max(10px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 6px) max(10px, env(safe-area-inset-left, 0px)); }
+.tabbar button { position: relative; flex: 1; min-width: 0; max-width: 150px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: none; border: 0; border-radius: 12px; color: var(--muted); font: 700 12px/1.1 var(--ui, inherit); cursor: pointer; }
+.tabbar button[hidden] { display: none; }
+.tabbar button[aria-current] { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.tabbadge { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--now, #e33); color: #fff; font: 800 11px/18px var(--ui, inherit); text-align: center; }
+body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); }
+.totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+.toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+body.tvon .tabbar, body.tvon .totop { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar) { display: none !important; }
+body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar) { display: none !important; }
+body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !important; }
+.whobar { margin-bottom: -14px; }
+.faces { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.faces::-webkit-scrollbar { display: none; }
+.face { flex: none; display: flex; flex-direction: column; align-items: center; gap: 5px; width: 62px; background: none; border: 0; padding: 0; color: var(--muted); font: 700 13px/1.1 var(--ui, inherit); cursor: pointer; }
+.face b { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font: 800 24px/1 var(--display); color: #fff;
+  background: hsl(var(--h, 0) 45% 32%); border: 2.5px solid transparent; box-shadow: inset 0 0 0 2px var(--bg); }
+.face.on { color: var(--ink); }
+.face.on b { border-color: var(--accent); }
+.face.other b { background: var(--panel); color: var(--muted); border: 1.5px dashed var(--line, var(--rule)); box-shadow: none; }
+.face span { max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plprog { display: flex; align-items: center; gap: 14px; margin: 4px 0 14px; }
+.plprog svg { flex: none; }
+.plprog b { display: block; font: 800 var(--fs-l)/1.15 var(--display); color: var(--ink); }
+.plprog small { color: var(--muted); }
+.tkmust { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--chg, #e0f); color: #fff; font: 800 11px/1.5 var(--ui, inherit); letter-spacing: .05em; vertical-align: 2px; }
+.tvsec { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.tvsec h2 { margin-bottom: 4px; }
+.yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+body[data-tab="ajustes"] .wrap > :not(#config) { display: none !important; }
+body[data-tab="org"] .wrap > :not(#admin):not(#orgOff) { display: none !important; }
+body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+.terows { display: flex; flex-direction: column; gap: 8px; }
+.terow { display: grid; grid-template-columns: 1fr auto 44px; gap: 6px; align-items: center; padding: 8px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--panel); }
+.terow .teg { grid-column: 1 / 3; }
+.terow .tex { grid-row: 1 / 3; grid-column: 3; min-height: 44px; padding: 0; }
+.terow input, .terow select { min-height: 44px; min-width: 0; }
+.tktx summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+.holagrid .btn.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+#config .yosel { min-height: 48px; font-size: 17px; padding: 0 14px; border-radius: 24px; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line, var(--rule)); }
+/* Perfil a la barra de dalt: qui sóc i de quin equip; un toc i el canvies */
+.mwho:not([hidden]) { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; max-width: 128px; padding: 3px 10px 3px 3px; border: 1.5px solid var(--accent); border-radius: 99px; background: var(--panel); color: var(--ink); cursor: pointer; font: inherit; text-align: left; }
+.mwho .mav { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 800 14px/1 var(--display); color: #fff; background: hsl(var(--h, 20) 55% 42%); }
+.mwho.none .mav { background: var(--line, #444); }
+.mwho .mwt { min-width: 0; display: flex; flex-direction: column; line-height: 1.05; }
+.mwho .mwn { font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none; letter-spacing: 0; }
+.mwho .mwd { font-weight: 700; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.brandline .mwho.big { margin-left: auto; }
+.brandline .mwho.big + .firma { margin-left: 4px; }
+#mineOnly2 { display: none !important; }
+body:not([data-tab="ahora"]) #goNow2 { display: none; }
+@media (max-width: 439px) {
+  .minibar .mwho { max-width: 104px; }
+  body[data-tab="ahora"] .minibar .mwho { padding: 2px; }  /* amb «Ahora» al costat només hi cap la cara */
+  body[data-tab="ahora"] .minibar .mwho .mwt { display: none; }
+  .brandline .firma { display: none; }
+  .brandline { white-space: nowrap; min-width: 0; }
+  .brandline #festName { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .brandline .mwho.big { max-width: 46%; }
+}
+@media (orientation: landscape) and (max-height: 500px) { .tabbar button { min-height: 40px; flex-direction: row; gap: 6px; } .tabbar svg { width: 20px; height: 20px; } body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); } }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Blogh";src:url("img/Blogh.woff2");font-weight:100 900;font-display:swap}
@@ -832,11 +917,12 @@ li.tk.free .tkt { color: var(--muted); }
   <span class="mnext" id="mnext"></span>
   <img class="mlogo" id="mlogo" alt="" hidden>
   <button class="sim-badge" id="simBadge2" type="button" hidden>PROVA ✕</button>
-  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Només els meus artistes"></button>
+  <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Només els meus artistes" hidden></button>
+  <button class="mwho" id="mwho" type="button" aria-label="El teu perfil"><b class="mav"></b><span class="mwt"><span class="mwn"></span><small class="mwd"></small></span></button>
   <button class="btn go" id="goNow2" type="button">Ara</button>
 </div>
 
-<div class="tv" id="tv" hidden aria-label="Mode pantalla">
+<div class="tv" id="tv" hidden aria-label="Mode pantalla completa">
   <div class="tvtop">
     <div class="tvclock" id="tvClock"></div>
     <div class="tvinfo"><button class="btn tvx" id="tvX" type="button">Sortir de la pantalla</button><img src="img/banner.jpg" alt=""><div class="tvstatus" id="tvStatus"></div><div class="tvprog"><i id="tvProg"></i></div></div>
@@ -849,7 +935,7 @@ li.tk.free .tkt { color: var(--muted); }
 <div class="wrap">
   <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
   <header class="hero">
-    <div class="brandline"><b>Midnight</b> — <span id="festName">Bass in the Park</span><i class="firma" role="img" aria-label="Puig"></i></div>
+    <div class="brandline"><b>Midnight</b> — <span id="festName">Bass in the Park</span><button class="mwho big" id="hwho" type="button" aria-label="El teu perfil"><b class="mav"></b><span class="mwt"><span class="mwn"></span><small class="mwd"></small></span></button><i class="firma" role="img" aria-label="Puig"></i></div>
     <button class="sim-badge" id="simBadge" type="button" hidden>MODE PROVA ✕ Sortir</button>
     <div class="clock" id="clock">--:--<small>--</small></div>
     <div class="statusrow">
@@ -860,8 +946,14 @@ li.tk.free .tkt { color: var(--muted); }
     <div class="notice" id="notice" role="status" hidden></div>
   </header>
 
+  <div class="whobar" id="whoBar"><div class="faces" id="faces" role="group" aria-label="Qui ets"></div></div>
+  <section id="hola" class="hola" aria-labelledby="holaT">
+    <h2 id="holaT">Qui ets?</h2>
+    <p class="note" id="holaSub">Tria el teu nom i veuràs les teves tasques. Es pot canviar a Ajustos.</p>
+    <div id="holaBody"></div>
+  </section>
   <section id="plan" hidden>
-    <div class="shead"><h2>El meu <span>pla</span></h2><span class="plwho" id="planWho"></span></div>
+    <div class="shead"><h2 id="planH">Les meves <span>tasques</span></h2><span class="plwho" id="planWho"></span></div>
     <div id="planBody"></div>
   </section>
 
@@ -871,7 +963,8 @@ li.tk.free .tkt { color: var(--muted); }
       <h2>Ara <span>sona</span></h2>
       <div class="mygrp" role="group" aria-label="Els meus artistes"><button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Només els meus artistes</button><button class="chip" id="pickOpen" type="button">Triar <span id="pickCount"></span></button></div>
     </div>
-    <div class="feed" id="feed" hidden role="status"><div class="fh"><b>Últims avisos</b><button type="button" class="fclose" id="feedX" aria-label="Tancar avisos">✕</button></div><ul id="feedList"></ul></div>
+    <div class="feed" id="feed" hidden role="status"><div class="fpin" id="feedPin" hidden></div><div class="fh" id="feedHead"><b>Últims avisos</b><button type="button" class="fclose" id="feedX" aria-label="Tancar avisos">✕</button></div><ul id="feedList"></ul><button type="button" class="linkbtn fmore" id="feedMore" hidden></button></div>
+    <button type="button" class="feedbell" id="feedBell" hidden></button>
     <div class="chgbox" id="chgBox" hidden><div class="fh"><b>Canvis d’horari</b><span class="cn" id="chgN"></span></div><ul id="chgList"></ul></div>
     <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
     <p class="empty" id="rowsEmpty" hidden></p>
@@ -888,7 +981,7 @@ li.tk.free .tkt { color: var(--muted); }
     <p class="note">☆ = els meus artistes</p>
     <details class="howto">
       <summary>Com funcionen els avisos</summary>
-      <p>Amb l’app oberta i la pantalla encesa, t’avisem dels teus artistes abans que comencin i quan comencen. Quant abans, i si vols notificacions, ho tries a Configuració.<span id="howLocked"> Amb el mòbil bloquejat no arriben.</span></p>
+      <p>Amb l’app oberta i la pantalla encesa, t’avisem dels teus artistes abans que comencin i quan comencen. Quant abans, i si vols notificacions, ho tries a Ajustos.<span id="howLocked"> Amb el mòbil bloquejat no arriben.</span></p>
     </details>
   </section>
 
@@ -906,6 +999,13 @@ li.tk.free .tkt { color: var(--muted); }
     <p class="legend">Toca el mapa per ampliar-lo i mou-lo amb el dit. Torna a tocar per veure’l sencer.</p>
   </section>
 
+  <section class="tvbox tvsec" id="pantallaSec">
+    <h2>Mode <span>pantalla completa</span></h2>
+        <button class="btn" type="button" id="tvOpen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Mode pantalla completa</button>
+        <p class="note" style="margin:0">Per deixar-la en un monitor o una tele: l’hora en gran, què sona a cada escenari i el que ve. Sense preferits.</p>
+        <div class="row2 tvst" id="tvStages"></div>
+        <p class="note" style="margin:0">Un sol escenari (backstage): què sona, quant queda, el canvi i el proper efecte en gran.</p>
+      </section>
   <section id="tkgrid" hidden>
     <div class="shead"><h2>Horari <span>de tasques</span></h2><div class="mygrp"><button class="chip" id="tgTeam" type="button" aria-pressed="false">Equip</button></div></div>
     <div class="tlbox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
@@ -913,6 +1013,7 @@ li.tk.free .tkt { color: var(--muted); }
     <p class="legend" id="tgFree"></p>
   </section>
 
+  <section class="admin" id="orgOff" hidden><h2>Organització</h2><p class="note">Només funciona amb connexió, a l’app publicada.</p></section>
   <section class="admin" id="admin" hidden>
     <h2>Organització</h2>
     <form id="pwForm" class="pwform">
@@ -926,7 +1027,8 @@ li.tk.free .tkt { color: var(--muted); }
     <div id="editor" class="editor" hidden>
       <div class="orgmenu">
         <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horari</button>
-        <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Avís per a tothom</button>
+        <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Enviar avís</button>
+        <button type="button" class="btn" data-panel="pEquipo" aria-expanded="false">Equip</button>
         <button type="button" class="btn" data-panel="pTareas" aria-expanded="false">Tasques</button>
         <button type="button" class="btn" data-panel="pGlobal" aria-expanded="false">Vista global</button>
         <button type="button" class="btn" id="edClose">Sortir</button>
@@ -943,23 +1045,35 @@ li.tk.free .tkt { color: var(--muted); }
       </div>
 
       <div class="panel" id="pAviso" hidden>
-        <label for="edNotice">Avís per a tothom (surt en vermell a «Últims avisos»)</label>
+        <label for="edNotice">Avís (surt en vermell a dalt de tot)</label>
         <textarea id="edNotice" rows="3" placeholder="Ex.: Els Pets comencen 30 min tard"></textarea>
+        <label for="edNoticeTeam">Per a qui?</label>
+        <select id="edNoticeTeam"><option value="">Tothom</option><option value="prod">Només Producció</option><option value="mkt">Només Màrqueting</option><option value="video">Només Vídeo</option><option value="foto">Només Foto</option></select>
         <div class="edbar"><button type="button" class="btn primary" id="edSave2">Desar i publicar</button></div>
         <p class="note">Per treure l’avís, esborra el text i publica. Ho veuran tots en 1 o 2 minuts.</p>
+      </div>
+
+      <div class="panel" id="pEquipo" hidden>
+        <p class="note edhelp">Les persones que poden triar el seu nom a «Tasques». L’equip decideix què veuen. Si canvies un nom, les seves tasques el segueixen, però perd les ✓.</p>
+        <div id="teRows" class="terows"></div>
+        <button type="button" class="btn" id="teAdd">+ Afegir persona</button>
+        <div class="edbar sticky"><button type="button" class="btn primary" id="teSave">Desar i publicar</button></div>
       </div>
 
       <div class="panel" id="pTareas" hidden>
         <div class="tkimp"><label class="btn primary" for="tkFile">Pujar Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
         <p class="note edhelp">Una pestanya per persona: el nom de la pestanya diu de qui és («LAIA», «MARTÍ / CALVINS»). Des de Google Sheets: Fitxer → Baixa → Microsoft Excel. Substitueix les tasques de sota; després les pots retocar a mà.</p>
+        <details class="tktx"><summary>Equip com a text</summary>
         <label for="tkTeam">Equip (una persona per línia; després de «:», els seus grups)</label>
-        <textarea id="tkTeam" class="tkta" rows="6" placeholder="Marc: audiovisual, càmera&#10;Laia: audiovisual&#10;Jordi: producció" autocapitalize="words" spellcheck="false"></textarea>
+        <textarea id="tkTeam" class="tkta" rows="6" placeholder="Marc: màrqueting, càmera&#10;Laia: màrqueting, story&#10;Jordi: producció" autocapitalize="words" spellcheck="false"></textarea>
+        <p class="note edhelp">Més fàcil des d’Organització → Equip. Aquí: «Laia: màrqueting, story» (equip: producció, màrqueting, vídeo o foto).</p>
+        </details>
         <label for="tkList">Tasques (una per línia: hora, tasca i @qui)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Muntar càmeres @audiovisual&#10;18:30 Gravar l’entrada dels Catarres @Marc @Laia&#10;20:00-20:30 Canviar bateries @Marc&#10;23:00 Foto de grup @tothom" spellcheck="false"></textarea>
         <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.</p>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Desar i publicar</button></div>
-        <p class="note">Cadascú tria el seu nom a Configuració i només veu les seves tasques a «El meu pla».</p>
+        <p class="note">Cadascú tria el seu nom a Ajustos i només veu les seves tasques a «El meu pla».</p>
       </div>
 
       <div class="panel" id="pGlobal" hidden>
@@ -973,33 +1087,28 @@ li.tk.free .tkt { color: var(--muted); }
   </section>
 
   <section class="tools" id="config">
-    <h2>Configuració</h2>
+    <h2>Ajustos</h2>
     <p class="note" style="margin:0">Això només afecta aquest mòbil.</p>
     <div class="cgrp" role="group" aria-labelledby="profH">
-      <h3 id="profH" class="ch">Perfil</h3>
-      <div class="whosel" role="radiogroup" aria-label="Perfil">
+      <h3 id="profH" class="ch">El teu equip</h3>
+      <div class="whosel" role="radiogroup" aria-label="Equip">
         <label><input type="radio" name="prof" value="" checked> Només horaris</label>
         <label><input type="radio" name="prof" value="prod"> Producció</label>
         <label><input type="radio" name="prof" value="mkt"> Màrqueting</label>
+        <label><input type="radio" name="prof" value="video"> Vídeo</label>
+        <label><input type="radio" name="prof" value="foto"> Foto</label>
       </div>
-      <p class="note" style="margin:0">Producció i Màrqueting veuen també les prioritats, els efectes, el mode pantalla i l’entrada a «Organització».</p>
-    </div>
-    <div class="cgrp" id="yoGrp" hidden>
-      <h3 class="ch">Sóc…</h3>
-      <select class="yosel" id="yoSel" aria-label="Qui ets"></select>
-      <p class="note" style="margin:0">Per veure les teves tasques a «El meu pla». Només veus les teves.</p>
+      <div id="yoGrp" class="yogrp" hidden>
+        <h3 class="ch">Sóc…</h3>
+        <select class="yosel" id="yoSel" aria-label="Qui ets"></select>
+      </div>
+      <p class="note" style="margin:0">Amb equip veus també les teves tasques, les prioritats i els efectes.</p>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
       <div>
         <button class="btn switch" type="button" id="wake" aria-pressed="false">Mantenir la pantalla encesa</button>
         <div class="hint" id="wakeHint" hidden></div>
-      </div>
-      <div class="tvbox">
-        <button class="btn" type="button" id="tvOpen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Mode pantalla</button>
-        <p class="note" style="margin:0">Per deixar-la en un monitor o una tele: l’hora en gran, què sona a cada escenari i el que ve. Sense preferits.</p>
-        <div class="row2 tvst" id="tvStages"></div>
-        <p class="note" style="margin:0">Un sol escenari (backstage): què sona, quant queda, el canvi i el proper efecte en gran.</p>
       </div>
     </div>
     <div class="notif cgrp" role="group" aria-labelledby="notifH">
@@ -1092,6 +1201,12 @@ li.tk.free .tkt { color: var(--muted); }
   <div class="foot"><button class="btn primary" id="sheetDone" type="button">Fet</button></div>
 </div>
 
+<nav class="tabbar" id="tabbar" aria-label="Seccions">
+  <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horaris</span></button>
+  <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tasques</span><b class="tabbadge" id="tabBadge" hidden></b></button>
+  <button type="button" data-tab="org"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Organització</span></button>
+  <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustos</span></button>
+</nav>
 <button class="totop" id="toTop" type="button" aria-label="Tornar a dalt" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <div class="instov" id="instOv" hidden role="dialog" aria-modal="true" aria-labelledby="instOvT">
   <div class="card">
@@ -1392,7 +1507,7 @@ load(DEFAULT_RAW);
 // Perfil (Configuració): '' = només horaris; prod / mkt = també prioritats, efectes, mode pantalla i editor.
 // Es pot donar amb l'enllaç: ?perfil=produccio o ?perfil=marketing
 const PROFK = FEST.key + '-perfil-v1';
-const PROF_OK = v => v === 'prod' || v === 'mkt' ? v : '';
+const PROF_OK = v => ['prod', 'mkt', 'video', 'foto'].includes(v) ? v : '';
 let PROF = '';
 try { PROF = PROF_OK(localStorage.getItem(PROFK)); } catch (e) {}
 {
@@ -1410,16 +1525,22 @@ function mascotPerfil() {
   m.hidden = !src; m.className = 'mecanic m-' + k;
   if (src && i.getAttribute('src') !== src) i.src = src;
 }
+function setProf(v) {
+  PROF = PROF_OK(v);
+  try { localStorage.setItem(PROFK, PROF); } catch (e) {}
+  document.querySelectorAll('input[name=prof]').forEach(r => { r.checked = r.value === PROF; });
+  document.body.classList.toggle('pro', !!PROF);
+  document.body.classList.toggle('prof-prod', PROF === 'prod');
+  mascotPerfil();
+  document.getElementById('admin').hidden = !(ONLINE && ADMIN);
+  if (FEEDK) paintFeed();  // els avisos d'un equip només els veu aquell equip
+}
 document.querySelectorAll('input[name=prof]').forEach(r => {
   r.checked = r.value === PROF;
   r.addEventListener('change', () => {
-    PROF = PROF_OK(r.value);
-    try { localStorage.setItem(PROFK, PROF); } catch (e) {}
-    document.body.classList.toggle('pro', !!PROF);
-    document.body.classList.toggle('prof-prod', PROF === 'prod');
-    mascotPerfil();
-    document.getElementById('admin').hidden = !(ONLINE && ADMIN && PROF);
-    if (!PROF && tvOn) tvClose();
+    setProf(r.value);
+    const pe = YO && YO !== '-' ? person(YO) : null;
+    if (PROF && pe && pe.e && pe.e !== PROF) setYo('');
   });
 });
 
@@ -1526,6 +1647,7 @@ function scrollToNow(smooth) {
   tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
 }
 function goNow() {
+  if (typeof showTab === 'function') showTab('ahora');
   tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   scrollToNow(true);
 }
@@ -1695,7 +1817,15 @@ prefs.tb = [0, 5, 10, 15, 20, 30].includes(+prefs.tb) ? +prefs.tb : 10;
 const YOK = FEST.key + '-yo-v1';
 let YO = '';
 try { YO = localStorage.getItem(YOK) || ''; } catch (e) {}
-const yoPush = () => PROF === 'mkt' && YO && YO !== '-' ? YO : '';
+// Migració (28-10-2026): abans el nom només comptava amb Marketing. Un nom vell desat amb un altre perfil (o «-») s'oblida, perquè no rebi avisos d'un altre
+try {
+  const MIG = FEST.key + '-mig-ux1';
+  if (!localStorage.getItem(MIG)) {
+    if (YO === '-' || (YO && PROF !== 'mkt')) { YO = ''; localStorage.removeItem(YOK); }
+    localStorage.setItem(MIG, '1');
+  }
+} catch (e) {}
+const yoPush = () => !!PROF && YO && YO !== '-' ? YO : '';
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 // Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
 const PUSH = {"url": "https://midnight-push.midnightgroup.workers.dev", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
@@ -2055,7 +2185,7 @@ const deniedHelp = () => isIOS
 const canPush = () => !!(PUSH && PUSH.url && 'serviceWorker' in navigator && 'PushManager' in window);
 const b64uDec = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0)); };
 async function pushSubscription(create) {
-  const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, no) => setTimeout(() => no(new Error('sin service worker')), 10000))]);
+  const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, no) => setTimeout(() => no(new Error('sense service worker')), 10000))]);
   let sub = await reg.pushManager.getSubscription();
   if (!sub && create) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
   return sub;
@@ -2073,7 +2203,7 @@ async function syncNow(keepalive) {
   try {
     const sub = await pushSubscription(false);
     if (!sub) { pushActive = false; return notifUI(); }
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb }, keepalive);
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb }, keepalive);
   } catch (e) { syncDirty = true; }
 }
 function syncPush() {
@@ -2088,7 +2218,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) syncN
 addEventListener('pagehide', () => syncNow(true));
 async function pushOn() {
   const sub = await pushSubscription(true);
-  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb });
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
   pushActive = true;
 }
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sense resposta')), ms))]);
@@ -2166,7 +2296,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
     pushActive = true;
     notifUI('Restablertes. També arribaran amb el mòbil bloquejat.');
   } catch (e) {
@@ -2191,7 +2321,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '28/10 15:04';
+const BUILD = '28/10 16:52';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2315,9 +2445,9 @@ function tvRender(t) {
   // Avisos de l'organització: l'actiu i el darrer de l'última mitja hora
   const al = document.getElementById('tvAlert');
   const msgs = [];
-  if (notice) msgs.push(`<b>${html(noticeBy || 'Organització')}:</b> ${html(notice)}`);
+  if (noticeMine()) msgs.push(`<b>${noticeHead()}:</b> ${html(notice)}`);
   const lastF = feed.find(f => Date.now() - f.t < 30 * MIN);
-  if (lastF && !(notice && lastF.m.includes(html(notice)))) msgs.push(lastF.m);
+  if (lastF && !(noticeMine() && lastF.m.includes(html(notice)))) msgs.push(lastF.m);
   al.hidden = !msgs.length;
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
@@ -2404,49 +2534,65 @@ try {
 const REPO = 'paupuig92/midnight-webapp';
 const ONLINE = !/claude(usercontent)?\.(ai|com)$/.test(location.hostname);  // a tot arreu menys a la vista prèvia de Claude (GitHub, Cloudflare, domini propi)
 const CKEY = FEST.key + '-changes-v1';
-let stamp = '', notice = '', noticeBy = '', noticeById = '';
+let stamp = '', notice = '', noticeBy = '', noticeById = '', noticeTeam = '';
+// Un aviso pot ser només per a un equip: els altres no el veuen (ni la notificació)
+const noticeMine = () => notice && (!noticeTeam || noticeTeam === PROF) ? notice : '';
+const noticeHead = () => `${html(noticeBy || 'Organització')}${noticeTeam ? ` <i class="nteam">· per a ${html(WHO_L[noticeTeam])}</i>` : ''}`;
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
 const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}`).join('~');
-// Últimos avisos: els 3 darrers de les últimes 6 hores (i l'aviso actiu de l'organització), en vermell damunt la targeta
+// Avisos: l'aviso actiu de l'organització fixat dalt (no es pot tancar) i l'historial del dia (els 3 darrers; «Ver todos» per a la resta)
 var FEEDK = FEST.key + '-feed-v1';  // «var»: tick() hi mira abans que s'arribi aquí
 var feed = [], feedSeen = 0;
 try { feed = JSON.parse(localStorage.getItem(FEEDK) || '[]').filter(f => f && f.t && f.m); feedSeen = +localStorage.getItem(FEEDK + '-x') || 0; } catch (e) {}
 function feedAdd(m) {
   feed.unshift({ t: Date.now(), m });
-  feed = feed.slice(0, 6);
+  feed = feed.slice(0, 20);
   try { localStorage.setItem(FEEDK, JSON.stringify(feed)); } catch (e) {}
 }
-var feedKey = '';
+var feedKey = '', feedAll = false;
 function paintFeed() {
   const el = document.getElementById('feed');
   if (!el) return;
-  const items = feed.filter(f => Date.now() - f.t < 6 * 3600000).slice(0, 3).map(f => `<li><time>${hm(f.t)}</time><span>${f.m}</span></li>`);
-  if (notice && !feed.slice(0, 3).some(f => f.m.includes(html(notice)))) items.unshift(`<li><time>Avís</time><span><b>${html(noticeBy || 'Organització')}:</b> ${html(notice)}</span></li>`);
-  const newest = Math.max(0, ...feed.map(f => f.t));
-  const show = items.length && newest >= feedSeen || (notice && !feedSeen);
-  const key = items.join('') + show;
+  const mine = noticeMine();
+  const hist = feed.filter(f => Date.now() - f.t < 18 * 3600000 && !(mine && f.m.includes(html(mine))));
+  const newest = Math.max(0, ...hist.map(f => f.t));
+  const open = !!hist.length && (feedAll || newest >= feedSeen);
+  const list = open ? (feedAll ? hist : hist.slice(0, 3)) : [];
+  const pin = mine ? `<span class="fpt">📌 Avís${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${html(noticeBy || 'Organització')}:</b> ${html(mine)}</span>` : '';
+  const key = [pin, list.map(f => f.t + f.m).join(), open, feedAll, hist.length].join('|');
   if (key === feedKey) return;
   const was = el.hidden;
   feedKey = key;
-  el.hidden = !show;
-  document.getElementById('feedList').innerHTML = items.join('');
-  if (was && show && typeof anim === 'function') anim(el, RISE, { duration: 320 });
+  el.hidden = !mine && !open;
+  const p = document.getElementById('feedPin');
+  p.hidden = !mine; p.innerHTML = pin;
+  document.getElementById('feedHead').hidden = !open;
+  document.getElementById('feedList').innerHTML = list.map(f => `<li><time>${hm(f.t)}</time><span>${f.m}</span></li>`).join('');
+  const more = document.getElementById('feedMore');
+  more.hidden = !open || hist.length <= 3;
+  more.textContent = feedAll ? 'Veure’n menys' : `Veure tots els d’avui (${hist.length})`;
+  const bell = document.getElementById('feedBell');
+  bell.hidden = open || !hist.length;
+  bell.textContent = `🔔 Avisos d’avui (${hist.length})`;
+  if (was && !el.hidden && typeof anim === 'function') anim(el, RISE, { duration: 320 });
 }
 document.getElementById('feedX').addEventListener('click', () => {
-  feedSeen = Date.now() + 1;
+  feedSeen = Date.now() + 1; feedAll = false;
   try { localStorage.setItem(FEEDK + '-x', String(feedSeen)); } catch (e) {}
-  document.getElementById('feed').hidden = true; feedKey = '';
+  feedKey = ''; paintFeed();
 });
+document.getElementById('feedMore').addEventListener('click', () => { feedAll = !feedAll; feedKey = ''; paintFeed(); });
+document.getElementById('feedBell').addEventListener('click', () => { feedAll = true; feedKey = ''; paintFeed(); });
 // Als changes.json va l'id (prod / mkt), no el nom: el nom es tradueix i no ha de canviar les dades
-const WHO_L = { prod: 'Producció', mkt: 'Màrqueting' };
+const WHO_L = { prod: 'Producció', mkt: 'Màrqueting', video: 'Vídeo', foto: 'Foto' };
 const WHO_OK = w => Object.hasOwn(WHO_L, w) ? WHO_L[w] : '';
 function applyChanges(d, quiet) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return;
   if (!sameFest(d)) d = { updated: 'cartel', notice: '', sets: null };  // són d'un altre festival: horari del cartell
   const st = String(d.updated || '').slice(0, 40);
   if (!st || st === stamp) return;
-  const wasLoaded = stamp !== '', oldNotice = notice, oldKey = setsKey();
+  const wasLoaded = stamp !== '', oldNotice = noticeMine(), oldKey = setsKey();
   const prev = { SETS, ALL, BYID, TEND, H };
   const oldFavSets = ALL.filter(x => favs.has(x.id)).map(x => ({ id: x.id, n: x.n, a: x.a, b: x.b }));
   const newNotice = typeof d.notice === 'string' ? d.notice.slice(0, 500) : '';
@@ -2461,6 +2607,7 @@ function applyChanges(d, quiet) {
   }
   stamp = st;
   notice = newNotice;
+  noticeTeam = notice && PROF_OK(d.noticeTeam) || '';
   const by = WHO_OK(d.by);
   noticeById = notice ? (WHO_OK(d.noticeBy) ? d.noticeBy : WHO_OK(d.by) ? d.by : '') : '';
   noticeBy = WHO_OK(noticeById);
@@ -2481,15 +2628,15 @@ function applyChanges(d, quiet) {
   const schedChanged = setsKey() !== oldKey;
   if (wasLoaded && !quiet) {
     // Queda apuntat a «Últimos avisos» (encara que no es vulguin avisos emergents)
-    if (notice && notice !== oldNotice) feedAdd(`<b>${html(noticeBy || 'Organització')}:</b> ${html(notice)}`);
+    if (noticeMine() && noticeMine() !== oldNotice) feedAdd(`<b>${noticeHead()}:</b> ${html(notice)}`);
     if (schedChanged) feedAdd(!hasSets ? `<b>${html(org)}</b> ha tornat a l’horari del cartell.` : `<b>${html(org)}</b> ha canviat l’horari. Els canvis surten en lila.`);
   }
   paintFeed();
   if (!wasLoaded || quiet || !prefs.changes) return;
-  if (notice && notice !== oldNotice) {
-    toast(`<b>Avís de ${html(noticeBy || 'l’organització')}</b><br>${html(notice)}`, 'org', null, 30000);
-    sysNotify('Avís de l’organització', notice, 'aviso-' + st);
-  } else if (!notice && oldNotice && !schedChanged) {
+  if (noticeMine() && noticeMine() !== oldNotice) {
+    toast(`<b>Avís de ${html(noticeBy || 'l’organització')}${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</b><br>${html(notice)}`, 'org', null, 30000);
+    sysNotify(noticeTeam ? `Avís per a ${WHO_L[noticeTeam]}` : 'Avís de l’organització', notice, 'aviso-' + st);
+  } else if (!noticeMine() && oldNotice && !schedChanged) {
     toast('L’organització ha tret l’avís.', 'info', null, 6000);
   }
   if (schedChanged) {
@@ -2556,7 +2703,7 @@ let token = null, draft = null, edStage = STAGES[0].id;
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
 const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
-adminEl.hidden = !(ONLINE && ADMIN && PROF);
+adminEl.hidden = !(ONLINE && ADMIN);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
 const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
@@ -2613,7 +2760,7 @@ function edCountUI() {
     const m = draft.sets[st.id];
     n += m.filter(r => b[r.id] !== norm(r)).length + Object.keys(b).filter(id => !m.some(r => r.id === id)).length;
   }
-  if (String(draft.notice || '').trim() !== String(baseNotice || '').trim()) n++;
+  if (String(draft.notice || '').trim() !== String(baseNotice || '').trim() || String(draft.notice || '').trim() && (draft.noticeTeam || '') !== noticeTeam) n++;
   document.getElementById('edCount').textContent = n ? `${n} ${n === 1 ? 'canvi sense publicar' : 'canvis sense publicar'}` : 'Tot publicat';
 }
 const DKEY = FEST.key + '-draft-v1';
@@ -2685,9 +2832,10 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
       for (const st of STAGES) if (!Array.isArray(draft.sets[st.id])) draft.sets[st.id] = [];
     } else {
       saved = null;
-      draft = { notice, sets: rawNow() }; setBase(stamp || 'cartel', draft.sets, notice); dirty = false;
+      draft = { notice, noticeTeam, sets: rawNow() }; setBase(stamp || 'cartel', draft.sets, notice); dirty = false;
     }
     document.getElementById('edNotice').value = draft.notice || '';
+    document.getElementById('edNoticeTeam').value = draft.noticeTeam || '';
     document.getElementById('pwForm').hidden = true;
     document.getElementById('editor').hidden = false;
     openPanel('');
@@ -2767,6 +2915,7 @@ document.getElementById('edAdd').addEventListener('click', () => {
   rows[rows.length - 1].focus();
 });
 document.getElementById('edNotice').addEventListener('input', e => { draft.notice = e.target.value; markDirty(); });
+document.getElementById('edNoticeTeam').addEventListener('change', e => { draft.noticeTeam = e.target.value; markDirty(); });
 
 // Publicar: changes.json en un commit (API de dades de Git), comprovant abans
 // que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
@@ -2795,7 +2944,7 @@ async function commitFiles(files, message) {
     catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
     await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
   }
-  throw new Error('GitHub ocupado');
+  throw new Error('GitHub ocupat');
 }
 async function publish(data) {
   const remote = await remoteChanges();
@@ -2807,10 +2956,11 @@ async function publish(data) {
     } else {
       // Es combinen els canvis de tots dos; el resultat es mostra a l'editor perquè es revisi abans de publicar
       const m = merge3(baseRaw || DEFAULT_RAW, data.sets, rawOf(remote), baseNotice, data.notice, noticeOf(remote));
-      draft = { notice: m.notice, sets: m.sets };
+      draft = { notice: m.notice, noticeTeam: m.notice === data.notice ? data.noticeTeam || '' : PROF_OK(remote && remote.noticeTeam), sets: m.sets };
       setBase(rs, rawOf(remote), noticeOf(remote));
       markDirty();
       document.getElementById('edNotice').value = draft.notice || '';
+      document.getElementById('edNoticeTeam').value = draft.noticeTeam || '';
       renderEditor();
       const e = new Error('combinado'); e.when = when; e.clash = m.clash; throw e;
     }
@@ -2819,7 +2969,7 @@ async function publish(data) {
   const prevStamp = stamp;
   stamp = '';
   applyChanges(data, true);
-  if (stamp !== data.updated) { stamp = prevStamp; throw new Error('datos'); }
+  if (stamp !== data.updated) { stamp = prevStamp; throw new Error('dades no vàlides'); }
   const files = [{ path: 'docs/changes.json', content: JSON.stringify(data, null, 1) }];
   await commitFiles(files, `${data.by ? data.by + ': ' : ''}${data.sets ? 'Cambio de última hora en el horario' : 'Vuelve el horario del cartel'}`);
 }
@@ -2827,7 +2977,7 @@ async function save(data) {
   const btns = document.querySelectorAll('#editor button');
   btns.forEach(b => b.disabled = true);
   edMsg('Publicant…');
-  const before = { raw: rawNow(), notice, stamp };
+  const before = { raw: rawNow(), notice, noticeTeam, stamp };
   try {
     await publish(data);
     setBase(stamp, data.sets || DEFAULT_RAW, data.notice);
@@ -2837,7 +2987,7 @@ async function save(data) {
     edMsg('Publicat. Ho veuran tots els mòbils en 1 o 2 minuts.');
   } catch (err) {
     // No s'ha publicat: aquest mòbil torna a l'horari que hi havia
-    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, fest: FEST.id, updated: before.stamp || 'cartel', notice: before.notice, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
+    if (stamp !== before.stamp) { stamp = ''; applyChanges({ v: 1, fest: FEST.id, updated: before.stamp || 'cartel', notice: before.notice, noticeTeam: before.noticeTeam, sets: before.stamp === 'cartel' ? null : before.raw }, true); }
     edMsg(err.message === 'combinado' ? `Una altra persona ha publicat canvis mentre editaves${err.when}. Els hem ajuntat amb els teus${err.clash.length ? ` (a ${err.clash.slice(0, 3).join(', ')} havíeu tocat el mateix: es queda el teu)` : ''}. Revisa-ho i torna a prémer «Desar i publicar».`
       : err.message === 'cancelado' ? 'No s’ha publicat.'
       : err.name === 'AbortError' ? 'No hi ha prou connexió per publicar. Els teus canvis continuen aquí: torna-ho a provar d’aquí a un moment.'
@@ -2861,16 +3011,17 @@ document.getElementById('edSave').addEventListener('click', () => {
     }
   }
   const nt = String(draft.notice || '').trim();
-  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: nt, noticeBy: nt && nt === String(notice || '').trim() ? noticeById || whoNow() : whoNow(), sets: draft.sets });
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: nt, noticeBy: nt && nt === String(notice || '').trim() ? noticeById || whoNow() : whoNow(), noticeTeam: nt ? PROF_OK(draft.noticeTeam) : '', sets: draft.sets });
 });
 document.getElementById('edReset').addEventListener('click', () => {
   if (!confirm('S’esborraran tots els canvis de l’horari i tornarà el del cartell per a tothom. L’avís per a tothom es queda. Vols continuar?')) return;
   // L'avís publicat es manté (abans s'esborrava també)
-  draft = { notice, sets: structuredClone(DEFAULT_RAW) };
+  draft = { notice, noticeTeam, sets: structuredClone(DEFAULT_RAW) };
   document.getElementById('edNotice').value = notice || '';
+  document.getElementById('edNoticeTeam').value = noticeTeam || '';
   edOpen = -1;
   renderEditor();
-  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: notice || '', noticeBy: notice ? noticeById : '', sets: null });
+  save({ v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), notice: notice || '', noticeBy: notice ? noticeById : '', noticeTeam: notice ? noticeTeam : '', sets: null });
 });
 document.getElementById('edClose').addEventListener('click', () => {
   if (dirty && !confirm('Tens canvis sense publicar. Sortir i perdre’ls?')) return;
@@ -2910,15 +3061,22 @@ function applyTasks(d) {
   if (!okTasks(d)) return;
   TASKS = {
     updated: String(d.updated || ''), team: String(d.team || ''), tasks: String(d.tasks || ''),
-    people: d.people.filter(p => p && p.k && p.n).map(p => ({ k: nk(p.k), n: String(p.n).slice(0, 40), r: Array.isArray(p.r) ? p.r.map(String) : [] })),
+    people: d.people.filter(p => p && p.k && p.n).map(p => ({ k: nk(p.k), n: String(p.n).slice(0, 40), r: Array.isArray(p.r) ? p.r.map(String) : [], e: PROF_OK(p.e) })),
     list: d.list.filter(x => x && x.id && (x.a === null || Number.isFinite(x.a)) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: Number.isFinite(x.a) ? x.a : null, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String) })).sort(byTime),
   };
   paintYo();
   renderPlan(true);
   renderTg(true);
+  // Si l'organització m'ha posat en un altre equip, el perfil el segueix
+  const pe = person(YO);
+  if (pe && pe.e && pe.e !== PROF) setProf(pe.e);
+  if (!holaPick) holaPaint();
 }
 
 // --- Llegir l'equip i les tasques tal com els escriu l'organització ---
+// L'equip (Producción / Marketing) és un rol més: «Laia: marketing, Story». Triar el nom posa el perfil.
+const teamOf = r => ({ produccion: 'prod', produccio: 'prod', prod: 'prod', marketing: 'mkt', mkt: 'mkt', marqueting: 'mkt', video: 'video', videos: 'video', foto: 'foto', fotos: 'foto', fotografia: 'foto' })[nk(r)] || '';
+const TEAMS = [['prod', 'Producció'], ['mkt', 'Màrqueting'], ['video', 'Vídeo'], ['foto', 'Foto']];
 // Equip, una persona per línia: «Marc: audiovisual, cámara» (els rols són opcionals).
 function parseTeam(src) {
   const people = [], warn = [], seen = new Set();
@@ -2930,7 +3088,9 @@ function parseTeam(src) {
     if (!k) continue;
     if (seen.has(k)) { warn.push(`«${n}» surt dues vegades a l’equip`); continue; }
     seen.add(k);
-    people.push({ k, n, r: i < 0 ? [] : line.slice(i + 1).split(/[,;\t]/).map(x => x.trim()).filter(Boolean).slice(0, 8) });
+    const r = i < 0 ? [] : line.slice(i + 1).split(/[,;\t]/).map(x => x.trim()).filter(Boolean).slice(0, 8);
+    const e = r.map(teamOf).find(Boolean) || '';
+    people.push(e ? { k, n, r, e } : { k, n, r });
   }
   return { people, warn };
 }
@@ -3006,13 +3166,16 @@ function parseTasks(src, people) {
 // --- Qui sóc (Configuración) ---
 const yoSel = document.getElementById('yoSel');
 function paintYo() {
-  const opts = `<option value="">— Tria el teu nom —</option>${TASKS.people.map(p => `<option value="${p.k}">${html(p.n)}</option>`).join('')}<option value="-">No sóc de l’equip</option>`;
+  const op = p => `<option value="${p.k}">${html(p.n)}</option>`, mine = TASKS.people.filter(p => p.e === PROF || (p.k === YO && p.e)), rest = TASKS.people.filter(p => !p.e);
+  const opts = `<option value="">— Tria el teu nom —</option>${mine.map(op).join('')}${rest.length ? (mine.length ? `<optgroup label="Altres">${rest.map(op).join('')}</optgroup>` : rest.map(op).join('')) : ''}`;
   for (const s of document.querySelectorAll('.yosel')) { s.innerHTML = opts; s.value = YO && (YO === '-' || person(YO)) ? YO : ''; }
   document.getElementById('yoGrp').hidden = !(taskOn() && TASKS.people.length);
   document.getElementById('prefTbLbl').hidden = !(taskOn() && YO && YO !== '-' && TASKS.people.length);
 }
 function setYo(k) {
   YO = k === '-' ? '-' : nk(k);
+  const pe = person(YO);
+  if (pe && pe.e && pe.e !== PROF) setProf(pe.e);
   try { localStorage.setItem(YOK, YO); } catch (e) {}
   planAll = false;
   paintYo();
@@ -3028,9 +3191,9 @@ prefTb.value = String(prefs.tb);
 prefTb.addEventListener('change', () => { prefs.tb = +prefTb.value; savePrefs(); syncPush(); });
 
 // --- «El meu pla» ---
-let planAll = false, planKey = '';
-// Tot això (Soy…, Mi plan, Horario de tareas, avisos de tasques) només surt amb el perfil Marketing
-const taskOn = () => PROF === 'mkt';
+let planAll = false, planLate = false, planKey = '';
+// Tot això (Soy…, Mi plan, Horario de tareas, avisos de tasques) surt amb el perfil Producción o Marketing
+const taskOn = () => !!PROF;
 const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
 const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
 const grpOf = t => t === null ? 'Durant el dia' : `${hourOf(t)} h`;
@@ -3046,13 +3209,15 @@ function withWho(x) {
   const o = x.p.filter(k => k !== YO).map(k => (person(k) || { n: k }).n);
   return !o.length ? '' : o.length <= 3 ? `amb ${o.map(html).join(', ')}` : `amb ${o.length} persones més`;
 }
+// «IMPORTANTE»: una tasca que comença o acaba amb «!» o que diu IMPORTANT
+const tkMust = x => /^!|!\s*$|\bimportant/i.test(x.t);
 function renderPlan(force) {
   const sec = document.getElementById('plan'), t = now();
   const show = taskOn() && TASKS.people.length && YO !== '-';
   sec.hidden = !show;
   if (!show) return;
   const me = person(YO), mine = mineTasks();
-  const key = [YO, TASKS.updated, planAll, [...DONE].join(), mine.map(x => tkState(x, t)).join()].join('|');
+  const key = [YO, TASKS.updated, planAll, planLate, [...DONE].join(), mine.map(x => tkState(x, t)).join()].join('|');
   if (!force && key === planKey) return;
   planKey = key;
   const box = document.getElementById('planBody'), who = document.getElementById('planWho');
@@ -3062,42 +3227,48 @@ function renderPlan(force) {
     paintYo();
     return;
   }
-  const nDone = mine.filter(x => DONE.has(x.id)).length;
-  who.innerHTML = `${html(me.n)} · <b>${nDone}/${mine.length}</b> fetes`;
+  const nDone = mine.filter(x => DONE.has(x.id)).length, left = mine.length - nDone;
+  who.textContent = WHO_L[PROF] || '';
+  const C = 2 * Math.PI * 17, pc = mine.length ? nDone / mine.length : 0;
+  const prog = `<div class="plprog"><svg viewBox="0 0 40 40" width="44" height="44" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--rule)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/></svg><span><b>${left ? (left === 1 ? 'Et queda 1 tasca' : `Et queden ${left} tasques`) : 'Tot fet! 🎉'}</b><small>${nDone} de ${mine.length} fetes</small></span></div>`;
   if (!mine.length) { box.innerHTML = '<p class="empty">No tens cap tasca assignada. Si falta alguna cosa, digues-ho a l’organització.</p>'; return; }
   // Normalment: el que va tard, el que toca ara i les 6 següents. «Ver todo el día» les ensenya totes
   const st = mine.map(x => [x, tkState(x, t)]);
   const late = st.filter(([, s]) => s === 'late').length;
   let shown = st;
   if (!planAll) {
-    const open = st.filter(([, s]) => s === 'late' || s === 'now');
+    // Les endarrerides, plegades en una línia (primer el que toca ara)
+    const open = st.filter(([, s]) => (planLate && s === 'late') || s === 'now');
     shown = [...open, ...st.filter(([x, s]) => s === '' ).slice(0, 6), ...st.filter(([, s]) => s === 'free')].sort((p, q) => byTime(p[0], q[0]));
   }
   let h = '', out = '';
   for (const [x, s] of shown) {
     if (grpOf(x.a) !== h) { h = grpOf(x.a); out += `<li class="grp"><b>${h}</b></li>`; }
     out += `<li class="tk ${s}"><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Feta: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
-      + `${tkWhen(x)}<span class="tkn">${html(x.t)}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
+      + `${tkWhen(x)}<span class="tkn">${html(x.t)}${tkMust(x) ? '<span class="tkmust">IMPORTANT</span>' : ''}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
       + `${s === 'late' ? '<span class="tkf">Tard</span>' : s === 'now' ? '<span class="tkf">Ara</span>' : ''}</li>`;
   }
   const rest = mine.length - shown.length;
-  box.innerHTML = (late ? `<p class="pllate">${late === 1 ? 'Tens 1 tasca pendent d’abans' : `Tens ${late} tasques pendents d’abans`}</p>` : '')
+  box.innerHTML = prog + (late ? `<button type="button" class="pllate" id="planLate" aria-expanded="${planLate || planAll}">${late === 1 ? 'Tens 1 tasca pendent d’abans' : `Tens ${late} tasques pendents d’abans`}${planAll ? '' : planLate ? ' ▾' : ' ▸'}</button>` : '')
     + (shown.length ? `<ul class="tklist">${out}</ul>` : '<p class="empty">Tot fet! 🎉</p>')
     + (rest > 0 || planAll ? `<button type="button" class="linkbtn" id="planAll">${planAll ? 'Veure només el que toca' : `Veure tot el dia (${mine.length})`}</button>` : '');
 }
 document.getElementById('plan').addEventListener('click', e => {
   if (e.target.closest('#planAll')) { planAll = !planAll; renderPlan(true); return; }
+  if (e.target.closest('#planLate')) { planLate = !planLate; renderPlan(true); return; }
   const b = e.target.closest('[data-tk]');
   if (b) toggleTask(b.dataset.tk);
 });
 function toggleTask(id) {
   const on = !DONE.has(id);
   if (on) DONE.add(id); else DONE.delete(id);
-  DQ = DQ.filter(q => q.id !== id); DQ.push({ id, v: on });
+  DQ = DQ.filter(q => q.id !== id || q.who !== YO); DQ.push({ id, v: on, who: YO });
   saveDone();
   try { if (on && navigator.vibrate) navigator.vibrate(30); } catch (e) {}
   renderPlan(true);
   renderTg(true);
+  const tk = TASKS.list.find(x => x.id === id);
+  if (on && tk) toast(`Feta: <b>${html(tk.t.slice(0, 50))}</b>`, 'info', { label: 'Desfer', fn: () => { if (DONE.has(id)) toggleTask(id); } }, 6000);
   if (on && !RM.matches) { const nb = document.querySelector(`#plan [data-tk="${CSS.escape(id)}"]`); if (nb && nb.animate) nb.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.3,1.6,.5,1)' }); }
   flushDone();
 }
@@ -3186,7 +3357,7 @@ async function flushDone() {
   while (DQ.length) {
     const q = DQ[0];
     try {
-      const r = await fetchT(PUSH.url + '/done', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ who: YO, id: q.id, v: q.v }) }, 8000);
+      const r = await fetchT(PUSH.url + '/done', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ who: q.who || YO, id: q.id, v: q.v }) }, 8000);
       if (!r.ok && r.status !== 400) break;
     } catch (e) { break; }
     DQ.shift(); saveDone();
@@ -3251,7 +3422,7 @@ setInterval(() => {
   if (document.hidden) return;
   const t = now(), m = Math.floor(t / MIN);
   renderTg();
-  renderPlan();  // compara una clau: només repinta si alguna cosa ha canviat (també en moure el Modo prueba)
+  renderPlan(); paintBadge(); paintWho();  // compara una clau: només repinta si alguna cosa ha canviat (també en moure el Modo prueba)
   if (m !== tkMin) { tkMin = m; if (sim === null) checkTaskAlerts(t); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
 }, 1000);
 let tkN = 0;
@@ -3274,11 +3445,34 @@ async function remoteTasks() {
     throw e;
   }
 }
+// Una persona amb dues tasques a la mateixa hora o amb franges que es trepitgen (no compten les franges llargues, de més de 2 h 30: són torns)
+function tkOverlaps(list, people) {
+  const out = [], name = k => (people.find(p => p.k === k) || {}).n || k;
+  const by = {};
+  for (const x of list) if (x.a !== null) for (const k of x.p) (by[k] = by[k] || []).push(x);
+  for (const [k, xs] of Object.entries(by)) {
+    const at = {};
+    for (const x of xs) if (!(x.b && x.b - x.a > 150 * MIN)) (at[x.a] = at[x.a] || []).push(x);
+    // Diverses tasques del mateix artista a la mateixa hora («31 FAM · Reel», «31 FAM · Joc») són una sola cosa
+    for (const g of Object.values(at)) {
+      const subj = [...new Set(g.map(x => x.t.split(/\s+[·–-]\s+/)[0].trim()))];
+      if (subj.length > 1) out.push(`${name(k)}: ${g.length} tasques a les ${lbl(g[0].a)} (${subj.slice(0, 3).map(x => '«' + x.slice(0, 24) + '»').join(', ')}${subj.length > 3 ? '…' : ''})`);
+    }
+    const rs = xs.filter(x => x.b && x.b - x.a <= 150 * MIN).sort((p, q) => p.a - q.a);
+    for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length && rs[j].a < rs[i].b; j++)
+      if (rs[j].a !== rs[i].a) out.push(`${name(k)}: «${rs[i].t.slice(0, 24)}» (${lbl(rs[i].a)}–${lbl(rs[i].b)}) y «${rs[j].t.slice(0, 24)}» (${lbl(rs[j].a)}) es trepitgen`);
+  }
+  return out;
+}
 function tkPreview() {
   const team = parseTeam(tkTeam.value), tasks = parseTasks(tkList.value, team.people);
   const warn = [...team.warn, ...tasks.warn];
+  const noTeam = team.people.filter(p => !p.e).map(p => p.n);
+  if (noTeam.length) warn.unshift(`Sense equip: ${noTeam.join(', ')} (posa-l’hi a Organització → Equip)`);
+  const over = tkOverlaps(tasks.list, team.people);
   document.getElementById('tkInfo').innerHTML = `<b>${tasks.list.length}</b> tasques · <b>${team.people.length}</b> persones`
-    + (warn.length ? `<ul class="tkwarn">${warn.slice(0, 12).map(w => `<li>${html(w)}</li>`).join('')}${warn.length > 12 ? `<li>…i ${warn.length - 12} més</li>` : ''}</ul>` : '');
+    + (warn.length ? `<ul class="tkwarn">${warn.slice(0, 12).map(w => `<li>${html(w)}</li>`).join('')}${warn.length > 12 ? `<li>…i ${warn.length - 12} més</li>` : ''}</ul>` : '')
+    + (over.length ? `<p class="tkover-h">⚠️ Coincidències (pots publicar igualment):</p><ul class="tkwarn tkover">${over.slice(0, 10).map(w => `<li>${html(w)}</li>`).join('')}${over.length > 10 ? `<li>…i ${over.length - 10} més</li>` : ''}</ul>` : '');
   return { team, tasks, warn };
 }
 async function loadTk() {
@@ -3288,13 +3482,13 @@ async function loadTk() {
   const base = okTasks(remote) ? remote : TASKS;
   tkBase = okTasks(remote) ? String(remote.updated || '') : '';
   let dr = null;
-  try { dr = JSON.parse(sessionStorage.getItem(TDK) || 'null'); } catch (e) {}
+  try { dr = JSON.parse(localStorage.getItem(TDK) || 'null'); } catch (e) {}
   if (dr && typeof dr.team === 'string') { tkTeam.value = dr.team; tkList.value = dr.tasks; tkBase = dr.base; edMsg('Hem recuperat les tasques que encara no havies publicat.'); }
   else { tkTeam.value = base.team || ''; tkList.value = base.tasks || ''; edMsg(''); }
   tkLoaded = true;
   tkPreview();
 }
-const tkDraft = () => { try { sessionStorage.setItem(TDK, JSON.stringify({ team: tkTeam.value, tasks: tkList.value, base: tkBase })); } catch (e) {} };
+const tkDraft = () => { try { localStorage.setItem(TDK, JSON.stringify({ team: tkTeam.value, tasks: tkList.value, base: tkBase })); } catch (e) {} };
 tkTeam.addEventListener('input', () => { tkDraft(); tkPreview(); });
 tkList.addEventListener('input', () => { tkDraft(); tkPreview(); });
 document.querySelector('.orgmenu').addEventListener('click', e => {
@@ -3317,13 +3511,68 @@ document.getElementById('tkSave').addEventListener('click', async () => {
     const data = { v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), team: tkTeam.value, tasks: tkList.value, people: team.people, list: tasks.list };
     await commitFiles([{ path: 'docs/tasks.json', content: JSON.stringify(data, null, 1) }], `${data.by}: Tasques de l’equip`);
     tkBase = data.updated; tkPub = data.updated; tkPubUntil = Date.now() + 15 * MIN;
-    try { sessionStorage.removeItem(TDK); localStorage.setItem(TKK, JSON.stringify(data)); } catch (e) {}
+    try { localStorage.removeItem(TDK); localStorage.setItem(TKK, JSON.stringify(data)); } catch (e) {}
     applyTasks(data);
     edMsg('Tasques publicades. Cadascú les veurà a «El meu pla» en 1 o 2 minuts.');
   } catch (err) {
     edMsg(err.message === 'cancelado' ? 'No s’ha publicat res.' : err.status === 401 || err.status === 403 ? 'GitHub no deixa publicar: revisa el token.' : 'No s’ha pogut publicar. Mira la connexió i torna-ho a provar.', true);
   }
   btn.disabled = false;
+});
+
+// --- Organización → Equipo: la llista de l'equip amb botons (escriu el mateix text de tkTeam) ---
+const teRows = document.getElementById('teRows');
+const TEAM_W = { prod: 'producción', mkt: 'marketing', video: 'vídeo', foto: 'foto' };
+function teRender() {
+  const ppl = parseTeam(tkTeam.value).people;
+  teRows.innerHTML = ppl.map((p, i) => `<div class="terow" data-i="${i}">
+    <input class="ten" value="${html(p.n)}" aria-label="Nom" placeholder="Nom" autocapitalize="words">
+    <select class="tee" aria-label="Equipo"><option value="">— Equip —</option>${TEAMS.map(([v, t]) => `<option value="${v}"${p.e === v ? ' selected' : ''}>${t}</option>`).join('')}</select>
+    <input class="teg" value="${html(p.r.filter(r => !teamOf(r)).join(', '))}" aria-label="Grups" placeholder="Grups (opcional): story, càmera…">
+    <button type="button" class="btn quiet tex" aria-label="Treure">✕</button></div>`).join('') || '<p class="note">Encara no hi ha ningú. Afegeix la primera persona.</p>';
+}
+function teWrite() {
+  tkTeam.value = [...teRows.querySelectorAll('.terow')].map(r => {
+    const n = r.querySelector('.ten').value.replace(/[:\n#]/g, ' ').trim(), e = r.querySelector('.tee').value;
+    const g = [TEAM_W[e], ...r.querySelector('.teg').value.split(/[,;]/).map(x => x.trim())].filter(Boolean);
+    return n ? n + (g.length ? ': ' + g.join(', ') : '') : '';
+  }).filter(Boolean).join('\n');
+  tkDraft(); tkPreview();
+}
+teRows.addEventListener('input', teWrite);
+// Si es canvia un nom, les tasques que deien @Nom passen a dir el nom nou
+teRows.addEventListener('focusin', e => { if (e.target.classList.contains('ten')) e.target.dataset.old = e.target.value.trim(); });
+teRows.addEventListener('focusout', e => {
+  const el = e.target;
+  if (!el.classList.contains('ten')) return;
+  const o = (el.dataset.old || '').trim(), n = el.value.trim();
+  if (!o || !n || o === n) return;
+  const tok = v => v.split(/\s+/)[0];
+  const re = new RegExp(`@(${[o, tok(o)].map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?=[\\s,;@]|$)`, 'giu');
+  const nv = tkList.value.replace(re, '@' + tok(n));
+  if (nv !== tkList.value) { tkList.value = nv; tkDraft(); tkPreview(); edMsg(`Les tasques de «${o}» ara són de «${n}».`); }
+  el.dataset.old = n;
+});
+teRows.addEventListener('change', teWrite);
+teRows.addEventListener('click', e => {
+  if (!e.target.closest('.tex')) return;
+  const r = e.target.closest('.terow'), n = r.querySelector('.ten').value.trim();
+  if (n && !confirm(`Vols treure ${n} de l’equip?`)) return;
+  r.remove(); teWrite(); teRender();
+});
+document.getElementById('teAdd').addEventListener('click', () => {
+  teWrite();
+  if (!teRows.querySelector('.terow')) teRows.innerHTML = '';
+  teRows.insertAdjacentHTML('beforeend', '<div class="terow"><input class="ten" aria-label="Nom" placeholder="Nom" autocapitalize="words"><select class="tee" aria-label="Equipo"><option value="">— Equip —</option>' + TEAMS.map(([v, t]) => `<option value="${v}">${t}</option>`).join('') + '</select><input class="teg" aria-label="Grups" placeholder="Grups (opcional): story, càmera…"><button type="button" class="btn quiet tex" aria-label="Treure">✕</button></div>');
+  teRows.lastElementChild.querySelector('.ten').focus();
+});
+tkTeam.addEventListener('input', () => { if (!document.getElementById('pEquipo').hidden) teRender(); });
+document.getElementById('teSave').addEventListener('click', () => { teWrite(); teRender(); document.getElementById('tkSave').click(); });
+document.querySelector('.orgmenu').addEventListener('click', async e => {
+  const b = e.target.closest('[data-panel="pEquipo"]');
+  if (!b || b.getAttribute('aria-expanded') !== 'true') return;
+  if (!tkLoaded) await loadTk();
+  teRender();
 });
 
 // Excel: cada pestanya és d'una persona o d'unes quantes («MARTÍ / CALVINS», «STORY MARTA/LAIA»: STORY = grup).
@@ -3407,9 +3656,15 @@ document.getElementById('tkFile').addEventListener('change', async e => {
       }
     }
     if (!n) return edMsg('No hem trobat tasques a l’Excel. Té una pestanya per persona?', true);
-    if (tkList.value.trim() && !confirm(`Hem trobat ${n} tasques en ${out.filter(l => l.startsWith('# ')).length} pestanyes. Es canvien per les que hi ha ara. Vols continuar?`)) return edMsg('');
+    // Només se substitueixen els blocs «# pestanya» que venen a l'Excel; la resta (fet a mà) es queda
+    const nTabs = out.filter(l => l.startsWith('# ')).length, mine = new Set(out.filter(l => l.startsWith('# ')).map(l => nk(l)));
+    const blocks = [], cur = tkList.value.split('\n');
+    let blk = null;
+    for (const l of cur) { if (l.startsWith('# ')) { blk = { h: nk(l), lines: [l] }; blocks.push(blk); } else { if (!blk) { blk = { h: '', lines: [] }; blocks.push(blk); } blk.lines.push(l); } }
+    const keep = blocks.filter(b => !mine.has(b.h)).map(b => b.lines.join('\n').trim()).filter(Boolean);
+    if (keep.join('').trim() && !confirm(`Hem trobat ${n} tasques en ${nTabs} pestanyes. Es canvien les d’aquestes pestanyes i la resta es queda. Continuar?`)) return edMsg('');
     tkTeam.value = team.map(p => p.n + (p.r.length ? ': ' + p.r.join(', ') : '')).join('\n');
-    tkList.value = out.join('\n').trim();
+    tkList.value = [...keep, out.join('\n').trim()].join('\n\n').trim();
     tkDraft();
     tkPreview();
     edMsg(`Excel llegit: ${n} tasques. Revisa-les i prem «Desar i publicar».`);
@@ -3447,6 +3702,132 @@ document.getElementById('pGlobal').addEventListener('click', e => {
   if (e.target.closest('#gvRefresh')) pullDone().then(renderGlobal);
 });
 setInterval(() => { if (!document.hidden && !document.getElementById('pGlobal').hidden) pullDone().then(renderGlobal); }, 30000);
+// --- «Qui ets?»: surt dins la pestanya Tareas mentre no hagis triat qui ets (triar el nom posa l'equip) ---
+var holaEl = document.getElementById('hola'), holaBody = document.getElementById('holaBody'), holaPick = '';
+var holaForce = false;
+const needYo = () => holaForce || !taskOn() || !TASKS.people.length || !YO || YO === '-' || !person(YO);
+const holaBtn = (v, t) => `<button class="btn" type="button" data-hola="${v}">${t}</button>`;
+function holaTeams(title, sub) {
+  document.getElementById('holaT').textContent = title;
+  document.getElementById('holaSub').textContent = sub;
+  holaBody.innerHTML = `<div class="holagrid">${TEAMS.map(([v, t]) => holaBtn('t:' + v, t)).join('')}</div>`;
+}
+var holaKey = '';
+function holaPaint() {
+  if (!holaEl) return;
+  if (holaPick && !person(holaPick)) holaPick = '';
+  paintFaces();
+  document.body.classList.toggle('needyo', needYo() || !!holaPick);
+  const ppl = TASKS.people;
+  if (holaPick) { holaKey = ''; return holaTeams(`${person(holaPick).n}, de quin equip ets?`, 'Per saber què ensenyar-te.'); }
+  // Només repinta si ha canviat alguna cosa (no perdre el focus de VoiceOver)
+  const k = [PROF, YO, holaForce, TASKS.updated, ppl.length, navigator.onLine].join('|');
+  if (k === holaKey) return;
+  holaKey = k;
+  if (!ppl.length) {
+    if (!taskOn()) return holaTeams('De quin equip ets?', 'Encara no hi ha l’equip carregat. Quan el carreguin, aquí podràs triar el teu nom.');
+    document.getElementById('holaT').textContent = 'Encara no hi ha tasques';
+    document.getElementById('holaSub').textContent = navigator.onLine ? 'Quan l’organització les publiqui, sortiran aquí.' : 'Sense connexió: es carregaran quan torni la xarxa.';
+    holaBody.innerHTML = '';
+    return;
+  }
+  document.getElementById('holaT').textContent = 'Qui ets?';
+  document.getElementById('holaSub').textContent = 'Tria el teu nom i veuràs les teves tasques. Es pot canviar a Ajustos.';
+  holaBody.innerHTML = [...TEAMS, ['', 'Altres']].map(([e, t]) => {
+    const g = ppl.filter(p => (p.e || '') === e);
+    return g.length ? `<h3 class="ch">${t}</h3><div class="holagrid">${g.map(p => holaBtn('p:' + p.k, html(p.n)).replace('<button class="btn"', `<button class="btn${p.k === YO ? ' on' : ''}" aria-pressed="${p.k === YO}"`)).join('')}</div>` : '';
+  }).join('') + (holaForce && person(YO) ? `<div class="holagrid holamini">${holaBtn('x', `Continuar com a ${html(person(YO).n)}`)}</div>` : '');
+}
+const holaApply = () => { holaForce = false; paintYo(); renderPlan(true); renderTg(true); syncPush(); holaPick = ''; holaPaint(); scrollTo({ top: 0 }); };
+holaBody.addEventListener('click', e => {
+  const v = e.target.closest('[data-hola]')?.dataset.hola;
+  if (!v) return;
+  if (v === 'x') { holaForce = false; return holaPaint(); }
+  if (v.startsWith('t:')) { setProf(v.slice(2)); if (holaPick) setYo(holaPick); return holaApply(); }
+  const k = v.slice(2), pe = person(k);
+  if (pe && pe.e) { if (pe.e !== PROF) setProf(pe.e); setYo(k); return holaApply(); }
+  holaPick = k; holaPaint();
+});
+// Perfil a dalt (barra fina i capçalera): nom + equip; un toc porta a canviar-lo
+var whoReady = false;  // tick() hi passa abans que existeixin faceHue i companyia
+function paintWho() {
+  if (!whoReady) return;
+  const pe = YO && YO !== '-' ? person(YO) : null;
+  const key = [PROF, YO, pe && pe.n].join('|');
+  if (paintWho.k === key) return;
+  paintWho.k = key;
+  for (const el of document.querySelectorAll('.mwho')) {
+    el.classList.toggle('none', !PROF);
+    const av = el.querySelector('.mav');
+    av.style.setProperty('--h', pe ? faceHue(pe.k) : 20);
+    av.textContent = pe ? pe.n.slice(0, 1).toUpperCase() : PROF ? '?' : '👤';
+    el.querySelector('.mwn').textContent = pe ? pe.n.split(/\s+/)[0] : PROF ? 'Qui ets?' : 'Triar perfil';
+    el.querySelector('.mwd').textContent = PROF ? WHO_L[PROF] : 'Només horaris';
+    el.setAttribute('aria-label', pe ? `Perfil: ${pe.n}, ${WHO_L[PROF] || ''}. Canviar` : 'Triar perfil');
+  }
+}
+for (const el of document.querySelectorAll('.mwho')) el.addEventListener('click', () => {
+  if (!PROF) { showTab('ajustes'); document.getElementById('config').scrollIntoView({ block: 'start' }); return; }
+  holaForce = true; holaPick = ''; showTab('equipo'); holaPaint(); scrollTo({ top: 0 });
+});
+// Fila de cares (com les apps de rodatge): la gent del meu equip; un toc i ets aquella persona
+const faceHue = k => parseInt(hash(k), 36) % 360;
+function paintFaces() {
+  const box = document.getElementById('faces');
+  if (!box) return;
+  const ppl = TASKS.people, same = ppl.filter(p => p.e && p.e === PROF), list = same.length ? same : ppl.filter(p => !p.e || p.e === PROF);
+  const key = [PROF, YO, list.map(p => p.k).join()].join('|');
+  if (box.dataset.k === key) return;
+  box.dataset.k = key;
+  box.innerHTML = list.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-face="${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${html(p.n.slice(0, 1).toUpperCase())}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')
+    + `<button type="button" class="face other" data-face="+"><b>⋯</b><span>${html(WHO_L[PROF] || 'Equip')}</span></button>`;
+  box.querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+document.getElementById('faces').addEventListener('click', e => {
+  const f = e.target.closest('[data-face]')?.dataset.face;
+  if (!f) return;
+  if (f === '+') { holaForce = true; holaPick = ''; holaPaint(); scrollTo({ top: 0 }); return; }
+  if (f !== YO) { setYo(f); paintFaces(); paintTabs(); }
+});
+holaPaint();
+whoReady = true; paintWho();
+
+// --- Pestanyes de baix: Horarios · Tareas · Organización (contrasenya) · Ajustes ---
+var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
+function showTab(t, top = true) {
+  const ch = t !== TAB;
+  TAB = t;
+  document.body.dataset.tab = t;
+  for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  try { sessionStorage.setItem(TABK, t); } catch (e) {}
+  if (ch && top) scrollTo({ top: 0 });
+  if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
+  if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
+  if (t === 'ahora' && ch) requestAnimationFrame(() => scrollToNow(false));
+}
+function paintBadge() {
+  const bd = document.getElementById('tabBadge');
+  if (!bd) return;
+  const late = taskOn() ? mineTasks().filter(x => tkState(x, now()) === 'late').length : 0;
+  bd.hidden = !late; bd.textContent = late > 9 ? '9+' : late;
+}
+function paintTabs() {
+  paintBadge();
+  document.getElementById('orgOff').hidden = !document.getElementById('admin').hidden;
+  holaPaint();
+}
+// El logo de la barra fina porta a l'inici (Horarios, a dalt de tot)
+document.getElementById('mlogo').addEventListener('click', () => { showTab('ahora', false); scrollTo({ top: 0, behavior: 'smooth' }); });
+document.getElementById('tabbar').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]');
+  if (b) showTab(b.dataset.tab);
+});
+try { TAB = sessionStorage.getItem(TABK) || 'ahora'; } catch (e) {}
+showTab(TAB, false);
+paintTabs();
+setInterval(() => { if (!document.hidden) paintTabs(); }, 30000);
+document.addEventListener('change', e => { if (e.target.name === 'prof' || e.target.classList.contains('yosel')) setTimeout(paintTabs, 0); });
+holaBody.addEventListener('click', () => setTimeout(paintTabs, 0));
 // ==== /MI PLAN ====
 
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
