@@ -1,0 +1,26 @@
+{
+ "v": 1,
+ "fest": "castanyada-2026",
+ "updated": "2026-10-28T12:39:43.758Z",
+ "by": "mkt",
+ "team": "Laia",
+ "tasks": "12:30 - Gravar entrada @laia",
+ "people": [
+  {
+   "k": "laia",
+   "n": "Laia",
+   "r": []
+  }
+ ],
+ "list": [
+  {
+   "id": "t18c8r97",
+   "a": 1793446200000,
+   "b": 0,
+   "t": "- Gravar entrada",
+   "p": [
+    "laia"
+   ]
+  }
+ ]
+}
