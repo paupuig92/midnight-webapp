@@ -13,6 +13,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT / "docs"
@@ -31,6 +32,8 @@ admin = "null"
 if tok_f.is_file() and pw_f.is_file():
     tok = tok_f.read_bytes().strip()
     pw = pw_f.read_bytes().strip()
+    if len(pw) < 4:
+        sys.exit("ATURAT: la contrasenya d'admin és buida o massa curta (" + str(pw_f) + "). No es publica res.")
     if not salt_f.is_file():
         salt_f.write_bytes(os.urandom(16))
         salt_f.chmod(0o600)

@@ -806,6 +806,31 @@ li.tk.free .tkt { color: var(--muted); }
 .tkover-h { margin: 10px 0 0; font-size: var(--fs-s); font-weight: 700; color: #e0a030; }
 .tkwarn.tkover { color: #e0a030; }
 .admin textarea.tkta { font: 15px/1.45 ui-monospace, Menlo, monospace; }
+/* Tasques com una taula (com l'Excel): una fila per tasca */
+.tkimp { display: flex; flex-wrap: wrap; gap: 8px; }
+.tkbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 14px 0 6px; }
+.tkbar select { min-height: 44px; }
+.tkrows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.tkrow, .tkcols { display: grid; grid-template-columns: 88px 88px 1fr 40px; gap: 6px; }
+.tkrow { padding: 6px; border-radius: var(--r-card, 14px); background: var(--panel); }
+.tkrow .tka { grid-area: 1 / 1; } .tkrow .tkb { grid-area: 1 / 2; } .tkrow .tkw { grid-area: 1 / 3; } .tkrow .tkx { grid-area: 1 / 4; }
+.tkrow .tkt { grid-area: 2 / 1 / 3 / 5; }
+.tkrow input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 40px; font: 15px var(--body); color: var(--ink); background: var(--fill, var(--bg)); border: 0; border-radius: var(--r-btn, 10px); padding: 0 8px; }
+.tkrow .tkt { font-weight: 600; }
+.tkrow textarea.tkt { box-sizing: border-box; width: 100%; min-height: 40px; resize: none; overflow: hidden; font: 600 15px/1.35 var(--body); color: var(--ink); padding: 10px 8px; }
+.tkrow input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tkrow input[type="time"] { font-variant-numeric: tabular-nums; padding: 0 4px; }
+.tkrow .tkx { min-height: 40px; padding: 0; font-size: 18px; color: var(--now); background: none; }
+.tkrow.bad { box-shadow: inset 3px 0 0 var(--now); }
+.tkcols { padding: 0 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
+.tkcols span:nth-child(3) { display: none; }
+.tkimp .btn { min-height: 48px; margin: 0; }
+@media (min-width: 720px) {
+  .tkrow, .tkcols { grid-template-columns: 96px 96px 1fr 190px 40px; }
+  .tkrow .tkt { grid-area: 1 / 3; } .tkrow .tkw { grid-area: 1 / 4; } .tkrow .tkx { grid-area: 1 / 5; }
+  .tkcols span:nth-child(3) { display: block; }
+}
+
 .gvppl { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .gvp { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .gvp b { color: var(--accent); }
@@ -839,7 +864,10 @@ li.tk.free .tkt { color: var(--muted); }
 .tgrail.done { opacity: .5; }
 .tglong span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
-.tgnow { position: absolute; left: var(--gut); right: 0; height: 0; border-top: 2px solid var(--now); z-index: 5; pointer-events: none; }
+.tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 5; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
+.tgnow::before { content: ""; position: absolute; left: -5px; top: -6.5px; width: 10px; height: 10px; border-radius: 50%; background: var(--now); }
+.tgpast { position: absolute; grid-row: 2; left: 0; right: 0; top: 0; background: color-mix(in srgb, var(--bg) 45%, transparent); z-index: 1; pointer-events: none; }  /* el que ja ha passat, una mica apagat (per sota de les tasques) */
+.tgb, .tgrail { z-index: 2; }
 #hola h2 { margin-bottom: 4px; }
 #hola .ch { margin: 14px 0 0; }
 .holagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
@@ -869,7 +897,10 @@ body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
 .tabbar button[hidden] { display: none; }
 .tabbar button[aria-current] { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .tabbadge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg); background: var(--now, #e33); color: #fff; font: 800 10px/16px var(--ui, inherit); text-align: center; }  /* a la cantonada de la icona, sense tapar-la */
-body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); }
+body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); min-height: 100lvh; box-sizing: border-box; }  /* mai més curta que la pantalla (la barra de baix no salta) */
+/* Barra de baix clavada: a l'iPhone l'efecte «goma» en estirar la pàgina la feia pujar i baixar */
+html, body { overscroll-behavior-y: none; }
+.tabbar { transform: translateZ(0); will-change: transform; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
@@ -1183,16 +1214,22 @@ li.tk.late .tkchk::before { border-color: var(--now); }
       </div>
 
       <div class="panel" id="pTareas" hidden>
-        <div class="tkimp"><label class="btn primary" for="tkFile">Subir Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
-        <p class="note edhelp">Una pestaña por persona: el nombre de la pestaña dice de quién es («LAIA», «MARTÍ / CALVINS»). Desde Google Sheets: Archivo → Descargar → Microsoft Excel. Sustituye las tareas de abajo; después puedes retocarlas a mano.</p>
+        <div class="tkimp"><label class="btn primary" for="tkFile">Subir Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><button type="button" class="btn" id="tkXls">Descargar Excel</button></div>
+        <p class="note edhelp">Para cambiar muchas: «Descargar Excel», edítalo (Excel, Numbers o Google Sheets) y vuelve a «Subir Excel». También vale el Excel por pestañas, una por persona («LAIA», «MARTÍ / CALVINS»).</p>
+        <div class="tkbar"><select id="tkWhoF" aria-label="Ver tareas de"></select><span class="note" id="tkCount"></span></div>
+        <div class="tkcols" aria-hidden="true"><span>Hora</span><span>Hasta</span><span>Tarea</span><span>Quién</span></div>
+        <div id="tkRows" class="tkrows"></div>
+        <button type="button" class="btn" id="tkAdd">+ Añadir tarea</button>
         <details class="tktx"><summary>Equipo como texto</summary>
         <label for="tkTeam">Equipo (una persona por línea; después de «:», sus grupos)</label>
         <textarea id="tkTeam" class="tkta" rows="6" placeholder="Marc: marketing, cámara&#10;Laia: marketing, story&#10;Jordi: producción" autocapitalize="words" spellcheck="false"></textarea>
         <p class="note edhelp">Más fácil desde Organización → Equipo. Aquí: «Laia: marketing, story» (equipo: producción, marketing, vídeo o foto).</p>
         </details>
+        <details class="tktx"><summary>Tareas como texto</summary>
         <label for="tkList">Tareas (una por línea: hora, tarea y @quién)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Montar cámaras @audiovisual&#10;18:30 Grabar la entrada de Catarres @Marc @Laia&#10;20:00-20:30 Cambiar baterías @Marc&#10;23:00 Foto de grupo @todos" spellcheck="false"></textarea>
         <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.</p>
+        </details>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Guardar y publicar</button></div>
         <p class="note">Cada uno elige su nombre en «Tareas» y solo ve las suyas.</p>
@@ -2457,7 +2494,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '28/10 17:45';
+const BUILD = '28/10 18:15';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2820,7 +2857,7 @@ async function pullChanges() {
 // Organització: editor protegit amb contrasenya.
 // ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
 // clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
-const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1500000, "nonce": "ulVjz7izyQaRF0Xb0jiiIA==", "ct": "GDCgR8q4YZwOMNKkpz1/QfNNlmRaoFDfDabwKwy5M3sR5ZROI9jrAso4w16sjKMRyK9YTlZ1KkfJCMXgLvt0G38hS56j2WI58IygMoK2UsM8dWtVJR3kR9lrIUno", "check": "rVFVhV2Hb3Z9a0OybsqNQ9zsR0G1WVFz/g4llbQ9hA0="};
+const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1500000, "nonce": "ulVjz7izyQaRF0Xb0jiiIA==", "ct": "LHUSJuZQ0tKTvYz0NhuVGFHT47tpfadxUBBX5ooHXuiWWEgt+u4fUxosUmOI2N3DjPLd7VFAbK9NVoxZ8xqrV7GvOWieayMzwJOVPOht6VPnGioBvz/rlBGWif80", "check": "l4Anl4eCQYvhXioLaFdxtjKgSW4+TVut9GHuVPGQFNI="};
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const b64e = u => btoa(String.fromCharCode(...u));
 async function unlock(pw) {
@@ -3449,6 +3486,8 @@ function renderTg(force) {
   const yy = v => PAD + (v - H0) / MIN * TPX, HT = (H1 - H0) / MIN * TPX + 2 * PAD;
   let gut = '';
   for (let h = H0; h <= H1; h += 3600000) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
+  const inNow = t >= H0 && t <= H1;
+  if (inNow) gut += `<span class="nowlbl" style="top:${yy(t)}px">${hm(t)}</span>`;
   const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
   const colW = [], longs = [];
   let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
@@ -3473,7 +3512,7 @@ function renderTg(force) {
     }
     g += '</div>';
   });
-  if (t >= H0 && t <= H1) g += `<div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
+  if (inNow) g += `<div class="tgpast" style="height:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div><div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
   const tg = document.getElementById('tg');
   tg.style.gridTemplateColumns = `var(--gut) ${colW.map(w => `minmax(${w}px, 1fr)`).join(' ')}`;
   tg.style.minWidth = `calc(var(--gut) + ${colW.reduce((a, w) => a + w, 0)}px)`;
@@ -3636,14 +3675,114 @@ async function loadTk() {
   else { tkTeam.value = base.team || ''; tkList.value = base.tasks || ''; edMsg(''); }
   tkLoaded = true;
   tkPreview();
+  tkRowsSync();
 }
 const tkDraft = () => { try { localStorage.setItem(TDK, JSON.stringify({ team: tkTeam.value, tasks: tkList.value, base: tkBase })); } catch (e) {} };
 tkTeam.addEventListener('input', () => { tkDraft(); tkPreview(); });
-tkList.addEventListener('input', () => { tkDraft(); tkPreview(); });
+tkList.addEventListener('input', () => { tkDraft(); tkPreview(); tkRowsSync(); });
+
+// --- Organización → Tareas com una taula (com l'Excel): cada fila escriu una línia del mateix text de tkList ---
+// Es manté la capçalera «# pestanya» de cada tasca, perquè tornar a pujar l'Excel per pestanyes només canviï aquella pestanya.
+const tkRowsEl = document.getElementById('tkRows'), tkWhoF = document.getElementById('tkWhoF');
+let tkRowsData = [];
+const hhmm = s => { const m = String(s || '').trim().match(/^(\d{1,2})[:.h](\d{2})$/); return m && +m[1] < 24 ? `${m[1].padStart(2, '0')}:${m[2]}` : ''; };
+const whoToks = w => String(w || '').split(/[\s,;@]+/).filter(Boolean);
+function tkToRows(src) {
+  const rows = [], TOK = /@([^\s@,;]+)/g;
+  let h = '', group = [];
+  for (let line of String(src).split('\n')) {
+    line = line.trim();
+    if (!line) continue;
+    if (line.startsWith('#')) { h = line; group = []; continue; }
+    let a = '', b = '', t = '', who = [];
+    if (line.includes('\t')) {
+      const c = line.split('\t').map(x => x.trim());
+      [a, b = ''] = c[0].split(/\s*[-–]\s*/);
+      t = c[1] || ''; who = c.slice(2).join(' ').match(/[^\s,;@]+/g) || [];
+    } else {
+      if (/^(@[^\s@,;]+[\s,;]*)+$/.test(line)) { group = [...line.matchAll(TOK)].map(m => m[1]); continue; }
+      const u = line.match(/^[-–•·]\s*(.+)$/);
+      const m = u ? [line, '', '', u[1]] : line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/) || [line, '', '', line];
+      [, a, b = ''] = m;
+      who = [...m[3].matchAll(TOK)].map(x => x[1]);
+      t = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
+    }
+    rows.push({ h, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
+  }
+  return rows;
+}
+function tkFromRows() {
+  const out = [];
+  for (const h of [...new Set(tkRowsData.map(r => r.h))]) {
+    if (h) out.push('', h);
+    for (const r of tkRowsData.filter(r => r.h === h)) {
+      const t = r.t.replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      if (!t) continue;
+      const w = whoToks(r.w).map(x => '@' + x).join(' ');
+      out.push(`${r.a ? r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+    }
+  }
+  return out.join('\n').trim();
+}
+function tkRowWho(r, ppl) { const s = new Set(); for (const x of whoToks(r.w)) (whoOf(x, ppl) || []).forEach(k => s.add(k)); return s; }
+function tkRowsRender() {
+  const ppl = parseTeam(tkTeam.value).people, f = tkWhoF.value;
+  tkWhoF.innerHTML = `<option value="">Todas las tareas</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
+  tkWhoF.value = ppl.some(p => p.k === f) ? f : '';
+  const fk = tkWhoF.value;
+  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
+  const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
+  tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = r.t && !tkRowWho(r, ppl).size; return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}">
+    <input type="time" class="tka" value="${r.a}" aria-label="Hora (vacía = durante el día)">
+    <input type="time" class="tkb" value="${r.b}" aria-label="Hasta (opcional)">
+    <button type="button" class="btn quiet tkx" aria-label="Quitar">✕</button>
+    <textarea class="tkt" rows="1" aria-label="Tarea" placeholder="Tarea">${html(r.t)}</textarea>
+    <input class="tkw" value="${html(r.w)}" aria-label="Quién" placeholder="Marc, story, todos" autocapitalize="words"></div>`; }).join('') || '<p class="note">No hay tareas. Añade la primera o sube un Excel.</p>';
+  for (const t of tkRowsEl.querySelectorAll('.tkt')) tkGrow(t);
+  document.getElementById('tkCount').textContent = fk ? `${idx.length} de ${tkRowsData.filter(r => r.t).length}` : '';
+}
+const tkGrow = t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };  // el text llarg es veu sencer
+function tkRowsSync() { tkRowsData = tkToRows(tkList.value); tkRowsRender(); }
+function tkRowsWrite() { tkList.value = tkFromRows(); tkDraft(); tkPreview(); }
+tkRowsEl.addEventListener('input', e => {
+  const row = e.target.closest('.tkrow');
+  if (!row) return;
+  const r = tkRowsData[+row.dataset.i], c = e.target.classList;
+  if (c.contains('tkt')) tkGrow(e.target);
+  if (c.contains('tka')) r.a = e.target.value; else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
+  tkRowsWrite();
+  row.classList.toggle('bad', !!r.t && !tkRowWho(r, parseTeam(tkTeam.value).people).size);
+});
+tkRowsEl.addEventListener('click', e => {
+  if (!e.target.closest('.tkx')) return;
+  const i = +e.target.closest('.tkrow').dataset.i, r = tkRowsData[i];
+  if (r.t && !confirm(`¿Quitar «${r.t.slice(0, 40)}»?`)) return;
+  tkRowsData.splice(i, 1); tkRowsWrite(); tkRowsRender();
+});
+tkWhoF.addEventListener('change', () => { for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
+document.getElementById('tkAdd').addEventListener('click', () => {
+  const p = person(tkWhoF.value);
+  tkRowsData.push({ h: '', a: '', b: '', t: '', w: p ? p.n.split(/\s+/)[0] : '', nw: true });
+  tkRowsRender();
+  tkRowsEl.querySelector(`[data-i="${tkRowsData.length - 1}"] .tkt`)?.focus();
+});
+// «Descargar Excel»: un full amb HORA · HASTA · TAREA · QUIÉN (es pot tornar a pujar tal qual)
+document.getElementById('tkXls').addEventListener('click', async () => {
+  try {
+    const X = await loadXlsx();
+    const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a) : -Infinity) - (q.a ? taskTime(q.a) : -Infinity));
+    const ws = X.utils.aoa_to_sheet([['HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [r.a, r.b, r.t, r.w])]);
+    ws['!cols'] = [{ wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
+    const wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, ws, 'TAREAS');
+    X.writeFile(wb, `tareas-${FEST.id}.xlsx`);
+    edMsg('Excel descargado. Edítalo y vuelve a «Subir Excel»: se cambian todas las tareas por las del archivo.');
+  } catch (err) { edMsg('No se ha podido crear el Excel. Mira la conexión.', true); }
+});
 document.querySelector('.orgmenu').addEventListener('click', e => {
   const b = e.target.closest('[data-panel]');
   if (!b || b.getAttribute('aria-expanded') !== 'true') return;
-  if (b.dataset.panel === 'pTareas' && !tkLoaded) loadTk();
+  if (b.dataset.panel === 'pTareas') { if (!tkLoaded) loadTk(); else tkRowsRender(); }
   if (b.dataset.panel === 'pGlobal') { renderGlobal(); pullDone().then(renderGlobal); }
 });
 document.getElementById('tkSave').addEventListener('click', async () => {
@@ -3699,7 +3838,7 @@ teRows.addEventListener('focusout', e => {
   const tok = v => v.split(/\s+/)[0];
   const re = new RegExp(`@(${[o, tok(o)].map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?=[\\s,;@]|$)`, 'giu');
   const nv = tkList.value.replace(re, '@' + tok(n));
-  if (nv !== tkList.value) { tkList.value = nv; tkDraft(); tkPreview(); edMsg(`Las tareas de «${o}» ahora son de «${n}».`); }
+  if (nv !== tkList.value) { tkList.value = nv; tkDraft(); tkPreview(); tkRowsSync(); edMsg(`Las tareas de «${o}» ahora son de «${n}».`); }
   el.dataset.old = n;
 });
 teRows.addEventListener('change', teWrite);
@@ -3774,6 +3913,24 @@ function sheetTasks(name, rows) {
   }
   return { names, grp, lines: lines.length > 1 ? lines : [] };
 }
+function fullSheet(rows) {
+  const cells = r => r.map(v => String(v ?? '').trim());
+  const hi = rows.findIndex(r => cells(r).some(v => /^(qui[eé]n|qui)$/i.test(v)));
+  if (hi < 0) return null;
+  const hd = cells(rows[hi]), col = re => hd.findIndex(v => re.test(v));
+  const ca = col(/^hora$/i), cb = col(/^(hasta|fins|fin|final)$/i), ct = col(/^(tarea|tasca|tareas|tasques)$/i), cw = col(/^(qui[eé]n|qui)$/i);
+  if (ct < 0) return null;
+  const out = ['# TAREAS'];
+  for (const raw of rows.slice(hi + 1)) {
+    const r = cells(raw), t = (r[ct] || '').replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (!t) continue;
+    const ft = ca >= 0 && r[ca] ? fuzzyTime(r[ca]) : null, a = ft && ft.a ? hhmm(ft.a) : '';
+    const b = a ? hhmm(cb >= 0 ? r[cb] : '') || (ft.b ? hhmm(ft.b) : '') : '';
+    const w = whoToks(cw >= 0 ? r[cw] : '').map(x => '@' + x).join(' ');
+    out.push(`${a ? a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+  }
+  return out.slice(1);
+}
 let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
   const sc = document.createElement('script');
@@ -3789,6 +3946,15 @@ document.getElementById('tkFile').addEventListener('change', async e => {
   try {
     const X = await loadXlsx();
     const wb = X.read(await f.arrayBuffer(), { type: 'array' });
+    // El que fa «Descargar Excel» (HORA · HASTA · TAREA · QUIÉN): és la llista sencera, la canvia tota
+    const full = wb.SheetNames.map(sn => fullSheet(X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: false, defval: '' }))).find(Boolean);
+    if (full) {
+      if (!full.length) return edMsg('El Excel no tiene tareas.', true);
+      if (tkList.value.trim() && !confirm(`Hemos encontrado ${full.length} tareas. Se cambian todas las tareas por las del Excel. ¿Continuar?`)) return edMsg('');
+      tkList.value = ['# TAREAS', ...full].join('\n');
+      tkDraft(); tkPreview(); tkRowsSync();
+      return edMsg(`Excel leído: ${full.length} tareas. Revísalas y pulsa «Guardar y publicar».`);
+    }
     const team = parseTeam(tkTeam.value).people;
     const out = [];
     let n = 0;
@@ -3816,6 +3982,7 @@ document.getElementById('tkFile').addEventListener('change', async e => {
     tkList.value = [...keep, out.join('\n').trim()].join('\n\n').trim();
     tkDraft();
     tkPreview();
+    tkRowsSync();
     edMsg(`Excel leído: ${n} tareas. Revísalas y pulsa «Guardar y publicar».`);
   } catch (err) {
     edMsg(err.message === 'xlsx' ? 'No se ha podido cargar el lector de Excel. Mira la conexión.' : 'No hemos podido leer el archivo. ¿Es un Excel (.xlsx)?', true);
@@ -3951,10 +4118,11 @@ var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
   const ch = t !== TAB;
   TAB = t;
+  // Primer a dalt i després canviar el contingut: a l'iPhone, si la pàgina s'encongeix amb scroll, la barra de baix es desplaça
+  if (ch && top) scrollTo({ top: 0 });
   document.body.dataset.tab = t;
   for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
-  if (ch && top) scrollTo({ top: 0 });
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => scrollToNow(false));
