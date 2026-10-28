@@ -815,7 +815,10 @@ li.tk.free .tkt { color: var(--muted); }
 .tgrail.done { opacity: .5; }
 .tglong span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
-.tgnow { position: absolute; left: var(--gut); right: 0; height: 0; border-top: 2px solid var(--now); z-index: 5; pointer-events: none; }
+.tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 5; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
+.tgnow::before { content: ""; position: absolute; left: -5px; top: -6.5px; width: 10px; height: 10px; border-radius: 50%; background: var(--now); }
+.tgpast { position: absolute; grid-row: 2; left: 0; right: 0; top: 0; background: color-mix(in srgb, var(--bg) 45%, transparent); z-index: 1; pointer-events: none; }  /* el que ja ha passat, una mica apagat (per sota de les tasques) */
+.tgb, .tgrail { z-index: 2; }
 #hola h2 { margin-bottom: 4px; }
 #hola .ch { margin: 14px 0 0; }
 .holagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
@@ -845,7 +848,7 @@ body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
 .tabbar button[hidden] { display: none; }
 .tabbar button[aria-current] { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .tabbadge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg); background: var(--now, #e33); color: #fff; font: 800 10px/16px var(--ui, inherit); text-align: center; }  /* a la cantonada de la icona, sense tapar-la */
-body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); }
+body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); min-height: 100lvh; box-sizing: border-box; }  /* mai més curta que la pantalla (la barra de baix no salta) */
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
@@ -3414,6 +3417,8 @@ function renderTg(force) {
   const yy = v => PAD + (v - H0) / MIN * TPX, HT = (H1 - H0) / MIN * TPX + 2 * PAD;
   let gut = '';
   for (let h = H0; h <= H1; h += 3600000) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
+  const inNow = t >= H0 && t <= H1;
+  if (inNow) gut += `<span class="nowlbl" style="top:${yy(t)}px">${hm(t)}</span>`;
   const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
   const colW = [], longs = [];
   let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
@@ -3438,7 +3443,7 @@ function renderTg(force) {
     }
     g += '</div>';
   });
-  if (t >= H0 && t <= H1) g += `<div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
+  if (inNow) g += `<div class="tgpast" style="height:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div><div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
   const tg = document.getElementById('tg');
   tg.style.gridTemplateColumns = `var(--gut) ${colW.map(w => `minmax(${w}px, 1fr)`).join(' ')}`;
   tg.style.minWidth = `calc(var(--gut) + ${colW.reduce((a, w) => a + w, 0)}px)`;
@@ -3916,10 +3921,11 @@ var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
   const ch = t !== TAB;
   TAB = t;
+  // Primer a dalt i després canviar el contingut: a l'iPhone, si la pàgina s'encongeix amb scroll, la barra de baix es desplaça
+  if (ch && top) scrollTo({ top: 0 });
   document.body.dataset.tab = t;
   for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
-  if (ch && top) scrollTo({ top: 0 });
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => scrollToNow(false));
