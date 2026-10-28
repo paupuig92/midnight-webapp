@@ -176,10 +176,12 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .minibar .round { width: 38px; height: 38px; }
 .minibar .mnext b { color: var(--fav); }
 .minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
+/* En mòbil no hi cap «PROVA ✕» al costat del logo: el rellotge mateix es posa a ratlles vermelles i, si el toques, surts del Modo prueba */
+@media (max-width: 439px) { .minibar .sim-badge { display: none !important; } .minibar.simon .mclock { background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); color: #fff; border-radius: 99px; padding: 6px 9px; cursor: pointer; } }
 .minibar .btn { min-height: 36px; padding: 0 10px; }
 /* logo del festival al mig de la barra (FEST.miniLogo); al mòbil ocupa el lloc del «★ proper artista» */
 .minibar .mlogo { position: absolute; left: 50%; bottom: 7px; box-sizing: border-box; height: calc(var(--barh) - 14px); width: auto; max-width: 36vw; padding: 3px 9px; border-radius: 7px; background: var(--mlogo-bg, linear-gradient(#fe5e08, #fe8e04)); object-fit: contain; translate: -50% 0; cursor: pointer; }
-@media (max-width: 439px) { .minibar:has(.mlogo:not([hidden])) .mnext { visibility: hidden; } }
+@media (max-width: 439px) { .minibar:has(.mlogo:not([hidden])) .mnext { visibility: hidden; } .minibar:has(.mlogo:not([hidden])) .mleft { display: none; } }
 @media (max-width: 374px) { .minibar:has(.mlogo:not([hidden])) .mleft { display: none; } .minibar .mlogo { max-width: 30vw; padding: 3px 6px; } }
 
 h2 { margin: 0; font-family: var(--title); font-weight: 900; font-stretch: 125%; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
@@ -344,7 +346,7 @@ body.offline .status::after { content: " · sense connexió (horari desat)"; col
 .blk.fit-s .s, .blk.fit-t .t { display: none; }
 .blk.fit-z { gap: 0; padding-top: 1px; padding-bottom: 1px; }
 .blk.fit-z { padding-left: 7px; padding-right: 3px; }
-.blk.fit-z .n { font-size: 10.5px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blk.fit-z .n { font-size: 10px; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }  /* dues línies abans que tallar */
 .blk.fit-z .t { font-size: 9.5px; line-height: 1; }
 .blk.fit-c .n { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .blk.past { background: var(--bg); border-color: color-mix(in srgb, var(--rule) 55%, var(--bg)); }
@@ -418,7 +420,10 @@ body.offline .status::after { content: " · sense connexió (horari desat)"; col
 .edmsg { margin-top: 10px; font-size: var(--fs-s); color: var(--accent); min-height: 1.2em; }
 .edmsg.bad { color: var(--now); }
 .linkbtn { margin-top: 14px; background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: var(--fs-s); padding: 10px 0; cursor: pointer; }
-.simbox summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.simbox summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; }
+.simbox summary::-webkit-details-marker { display: none; }
+.simbox summary::after { content: "›"; flex: none; font-size: 24px; line-height: 1; color: var(--accent); transition: transform .15s; }
+.simbox[open] summary::after { transform: rotate(90deg); }
 .sim { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .sim label { display: flex; gap: 10px; align-items: center; color: var(--ink); min-height: 44px; font-weight: 600; }
 .sim input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); }
@@ -479,7 +484,7 @@ body.offline .status::after { content: " · sense connexió (horari desat)"; col
 .sheet .body .note img { width: 64px; height: 64px; object-fit: contain; flex: none; }
 @media (min-width: 700px) { .blk .n { font-size: 13px; font-stretch: 95%; } }
 /* iPhone estret (SE, mini, 375 px): més lloc per als noms */
-@media (max-width: 380px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .row .star { width: 40px; height: 40px; } }
+@media (max-width: 380px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; column-gap: 8px; } .row img.logo, .row svg.logo { width: 42px; height: 34px; } .row .sn { overflow-wrap: anywhere; } .row .star { width: 40px; height: 40px; } }
 /* revisió iPhone */
 .tlbox { isolation: isolate; }  /* la vora difuminada (z 9) i la capçalera de la graella no passen per sobre de la minibarra ni de la franja de dalt */
 .toast .msg, .notice { overflow-wrap: anywhere; }
@@ -521,7 +526,7 @@ body.locked .totop { opacity: 0; transform: translateY(12px); pointer-events: no
 .totop { border: 1.5px solid var(--line, var(--rule)); color: var(--ink); }
 @media (min-width: 900px) { .rows, .closedline, .underrows, .upnext, #rowsEmpty { max-width: 760px; } }
 .tools .switch { width: 100%; justify-content: space-between; gap: 16px; border: 0; border-radius: 0; padding: 0; min-height: 48px; font: 700 var(--fs-m)/1.25 var(--body); text-align: left; color: var(--ink); }
-.tools .switch::after { content: ""; flex: none; width: 46px; height: 28px; border-radius: 14px; background: radial-gradient(circle at 14px 50%, var(--ink) 10px, transparent 10.5px), var(--rule); transition: background .15s; }
+.tools .switch::after { content: ""; flex: none; width: 46px; height: 28px; border-radius: 14px; background: radial-gradient(circle at 14px 50%, #8d8d8d 10px, transparent 10.5px), #2e2e2e; box-shadow: inset 0 0 0 1.5px #555; transition: background .15s; }  /* apagat: gris; encès: color del festival */
 .tools .switch[aria-pressed="true"] { color: var(--ink); }
 .tools .switch[aria-pressed="true"]::after { background: radial-gradient(circle at 32px 50%, var(--accent-ink) 10px, transparent 10.5px), var(--accent); }
 .tools .switch:disabled { opacity: .5; }
@@ -702,9 +707,9 @@ body.tvon { overflow: hidden; }
 .tvcard img { width: 3.6em; height: 3.6em; object-fit: contain; }
 .tvcard .tsn { font: 800 .85em/1.1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
 .tvcard.live .tsn::before { content: ""; display: inline-block; width: .55em; height: .55em; border-radius: 50%; background: var(--now); margin-right: .4em; vertical-align: .05em; }
-.tvcard .tdj { font: 900 2em/1.05 var(--display); font-stretch: 108%; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvcard .tdj { font: 900 2em/1.05 var(--display); font-stretch: 108%; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .tvcard .tdj .sub { font: 600 .4em var(--body); color: var(--muted); letter-spacing: .03em; }
-.tvcard .taf { color: var(--muted); font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvcard .taf { color: var(--muted); font-size: .95em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .tvcard .taf b { color: var(--ink); }
 .tvcard .tleft { text-align: right; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .tvcard .tleft span { display: block; font-size: .8em; color: var(--muted); }
@@ -720,13 +725,19 @@ body.tvon { overflow: hidden; }
 .tvnext ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; min-height: 0; }
 .tvnext li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); column-gap: .8em; align-items: baseline; padding: .55em 0; border-bottom: 1px solid var(--rule); }
 .tvnext li .tt { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
-.tvnext li .tn { font: 900 1.25em/1.1 var(--display); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tvnext li .tn { font: 900 1.25em/1.1 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
 .tvnext li .tw { grid-column: 2; font-size: .85em; font-weight: 700; color: var(--sc, var(--muted)); }
 .tvnext li .tw span { color: var(--muted); font-weight: 600; }
 .tvnext li.empty { display: block; color: var(--muted); }
 .tv.alert { grid-template: "top top" auto "alert alert" auto "now next" minmax(0, 1fr) / minmax(0, 1.45fr) minmax(0, 1fr); }
 .tvalert { grid-area: alert; background: color-mix(in srgb, var(--now) 18%, var(--panel)); border: .12em solid var(--now); border-radius: .5em; padding: .5em .9em; font-size: 1.25em; font-weight: 700; line-height: 1.25; display: flex; flex-direction: column; gap: .3em; }
 .tvalert[hidden] { display: none; }
+@media (max-height: 560px) {
+  .tvnow { overflow-y: auto; }
+  .tvcard { flex: 0 0 auto; max-height: none; padding: .4em .8em .5em .6em; }
+  .tvcard img { width: 2.6em; height: 2.6em; }
+  .tvcard .tdj { font-size: 1.5em; }
+}
 .tvalert b { color: var(--now); }
 .tvalert div { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tvnext li.gone .tn { text-decoration: line-through; opacity: .6; }
@@ -784,6 +795,7 @@ body.tvon { overflow: hidden; }
 .tkf { font: 800 var(--fs-xs)/1 var(--display); text-transform: uppercase; letter-spacing: .06em; padding: 5px 8px; border-radius: 999px; }
 li.tk.now { border-left: 3px solid var(--now); padding-left: 6px; }
 li.tk.now .tkf { background: var(--now); color: #fff; }
+li.tk.now .tkf.run { background: transparent; color: var(--muted); border: 1.5px solid var(--line, var(--rule)); }  /* franges llargues: el vermell es reserva per al que toca ara */
 li.tk.late .tkf { border: 1.5px solid var(--now); color: var(--now); }
 li.tk.late .tkchk { border-color: var(--now); }
 li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; }
@@ -814,6 +826,9 @@ li.tk.free .tkt { color: var(--muted); }
 .tgb.mine { cursor: pointer; border-color: var(--fav); }
 .tgb .tt { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .tgb .tn { font: 800 12px/1.1 var(--body); overflow-wrap: anywhere; }
+.tgb.fit { justify-content: center; padding-top: 1px; padding-bottom: 1px; }
+.tgb.fit .tt { display: none; }
+.tgb.fit .tn { font-size: 11px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .tgb.now { border-color: var(--now); box-shadow: 0 0 0 1px var(--now); }
 .tgb.late { border-color: var(--now); border-style: dashed; }
 .tgb.late .tt { color: var(--now); }
@@ -822,6 +837,7 @@ li.tk.free .tkt { color: var(--muted); }
 .tgrail { position: absolute; width: 14px; box-sizing: border-box; border: 1.5px solid var(--accent-dim); border-radius: 4px; background: var(--accent-deep); padding: 0; overflow: hidden; font: inherit; color: var(--ink); cursor: default; }
 .tgrail.mine { border-color: var(--fav); cursor: pointer; }
 .tgrail.done { opacity: .5; }
+.tglong span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
 .tgnow { position: absolute; left: var(--gut); right: 0; height: 0; border-top: 2px solid var(--now); z-index: 5; pointer-events: none; }
 #hola h2 { margin-bottom: 4px; }
@@ -829,6 +845,17 @@ li.tk.free .tkt { color: var(--muted); }
 .holagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
 .holagrid .btn { min-height: 56px; font-size: var(--fs-l); justify-content: center; }
 .holamini { grid-template-columns: 1fr; margin-top: 18px; }
+/* «Qui ets?»: pestanyes de departament a dalt i les cares de la gent a sota (un toc i ja ets tu) */
+.holadept { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 12px 0 0; }
+.holadept::-webkit-scrollbar { display: none; }
+.holadept button { min-width: 0; min-height: 44px; padding: 0 4px; border-radius: 99px; border: 1.5px solid var(--line, var(--rule)); background: var(--panel); color: var(--ink); font: 700 13px/1 inherit; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.holadept button[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.holadept button small { opacity: .7; font-weight: 600; margin-left: 3px; }
+.holafaces { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 14px 8px; margin-top: 16px; justify-items: center; }
+.holafaces .face { width: 76px; }
+.holafaces .face b { width: 64px; height: 64px; font-size: 26px; }
+.holafaces .face span { max-width: 76px; font-size: 14px; }
+.holaempty { margin-top: 16px; }
 .holamini .btn { min-height: 44px; font-size: inherit; opacity: .8; }
 body:not([data-tab="equipo"]) #hola, body[data-tab="equipo"]:not(.needyo) #hola { display: none !important; }
 body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
@@ -841,7 +868,7 @@ body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
   background: none; border: 0; border-radius: 12px; color: var(--muted); font: 700 12px/1.1 var(--ui, inherit); cursor: pointer; }
 .tabbar button[hidden] { display: none; }
 .tabbar button[aria-current] { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
-.tabbadge { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--now, #e33); color: #fff; font: 800 11px/18px var(--ui, inherit); text-align: center; }
+.tabbadge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg); background: var(--now, #e33); color: #fff; font: 800 10px/16px var(--ui, inherit); text-align: center; }  /* a la cantonada de la icona, sense tapar-la */
 body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
@@ -875,51 +902,144 @@ body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"]) .wrap { pad
 .terow .teg { grid-column: 1 / 3; }
 .terow .tex { grid-row: 1 / 3; grid-column: 3; min-height: 44px; padding: 0; }
 .terow input, .terow select { min-height: 44px; min-width: 0; }
+.terow input { box-sizing: border-box; width: 100%; font: 16px var(--body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line, var(--rule)); border-radius: 10px; padding: 0 12px; }  /* com la resta de camps */
+.terow input:focus { border-color: var(--accent); outline: none; }
+.terow .tex { font-size: 20px; color: var(--now); }
 .tktx summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 .holagrid .btn.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 #config .yosel { min-height: 48px; font-size: 17px; padding: 0 14px; border-radius: 24px; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line, var(--rule)); }
 /* Perfil a la barra de dalt: qui sóc i de quin equip; un toc i el canvies */
 .mwho:not([hidden]) { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; max-width: 128px; padding: 3px 10px 3px 3px; border: 1.5px solid var(--accent); border-radius: 99px; background: var(--panel); color: var(--ink); cursor: pointer; font: inherit; text-align: left; }
+.minibar .mwho { position: relative; min-height: 40px; }
+.minibar .mwho::after, .minibar .sim-badge::after { content: ""; position: absolute; inset: -4px; }
+.minibar .sim-badge { position: relative; }
 .mwho .mav { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 800 14px/1 var(--display); color: #fff; background: hsl(var(--h, 20) 55% 42%); }
 .mwho.none .mav { background: var(--line, #444); }
-.mwho .mwt { min-width: 0; display: flex; flex-direction: column; line-height: 1.05; }
+.mwho.none .mwd { display: none; }
+.mwho .mwt { min-width: 0; overflow: hidden; display: flex; flex-direction: column; line-height: 1.05; }
 .mwho .mwn { font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none; letter-spacing: 0; }
-.mwho .mwd { font-weight: 700; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.mwho .mwd { font-weight: 700; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brandline .mwho.big { margin-left: auto; }
+/* Ajustes: la mateixa targeta de perfil, en gran; un toc obre el selector de Tareas */
+.mwho.card { display: flex; width: 100%; max-width: none; min-height: 76px; gap: 14px; padding: 10px 16px 10px 10px; border-radius: 20px; }
+.mwho.card .mav { width: 56px; height: 56px; font-size: 24px; }
+.mwho.card .mwn { font-size: 20px; }
+.mwho.card .mwd { font-size: 12px; margin-top: 3px; }
+.mwho.card.none .mwd { display: block; }
+.mwho.card .mwt { flex: 1; }
+.mwho.card .mgo { flex: none; font-weight: 800; font-size: var(--fs-s); color: var(--accent); }
+#yoGrp[data-off] { display: none !important; }
 .brandline .mwho.big + .firma { margin-left: 4px; }
 #mineOnly2 { display: none !important; }
 body:not([data-tab="ahora"]) #goNow2 { display: none; }
 @media (max-width: 439px) {
   .minibar .mwho { max-width: 104px; }
-  body[data-tab="ahora"] .minibar .mwho { padding: 2px; }  /* amb «Ahora» al costat només hi cap la cara */
+  body[data-tab="ahora"] .minibar .mwho { padding: 4px; }  /* amb «Ahora» al costat només hi cap la cara */
   body[data-tab="ahora"] .minibar .mwho .mwt { display: none; }
   .brandline .firma { display: none; }
   .brandline { white-space: nowrap; min-width: 0; }
   .brandline #festName { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .brandline .mwho.big { max-width: 46%; }
 }
-@media (orientation: landscape) and (max-height: 500px) { .tabbar button { min-height: 40px; flex-direction: row; gap: 6px; } .tabbar svg { width: 20px; height: 20px; } body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); } }
+@media (orientation: landscape) and (max-height: 500px) { .tabbadge { top: -2px; left: auto; right: 4px; } .tabbar button { min-height: 40px; flex-direction: row; gap: 6px; } .tabbar svg { width: 20px; height: 20px; } body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); } }
+/* ==== Capa de disseny (28-10): menys «app genèrica». Tot amb fitxes (--r-*), i el color del festival on toca ==== */
+:root { --r-btn: 10px; --r-card: 14px; --r-chip: 8px; --fill: color-mix(in srgb, var(--ink) 7%, transparent); --fill-2: color-mix(in srgb, var(--ink) 12%, transparent); --caps: .08em; }
+.ico { flex: none; vertical-align: -.2em; margin-right: .35em; }
+/* Botons: plens i discrets; només el principal de cada pantalla (.primary) va de color */
+.btn, .chip { border: 0; border-radius: var(--r-btn); background: var(--fill); font-weight: 700; }
+.chip { border-radius: var(--r-chip); }
+.btn[aria-pressed="true"], .orgmenu .btn[aria-expanded="true"] { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.chip[aria-pressed="true"] { background: var(--fav); color: #1a1400; }
+.mygrp { gap: 0; }
+.tools .switch, .btn.quiet, .btn.switch { background: none; }
+.btn.go { background: none; padding: 0 6px; color: var(--accent); }
+.btn.go:active { background: none; color: var(--accent); opacity: .6; }
+#edClose { background: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
+.holadept button { border: 0; border-radius: var(--r-btn); background: var(--fill); }
+.holadept button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.feedbell:not([hidden]) { border: 0; border-radius: var(--r-btn); background: var(--fill); display: inline-flex; align-items: center; margin-left: auto; min-height: 40px; }
+.feedbell b { margin-left: 6px; color: var(--accent); }
+.linkbtn { color: var(--ink); }
+/* Cares: fosques, inicial amb la lletra del festival; l'anell de color només a qui està triat */
+.face b, .mwho .mav { background: var(--fill-2) !important; color: var(--ink); font-family: var(--display); font-weight: 800; box-shadow: none; border: 2px solid transparent; }
+.face.on b { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent) !important; }
+.face.other b { border: 1.5px dashed var(--line); background: transparent !important; }
+.mwho .mav .ico { margin: 0; width: 18px; height: 18px; color: var(--muted); }
+.mwho:not([hidden]) { border: 0; border-radius: 12px; background: var(--fill); }
+.mwho.card { border-radius: var(--r-card); background: var(--fill); }
+/* Targetes de «Ahora suena»: totes iguals (fons, vora de l'escenari, 14 px) i el temps a la mateixa línia que «Después» */
+.row { background: var(--panel); border: 0; border-radius: var(--r-card); padding: 12px 12px 0 13px; margin-bottom: 6px; overflow: hidden;
+  grid-template-columns: 56px minmax(0, 1fr) auto; grid-template-rows: auto auto auto; row-gap: 2px; }
+.row .mid { display: contents; }
+.row > .logo, .row > img.logo, .row > svg.logo { grid-row: 1 / span 3; align-self: center; }
+.row .sn { grid-column: 2; grid-row: 1; letter-spacing: var(--caps); font-size: 11px; }
+.row .dj { grid-column: 2 / 4; grid-row: 2; }
+.row .dj .sub { display: block; text-transform: none; letter-spacing: 0; font: 500 13px/1.3 var(--body); color: var(--muted); margin-top: 2px; }
+.row .after { grid-column: 2; grid-row: 3; padding-bottom: 12px; align-self: end; }
+.row .right { grid-column: 3; grid-row: 1 / span 3; align-self: end; padding-bottom: 10px; }
+.row .left span { color: var(--muted); }
+.row .bar { margin: 0 -12px 0 -13px; height: 3px; grid-row: 4; }
+@media (max-width: 380px) { .row { grid-template-columns: 42px minmax(0, 1fr) auto; } }
+/* Barra de dalt: tres columnes (esquerra · logo · dreta), sense que es toquin */
+.minibar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; }
+.minibar[hidden] { display: none; }
+.minibar .mgl, .minibar .mgr { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.minibar .mgr { justify-content: flex-end; }
+.minibar .mlogo { position: static; translate: none; grid-column: 2; grid-row: 1; justify-self: center; }
+.minibar .mgr { grid-column: 3; grid-row: 1; }
+.minibar .mleft .ico { margin-right: 2px; }
+/* Ajustes i Organización: sense caixes dins de caixes ni ratlles entre botons */
+.cgrp > div + div, .cgrp > div + details { border-top: 0; padding-top: 4px; }
+.cgrp .ch, .tklist li.grp b, .feed .fh b { color: var(--muted); letter-spacing: var(--caps); }
+/* Controls de formulari amb l'estil de l'app */
+input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color: var(--accent); }
+select { -webkit-appearance: none; appearance: none; border: 0 !important; border-radius: var(--r-btn) !important; background-color: var(--fill) !important; color: var(--ink);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23c9b29a' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right 12px center !important; padding-right: 34px !important; }
+.terow input, #edNotice, textarea { border: 0 !important; border-radius: var(--r-btn) !important; background: var(--fill) !important; }
+.terow { border: 0; background: var(--panel); border-radius: var(--r-card); }
+/* Tasques: casella petita (amb zona de toc gran), hora en columna fixa */
+.tkchk { width: 44px; height: 44px; border: 0; background: none; position: relative; }
+.tkchk::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; border: 2px solid var(--line); }
+.tkchk svg { position: relative; }
+.tkchk[aria-pressed="true"] { background: none; color: var(--accent-ink); }
+.tkchk[aria-pressed="true"]::before { background: var(--accent); border-color: var(--accent); }
+li.tk.late .tkchk { border: 0; }
+li.tk.late .tkchk::before { border-color: var(--now); }
+.tklist li.tk { grid-template-columns: 44px 56px minmax(0, 1fr) auto; gap: 8px; }
+.tkt { font-variant-numeric: tabular-nums; }
+#tgTeam { margin-right: 0; max-width: 100%; }
+/* Menys taronja: temps relatius i etiquetes en gris; el color queda per a «ara», l'acció principal i els comptadors */
+.upnext li.grp span { color: var(--muted); }
+
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Blogh";src:url("img/Blogh.woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-Regular.woff2");font-weight:300 400;font-display:swap}
+@font-face{font-family:"Bricolage";src:url("img/Bricolage-SemiBold.woff2");font-weight:500 600;font-display:swap}
 @font-face{font-family:"Bricolage";src:url("img/Bricolage-Bold.woff2");font-weight:700;font-display:swap}
 @font-face{font-family:"Bricolage";src:url("img/Bricolage-ExtraBold.woff2");font-weight:800 900;font-display:swap}
 @font-face{font-family:"Bricolage Cond";src:url("img/Bricolage-SemiCondensed-SemiBold.woff2");font-weight:600 900;font-display:swap}
-:root{--accent:#ff7a1a;--accent-rgb:255, 122, 26;--accent-dim:#8f430f;--accent-deep:#2e1606;--accent-ink:#1a0b02;--bg:#0a0604;--panel:#160e09;--ink:#fdf4e3;--muted:#c9b29a;--rule:#6b3d1c;--line:#8a5428;--display:"Bricolage", "Archivo", sans-serif;--title:"Blogh", "Bricolage", sans-serif;--cond:"Bricolage Cond", "Bricolage", sans-serif}</style>
+:root{--accent:#ff7a1a;--accent-rgb:255, 122, 26;--accent-dim:#8f430f;--accent-deep:#2e1606;--accent-ink:#1a0b02;--bg:#0a0604;--panel:#160e09;--ink:#fdf4e3;--muted:#c9b29a;--rule:#6b3d1c;--line:#8a5428;--display:"Bricolage", "Archivo", sans-serif;--body:"Bricolage", "Archivo", sans-serif;--title:"Blogh", "Bricolage", sans-serif;--cond:"Bricolage Cond", "Bricolage", sans-serif}</style>
 </head>
 <body>
 
 
 <div class="topedge" aria-hidden="true"></div>
 <div class="minibar" id="minibar" hidden>
+  <div class="mgl">
   <span class="mclock" id="mclock"></span>
   <span class="mleft" id="mleft" hidden aria-label="Temps fins que acaba el festival"></span>
   <span class="mnext" id="mnext"></span>
+  </div>
   <img class="mlogo" id="mlogo" alt="" hidden>
+  <div class="mgr">
   <button class="sim-badge" id="simBadge2" type="button" hidden>PROVA ✕</button>
   <button class="round star" id="mineOnly2" type="button" aria-pressed="false" aria-label="Només els meus artistes" hidden></button>
   <button class="mwho" id="mwho" type="button" aria-label="El teu perfil"><b class="mav"></b><span class="mwt"><span class="mwn"></span><small class="mwd"></small></span></button>
   <button class="btn go" id="goNow2" type="button">Ara</button>
+  </div>
 </div>
 
 <div class="tv" id="tv" hidden aria-label="Mode pantalla completa">
@@ -957,19 +1077,20 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
     <div id="planBody"></div>
   </section>
 
+  <!-- Avisos a dalt de tot; «Quedan» després dels escenaris (que «Ahora suena» es vegi sense fer scroll) -->
+  <div class="feed" id="feed" hidden role="status"><div class="fpin" id="feedPin" hidden></div><div class="fh" id="feedHead"><b>Últims avisos</b><button type="button" class="fclose" id="feedX" aria-label="Tancar avisos">✕</button></div><ul id="feedList"></ul><button type="button" class="linkbtn fmore" id="feedMore" hidden></button></div>
+  <button type="button" class="feedbell" id="feedBell" hidden></button>
   <section id="ahora">
     <span class="mecanic" id="mecanic" aria-hidden="true" hidden><img alt="" width="120" height="144"></span>
     <div class="shead">
       <h2>Ara <span>sona</span></h2>
       <div class="mygrp" role="group" aria-label="Els meus artistes"><button class="chip" id="mineOnly" type="button" aria-pressed="false">★ Només els meus artistes</button><button class="chip" id="pickOpen" type="button">Triar <span id="pickCount"></span></button></div>
     </div>
-    <div class="feed" id="feed" hidden role="status"><div class="fpin" id="feedPin" hidden></div><div class="fh" id="feedHead"><b>Últims avisos</b><button type="button" class="fclose" id="feedX" aria-label="Tancar avisos">✕</button></div><ul id="feedList"></ul><button type="button" class="linkbtn fmore" id="feedMore" hidden></button></div>
-    <button type="button" class="feedbell" id="feedBell" hidden></button>
     <div class="chgbox" id="chgBox" hidden><div class="fh"><b>Canvis d’horari</b><span class="cn" id="chgN"></span></div><ul id="chgList"></ul></div>
-    <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
     <p class="empty" id="rowsEmpty" hidden></p>
     <div class="rows" id="rows"></div>
     <p class="closedline" id="closedLine" hidden></p>
+    <div class="mascot" id="mascot" hidden><img alt="" width="104" height="104"><div class="mtxt"></div></div>
     <div class="scale" aria-label="Importància, de 5 (més) a 1 (menys)">Importància:
       <i class="imp" style="--tc:var(--t5)">5</i><i class="imp" style="--tc:var(--t4)">4</i><i class="imp" style="--tc:var(--t3)">3</i><i class="imp" style="--tc:var(--t2)">2</i><i class="imp" style="--tc:var(--t1)">1</i>
       de més a menys</div>
@@ -978,7 +1099,7 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
   <section id="siguiente">
     <div class="shead"><h2>A <span>continuació</span></h2></div>
     <ul class="upnext" id="upnext"></ul>
-    <p class="note">☆ = els meus artistes</p>
+    <p class="note">☆ marca els teus artistes.</p>
     <details class="howto">
       <summary>Com funcionen els avisos</summary>
       <p>Amb l’app oberta i la pantalla encesa, t’avisem dels teus artistes abans que comencin i quan comencen. Quant abans, i si vols notificacions, ho tries a Ajustos.<span id="howLocked"> Amb el mòbil bloquejat no arriben.</span></p>
@@ -1010,6 +1131,7 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
     <div class="shead"><h2>Horari <span>de tasques</span></h2><div class="mygrp"><button class="chip" id="tgTeam" type="button" aria-pressed="false">Equip</button></div></div>
     <div class="tlbox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
     <p class="legend">Línia vermella = ara. Toca una tasca teva per marcar-la com a feta. «Equip» = una columna per persona.</p>
+    <p class="legend tglong" id="tgLong" hidden></p>
     <p class="legend" id="tgFree"></p>
   </section>
 
@@ -1073,11 +1195,11 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
         <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.</p>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Desar i publicar</button></div>
-        <p class="note">Cadascú tria el seu nom a Ajustos i només veu les seves tasques a «El meu pla».</p>
+        <p class="note">Cadascú tria el seu nom a «Tasques» i només veu les seves.</p>
       </div>
 
       <div class="panel" id="pGlobal" hidden>
-        <p class="note edhelp">Qui té què a cada hora. En verd, el que està fet; en vermell, el que va tard. Toca una persona per veure només el seu.</p>
+        <p class="note edhelp">Qui té què a cada hora. Amb ✓, el que està fet; en vermell, el que va tard. Toca una persona per veure només el seu.</p>
         <div id="gvBody"></div>
         <button type="button" class="linkbtn" id="gvRefresh">Actualitzar</button>
       </div>
@@ -1088,21 +1210,22 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
 
   <section class="tools" id="config">
     <h2>Ajustos</h2>
-    <p class="note" style="margin:0">Això només afecta aquest mòbil.</p>
+    <p class="note" style="margin:0">Només en aquest mòbil.</p>
     <div class="cgrp" role="group" aria-labelledby="profH">
-      <h3 id="profH" class="ch">El teu equip</h3>
-      <div class="whosel" role="radiogroup" aria-label="Equip">
+      <h3 id="profH" class="ch">El teu perfil</h3>
+      <button class="mwho big card" id="cwho" type="button" aria-label="El teu perfil"><b class="mav"></b><span class="mwt"><span class="mwn"></span><small class="mwd"></small></span><span class="mgo">Canviar ›</span></button>
+      <div class="whosel" role="radiogroup" aria-label="Equip" hidden>
         <label><input type="radio" name="prof" value="" checked> Només horaris</label>
         <label><input type="radio" name="prof" value="prod"> Producció</label>
         <label><input type="radio" name="prof" value="mkt"> Màrqueting</label>
         <label><input type="radio" name="prof" value="video"> Vídeo</label>
         <label><input type="radio" name="prof" value="foto"> Foto</label>
       </div>
-      <div id="yoGrp" class="yogrp" hidden>
+      <div id="yoGrp" class="yogrp" hidden data-off>
         <h3 class="ch">Sóc…</h3>
         <select class="yosel" id="yoSel" aria-label="Qui ets"></select>
       </div>
-      <p class="note" style="margin:0">Amb equip veus també les teves tasques, les prioritats i els efectes.</p>
+      <p class="note" style="margin:0">Amb perfil veus també les teves tasques, les prioritats i els efectes. Es tria en un sol lloc: aquí o tocant el teu nom a dalt.</p>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
@@ -1186,7 +1309,7 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
       </details>
     </div>
   </section>
-  <footer class="credit">Algun suggeriment o millora? <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></footer>
+  <footer class="credit">Errors o idees: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></footer>
 </div>
 
 <div class="sheet pick" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH" hidden>
@@ -1242,10 +1365,12 @@ const FEST = {
   accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
   // Colors de base propis (opcional): els del Bass eren verdosos
   theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428',
-    '--display': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
+    '--display': '"Bricolage", "Archivo", sans-serif', '--body': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
   // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
   fonts: [
     { family: 'Blogh', file: 'Blogh.woff2', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
+    { family: 'Bricolage', file: 'Bricolage-Regular.woff2', weight: '300 400' },
+    { family: 'Bricolage', file: 'Bricolage-SemiBold.woff2', weight: '500 600' },
     { family: 'Bricolage', file: 'Bricolage-Bold.woff2', weight: 700 },
     { family: 'Bricolage', file: 'Bricolage-ExtraBold.woff2', weight: '800 900' },
     { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.woff2', weight: '600 900' },
@@ -1466,8 +1591,16 @@ function dur(ms) {
 }
 const STARI = on => `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
 const inDur = ms => ms <= 0 ? 'ja' : `d’aquí a ${dur(ms)}`;
-const FXI = { FOC: '🔥', CO2: '💨', SPARK: '✨', PIRO: '🎆', CONFETI: '🎉' };
-const fxPill = f => `<span class="fx"><i aria-hidden="true">${FXI[f] || '❀'}</i>${html(f)}</span>`;
+// Icones de línia (com les de la barra de baix): en lloc d'emojis
+const ICO = Object.fromEntries(Object.entries({
+  pin: '<path d="M9 4h6M10 4v6l-3 4h10l-3-4V4M12 14v6"/>',
+  bell: '<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15zM10 20.5a2 2 0 004 0"/>',
+  time: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M10 3h4"/>',
+  user: '<circle cx="12" cy="9" r="3.6"/><path d="M5.5 19.5c1-3.6 3.6-5.3 6.5-5.3s5.5 1.7 6.5 5.3"/>',
+  alert: '<path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/>',
+}).map(([k, d]) => [k, `<svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`]));
+const FXI = {};  // abans emojis: ara l'etiqueta sola (es llegeix millor i no fa «app genèrica»)
+const fxPill = f => `<span class="fx">${html(f)}</span>`;
 const fxTags = x => x.fx && x.fx.length ? `<span class="fxs" aria-label="Efectes">${x.fx.map(fxPill).join('')}</span>` : '';
 const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nou' : `Canvi · abans ${esc(x.was)}`}</span>`;
 
@@ -1533,6 +1666,7 @@ function setProf(v) {
   document.body.classList.toggle('prof-prod', PROF === 'prod');
   mascotPerfil();
   document.getElementById('admin').hidden = !(ONLINE && ADMIN);
+  paintWho();
   if (FEEDK) paintFeed();  // els avisos d'un equip només els veu aquell equip
 }
 document.querySelectorAll('input[name=prof]').forEach(r => {
@@ -1771,7 +1905,7 @@ function upHTML(t) {
   let list = ALL.filter(x => x.a > t && (filt || inNext(x)));
   if (filt) list = list.filter(x => favs.has(x.id));
   if (!list.length) {
-    if (filt) return `<li class="empty">${favs.size ? 'No et queden artistes per començar.' : 'Encara no has triat artistes: toca «Triar els meus artistes».'}</li>`;
+    if (filt) return `<li class="empty">${favs.size ? 'No et queden artistes per començar.' : 'Encara no has triat artistes: toca «Triar».'}</li>`;
     return '<li class="empty">No queden més actuacions.</li>';
   }
   let out = '', last = null;
@@ -1933,7 +2067,7 @@ function tick(force) {
   if (tvOn) tvClock(t);
   const ml = document.getElementById('mleft');
   ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
-  if (!ml.hidden) ml.textContent = '⏳ ' + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
+  if (!ml.hidden) ml.innerHTML = ICO.time + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
@@ -2010,7 +2144,7 @@ function tick(force) {
   re.hidden = done ? t >= TEND : anyRow || !filt;
   re.classList.toggle('compact', done);
   const none = !hasFav;
-  const rtxt = done ? 'Els teus artistes ja han tocat. Això és el que sona ara. <button class="linkbtn" type="button" data-seeall>Veure-ho tot</button>' : none ? 'Encara no has triat artistes. Toca «Triar els meus artistes».' : 'Ja no et queda ningú per cobrir.';
+  const rtxt = done ? 'Els teus artistes ja han tocat. Això és el que sona ara. <button class="linkbtn" type="button" data-seeall>Veure-ho tot</button>' : none ? 'Encara no has triat artistes. Toca «Triar».' : 'Ja no et queda ningú per cobrir.';
   const rsp = re.querySelector('span') || re;
   if (rsp.innerHTML !== rtxt) rsp.innerHTML = rtxt;
   const rimg = re.querySelector('img'), rsrc = done ? '' : none ? DECO.empty : DECO.done;
@@ -2114,6 +2248,7 @@ function applySim() {
   if (was && !simOn.checked) { told = realTold || new Set(); realTold = null; }
   document.getElementById('simBadge').hidden = !simOn.checked;
   document.getElementById('simBadge2').hidden = !simOn.checked;
+  document.getElementById('minibar').classList.toggle('simon', simOn.checked);
   tick(true);
   scrollToNow(false);
 }
@@ -2136,6 +2271,7 @@ document.getElementById('simPresets').addEventListener('click', e => { const b =
 function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
 document.getElementById('simBadge2').addEventListener('click', exitSim);
+document.getElementById('mclock').addEventListener('click', () => { if (simOn.checked && innerWidth < 440) exitSim(); });
 
 // Notificacions (Configuración)
 const notifMsg = document.getElementById('notifMsg');
@@ -2321,7 +2457,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '28/10 16:52';
+const BUILD = '28/10 17:45';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2559,7 +2695,7 @@ function paintFeed() {
   const newest = Math.max(0, ...hist.map(f => f.t));
   const open = !!hist.length && (feedAll || newest >= feedSeen);
   const list = open ? (feedAll ? hist : hist.slice(0, 3)) : [];
-  const pin = mine ? `<span class="fpt">📌 Avís${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${html(noticeBy || 'Organització')}:</b> ${html(mine)}</span>` : '';
+  const pin = mine ? `<span class="fpt">${ICO.pin}Avís${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${html(noticeBy || 'Organització')}:</b> ${html(mine)}</span>` : '';
   const key = [pin, list.map(f => f.t + f.m).join(), open, feedAll, hist.length].join('|');
   if (key === feedKey) return;
   const was = el.hidden;
@@ -2574,7 +2710,7 @@ function paintFeed() {
   more.textContent = feedAll ? 'Veure’n menys' : `Veure tots els d’avui (${hist.length})`;
   const bell = document.getElementById('feedBell');
   bell.hidden = open || !hist.length;
-  bell.textContent = `🔔 Avisos d’avui (${hist.length})`;
+  bell.innerHTML = `${ICO.bell}Avisos d’avui <b>${hist.length}</b>`;
   if (was && !el.hidden && typeof anim === 'function') anim(el, RISE, { duration: 320 });
 }
 document.getElementById('feedX').addEventListener('click', () => {
@@ -2586,6 +2722,7 @@ document.getElementById('feedMore').addEventListener('click', () => { feedAll = 
 document.getElementById('feedBell').addEventListener('click', () => { feedAll = true; feedKey = ''; paintFeed(); });
 // Als changes.json va l'id (prod / mkt), no el nom: el nom es tradueix i no ha de canviar les dades
 const WHO_L = { prod: 'Producció', mkt: 'Màrqueting', video: 'Vídeo', foto: 'Foto' };
+const WHO_S = { prod: 'Prod', mkt: 'Màrq', video: 'Vídeo', foto: 'Foto' };  // curt, per a la píndola de la barra fina
 const WHO_OK = w => Object.hasOwn(WHO_L, w) ? WHO_L[w] : '';
 function applyChanges(d, quiet) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return;
@@ -3178,6 +3315,7 @@ function setYo(k) {
   if (pe && pe.e && pe.e !== PROF) setProf(pe.e);
   try { localStorage.setItem(YOK, YO); } catch (e) {}
   planAll = false;
+  paintWho();
   paintYo();
   renderPlan(true);
   tgScrolled = false;
@@ -3197,7 +3335,7 @@ const taskOn = () => !!PROF;
 const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
 const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
 const grpOf = t => t === null ? 'Durant el dia' : `${hourOf(t)} h`;
-const tkWhen = x => x.a === null ? '<span class="tkt">–</span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
+const tkWhen = x => x.a === null ? '<span class="tkt"></span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
 function tkState(x, t) {
   if (DONE.has(x.id)) return 'done';
   if (x.a === null) return 'free';
@@ -3230,7 +3368,7 @@ function renderPlan(force) {
   const nDone = mine.filter(x => DONE.has(x.id)).length, left = mine.length - nDone;
   who.textContent = WHO_L[PROF] || '';
   const C = 2 * Math.PI * 17, pc = mine.length ? nDone / mine.length : 0;
-  const prog = `<div class="plprog"><svg viewBox="0 0 40 40" width="44" height="44" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--rule)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/></svg><span><b>${left ? (left === 1 ? 'Et queda 1 tasca' : `Et queden ${left} tasques`) : 'Tot fet! 🎉'}</b><small>${nDone} de ${mine.length} fetes</small></span></div>`;
+  const prog = `<div class="plprog"><svg viewBox="0 0 40 40" width="44" height="44" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--rule)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/></svg><span><b>${left ? (left === 1 ? 'Et queda 1 tasca' : `Et queden ${left} tasques`) : 'Tot fet!'}</b><small>${nDone} de ${mine.length} fetes</small></span></div>`;
   if (!mine.length) { box.innerHTML = '<p class="empty">No tens cap tasca assignada. Si falta alguna cosa, digues-ho a l’organització.</p>'; return; }
   // Normalment: el que va tard, el que toca ara i les 6 següents. «Ver todo el día» les ensenya totes
   const st = mine.map(x => [x, tkState(x, t)]);
@@ -3246,11 +3384,11 @@ function renderPlan(force) {
     if (grpOf(x.a) !== h) { h = grpOf(x.a); out += `<li class="grp"><b>${h}</b></li>`; }
     out += `<li class="tk ${s}"><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Feta: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
       + `${tkWhen(x)}<span class="tkn">${html(x.t)}${tkMust(x) ? '<span class="tkmust">IMPORTANT</span>' : ''}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
-      + `${s === 'late' ? '<span class="tkf">Tard</span>' : s === 'now' ? '<span class="tkf">Ara</span>' : ''}</li>`;
+      + `${s === 'late' ? '<span class="tkf">Tard</span>' : s === 'now' ? (x.b ? '<span class="tkf run">En curs</span>' : '<span class="tkf">Ara</span>') : ''}</li>`;
   }
   const rest = mine.length - shown.length;
   box.innerHTML = prog + (late ? `<button type="button" class="pllate" id="planLate" aria-expanded="${planLate || planAll}">${late === 1 ? 'Tens 1 tasca pendent d’abans' : `Tens ${late} tasques pendents d’abans`}${planAll ? '' : planLate ? ' ▾' : ' ▸'}</button>` : '')
-    + (shown.length ? `<ul class="tklist">${out}</ul>` : '<p class="empty">Tot fet! 🎉</p>')
+    + (shown.length ? `<ul class="tklist">${out}</ul>` : '<p class="empty">Tot fet!</p>')
     + (rest > 0 || planAll ? `<button type="button" class="linkbtn" id="planAll">${planAll ? 'Veure només el que toca' : `Veure tot el dia (${mine.length})`}</button>` : '');
 }
 document.getElementById('plan').addEventListener('click', e => {
@@ -3312,6 +3450,7 @@ function renderTg(force) {
   let gut = '';
   for (let h = H0; h <= H1; h += 3600000) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
   const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
+  const colW = [], longs = [];
   let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
   cols.forEach((p, ci) => {
     g += `<div class="tgc" style="grid-column:${ci + 2};height:${HT}px;${bg}">`;
@@ -3319,12 +3458,16 @@ function renderTg(force) {
     // Les llargues (més de 2 h 30: «de dia», «obertura a 22 h») van com una franja estreta a la dreta i no prenen lloc
     const long = own.filter(x => x.b && x.b - x.a > 150 * MIN), R = long.length * 16;
     const mine = p === me;
+    if (mine || !team) for (const x of long) if (!longs.includes(x)) longs.push(x);
+    const ln = lanes(own.filter(x => !long.includes(x)));
+    // Prou ample perquè cada tasca d'una mateixa hora tingui ~84 px (si no, la graella fa scroll de costat)
+    colW[ci] = Math.max(team ? 112 : 160, Math.max(1, ...ln.map(([, , n]) => n)) * 84 + R);
     const tag = (x, cls, style, inner) => {
       const ok = isDone(p.k, x.id), st = ok ? 'done' : t >= tkEnd(x) ? 'late' : t >= x.a ? 'now' : '';
       return `<${mine ? 'button type="button"' : 'div'} class="${cls} ${st}${mine ? ' mine' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(x.t)}" style="${style}">${inner(ok)}</${mine ? 'button' : 'div'}>`;
     };
     long.forEach((x, i) => { g += tag(x, 'tgrail', `top:${yy(x.a)}px;height:${(x.b - x.a) / MIN * TPX - 2}px;right:${2 + i * 16}px`, ok => `<span>${ok ? '✓ ' : ''}${html(x.t)}</span>`); });
-    for (const [x, l, n] of lanes(own.filter(x => !long.includes(x)))) {
+    for (const [x, l, n] of ln) {
       const h = Math.max(40, (tkEnd(x) - x.a) / MIN * TPX - 2);
       g += tag(x, 'tgb', `top:${yy(x.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px - ${R}px) / ${n});width:calc((100% - 4px - ${R}px) / ${n} - 3px)`, ok => `<span class="tt">${ok ? '✓ ' : ''}${lbl(x.a)}</span><span class="tn">${html(x.t)}</span>`);
     }
@@ -3332,11 +3475,17 @@ function renderTg(force) {
   });
   if (t >= H0 && t <= H1) g += `<div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
   const tg = document.getElementById('tg');
-  tg.style.gridTemplateColumns = `var(--gut) repeat(${cols.length}, minmax(${team ? 112 : 160}px, 1fr))`;
-  tg.style.minWidth = `calc(var(--gut) + ${cols.length} * ${team ? 112 : 160}px)`;
+  tg.style.gridTemplateColumns = `var(--gut) ${colW.map(w => `minmax(${w}px, 1fr)`).join(' ')}`;
+  tg.style.minWidth = `calc(var(--gut) + ${colW.reduce((a, w) => a + w, 0)}px)`;
+  // Les franges llargues (les barretes verticals de la dreta) també en text, que en vertical no es llegeixen
+  const lg = document.getElementById('tgLong');
+  lg.hidden = !longs.length;
+  lg.innerHTML = longs.length ? `<b>Franges llargues:</b> ${longs.sort(byTime).map(x => `${html(x.t)} <span>${lbl(x.a)}–${lbl(x.b)}</span>`).join(' · ')}` : '';
   tg.innerHTML = g;
+  // Si el text no hi cap: fora l'hora, i el nom a 2 línies (mai tallat per dalt i per baix)
+  requestAnimationFrame(() => { for (const b of tg.querySelectorAll('.tgb')) if (b.scrollHeight > b.clientHeight + 1) b.classList.add('fit'); });
   const nf = (team ? TASKS.list : mineTasks()).filter(x => x.a === null).length;
-  document.getElementById('tgFree').textContent = nf ? `${nf === 1 ? '1 tasca' : `${nf} tasques`} sense hora: surten a «El meu pla», a «Durant el dia».` : '';
+  document.getElementById('tgFree').textContent = nf ? `${nf === 1 ? '1 tasca' : `${nf} tasques`} sense hora: surten a «Les meves tasques», a «Durant el dia».` : '';
   const w = document.getElementById('tgWrap');
   if (!tgScrolled && w.clientHeight) { tgScrolled = true; w.scrollTop = Math.max(0, yy(Math.min(Math.max(t, H0), H1)) - 80); }
 }
@@ -3456,11 +3605,11 @@ function tkOverlaps(list, people) {
     // Diverses tasques del mateix artista a la mateixa hora («31 FAM · Reel», «31 FAM · Joc») són una sola cosa
     for (const g of Object.values(at)) {
       const subj = [...new Set(g.map(x => x.t.split(/\s+[·–-]\s+/)[0].trim()))];
-      if (subj.length > 1) out.push(`${name(k)}: ${g.length} tasques a les ${lbl(g[0].a)} (${subj.slice(0, 3).map(x => '«' + x.slice(0, 24) + '»').join(', ')}${subj.length > 3 ? '…' : ''})`);
+      if (subj.length > 1) out.push(`${name(k)}: ${g.length} tasques a les ${lbl(g[0].a)} (${subj.slice(0, 3).map(x => '«' + x.slice(0, 40) + '»').join(', ')}${subj.length > 3 ? '…' : ''})`);
     }
     const rs = xs.filter(x => x.b && x.b - x.a <= 150 * MIN).sort((p, q) => p.a - q.a);
     for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length && rs[j].a < rs[i].b; j++)
-      if (rs[j].a !== rs[i].a) out.push(`${name(k)}: «${rs[i].t.slice(0, 24)}» (${lbl(rs[i].a)}–${lbl(rs[i].b)}) y «${rs[j].t.slice(0, 24)}» (${lbl(rs[j].a)}) es trepitgen`);
+      if (rs[j].a !== rs[i].a) out.push(`${name(k)}: «${rs[i].t.slice(0, 40)}» (${lbl(rs[i].a)}–${lbl(rs[i].b)}) y «${rs[j].t.slice(0, 40)}» (${lbl(rs[j].a)}) es trepitgen`);
   }
   return out;
 }
@@ -3472,7 +3621,7 @@ function tkPreview() {
   const over = tkOverlaps(tasks.list, team.people);
   document.getElementById('tkInfo').innerHTML = `<b>${tasks.list.length}</b> tasques · <b>${team.people.length}</b> persones`
     + (warn.length ? `<ul class="tkwarn">${warn.slice(0, 12).map(w => `<li>${html(w)}</li>`).join('')}${warn.length > 12 ? `<li>…i ${warn.length - 12} més</li>` : ''}</ul>` : '')
-    + (over.length ? `<p class="tkover-h">⚠️ Coincidències (pots publicar igualment):</p><ul class="tkwarn tkover">${over.slice(0, 10).map(w => `<li>${html(w)}</li>`).join('')}${over.length > 10 ? `<li>…i ${over.length - 10} més</li>` : ''}</ul>` : '');
+    + (over.length ? `<p class="tkover-h">${ICO.alert}Coincidències (pots publicar igualment):</p><ul class="tkwarn tkover">${over.slice(0, 10).map(w => `<li>${html(w)}</li>`).join('')}${over.length > 10 ? `<li>…i ${over.length - 10} més</li>` : ''}</ul>` : '');
   return { team, tasks, warn };
 }
 async function loadTk() {
@@ -3513,7 +3662,7 @@ document.getElementById('tkSave').addEventListener('click', async () => {
     tkBase = data.updated; tkPub = data.updated; tkPubUntil = Date.now() + 15 * MIN;
     try { localStorage.removeItem(TDK); localStorage.setItem(TKK, JSON.stringify(data)); } catch (e) {}
     applyTasks(data);
-    edMsg('Tasques publicades. Cadascú les veurà a «El meu pla» en 1 o 2 minuts.');
+    edMsg('Tasques publicades. Cadascú les veurà a «Tasques» en 1 o 2 minuts.');
   } catch (err) {
     edMsg(err.message === 'cancelado' ? 'No s’ha publicat res.' : err.status === 401 || err.status === 403 ? 'GitHub no deixa publicar: revisa el token.' : 'No s’ha pogut publicar. Mira la connexió i torna-ho a provar.', true);
   }
@@ -3704,7 +3853,7 @@ document.getElementById('pGlobal').addEventListener('click', e => {
 setInterval(() => { if (!document.hidden && !document.getElementById('pGlobal').hidden) pullDone().then(renderGlobal); }, 30000);
 // --- «Qui ets?»: surt dins la pestanya Tareas mentre no hagis triat qui ets (triar el nom posa l'equip) ---
 var holaEl = document.getElementById('hola'), holaBody = document.getElementById('holaBody'), holaPick = '';
-var holaForce = false;
+var holaForce = false, holaDept = '';
 const needYo = () => holaForce || !taskOn() || !TASKS.people.length || !YO || YO === '-' || !person(YO);
 const holaBtn = (v, t) => `<button class="btn" type="button" data-hola="${v}">${t}</button>`;
 function holaTeams(title, sub) {
@@ -3721,7 +3870,7 @@ function holaPaint() {
   const ppl = TASKS.people;
   if (holaPick) { holaKey = ''; return holaTeams(`${person(holaPick).n}, de quin equip ets?`, 'Per saber què ensenyar-te.'); }
   // Només repinta si ha canviat alguna cosa (no perdre el focus de VoiceOver)
-  const k = [PROF, YO, holaForce, TASKS.updated, ppl.length, navigator.onLine].join('|');
+  const k = [PROF, YO, holaForce, holaDept, TASKS.updated, ppl.length, navigator.onLine].join('|');
   if (k === holaKey) return;
   holaKey = k;
   if (!ppl.length) {
@@ -3732,17 +3881,23 @@ function holaPaint() {
     return;
   }
   document.getElementById('holaT').textContent = 'Qui ets?';
-  document.getElementById('holaSub').textContent = 'Tria el teu nom i veuràs les teves tasques. Es pot canviar a Ajustos.';
-  holaBody.innerHTML = [...TEAMS, ['', 'Altres']].map(([e, t]) => {
-    const g = ppl.filter(p => (p.e || '') === e);
-    return g.length ? `<h3 class="ch">${t}</h3><div class="holagrid">${g.map(p => holaBtn('p:' + p.k, html(p.n)).replace('<button class="btn"', `<button class="btn${p.k === YO ? ' on' : ''}" aria-pressed="${p.k === YO}"`)).join('')}</div>` : '';
-  }).join('') + (holaForce && person(YO) ? `<div class="holagrid holamini">${holaBtn('x', `Continuar com a ${html(person(YO).n)}`)}</div>` : '');
+  document.getElementById('holaSub').textContent = 'Tria el teu departament i toca la teva cara.';
+  const depts = [...TEAMS, ...(ppl.some(p => !p.e) ? [['-', 'Altres']] : [])].map(([e, t]) => [e, t, ppl.filter(p => (p.e || '-') === e)]);
+  if (!depts.some(d => d[0] === holaDept)) holaDept = PROF && depts.some(d => d[0] === PROF) ? PROF : (depts.find(d => d[2].length) || depts[0])[0];
+  const [dv, dt, dp] = depts.find(d => d[0] === holaDept);
+  const tabs = `<div class="holadept" role="group" aria-label="Departament">${depts.map(([e, t, g]) => `<button type="button" data-hola="d:${e}" aria-pressed="${e === holaDept}">${t}${g.length ? `<small>${g.length}</small>` : ''}</button>`).join('')}</div>`;
+  const faces = dp.length ? `<div class="holafaces">${dp.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-hola="p:${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${html(p.n.slice(0, 1).toUpperCase())}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')}</div>`
+    : `<p class="note holaempty">Encara no hi ha ningú de ${html(dt)} a la llista. L’afegeix l’organització a «Equip».</p><div class="holagrid holamini">${holaBtn('o:' + dv, `Entrar com a ${html(dt)} (només horaris)`)}</div>`;
+  holaBody.innerHTML = tabs + faces
+    + `<div class="holagrid holamini">${holaForce && person(YO) ? holaBtn('x', `Continuar com a ${html(person(YO).n)}`) : ''}${holaBtn('o:', 'Només horaris, sense tasques')}</div>`;
 }
-const holaApply = () => { holaForce = false; paintYo(); renderPlan(true); renderTg(true); syncPush(); holaPick = ''; holaPaint(); scrollTo({ top: 0 }); };
+const holaApply = () => { holaForce = false; paintWho(); paintYo(); renderPlan(true); renderTg(true); syncPush(); holaPick = ''; holaPaint(); scrollTo({ top: 0 }); };
 holaBody.addEventListener('click', e => {
   const v = e.target.closest('[data-hola]')?.dataset.hola;
   if (!v) return;
   if (v === 'x') { holaForce = false; return holaPaint(); }
+  if (v.startsWith('d:')) { holaDept = v.slice(2); return holaPaint(); }
+  if (v.startsWith('o:')) { setProf(v.slice(2)); setYo(''); holaApply(); return showTab('ahora'); }
   if (v.startsWith('t:')) { setProf(v.slice(2)); if (holaPick) setYo(holaPick); return holaApply(); }
   const k = v.slice(2), pe = person(k);
   if (pe && pe.e) { if (pe.e !== PROF) setProf(pe.e); setYo(k); return holaApply(); }
@@ -3760,14 +3915,13 @@ function paintWho() {
     el.classList.toggle('none', !PROF);
     const av = el.querySelector('.mav');
     av.style.setProperty('--h', pe ? faceHue(pe.k) : 20);
-    av.textContent = pe ? pe.n.slice(0, 1).toUpperCase() : PROF ? '?' : '👤';
-    el.querySelector('.mwn').textContent = pe ? pe.n.split(/\s+/)[0] : PROF ? 'Qui ets?' : 'Triar perfil';
-    el.querySelector('.mwd').textContent = PROF ? WHO_L[PROF] : 'Només horaris';
+    if (pe || PROF) av.textContent = pe ? pe.n.slice(0, 1).toUpperCase() : '?'; else av.innerHTML = ICO.user;
+    el.querySelector('.mwn').textContent = pe ? pe.n.split(/\s+/)[0] : PROF ? (el.classList.contains('card') ? 'Tria el teu nom' : 'Qui ets?') : el.classList.contains('card') ? 'Sense perfil' : 'Perfil';
+    el.querySelector('.mwd').textContent = PROF ? (el.classList.contains('big') ? WHO_L[PROF] : WHO_S[PROF]) : el.classList.contains('card') ? 'Només horaris' : '';
     el.setAttribute('aria-label', pe ? `Perfil: ${pe.n}, ${WHO_L[PROF] || ''}. Canviar` : 'Triar perfil');
   }
 }
 for (const el of document.querySelectorAll('.mwho')) el.addEventListener('click', () => {
-  if (!PROF) { showTab('ajustes'); document.getElementById('config').scrollIntoView({ block: 'start' }); return; }
   holaForce = true; holaPick = ''; showTab('equipo'); holaPaint(); scrollTo({ top: 0 });
 });
 // Fila de cares (com les apps de rodatge): la gent del meu equip; un toc i ets aquella persona
@@ -3780,7 +3934,7 @@ function paintFaces() {
   if (box.dataset.k === key) return;
   box.dataset.k = key;
   box.innerHTML = list.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-face="${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${html(p.n.slice(0, 1).toUpperCase())}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')
-    + `<button type="button" class="face other" data-face="+"><b>⋯</b><span>${html(WHO_L[PROF] || 'Equip')}</span></button>`;
+    + `<button type="button" class="face other" data-face="+"><b>⋯</b><span>${html(WHO_S[PROF] || 'Equipo')}</span></button>`;
   box.querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 document.getElementById('faces').addEventListener('click', e => {
