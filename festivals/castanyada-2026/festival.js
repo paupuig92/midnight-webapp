@@ -50,7 +50,7 @@ const FEST = {
     'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
     'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
   },
-  map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
+  // map: 'img/mapa.jpg',       // mapa del recinte (opcional): surt a sota de l'horari (en Pau el va treure el 28-10)
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
     { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },

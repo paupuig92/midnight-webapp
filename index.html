@@ -755,6 +755,9 @@ li.tk.now .tkf { background: var(--now); color: #fff; }
 li.tk.late .tkf { border: 1.5px solid var(--now); color: var(--now); }
 li.tk.late .tkchk { border-color: var(--now); }
 li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; }
+.tkimp { margin: 10px 0 4px; }
+.tkimp label { cursor: pointer; }
+li.tk.free .tkt { color: var(--muted); }
 .tkwarn { margin: 6px 0 0; padding-left: 18px; color: var(--now); font-size: var(--fs-s); }
 .admin textarea.tkta { font: 15px/1.45 ui-monospace, Menlo, monospace; }
 .gvppl { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
@@ -766,6 +769,27 @@ li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; 
 .gvc { font-size: var(--fs-xs); font-weight: 700; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 .gvc.ok { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .gvc.late { border-color: var(--now); color: var(--now); }
+#tkgrid .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tg-wrap { overflow: auto; max-height: min(68svh, 640px); min-height: 260px; border: 1px solid var(--rule); border-radius: 8px; overscroll-behavior: contain; }
+.tg { display: grid; grid-template-rows: auto auto; position: relative; }
+.tgh { grid-row: 1; position: sticky; top: 0; z-index: 7; background: var(--bg); border-bottom: 1px solid var(--rule); padding: 8px 4px; font: 900 12px/1.1 var(--cond); text-transform: uppercase; text-align: center; overflow-wrap: anywhere; }
+.tgh:first-child { left: 0; z-index: 8; }
+.tgh.me { color: var(--fav); }
+.tgc { grid-row: 2; position: relative; border-left: 1px solid var(--rule); }
+.tgb { position: absolute; box-sizing: border-box; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); padding: 3px 5px; overflow: hidden; text-align: left; font: inherit; display: flex; flex-direction: column; gap: 1px; cursor: default; }
+.tgb.mine { cursor: pointer; border-color: var(--fav); }
+.tgb .tt { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tgb .tn { font: 800 12px/1.1 var(--body); overflow-wrap: anywhere; }
+.tgb.now { border-color: var(--now); box-shadow: 0 0 0 1px var(--now); }
+.tgb.late { border-color: var(--now); border-style: dashed; }
+.tgb.late .tt { color: var(--now); }
+.tgb.done { background: var(--accent-deep); border-color: var(--accent-dim); opacity: .6; }
+.tgb.done .tn { text-decoration: line-through; }
+.tgrail { position: absolute; width: 14px; box-sizing: border-box; border: 1.5px solid var(--accent-dim); border-radius: 4px; background: var(--accent-deep); padding: 0; overflow: hidden; font: inherit; color: var(--ink); cursor: default; }
+.tgrail.mine { border-color: var(--fav); cursor: pointer; }
+.tgrail.done { opacity: .5; }
+.tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
+.tgnow { position: absolute; left: var(--gut); right: 0; height: 0; border-top: 2px solid var(--now); z-index: 5; pointer-events: none; }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -849,6 +873,13 @@ li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; 
     <p class="legend">Toca el mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
   </section>
 
+  <section id="tkgrid" hidden>
+    <div class="shead"><h2>Horario <span>de tareas</span></h2><div class="mygrp"><button class="chip" id="tgTeam" type="button" aria-pressed="false">Equipo</button></div></div>
+    <div class="tlbox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
+    <p class="legend">Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona.</p>
+    <p class="legend" id="tgFree"></p>
+  </section>
+
   <section class="admin" id="admin" hidden>
     <h2>Organización</h2>
     <form id="pwForm" class="pwform">
@@ -886,11 +917,13 @@ li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; 
       </div>
 
       <div class="panel" id="pTareas" hidden>
+        <div class="tkimp"><label class="btn primary" for="tkFile">Subir Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
+        <p class="note edhelp">Una pestaña por persona: el nombre de la pestaña dice de quién es («LAIA», «MARTÍ / CALVINS»). Desde Google Sheets: Archivo → Descargar → Microsoft Excel. Sustituye las tareas de abajo; después puedes retocarlas a mano.</p>
         <label for="tkTeam">Equipo (una persona por línea; después de «:», sus grupos)</label>
         <textarea id="tkTeam" class="tkta" rows="6" placeholder="Marc: audiovisual, cámara&#10;Laia: audiovisual&#10;Jordi: producción" autocapitalize="words" spellcheck="false"></textarea>
         <label for="tkList">Tareas (una por línea: hora, tarea y @quién)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Montar cámaras @audiovisual&#10;18:30 Grabar la entrada de Catarres @Marc @Laia&#10;20:00-20:30 Cambiar baterías @Marc&#10;23:00 Foto de grupo @todos" spellcheck="false"></textarea>
-        <p class="note edhelp">@nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.</p>
+        <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.</p>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Guardar y publicar</button></div>
         <p class="note">Cada uno elige su nombre en Configuración y solo ve sus tareas en «Mi plan».</p>
@@ -1095,7 +1128,7 @@ const FEST = {
     'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
     'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
   },
-  map: 'img/mapa.jpg',          // mapa del recinte (opcional): surt a sota de l'horari
+  // map: 'img/mapa.jpg',       // mapa del recinte (opcional): surt a sota de l'horari (en Pau el va treure el 28-10)
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
     { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
@@ -1629,7 +1662,7 @@ prefs.tb = [0, 5, 10, 15, 20, 30].includes(+prefs.tb) ? +prefs.tb : 10;
 const YOK = FEST.key + '-yo-v1';
 let YO = '';
 try { YO = localStorage.getItem(YOK) || ''; } catch (e) {}
-const yoPush = () => YO && YO !== '-' ? YO : '';
+const yoPush = () => PROF === 'mkt' && YO && YO !== '-' ? YO : '';
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 // Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
 const PUSH = /*PUSH*/null/*PUSH*/;
@@ -2835,7 +2868,9 @@ try { DONE = new Set(JSON.parse(localStorage.getItem(DNK) || '[]')); DQ = JSON.p
 const saveDone = () => { try { localStorage.setItem(DNK, JSON.stringify([...DONE])); localStorage.setItem(DQK, JSON.stringify(DQ.slice(-200))); } catch (e) {} };
 const nk = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
 const TK_SLACK = 15 * MIN;   // una tasca sense hora de final «dura» 15 min; després, si no està feta, va tard
-const tkEnd = x => x.b > x.a ? x.b : x.a + TK_SLACK;
+// Sense hora (a = null): «durante el día», mai va tard
+const tkEnd = x => x.a === null ? Infinity : x.b > x.a ? x.b : x.a + TK_SLACK;
+const byTime = (x, y) => (x.a ?? Infinity) - (y.a ?? Infinity);
 const person = k => TASKS.people.find(p => p.k === k);
 const okTasks = d => d && typeof d === 'object' && d.fest === FEST.id && Array.isArray(d.list) && Array.isArray(d.people);
 function applyTasks(d) {
@@ -2843,10 +2878,11 @@ function applyTasks(d) {
   TASKS = {
     updated: String(d.updated || ''), team: String(d.team || ''), tasks: String(d.tasks || ''),
     people: d.people.filter(p => p && p.k && p.n).map(p => ({ k: nk(p.k), n: String(p.n).slice(0, 40), r: Array.isArray(p.r) ? p.r.map(String) : [] })),
-    list: d.list.filter(x => x && x.id && Number.isFinite(x.a) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: x.a, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String) })).sort((x, y) => x.a - y.a),
+    list: d.list.filter(x => x && x.id && (x.a === null || Number.isFinite(x.a)) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: Number.isFinite(x.a) ? x.a : null, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String) })).sort(byTime),
   };
   paintYo();
   renderPlan(true);
+  renderTg(true);
 }
 
 // --- Llegir l'equip i les tasques tal com els escriu l'organització ---
@@ -2908,14 +2944,15 @@ function parseTasks(src, people) {
       toks = (c.slice(2).join(' ').match(/[^\s,;@]+/g) || []);
     } else {
       if (/^(@[^\s@,;]+[\s,;]*)+$/.test(line)) { group = [...line.matchAll(TOK)].map(m => m[1]); continue; }
-      const m = line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/);
+      const u = line.match(/^[-–•·]\s*(.+)$/);
+      const m = u ? [line, '', '', u[1]] : line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/);
       if (!m) { warn.push(`Sin hora: «${line.slice(0, 40)}»`); continue; }
       [, ta, tb] = m;
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = taskTime(ta), b = tb ? taskTime(tb) : 0;
-    if (!Number.isFinite(a)) { warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
+    const a = ta ? taskTime(ta) : null, b = ta && tb ? taskTime(tb) : 0;
+    if (a !== null && !Number.isFinite(a)) { warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
     if (!text) { warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
     if (!toks.length) toks = group;
     const p = new Set();
@@ -2923,13 +2960,13 @@ function parseTasks(src, people) {
       const w = whoOf(tk, people);
       if (w) w.forEach(k => p.add(k)); else warn.push(`No sé quién es «@${tk}» (${ta} ${text.slice(0, 30)})`);
     }
-    if (!p.size) warn.push(`Nadie para «${ta} ${text.slice(0, 30)}»`);
+    if (!p.size) warn.push(`Nadie para «${ta || '–'} ${text.slice(0, 30)}»`);
     let id = 't' + hash(a + '|' + nk(text)), n = 2;
     while (ids.has(id)) id = 't' + hash(a + '|' + nk(text)) + '-' + n++;
     ids.add(id);
-    list.push({ id, a, b: Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 120), p: [...p] });
+    list.push({ id, a, b: a !== null && Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 200), p: [...p] });
   }
-  list.sort((x, y) => x.a - y.a);
+  list.sort(byTime);
   return { list, warn };
 }
 
@@ -2938,8 +2975,8 @@ const yoSel = document.getElementById('yoSel');
 function paintYo() {
   const opts = `<option value="">— Elige tu nombre —</option>${TASKS.people.map(p => `<option value="${p.k}">${html(p.n)}</option>`).join('')}<option value="-">No estoy en el equipo</option>`;
   for (const s of document.querySelectorAll('.yosel')) { s.innerHTML = opts; s.value = YO && (YO === '-' || person(YO)) ? YO : ''; }
-  document.getElementById('yoGrp').hidden = !TASKS.people.length;
-  document.getElementById('prefTbLbl').hidden = !(YO && YO !== '-');
+  document.getElementById('yoGrp').hidden = !(taskOn() && TASKS.people.length);
+  document.getElementById('prefTbLbl').hidden = !(taskOn() && YO && YO !== '-' && TASKS.people.length);
 }
 function setYo(k) {
   YO = k === '-' ? '-' : nk(k);
@@ -2947,6 +2984,8 @@ function setYo(k) {
   planAll = false;
   paintYo();
   renderPlan(true);
+  tgScrolled = false;
+  renderTg(true);
   syncPush();
   pullDone();
 }
@@ -2957,10 +2996,15 @@ prefTb.addEventListener('change', () => { prefs.tb = +prefTb.value; savePrefs();
 
 // --- «Mi plan» ---
 let planAll = false, planKey = '';
-const mineTasks = () => YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
-const hourOf = t => hm(t).slice(0, 2);
+// Tot això (Soy…, Mi plan, Horario de tareas, avisos de tasques) només surt amb el perfil Marketing
+const taskOn = () => PROF === 'mkt';
+const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
+const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
+const grpOf = t => t === null ? 'Durante el día' : `${hourOf(t)} h`;
+const tkWhen = x => x.a === null ? '<span class="tkt">–</span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
 function tkState(x, t) {
   if (DONE.has(x.id)) return 'done';
+  if (x.a === null) return 'free';
   if (t >= tkEnd(x)) return 'late';
   if (t >= x.a) return 'now';
   return '';
@@ -2971,7 +3015,7 @@ function withWho(x) {
 }
 function renderPlan(force) {
   const sec = document.getElementById('plan'), t = now();
-  const show = TASKS.people.length && YO !== '-';
+  const show = taskOn() && TASKS.people.length && YO !== '-';
   sec.hidden = !show;
   if (!show) return;
   const me = person(YO), mine = mineTasks();
@@ -2994,13 +3038,13 @@ function renderPlan(force) {
   let shown = st;
   if (!planAll) {
     const open = st.filter(([, s]) => s === 'late' || s === 'now');
-    shown = [...open, ...st.filter(([x, s]) => s === '' ).slice(0, 6)].sort((p, q) => p[0].a - q[0].a);
+    shown = [...open, ...st.filter(([x, s]) => s === '' ).slice(0, 6), ...st.filter(([, s]) => s === 'free')].sort((p, q) => byTime(p[0], q[0]));
   }
   let h = '', out = '';
   for (const [x, s] of shown) {
-    if (hourOf(x.a) !== h) { h = hourOf(x.a); out += `<li class="grp"><b>${h} h</b></li>`; }
+    if (grpOf(x.a) !== h) { h = grpOf(x.a); out += `<li class="grp"><b>${h}</b></li>`; }
     out += `<li class="tk ${s}"><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Hecha: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
-      + `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span><span class="tkn">${html(x.t)}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
+      + `${tkWhen(x)}<span class="tkn">${html(x.t)}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
       + `${s === 'late' ? '<span class="tkf">Tarde</span>' : s === 'now' ? '<span class="tkf">Ahora</span>' : ''}</li>`;
   }
   const rest = mine.length - shown.length;
@@ -3011,20 +3055,100 @@ function renderPlan(force) {
 document.getElementById('plan').addEventListener('click', e => {
   if (e.target.closest('#planAll')) { planAll = !planAll; renderPlan(true); return; }
   const b = e.target.closest('[data-tk]');
-  if (!b) return;
-  const id = b.dataset.tk, on = !DONE.has(id);
+  if (b) toggleTask(b.dataset.tk);
+});
+function toggleTask(id) {
+  const on = !DONE.has(id);
   if (on) DONE.add(id); else DONE.delete(id);
   DQ = DQ.filter(q => q.id !== id); DQ.push({ id, v: on });
   saveDone();
   try { if (on && navigator.vibrate) navigator.vibrate(30); } catch (e) {}
   renderPlan(true);
-  if (on && !RM.matches) { const nb = document.querySelector(`[data-tk="${CSS.escape(id)}"]`); if (nb && nb.animate) nb.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.3,1.6,.5,1)' }); }
+  renderTg(true);
+  if (on && !RM.matches) { const nb = document.querySelector(`#plan [data-tk="${CSS.escape(id)}"]`); if (nb && nb.animate) nb.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.3,1.6,.5,1)' }); }
   flushDone();
+}
+
+// --- Horario de tareas: graella com la dels escenaris (sota el mapa). La meva columna o, amb «Equipo», una per persona ---
+const TGK = FEST.key + '-tgteam-v1';
+let tgTeam = false, tgKey = '', tgScrolled = false;
+try { tgTeam = localStorage.getItem(TGK) === '1'; } catch (e) {}
+const TPX = 1.6;  // px per minut, com l'horari
+function lanes(list) {
+  // Tasques que es trepitgen a la mateixa columna: una al costat de l'altra
+  const end = [], out = [];
+  for (const x of list) {
+    const b = Math.max(tkEnd(x), x.a + 42 / TPX * MIN);
+    let l = end.findIndex(e => e <= x.a);
+    if (l < 0) { l = end.length; end.push(b); } else end[l] = b;
+    out.push([x, l]);
+  }
+  // Quantes n'hi ha alhora per a cada tasca (per a l'amplada)
+  return out.map(([x, l]) => [x, l, Math.max(...out.filter(([o]) => o.a < tkEnd(x) && tkEnd(o) > x.a).map(([, ol]) => ol)) + 1]);
+}
+function renderTg(force) {
+  const sec = document.getElementById('tkgrid'), t = now();
+  const me = person(YO);
+  const show = taskOn() && TASKS.list.length && YO !== '-' && (me || tgTeam);
+  sec.hidden = !show;
+  if (!show) return;
+  const team = tgTeam || !me;
+  const d = doneAll || {};
+  const isDone = (k, id) => k === YO ? DONE.has(id) : !!(d[k] && d[k][id]);
+  const cols = team ? [...(me ? [me] : []), ...TASKS.people.filter(p => p !== me)].filter(p => TASKS.list.some(x => x.p.includes(p.k))) : [me];
+  const key = [team, YO, TASKS.updated, Math.floor(t / MIN), [...DONE].join(), JSON.stringify(d).length].join('|');
+  if (!force && key === tgKey) return;
+  tgKey = key;
+  document.getElementById('tgTeam').setAttribute('aria-pressed', team);
+  document.getElementById('tgTeam').hidden = !me;
+  const timed = TASKS.list.filter(x => x.a !== null);
+  const H0 = Math.floor(Math.min(T0, ...timed.map(x => x.a)) / 3600000) * 3600000;
+  const H1 = Math.ceil(Math.max(TEND, ...timed.map(tkEnd)) / 3600000) * 3600000;
+  const yy = v => PAD + (v - H0) / MIN * TPX, HT = (H1 - H0) / MIN * TPX + 2 * PAD;
+  let gut = '';
+  for (let h = H0; h <= H1; h += 3600000) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
+  const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
+  let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
+  cols.forEach((p, ci) => {
+    g += `<div class="tgc" style="grid-column:${ci + 2};height:${HT}px;${bg}">`;
+    const own = timed.filter(x => x.p.includes(p.k));
+    // Les llargues (més de 2 h 30: «de dia», «obertura a 22 h») van com una franja estreta a la dreta i no prenen lloc
+    const long = own.filter(x => x.b && x.b - x.a > 150 * MIN), R = long.length * 16;
+    const mine = p === me;
+    const tag = (x, cls, style, inner) => {
+      const ok = isDone(p.k, x.id), st = ok ? 'done' : t >= tkEnd(x) ? 'late' : t >= x.a ? 'now' : '';
+      return `<${mine ? 'button type="button"' : 'div'} class="${cls} ${st}${mine ? ' mine' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(x.t)}" style="${style}">${inner(ok)}</${mine ? 'button' : 'div'}>`;
+    };
+    long.forEach((x, i) => { g += tag(x, 'tgrail', `top:${yy(x.a)}px;height:${(x.b - x.a) / MIN * TPX - 2}px;right:${2 + i * 16}px`, ok => `<span>${ok ? '✓ ' : ''}${html(x.t)}</span>`); });
+    for (const [x, l, n] of lanes(own.filter(x => !long.includes(x)))) {
+      const h = Math.max(40, (tkEnd(x) - x.a) / MIN * TPX - 2);
+      g += tag(x, 'tgb', `top:${yy(x.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px - ${R}px) / ${n});width:calc((100% - 4px - ${R}px) / ${n} - 3px)`, ok => `<span class="tt">${ok ? '✓ ' : ''}${lbl(x.a)}</span><span class="tn">${html(x.t)}</span>`);
+    }
+    g += '</div>';
+  });
+  if (t >= H0 && t <= H1) g += `<div class="tgnow" style="top:${yy(t)}px;grid-column:2 / ${cols.length + 2}"></div>`;
+  const tg = document.getElementById('tg');
+  tg.style.gridTemplateColumns = `var(--gut) repeat(${cols.length}, minmax(${team ? 112 : 160}px, 1fr))`;
+  tg.style.minWidth = `calc(var(--gut) + ${cols.length} * ${team ? 112 : 160}px)`;
+  tg.innerHTML = g;
+  const nf = (team ? TASKS.list : mineTasks()).filter(x => x.a === null).length;
+  document.getElementById('tgFree').textContent = nf ? `${nf === 1 ? '1 tarea' : `${nf} tareas`} sin hora: salen en «Mi plan», en «Durante el día».` : '';
+  const w = document.getElementById('tgWrap');
+  if (!tgScrolled && w.clientHeight) { tgScrolled = true; w.scrollTop = Math.max(0, yy(Math.min(Math.max(t, H0), H1)) - 80); }
+}
+document.getElementById('tgTeam').addEventListener('click', () => {
+  tgTeam = !tgTeam;
+  try { localStorage.setItem(TGK, tgTeam ? '1' : '0'); } catch (e) {}
+  renderTg(true);
+  if (tgTeam) pullDone().then(() => renderTg(true));
 });
+document.getElementById('tg').addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (b) toggleTask(b.dataset.tk); });
+// Canvi de perfil: tot el de les tasques apareix o desapareix
+for (const r of document.querySelectorAll('input[name="prof"]')) r.addEventListener('change', () => setTimeout(() => { paintYo(); renderPlan(true); renderTg(true); syncPush(); }, 0));
 // Les ✓ van al servidor; si no hi ha cobertura, es queden a la cua i s'envien més tard
 let flushing = false;
 async function flushDone() {
-  if (!ONLINE || !PUSH || !PUSH.url || flushing || !YO || YO === '-') return;
+  if (!ONLINE || !PUSH || !PUSH.url || flushing || !YO || YO === '-') return;  // (les ✓ ja marcades s'envien encara que es canviï de perfil)
   flushing = true;
   while (DQ.length) {
     const q = DQ[0];
@@ -3050,6 +3174,7 @@ async function pullDone() {
       saveDone();
       renderPlan();
     }
+    renderTg();
     return doneAll;
   } catch (e) { return null; }
 }
@@ -3086,13 +3211,15 @@ async function pullTasks() {
     }
   } catch (e) {}
   await flushDone();
-  if (YO && YO !== '-') await pullDone();
+  if (taskOn() && (YO && YO !== '-' || tgTeam)) await pullDone();
 }
 let tkMin = -1;
 setInterval(() => {
   if (document.hidden) return;
   const t = now(), m = Math.floor(t / MIN);
-  if (m !== tkMin) { tkMin = m; renderPlan(); if (sim === null) checkTaskAlerts(t); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
+  renderTg();
+  renderPlan();  // compara una clau: només repinta si alguna cosa ha canviat (també en moure el Modo prueba)
+  if (m !== tkMin) { tkMin = m; if (sim === null) checkTaskAlerts(t); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
 }, 1000);
 let tkN = 0;
 setInterval(() => { if (!document.hidden && ++tkN % 2 === 0) pullTasks(); }, 60000);
@@ -3166,6 +3293,98 @@ document.getElementById('tkSave').addEventListener('click', async () => {
   btn.disabled = false;
 });
 
+// Excel: cada pestanya és d'una persona o d'unes quantes («MARTÍ / CALVINS», «STORY MARTA/LAIA»: STORY = grup).
+// Es busca la fila de títols (la que diu HORA, o la primera amb 2 títols); les caselles TRUE/FALSE (✓ del full) no compten.
+// Una fila sense hora és de l'hora de dalt (i de l'artista de dalt). «Obertura», «De dia (12h a 00h)», «19h», «De 18 a 20h»… s'entenen;
+// el que no té hora clara («Atardecer», «???») queda sense hora, amb el text original entre parèntesis.
+const cap = s => s.toLowerCase().replace(/(^|[\s'-])\p{L}/gu, c => c.toUpperCase());
+function fuzzyTime(s) {
+  s = String(s || '').trim();
+  if (!s) return null;
+  if (/^(obertura|apertura|obrir|abrir)/i.test(s) && !/\d/.test(s)) return { a: FEST.start };
+  const m = [...s.matchAll(/(\d{1,2})(?:[:.](\d{2}))?\s*h?/g)].filter(x => +x[1] < 24);
+  if (!m.length) return null;
+  const f = x => `${x[1].padStart(2, '0')}:${x[2] || '00'}`;
+  const range = m.length > 1 && /\d\s*h?\s*(a|-|–|fins|hasta|al?)\s*(les\s*)?\d/i.test(s);
+  return { a: f(m[0]), b: range ? f(m[1]) : '', note: /^\s*\d{1,2}([:.]\d{2})?\s*h?\s*$/.test(s) ? '' : s };
+}
+const isBool = v => /^(true|false|verdadero|falso|vertader|fals)$/i.test(String(v).trim());
+function sheetTasks(name, rows) {
+  const parts = name.split(/\s*[\/,&+_]\s*|\s+-\s+|\s+(?:i|y)\s+/).map(x => x.trim()).filter(Boolean);
+  let grp = '';
+  const names = parts.map(x => { const w = x.split(/\s+/); if (w.length > 1) { grp = w.slice(0, -1).join(' '); return w[w.length - 1]; } return x; }).map(cap);
+  const cells = r => r.map(v => String(v ?? '').trim());
+  let hi = rows.findIndex(r => cells(r).some(v => /^hora$/i.test(v)));
+  if (hi < 0) hi = rows.findIndex(r => cells(r).filter(v => v && !isBool(v)).length >= 2);
+  const head = hi >= 0 ? cells(rows[hi]) : [];
+  const hc = head.findIndex(v => /^hora$/i.test(v));
+  const lines = [`@${names.map(n => n.replace(/\s+/g, '')).join(' @')}`];
+  let lastT = null, carry = [];
+  for (const raw of rows.slice(hi + 1)) {
+    const r = cells(raw);
+    const vals = r.map((v, i) => i === hc || isBool(v) ? '' : v);
+    const first = vals.findIndex(Boolean);
+    if (first < 0) { if (!r[hc] ) continue; }
+    const filled = vals.filter(Boolean);
+    // Títol d'un apartat («ARTISTES PER DIA»): una sola casella, sense ✓ ni hora
+    if (filled.length === 1 && !r.some(isBool) && !(hc >= 0 && r[hc]) && filled[0] === filled[0].toUpperCase() && filled[0].length < 40) { lastT = null; carry = []; continue; }
+    const own = hc >= 0 && r[hc];
+    if (own) { lastT = fuzzyTime(r[hc]) || { a: '', note: r[hc] }; carry = []; }
+    // Les caselles buides a l'esquerra de la primera plena són les de la fila de dalt (artista…): és una fila de continuació
+    let cont = false;
+    for (let i = 0; i < first; i++) if (i !== hc && !vals[i] && carry[i]) { vals[i] = carry[i]; cont = true; }
+    if (!own && !cont) lastT = null;
+    for (let i = 0; i < vals.length; i++) if (vals[i] && i <= first) carry[i] = vals[i];
+    let text = vals.filter(Boolean).join(' · ').replace(/\s+/g, ' ');
+    if (!text) continue;
+    const tm = hc >= 0 ? lastT : null;
+    if (tm && tm.note) text += ` (${tm.note})`;
+    lines.push(tm && tm.a ? `${tm.a}${tm.b ? '-' + tm.b : ''} ${text}` : `- ${text}`);
+  }
+  return { names, grp, lines: lines.length > 1 ? lines : [] };
+}
+let xlsxLib = null;
+const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
+  const sc = document.createElement('script');
+  sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; no(new Error('xlsx')); };
+  document.head.appendChild(sc);
+}));
+document.getElementById('tkFile').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  edMsg('Leyendo el Excel…');
+  try {
+    const X = await loadXlsx();
+    const wb = X.read(await f.arrayBuffer(), { type: 'array' });
+    const team = parseTeam(tkTeam.value).people;
+    const out = [];
+    let n = 0;
+    for (const sn of wb.SheetNames) {
+      const rows = X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: false, defval: '' });
+      const st = sheetTasks(sn, rows);
+      if (!st.lines.length) continue;
+      n += st.lines.length - 1;
+      out.push(`# ${sn}`, ...st.lines, '');
+      for (const nm of st.names) {
+        const p = team.find(q => q.k === nk(nm));
+        if (!p) team.push({ k: nk(nm), n: nm, r: st.grp ? [cap(st.grp)] : [] });
+        else if (st.grp && !p.r.some(r => nk(r) === nk(st.grp))) p.r.push(cap(st.grp));
+      }
+    }
+    if (!n) return edMsg('No hemos encontrado tareas en el Excel. ¿Tiene una pestaña por persona?', true);
+    if (tkList.value.trim() && !confirm(`Hemos encontrado ${n} tareas en ${out.filter(l => l.startsWith('# ')).length} pestañas. Se cambian por las que hay ahora. ¿Continuar?`)) return edMsg('');
+    tkTeam.value = team.map(p => p.n + (p.r.length ? ': ' + p.r.join(', ') : '')).join('\n');
+    tkList.value = out.join('\n').trim();
+    tkDraft();
+    tkPreview();
+    edMsg(`Excel leído: ${n} tareas. Revísalas y pulsa «Guardar y publicar».`);
+  } catch (err) {
+    edMsg(err.message === 'xlsx' ? 'No se ha podido cargar el lector de Excel. Mira la conexión.' : 'No hemos podido leer el archivo. ¿Es un Excel (.xlsx)?', true);
+  }
+});
+
 // --- Organización → Vista global: qui ha de fer què a cada hora i què està fet ---
 let gvWho = '';
 function renderGlobal() {
@@ -3182,10 +3401,10 @@ function renderGlobal() {
   let h = '', rows = '';
   for (const x of TASKS.list) {
     if (gvWho && !x.p.includes(gvWho)) continue;
-    if (hourOf(x.a) !== h) { h = hourOf(x.a); rows += `<li class="grp"><b>${h} h</b></li>`; }
+    if (grpOf(x.a) !== h) { h = grpOf(x.a); rows += `<li class="grp"><b>${h}</b></li>`; }
     const late = t >= tkEnd(x);
     const chips = x.p.map(k => { const ok = isDone(k, x.id); return `<span class="gvc ${ok ? 'ok' : late ? 'late' : ''}">${ok ? '✓ ' : ''}${html((person(k) || { n: k }).n)}</span>`; }).join('') || '<span class="gvc late">Nadie</span>';
-    rows += `<li class="gvt"><span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span><span class="tkn">${html(x.t)}<span class="gvcs">${chips}</span></span></li>`;
+    rows += `<li class="gvt">${tkWhen(x)}<span class="tkn">${html(x.t)}<span class="gvcs">${chips}</span></span></li>`;
   }
   box.innerHTML = out + `<ul class="tklist">${rows}</ul>`;
 }
