@@ -1,24 +1,622 @@
 {
  "v": 1,
  "fest": "castanyada-2026",
- "updated": "2026-10-28T12:39:43.758Z",
+ "updated": "2026-10-28T14:07:20.000Z",
  "by": "mkt",
- "team": "Laia",
- "tasks": "12:30 - Gravar entrada @laia",
+ "team": "Martí\nCalvins\nLaia: Story\nMarta: Story",
+ "tasks": "# MARTÍ - CALVINS\n@Martí @Calvins\n- PARTIT POLÍTIC CABRÓ ROCK · Públic · Fuet · Algun xarrup o consumició per donar\n- BOTIFLOMETRE · Públic + VIP · Fuet · 20 barretines, 20 cintes CAT, 50 banderes ES + Pintacaras + Fuet\n- PARLA CATALÀ COLLONS · Públic i entrada · Micro amagat (Càmara oculta)\n- PUNTUANT OUTFITS ALBINA MODA · Públic · Micro normal o el que ella vulgui\n- PANELLETS LLUC CRUSELLAS · Públic · Micro amagat · Dolç Halloween + Ingredients (Pack fer panellets) + Pinya Pinyons\n\n# LAIA\n@Laia\n15:30 31 FAM · Missatges festivals · NOU DISC! + 10 ANYS + PRIMER COP A TOT ARREU\n15:30 31 FAM · Reel EMF - Martí\n15:30 31 FAM · JOC: Endevina qui és\n17:15 Els Amics de les Arts · Missatges festivals - NO EMF · NOU DISC! + PRIMER COP A FESTIUET\n17:15 Els Amics de les Arts · Test BOFIFLER\n19:00 Els Pets · Entrevista genèrica\n20:40 La Ludwig Band · Missatges festivals · PRIMER COP A TOT ARREU\n20:40 La Ludwig Band · Test BOFIFLER\n22:30 Lax'n'Busto · Missatges festivals - NO FESTIUET · REACCIÓ AL VÍDEO DEL CABRÓ CARROUSEL\n22:30 Lax'n'Busto · Test BOFIFLER\n22:30 Lax'n'Busto · JOC: Endevina qui és\n00:15 Els Catarres · Missatges festivals · DESTACAR CULTURA, TRADICIONS...\n00:15 Els Catarres · Test BOFIFLER\n00:15 Els Catarres · Puja Pack Català\n01:55 The Tyets · Missatges festivals · NOU DISC! + Tema Raquel Sans\n01:55 The Tyets · Puja Pack Català\n01:55 The Tyets · JOC: Endevina qui és\n- Miki Núñez · Missatge Cabró Rock · Tema Raquel Sans (???)\n03:35 Figa Flawas · Missatges festivals · NOU DISC! + Reacció de l'últim Cabró\n03:35 Figa Flawas · JOC: Endevina qui és\n05:00 Doctor Prats · Missatges festivals · Preguntar si treuran nova música\n05:00 Doctor Prats · Puja Pack Català\n\n# STORY MARTA_LAIA\n@Marta @Laia\n12:00 Entrada - Gent correns\n12:00 Entrada - Fuets Noel · IMPORTANT: PATROS!\n12:00-22:00 Photocall Enganxines (Obertura (12h a 22h))\n12:00-00:00 Atracció Calçot (De dia (12h a 00h))\n12:00-00:00 Atracció Burro (De dia (12h a 00h))\n14:10 Sardanes + Cobla 1\n15:30 Sardanes + Cobla 2\n- Estrella (De dia si es pot)\n- Negrita (De dia si es pot)\n- Foodtrucks (Atardecer)\n- Zona de descans (Tarda, atardecer)\n17:15 Lo Pau de Ponts - Garrotins\n18:00-20:00 Photocall Nena i Cabró (De 18 a 20h)\n18:00-00:00 Túnel del Terror (De nit (18h a 00h))\n18:20 Actuacions Gegants, Bastoners i Gitanes 1\n19:00 Actuacions Gegants, Bastoners i Gitanes 2\n19:00 Havaneres + Ron Cremat\n19:40 Actuació Castellers\n20:00 Emisió La Xarxa + (20h -> a les 20:40h comencen)\n20:40 Gran Aplec Cultura Catalana\n22:30 K-ZU Moment Viral (22:30 / 00:15)\n- Vídeos per IA (moments pel recinte \"naturals\")\n12:30 JULS\n13:30 VEN'NUS\n14:30 31 FAM\n16:00 Els Amics de les Arts\n17:45 Els Pets\n19:30 La Ludwig Band\n20:40 Gran Aplec de la Cultura Catalana\n21:10 Lax'n'Busto\n23:00 Els Catarres\n00:45 The Tyets (+ tema Miki Núñez)\n02:25 Figa Flawas\n04:00 Doctor Prats",
  "people": [
+  {
+   "k": "marti",
+   "n": "Martí",
+   "r": []
+  },
+  {
+   "k": "calvins",
+   "n": "Calvins",
+   "r": []
+  },
   {
    "k": "laia",
    "n": "Laia",
-   "r": []
+   "r": [
+    "Story"
+   ]
+  },
+  {
+   "k": "marta",
+   "n": "Marta",
+   "r": [
+    "Story"
+   ]
   }
  ],
  "list": [
   {
-   "id": "t18c8r97",
+   "id": "thew3w4",
+   "a": 1793444400000,
+   "b": 0,
+   "t": "Entrada - Gent correns",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tmgqds0",
+   "a": 1793444400000,
+   "b": 0,
+   "t": "Entrada - Fuets Noel · IMPORTANT: PATROS!",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t6cyav",
+   "a": 1793444400000,
+   "b": 1793480400000,
+   "t": "Photocall Enganxines (Obertura (12h a 22h))",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tuh44h8",
+   "a": 1793444400000,
+   "b": 1793487600000,
+   "t": "Atracció Calçot (De dia (12h a 00h))",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t2rhnz6",
+   "a": 1793444400000,
+   "b": 1793487600000,
+   "t": "Atracció Burro (De dia (12h a 00h))",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "ti8pf2p",
    "a": 1793446200000,
    "b": 0,
-   "t": "- Gravar entrada",
+   "t": "JULS",
    "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tf3qaod",
+   "a": 1793449800000,
+   "b": 0,
+   "t": "VEN'NUS",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tzc7q3h",
+   "a": 1793452200000,
+   "b": 0,
+   "t": "Sardanes + Cobla 1",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1ed0diz",
+   "a": 1793453400000,
+   "b": 0,
+   "t": "31 FAM",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tb0qwi5",
+   "a": 1793457000000,
+   "b": 0,
+   "t": "31 FAM · Missatges festivals · NOU DISC! + 10 ANYS + PRIMER COP A TOT ARREU",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t19949aw",
+   "a": 1793457000000,
+   "b": 0,
+   "t": "31 FAM · Reel EMF - Martí",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1gjgy3m",
+   "a": 1793457000000,
+   "b": 0,
+   "t": "31 FAM · JOC: Endevina qui és",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tlsqps7",
+   "a": 1793457000000,
+   "b": 0,
+   "t": "Sardanes + Cobla 2",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1m8zpxq",
+   "a": 1793458800000,
+   "b": 0,
+   "t": "Els Amics de les Arts",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1g4tibh",
+   "a": 1793463300000,
+   "b": 0,
+   "t": "Els Amics de les Arts · Missatges festivals - NO EMF · NOU DISC! + PRIMER COP A FESTIUET",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tnmhosg",
+   "a": 1793463300000,
+   "b": 0,
+   "t": "Els Amics de les Arts · Test BOFIFLER",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t23ztrg",
+   "a": 1793463300000,
+   "b": 0,
+   "t": "Lo Pau de Ponts - Garrotins",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t14ltdf3",
+   "a": 1793465100000,
+   "b": 0,
+   "t": "Els Pets",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t19mgx1e",
+   "a": 1793466000000,
+   "b": 1793473200000,
+   "t": "Photocall Nena i Cabró (De 18 a 20h)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tueqs4o",
+   "a": 1793466000000,
+   "b": 1793487600000,
+   "t": "Túnel del Terror (De nit (18h a 00h))",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1dk8hwn",
+   "a": 1793467200000,
+   "b": 0,
+   "t": "Actuacions Gegants, Bastoners i Gitanes 1",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t17rkzn9",
+   "a": 1793469600000,
+   "b": 0,
+   "t": "Els Pets · Entrevista genèrica",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1grfvjc",
+   "a": 1793469600000,
+   "b": 0,
+   "t": "Actuacions Gegants, Bastoners i Gitanes 2",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "ti1974w",
+   "a": 1793469600000,
+   "b": 0,
+   "t": "Havaneres + Ron Cremat",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tqoumlb",
+   "a": 1793471400000,
+   "b": 0,
+   "t": "La Ludwig Band",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t14hzwnr",
+   "a": 1793472000000,
+   "b": 0,
+   "t": "Actuació Castellers",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t19z1q97",
+   "a": 1793473200000,
+   "b": 0,
+   "t": "Emisió La Xarxa + (20h -> a les 20:40h comencen)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t8cqlyw",
+   "a": 1793475600000,
+   "b": 0,
+   "t": "La Ludwig Band · Missatges festivals · PRIMER COP A TOT ARREU",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1txpk0a",
+   "a": 1793475600000,
+   "b": 0,
+   "t": "La Ludwig Band · Test BOFIFLER",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tl9q12f",
+   "a": 1793475600000,
+   "b": 0,
+   "t": "Gran Aplec Cultura Catalana",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1exn0kj",
+   "a": 1793475600000,
+   "b": 0,
+   "t": "Gran Aplec de la Cultura Catalana",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1259pbh",
+   "a": 1793477400000,
+   "b": 0,
+   "t": "Lax'n'Busto",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1nncqq",
+   "a": 1793482200000,
+   "b": 0,
+   "t": "Lax'n'Busto · Missatges festivals - NO FESTIUET · REACCIÓ AL VÍDEO DEL CABRÓ CARROUSEL",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tzi9768",
+   "a": 1793482200000,
+   "b": 0,
+   "t": "Lax'n'Busto · Test BOFIFLER",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t157cdsa",
+   "a": 1793482200000,
+   "b": 0,
+   "t": "Lax'n'Busto · JOC: Endevina qui és",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "ttnwt0o",
+   "a": 1793482200000,
+   "b": 0,
+   "t": "K-ZU Moment Viral (22:30 / 00:15)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tffrfam",
+   "a": 1793484000000,
+   "b": 0,
+   "t": "Els Catarres",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1scb709",
+   "a": 1793488500000,
+   "b": 0,
+   "t": "Els Catarres · Missatges festivals · DESTACAR CULTURA, TRADICIONS...",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t14iprl8",
+   "a": 1793488500000,
+   "b": 0,
+   "t": "Els Catarres · Test BOFIFLER",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1pyu1g0",
+   "a": 1793488500000,
+   "b": 0,
+   "t": "Els Catarres · Puja Pack Català",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t78vxf0",
+   "a": 1793490300000,
+   "b": 0,
+   "t": "The Tyets (+ tema Miki Núñez)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "tres6m2",
+   "a": 1793494500000,
+   "b": 0,
+   "t": "The Tyets · Missatges festivals · NOU DISC! + Tema Raquel Sans",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t17ub6l4",
+   "a": 1793494500000,
+   "b": 0,
+   "t": "The Tyets · Puja Pack Català",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1x6b0ja",
+   "a": 1793494500000,
+   "b": 0,
+   "t": "The Tyets · JOC: Endevina qui és",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "ti87w4m",
+   "a": 1793496300000,
+   "b": 0,
+   "t": "Figa Flawas",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t3y6r0",
+   "a": 1793500500000,
+   "b": 0,
+   "t": "Figa Flawas · Missatges festivals · NOU DISC! + Reacció de l'últim Cabró",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t1kkug2x",
+   "a": 1793500500000,
+   "b": 0,
+   "t": "Figa Flawas · JOC: Endevina qui és",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tws15nv",
+   "a": 1793502000000,
+   "b": 0,
+   "t": "Doctor Prats",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t5mnp15",
+   "a": 1793505600000,
+   "b": 0,
+   "t": "Doctor Prats · Missatges festivals · Preguntar si treuran nova música",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "tfg82wz",
+   "a": 1793505600000,
+   "b": 0,
+   "t": "Doctor Prats · Puja Pack Català",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t15u1tqv",
+   "a": null,
+   "b": 0,
+   "t": "PARTIT POLÍTIC CABRÓ ROCK · Públic · Fuet · Algun xarrup o consumició per donar",
+   "p": [
+    "marti",
+    "calvins"
+   ]
+  },
+  {
+   "id": "t1kdevqa",
+   "a": null,
+   "b": 0,
+   "t": "BOTIFLOMETRE · Públic + VIP · Fuet · 20 barretines, 20 cintes CAT, 50 banderes ES + Pintacaras + Fuet",
+   "p": [
+    "marti",
+    "calvins"
+   ]
+  },
+  {
+   "id": "tj8z4ye",
+   "a": null,
+   "b": 0,
+   "t": "PARLA CATALÀ COLLONS · Públic i entrada · Micro amagat (Càmara oculta)",
+   "p": [
+    "marti",
+    "calvins"
+   ]
+  },
+  {
+   "id": "t195vamm",
+   "a": null,
+   "b": 0,
+   "t": "PUNTUANT OUTFITS ALBINA MODA · Públic · Micro normal o el que ella vulgui",
+   "p": [
+    "marti",
+    "calvins"
+   ]
+  },
+  {
+   "id": "tv43yn4",
+   "a": null,
+   "b": 0,
+   "t": "PANELLETS LLUC CRUSELLAS · Públic · Micro amagat · Dolç Halloween + Ingredients (Pack fer panellets) + Pinya Pinyons",
+   "p": [
+    "marti",
+    "calvins"
+   ]
+  },
+  {
+   "id": "terqe47",
+   "a": null,
+   "b": 0,
+   "t": "Miki Núñez · Missatge Cabró Rock · Tema Raquel Sans (???)",
+   "p": [
+    "laia"
+   ]
+  },
+  {
+   "id": "t8dedbi",
+   "a": null,
+   "b": 0,
+   "t": "Estrella (De dia si es pot)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1iyb5da",
+   "a": null,
+   "b": 0,
+   "t": "Negrita (De dia si es pot)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1hy57vl",
+   "a": null,
+   "b": 0,
+   "t": "Foodtrucks (Atardecer)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t1c61j7l",
+   "a": null,
+   "b": 0,
+   "t": "Zona de descans (Tarda, atardecer)",
+   "p": [
+    "marta",
+    "laia"
+   ]
+  },
+  {
+   "id": "t5h5ha1",
+   "a": null,
+   "b": 0,
+   "t": "Vídeos per IA (moments pel recinte \"naturals\")",
+   "p": [
+    "marta",
     "laia"
    ]
   }
