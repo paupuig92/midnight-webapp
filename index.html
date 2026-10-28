@@ -849,6 +849,9 @@ body[data-tab="equipo"].needyo :is(#plan, #tkgrid) { display: none !important; }
 .tabbar button[aria-current] { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .tabbadge { position: absolute; top: 0; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg); background: var(--now, #e33); color: #fff; font: 800 10px/16px var(--ui, inherit); text-align: center; }  /* a la cantonada de la icona, sense tapar-la */
 body { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); min-height: 100lvh; box-sizing: border-box; }  /* mai més curta que la pantalla (la barra de baix no salta) */
+/* Barra de baix clavada: a l'iPhone l'efecte «goma» en estirar la pàgina la feia pujar i baixar */
+html, body { overscroll-behavior-y: none; }
+.tabbar { transform: translateZ(0); will-change: transform; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
