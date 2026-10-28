@@ -1,4 +1,4 @@
-const VERSION = 'bitp-6ea35793';
+const VERSION = 'bitp-54d30a2f';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/Blogh.woff2", "img/Bricolage-Bold.woff2", "img/Bricolage-ExtraBold.woff2", "img/Bricolage-SemiCondensed-SemiBold.woff2", "img/banner.jpg", "img/bn-cabra.webp", "img/bn-titol.webp", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-foto.png", "img/deco-got.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-m-crack.png", "img/deco-m-enamorat.png", "img/deco-m-enfadat.png", "img/deco-m-festa.png", "img/deco-m-flipat.png", "img/deco-m-guai.png", "img/deco-m-plora.png", "img/deco-m-xocat.png", "img/deco-mecanic.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/logo-31fam.png", "img/logo-amics.png", "img/logo-aplec.png", "img/logo-catarres.png", "img/logo-figa.png", "img/logo-juls.png", "img/logo-lax.png", "img/logo-ludwig.png", "img/logo-pets.png", "img/logo-prats.png", "img/logo-tyets.png", "img/logo-vennus.png", "img/mapa.jpg", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
 
@@ -73,12 +73,13 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) {
     if (!url.hostname.endsWith('fonts.googleapis.com') && !url.hostname.endsWith('fonts.gstatic.com')) return;  // API de GitHub: directe
   }
-  // Canvis de l'organització: sempre primer la xarxa; sense cobertura, l'última còpia
-  if (url.pathname.endsWith('/changes.json')) {
+  // Canvis de l'organització i tasques de l'equip: sempre primer la xarxa; sense cobertura, l'última còpia
+  const live = ['changes.json', 'tasks.json'].find(f => url.pathname.endsWith('/' + f));
+  if (live) {
     e.respondWith(caches.open(VERSION).then(cache => fetch(e.request).then(res => {
-      if (res.ok) cache.put('changes.json', res.clone());
+      if (res.ok) cache.put(live, res.clone());
       return res;
-    }).catch(() => cache.match('changes.json').then(r => r || new Response('', { status: 504 })))));
+    }).catch(() => cache.match(live).then(r => r || new Response('', { status: 504 })))));
     return;
   }
   // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)

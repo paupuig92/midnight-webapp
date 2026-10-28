@@ -184,6 +184,8 @@ if _left:
   Cache-Control: no-cache
 /changes.json
   Cache-Control: no-store
+/tasks.json
+  Cache-Control: no-store
 /cartel.json
   Cache-Control: no-cache
 /manifest.webmanifest
@@ -305,12 +307,13 @@ self.addEventListener('fetch', e => {{
   if (url.origin !== location.origin) {{
     if (!url.hostname.endsWith('fonts.googleapis.com') && !url.hostname.endsWith('fonts.gstatic.com')) return;  // API de GitHub: directe
   }}
-  // Canvis de l'organització: sempre primer la xarxa; sense cobertura, l'última còpia
-  if (url.pathname.endsWith('/changes.json')) {{
+  // Canvis de l'organització i tasques de l'equip: sempre primer la xarxa; sense cobertura, l'última còpia
+  const live = ['changes.json', 'tasks.json'].find(f => url.pathname.endsWith('/' + f));
+  if (live) {{
     e.respondWith(caches.open(VERSION).then(cache => fetch(e.request).then(res => {{
-      if (res.ok) cache.put('changes.json', res.clone());
+      if (res.ok) cache.put(live, res.clone());
       return res;
-    }}).catch(() => cache.match('changes.json').then(r => r || new Response('', {{ status: 504 }})))));
+    }}).catch(() => cache.match(live).then(r => r || new Response('', {{ status: 504 }})))));
     return;
   }}
   // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)

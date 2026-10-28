@@ -7,7 +7,9 @@
 //   3. els envia en lots de 40, cada lot des d'una crida pròpia (/send), perquè el pla gratuït només deixa 50 peticions per crida.
 // Els push van sense contingut: en rebre'l, el service worker de l'app demana GET /now i el servidor li diu què mostrar.
 //
-// Dades: Durable Object «Store» amb SQLite (un registre per mòbil; coherent i sense curses). Taules: subs, kv ('last', 'sets').
+// Tasques de l'equip («Mi plan»): l'organització publica docs/tasks.json; el mòbil diu qui és (yo) i quants minuts abans vol l'avís (tb).
+// Les ✓ de les tasques es guarden aquí (POST /done) perquè l'organització les vegi a la vista global (GET /done).
+// Dades: Durable Object «Store» amb SQLite (un registre per mòbil; coherent i sense curses). Taules: subs, done, kv ('last', 'sets', 'tasks').
 // Secrets: VAPID_JWK (clau privada), SEND_KEY (per a /send). Text: VAPID_PUBLIC. Enllaços: STORE (Durable Object), SELF (el mateix worker).
 // CARTEL (l'horari del cartell) el posa instala.sh a partir de docs/cartel.json.
 
@@ -52,6 +54,9 @@ const idOf = async endpoint => [...new Uint8Array(await crypto.subtle.digest('SH
 const okEndpoint = ep => { try { return typeof ep === 'string' && ep.length <= 600 && ep.startsWith('https://') && PUSH_HOSTS.test(new URL(ep).hostname); } catch (e) { return false; } };
 const cleanFavs = f => Array.isArray(f) ? [...new Set(f.filter(x => typeof x === 'string' && /^[\w-]{1,40}$/.test(x)))].slice(0, 80) : [];
 const cleanBefore = b => [0, 5, 10, 15, 20, 30].includes(+b) ? +b : 10;
+const cleanYo = y => typeof y === 'string' && /^[a-z0-9]{1,40}$/.test(y) ? y : '';
+const okTaskId = id => typeof id === 'string' && /^[\w-]{1,40}$/.test(id);
+const MAX_DONE = 5000;
 
 // Horari: { all: { id: { n, a, b, stage } }, key, stamp, notice }
 function digest(sets, stamp, notice) {
@@ -78,6 +83,31 @@ async function fetchSchedule() {
     if (!sameFest(c)) return { sets: CARTEL.sets, stamp: 'cartel', notice: '' };  // són d'un altre festival
     return { sets: c.sets && typeof c.sets === 'object' ? c.sets : CARTEL.sets, stamp: c.updated, notice: c.notice };
   } catch (e) { return null; }
+}
+
+// Tasques: { list: [{ id, a, b, t, p: [qui] }] } (a i b ja en ms; p = les persones a qui toca, ja resoltes per l'app)
+async function fetchTasks() {
+  try {
+    const r = await fetch(`${PAGES}tasks.json?t=${Date.now()}`, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(6000) });
+    if (r.status === 404) return { list: [], stamp: 'none' };
+    if (!r.ok) return null;
+    const c = await r.json();
+    if (!c || typeof c !== 'object' || c.fest !== CARTEL.fest || !Array.isArray(c.list)) return { list: [], stamp: 'none' };
+    const list = c.list.filter(x => x && okTaskId(x.id) && Number.isFinite(x.a) && typeof x.t === 'string' && Array.isArray(x.p))
+      .slice(0, 2000).map(x => ({ id: x.id, a: x.a, t: x.t.slice(0, 120), p: x.p.filter(k => cleanYo(k)) }));
+    return { list, stamp: String(c.updated || '') };
+  } catch (e) { return null; }
+}
+function dueTasks(sub, list, from, to) {
+  const items = [];
+  if (!sub.yo || !(sub.tb > 0) || !list) return items;
+  for (const x of list) {
+    if (!x.p.includes(sub.yo)) continue;
+    const pre = x.a - sub.tb * MIN;
+    if (pre > from && pre <= to) items.push({ title: `Tasca · d’aquí a ${sub.tb} min`, body: x.t, tag: `tk-${x.id}@${x.a}:pre` });
+    if (x.a > from && x.a <= to) items.push({ title: 'Tasca · ara', body: x.t, tag: `tk-${x.id}@${x.a}:go` });
+  }
+  return items;
 }
 
 // Què toca avisar a un mòbil en la finestra (from, to]
@@ -143,8 +173,8 @@ async function sendBatch(env, list) {
 // Cada minut
 async function everyMinute(env, now) {
   if (now > END) return;
-  const fresh = await fetchSchedule();
-  const res = await callStore(env, '/tick', { now, fresh });
+  const [fresh, tasks] = await Promise.all([fetchSchedule(), fetchTasks()]);
+  const res = await callStore(env, '/tick', { now, fresh, tasks });
   const targets = res.targets || [];
   if (!targets.length) return;
   const chunks = [];
@@ -165,9 +195,15 @@ export class Store {
     this.sql = state.storage.sql;
     this.sql.exec(`CREATE TABLE IF NOT EXISTS subs (id TEXT PRIMARY KEY, endpoint TEXT NOT NULL, favs TEXT NOT NULL, before INTEGER NOT NULL, changes INTEGER NOT NULL, at INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS done (who TEXT NOT NULL, id TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (who, id))`);
+    // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
+    const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
+    if (!cols.includes('yo')) this.sql.exec("ALTER TABLE subs ADD COLUMN yo TEXT NOT NULL DEFAULT ''");
+    if (!cols.includes('tb')) this.sql.exec('ALTER TABLE subs ADD COLUMN tb INTEGER NOT NULL DEFAULT 10');
     // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
+      this.sql.exec('DELETE FROM done');
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
@@ -186,10 +222,10 @@ export class Store {
     } catch (e) {}
     this.put('imported', true);
   }
-  upsert(id, endpoint, favs, before, changes, at) {
-    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at`,
-      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at);
+  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10) {
+    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb`,
+      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb);
   }
   row(id) {
     const r = this.sql.exec('SELECT * FROM subs WHERE id = ?', id).toArray()[0];
@@ -201,18 +237,20 @@ export class Store {
     const b = req.method === 'POST' ? await req.json() : {};
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
-      let { favs, before, changes } = b;
+      let { favs, before, changes, yo, tb } = b;
       if (b.old && b.old !== b.endpoint) {
         const oldId = await idOf(b.old), prev = this.row(oldId);
         // Renovació de la subscripció (pushsubscriptionchange): conserva les preferències del registre vell
-        if (prev && favs === undefined) ({ favs, before, changes } = prev);
+        if (prev && favs === undefined) ({ favs, before, changes, yo, tb } = prev);
         this.sql.exec('DELETE FROM subs WHERE id = ?', oldId);
       }
       const cur = this.row(id);
       const nf = cleanFavs(favs), nb = cleanBefore(before), nc = changes !== false;
-      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc) return json({ ok: true, id, same: true });
+      // Un mòbil antic (sense «yo») conserva el que ja hi havia
+      const ny = yo === undefined ? (cur ? cur.yo : '') : cleanYo(yo), nt = tb === undefined ? (cur ? cur.tb : 10) : cleanBefore(tb);
+      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt) return json({ ok: true, id, same: true });
       if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) return json({ error: 'full' }, 429);
-      this.upsert(id, b.endpoint, nf, nb, nc, Date.now());
+      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt);
       return json({ ok: true, id });
     }
     if (url.pathname === '/unsub') { this.sql.exec('DELETE FROM subs WHERE id = ?', await idOf(b.endpoint)); return json({ ok: true }); }
@@ -222,6 +260,22 @@ export class Store {
     if (url.pathname === '/debug') return json({ last: this.get('last'), sets: (this.get('sets') || {}).stamp || null, sent: this.get('sent'),
       subs: this.sql.exec('SELECT id, before, changes, at, favs FROM subs').toArray() });
     if (url.pathname === '/sent') { this.put('sent', b); return json({ ok: true }); }
+    // ✓ d'una tasca (v = true la marca, false la desmarca)
+    if (url.pathname === '/done') {
+      const who = cleanYo(b.who);
+      if (!who || !okTaskId(b.id)) return json({ error: 'bad' }, 400);
+      if (b.v) {
+        if (this.sql.exec('SELECT COUNT(*) AS n FROM done').one().n >= MAX_DONE) return json({ error: 'full' }, 429);
+        this.sql.exec('INSERT INTO done (who, id, at) VALUES (?, ?, ?) ON CONFLICT(who, id) DO NOTHING', who, b.id, Date.now());
+      } else this.sql.exec('DELETE FROM done WHERE who = ? AND id = ?', who, b.id);
+      return json({ ok: true });
+    }
+    // Vista global: totes les ✓ ({ qui: { tasca: hora } })
+    if (url.pathname === '/doneall') {
+      const out = {};
+      for (const r of this.sql.exec('SELECT who, id, at FROM done').toArray()) (out[r.who] = out[r.who] || {})[r.id] = r.at;
+      return json({ done: out });
+    }
 
     // Horari vigent: el fresc si n'hi ha; si no, l'últim bo; si no, el cartell
     const current = fresh => {
@@ -233,6 +287,9 @@ export class Store {
     if (url.pathname === '/tick') {
       const { now, fresh } = b;
       const sch = current(fresh);
+      // Tasques: les fresques si n'hi ha; si GitHub falla, les últimes bones
+      if (b.tasks) this.put('tasks', b.tasks);
+      const tasks = (b.tasks || this.get('tasks') || {}).list || [];
       if (fresh) {
         const s = this.get('sets');
         if (!s || s.stamp !== fresh.stamp) this.put('sets', { sets: fresh.sets, stamp: fresh.stamp, notice: fresh.notice });
@@ -240,7 +297,7 @@ export class Store {
       const targets = new Map();
       for (const sub of this.sql.exec('SELECT * FROM subs').toArray()) {
         const s = { ...sub, favs: JSON.parse(sub.favs), changes: !!sub.changes };
-        if (dueFor(s, sch.all, now - MIN, now).length) targets.set(s.id, s.endpoint);
+        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length) targets.set(s.id, s.endpoint);
       }
       // Canvi de l'organització: només si l'horari publicat és més nou que el que ja s'havia vist
       if (fresh) {
@@ -266,7 +323,7 @@ export class Store {
       if (!sub) return json({ items: [] });
       const sch = current(null);
       // 15 min: el mateix temps que Apple guarda el push si el mòbil no té cobertura (TTL 900 s); el mòbil no repeteix el que ja ha mostrat
-      const items = dueFor(sub, sch.all, b.now - 15 * MIN, b.now);
+      const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now)];
       const last = this.get('last');
       if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
       return json({ items });
@@ -286,6 +343,12 @@ export default {
         const list = (await req.json()).filter(t => t && typeof t.id === 'string' && okEndpoint(t.endpoint)).slice(0, BATCH);
         return json(await sendBatch(env, list));
       }
+      // ✓ de les tasques: les marca cada mòbil i les llegeix la vista global de l'organització
+      if (req.method === 'POST' && url.pathname === '/done') {
+        const r = await callStore(env, '/done', await req.json());
+        return json(r, r.error ? 400 : 200, origin);
+      }
+      if (req.method === 'GET' && url.pathname === '/done') return json(await callStore(env, '/doneall', {}), 200, origin);
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await req.json();
         if (!okEndpoint(b.endpoint) || (b.old !== undefined && b.old !== '' && !okEndpoint(b.old))) return json({ error: 'endpoint' }, 400, origin);

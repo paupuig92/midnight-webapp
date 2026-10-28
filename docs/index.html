@@ -755,6 +755,41 @@ body.tvon { overflow: hidden; }
   .tvcard { flex: none; }
 }
 @media (prefers-reduced-motion: reduce) { .tvprog i, .tvcard .tbar i { transition: none; } }
+/* Mi plan (tasques per hores) i Organización → Tareas / Vista global */
+#plan .plwho { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
+#plan .plwho b { color: var(--accent); }
+.plask { display: flex; flex-direction: column; gap: 8px; border: 1.5px dashed var(--line); border-radius: 12px; padding: 12px; }
+.plask p { margin: 0; }
+.plask select, .admin .gvsel { font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 10px; max-width: 280px; }
+.pllate { margin: 0 0 6px; color: var(--now); font-weight: 700; font-size: var(--fs-s); }
+.tklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tklist li.grp { padding: 10px 0 2px; font-variant-numeric: tabular-nums; }
+.tklist li.grp b { font-size: var(--fs-s); color: var(--accent); }
+.tklist li.tk, .tklist li.gvt { display: grid; grid-template-columns: auto 58px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.tklist li.gvt { grid-template-columns: 58px minmax(0, 1fr); align-items: start; }
+.tkchk { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: transparent; color: transparent; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.tkchk[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tkt { font: 800 var(--fs-m)/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.tkt small { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); }
+.tkn { font-weight: 700; overflow-wrap: anywhere; }
+.tkn small { display: block; font-weight: 500; font-size: var(--fs-xs); color: var(--muted); }
+.tkf { font: 800 var(--fs-xs)/1 var(--display); text-transform: uppercase; letter-spacing: .06em; padding: 5px 8px; border-radius: 999px; }
+li.tk.now { border-left: 3px solid var(--now); padding-left: 6px; }
+li.tk.now .tkf { background: var(--now); color: #fff; }
+li.tk.late .tkf { border: 1.5px solid var(--now); color: var(--now); }
+li.tk.late .tkchk { border-color: var(--now); }
+li.tk.done .tkn, li.tk.done .tkt { opacity: .45; text-decoration: line-through; }
+.tkwarn { margin: 6px 0 0; padding-left: 18px; color: var(--now); font-size: var(--fs-s); }
+.admin textarea.tkta { font: 15px/1.45 ui-monospace, Menlo, monospace; }
+.gvppl { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.gvp { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.gvp b { color: var(--accent); }
+.gvp i { font-style: normal; color: var(--now); }
+.gvp[aria-pressed="true"] { border-color: var(--accent); }
+.gvcs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.gvc { font-size: var(--fs-xs); font-weight: 700; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.gvc.ok { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.gvc.late { border-color: var(--now); color: var(--now); }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Blogh";src:url("img/Blogh.woff2");font-weight:100 900;font-display:swap}
@@ -800,6 +835,11 @@ body.tvon { overflow: hidden; }
     <div class="dstnote" id="dstnote" hidden></div>
     <div class="notice" id="notice" role="status" hidden></div>
   </header>
+
+  <section id="plan" hidden>
+    <div class="shead"><h2>Mi <span>plan</span></h2><span class="plwho" id="planWho"></span></div>
+    <div id="planBody"></div>
+  </section>
 
   <section id="ahora">
     <span class="mecanic" id="mecanic" aria-hidden="true" hidden><img alt="" width="120" height="144"></span>
@@ -856,6 +896,8 @@ body.tvon { overflow: hidden; }
       <div class="orgmenu">
         <button type="button" class="btn" data-panel="pHorario" aria-expanded="false">Editar horario</button>
         <button type="button" class="btn" data-panel="pAviso" aria-expanded="false">Aviso para todos</button>
+        <button type="button" class="btn" data-panel="pTareas" aria-expanded="false">Tareas</button>
+        <button type="button" class="btn" data-panel="pGlobal" aria-expanded="false">Vista global</button>
         <button type="button" class="btn" id="edClose">Salir</button>
       </div>
 
@@ -876,6 +918,23 @@ body.tvon { overflow: hidden; }
         <p class="note">Para quitar el aviso, borra el texto y publica. Lo verán todos en 1 o 2 minutos.</p>
       </div>
 
+      <div class="panel" id="pTareas" hidden>
+        <label for="tkTeam">Equipo (una persona por línea; después de «:», sus grupos)</label>
+        <textarea id="tkTeam" class="tkta" rows="6" placeholder="Marc: audiovisual, cámara&#10;Laia: audiovisual&#10;Jordi: producción" autocapitalize="words" spellcheck="false"></textarea>
+        <label for="tkList">Tareas (una por línea: hora, tarea y @quién)</label>
+        <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Montar cámaras @audiovisual&#10;18:30 Grabar la entrada de Catarres @Marc @Laia&#10;20:00-20:30 Cambiar baterías @Marc&#10;23:00 Foto de grupo @todos" spellcheck="false"></textarea>
+        <p class="note edhelp">@nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.</p>
+        <div class="note" id="tkInfo"></div>
+        <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Guardar y publicar</button></div>
+        <p class="note">Cada uno elige su nombre en Configuración y solo ve sus tareas en «Mi plan».</p>
+      </div>
+
+      <div class="panel" id="pGlobal" hidden>
+        <p class="note edhelp">Quién tiene qué a cada hora. En verde, lo hecho; en rojo, lo que va tarde. Toca una persona para ver solo lo suyo.</p>
+        <div id="gvBody"></div>
+        <button type="button" class="linkbtn" id="gvRefresh">Actualizar</button>
+      </div>
+
       <div class="edmsg" id="edMsg" role="status"></div>
     </div>
   </section>
@@ -891,6 +950,11 @@ body.tvon { overflow: hidden; }
         <label><input type="radio" name="prof" value="mkt"> Marketing</label>
       </div>
       <p class="note" style="margin:0">Producción y Marketing ven también las prioridades, los efectos, el modo pantalla y la entrada a «Organización».</p>
+    </div>
+    <div class="cgrp" id="yoGrp" hidden>
+      <h3 class="ch">Soy…</h3>
+      <select class="yosel" id="yoSel" aria-label="Quién eres"></select>
+      <p class="note" style="margin:0">Para ver tus tareas en «Mi plan». Solo ves las tuyas.</p>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
@@ -915,6 +979,11 @@ body.tvon { overflow: hidden; }
       <div class="hint" id="notifMsg" hidden></div>
       <label class="cfgsel" for="prefBefore">Avisarme de mis artistas
         <select id="prefBefore">
+          <option value="0">No avisar</option><option value="5">5 min antes</option><option value="10">10 min antes</option><option value="15">15 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option>
+        </select>
+      </label>
+      <label class="cfgsel" for="prefTb" id="prefTbLbl" hidden>Avisarme de mis tareas
+        <select id="prefTb">
           <option value="0">No avisar</option><option value="5">5 min antes</option><option value="10">10 min antes</option><option value="15">15 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option>
         </select>
       </label>
@@ -1588,6 +1657,12 @@ let prefs = { before: 10, changes: true };
 try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; } catch (e) {}
 prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
 prefs.changes = prefs.changes !== false;
+prefs.tb = [0, 5, 10, 15, 20, 30].includes(+prefs.tb) ? +prefs.tb : 10;
+// Qui sóc (per a «Mi plan»): la clau del nom a l'equip; '-' = no sóc de l'equip
+const YOK = FEST.key + '-yo-v1';
+let YO = '';
+try { YO = localStorage.getItem(YOK) || ''; } catch (e) {}
+const yoPush = () => YO && YO !== '-' ? YO : '';
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 // Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
 const PUSH = {"url": "https://midnight-push.midnightgroup.workers.dev", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
@@ -1965,7 +2040,7 @@ async function syncNow(keepalive) {
   try {
     const sub = await pushSubscription(false);
     if (!sub) { pushActive = false; return notifUI(); }
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes }, keepalive);
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb }, keepalive);
   } catch (e) { syncDirty = true; }
 }
 function syncPush() {
@@ -1980,7 +2055,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) syncN
 addEventListener('pagehide', () => syncNow(true));
 async function pushOn() {
   const sub = await pushSubscription(true);
-  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes });
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb });
   pushActive = true;
 }
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sin respuesta')), ms))]);
@@ -2058,7 +2133,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), tb: prefs.tb });
     pushActive = true;
     notifUI('Restablecidas. También llegarán con el móvil bloqueado.');
   } catch (e) {
@@ -2083,7 +2158,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '26/10 21:42';
+const BUILD = '28/10 13:28';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2782,6 +2857,379 @@ fitClock();
 [...upEl.children].forEach((li, i) => anim(li, RISE, { duration: 360, delay: 260 + i * 35 }));
 booted = true;
 scrollToNow(false);
+// ==== MI PLAN (tasques de l'equip per hores) ====
+// L'organització publica docs/tasks.json (equip + tasques, des d'Organización → Tareas). Cadascú tria qui és a Configuración
+// i només veu les seves tasques. Les ✓ es guarden al mòbil i al servidor d'avisos (POST /done) perquè l'organització
+// les vegi a la «Vista global» (GET /done). Sense servidor (vista prèvia), només al mòbil.
+const TKK = FEST.key + '-tasks-v1', DNK = FEST.key + '-done-v1', DQK = FEST.key + '-doneq-v1', TDK = FEST.key + '-tkdraft-v1';
+let TASKS = { people: [], list: [], updated: '' };
+let DONE = new Set(), DQ = [];
+try { DONE = new Set(JSON.parse(localStorage.getItem(DNK) || '[]')); DQ = JSON.parse(localStorage.getItem(DQK) || '[]').filter(q => q && q.id); } catch (e) {}
+const saveDone = () => { try { localStorage.setItem(DNK, JSON.stringify([...DONE])); localStorage.setItem(DQK, JSON.stringify(DQ.slice(-200))); } catch (e) {} };
+const nk = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+const TK_SLACK = 15 * MIN;   // una tasca sense hora de final «dura» 15 min; després, si no està feta, va tard
+const tkEnd = x => x.b > x.a ? x.b : x.a + TK_SLACK;
+const person = k => TASKS.people.find(p => p.k === k);
+const okTasks = d => d && typeof d === 'object' && d.fest === FEST.id && Array.isArray(d.list) && Array.isArray(d.people);
+function applyTasks(d) {
+  if (!okTasks(d)) return;
+  TASKS = {
+    updated: String(d.updated || ''), team: String(d.team || ''), tasks: String(d.tasks || ''),
+    people: d.people.filter(p => p && p.k && p.n).map(p => ({ k: nk(p.k), n: String(p.n).slice(0, 40), r: Array.isArray(p.r) ? p.r.map(String) : [] })),
+    list: d.list.filter(x => x && x.id && Number.isFinite(x.a) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: x.a, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String) })).sort((x, y) => x.a - y.a),
+  };
+  paintYo();
+  renderPlan(true);
+}
+
+// --- Llegir l'equip i les tasques tal com els escriu l'organització ---
+// Equip, una persona per línia: «Marc: audiovisual, cámara» (els rols són opcionals).
+function parseTeam(src) {
+  const people = [], warn = [], seen = new Set();
+  for (let line of String(src).split('\n')) {
+    line = line.trim();
+    if (!line || line.startsWith('#')) continue;
+    const i = line.search(/[:\t]/);
+    const n = (i < 0 ? line : line.slice(0, i)).trim().slice(0, 40), k = nk(n);
+    if (!k) continue;
+    if (seen.has(k)) { warn.push(`«${n}» sale dos veces en el equipo`); continue; }
+    seen.add(k);
+    people.push({ k, n, r: i < 0 ? [] : line.slice(i + 1).split(/[,;\t]/).map(x => x.trim()).filter(Boolean).slice(0, 8) });
+  }
+  return { people, warn };
+}
+// Qui és «@xxx»: una persona (nom sencer o el primer nom), un rol (tots els que el tenen) o tothom
+function whoOf(tok, people) {
+  const t = nk(tok);
+  if (!t) return null;
+  if (['todos', 'todas', 'tothom', 'equipo', 'all'].includes(t)) return people.map(p => p.k);
+  const exact = people.filter(p => p.k === t);
+  if (exact.length) return [exact[0].k];
+  const first = people.filter(p => nk(p.n.split(/\s+/)[0]) === t);
+  if (first.length === 1) return [first[0].k];
+  const role = people.filter(p => p.r.some(r => nk(r) === t));
+  if (role.length) return role.map(p => p.k);
+  return null;
+}
+const END_M = (([h, m]) => h * 60 + m)(FEST.end.split(':').map(Number));
+// Hora d'una tasca: com a l'horari (de matinada = l'endemà), però el matí abans d'obrir (muntatge) és el mateix dia
+function taskTime(s) {
+  const m = String(s).trim().match(/^(\d{1,2})[:.h](\d{2})$/);
+  if (!m) return NaN;
+  const h = +m[1], mi = +m[2];
+  if (h > 23 || mi > 59) return NaN;
+  let t = T(`${String(h).padStart(2, '0')}:${m[2]}`);
+  const wm = h * 60 + mi;
+  if (wm < START_M && wm > END_M + 60) t -= 24 * 60 * MIN;
+  return t;
+}
+const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+// Tasques, una per línia: «18:30 Grabar la entrada @Marc @Laia», «18:30-19:00 …», «@audiovisual» sol = per a les línies de sota.
+// També es pot enganxar d'un Excel: hora ⇥ tasca ⇥ qui.
+function parseTasks(src, people) {
+  const list = [], warn = [], ids = new Set();
+  let group = [];
+  const TOK = /@([^\s@,;]+)/g;
+  for (let line of String(src).split('\n')) {
+    line = line.trim();
+    if (!line || line.startsWith('#')) continue;
+    let ta, tb, text, toks;
+    if (line.includes('\t')) {
+      const c = line.split('\t').map(x => x.trim());
+      [ta, tb] = c[0].split(/\s*[-–]\s*/);
+      text = c[1] || '';
+      toks = (c.slice(2).join(' ').match(/[^\s,;@]+/g) || []);
+    } else {
+      if (/^(@[^\s@,;]+[\s,;]*)+$/.test(line)) { group = [...line.matchAll(TOK)].map(m => m[1]); continue; }
+      const m = line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/);
+      if (!m) { warn.push(`Sin hora: «${line.slice(0, 40)}»`); continue; }
+      [, ta, tb] = m;
+      toks = [...m[3].matchAll(TOK)].map(x => x[1]);
+      text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
+    }
+    const a = taskTime(ta), b = tb ? taskTime(tb) : 0;
+    if (!Number.isFinite(a)) { warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
+    if (!text) { warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
+    if (!toks.length) toks = group;
+    const p = new Set();
+    for (const tk of toks) {
+      const w = whoOf(tk, people);
+      if (w) w.forEach(k => p.add(k)); else warn.push(`No sé quién es «@${tk}» (${ta} ${text.slice(0, 30)})`);
+    }
+    if (!p.size) warn.push(`Nadie para «${ta} ${text.slice(0, 30)}»`);
+    let id = 't' + hash(a + '|' + nk(text)), n = 2;
+    while (ids.has(id)) id = 't' + hash(a + '|' + nk(text)) + '-' + n++;
+    ids.add(id);
+    list.push({ id, a, b: Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 120), p: [...p] });
+  }
+  list.sort((x, y) => x.a - y.a);
+  return { list, warn };
+}
+
+// --- Qui sóc (Configuración) ---
+const yoSel = document.getElementById('yoSel');
+function paintYo() {
+  const opts = `<option value="">— Elige tu nombre —</option>${TASKS.people.map(p => `<option value="${p.k}">${html(p.n)}</option>`).join('')}<option value="-">No estoy en el equipo</option>`;
+  for (const s of document.querySelectorAll('.yosel')) { s.innerHTML = opts; s.value = YO && (YO === '-' || person(YO)) ? YO : ''; }
+  document.getElementById('yoGrp').hidden = !TASKS.people.length;
+  document.getElementById('prefTbLbl').hidden = !(YO && YO !== '-');
+}
+function setYo(k) {
+  YO = k === '-' ? '-' : nk(k);
+  try { localStorage.setItem(YOK, YO); } catch (e) {}
+  planAll = false;
+  paintYo();
+  renderPlan(true);
+  syncPush();
+  pullDone();
+}
+document.addEventListener('change', e => { if (e.target.classList.contains('yosel')) setYo(e.target.value); });
+const prefTb = document.getElementById('prefTb');
+prefTb.value = String(prefs.tb);
+prefTb.addEventListener('change', () => { prefs.tb = +prefTb.value; savePrefs(); syncPush(); });
+
+// --- «Mi plan» ---
+let planAll = false, planKey = '';
+const mineTasks = () => YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
+const hourOf = t => hm(t).slice(0, 2);
+function tkState(x, t) {
+  if (DONE.has(x.id)) return 'done';
+  if (t >= tkEnd(x)) return 'late';
+  if (t >= x.a) return 'now';
+  return '';
+}
+function withWho(x) {
+  const o = x.p.filter(k => k !== YO).map(k => (person(k) || { n: k }).n);
+  return !o.length ? '' : o.length <= 3 ? `con ${o.map(html).join(', ')}` : `con ${o.length} personas más`;
+}
+function renderPlan(force) {
+  const sec = document.getElementById('plan'), t = now();
+  const show = TASKS.people.length && YO !== '-';
+  sec.hidden = !show;
+  if (!show) return;
+  const me = person(YO), mine = mineTasks();
+  const key = [YO, TASKS.updated, planAll, [...DONE].join(), mine.map(x => tkState(x, t)).join()].join('|');
+  if (!force && key === planKey) return;
+  planKey = key;
+  const box = document.getElementById('planBody'), who = document.getElementById('planWho');
+  if (!me) {
+    who.textContent = '';
+    box.innerHTML = `<div class="plask"><p>${YO ? 'Ya no estás en el equipo de este festival. ' : ''}¿Quién eres? Elige tu nombre y verás tus tareas, hora a hora.</p><select class="yosel" aria-label="Quién eres"></select></div>`;
+    paintYo();
+    return;
+  }
+  const nDone = mine.filter(x => DONE.has(x.id)).length;
+  who.innerHTML = `${html(me.n)} · <b>${nDone}/${mine.length}</b> hechas`;
+  if (!mine.length) { box.innerHTML = '<p class="empty">No tienes tareas asignadas. Si falta algo, díselo a la organización.</p>'; return; }
+  // Normalment: el que va tard, el que toca ara i les 6 següents. «Ver todo el día» les ensenya totes
+  const st = mine.map(x => [x, tkState(x, t)]);
+  const late = st.filter(([, s]) => s === 'late').length;
+  let shown = st;
+  if (!planAll) {
+    const open = st.filter(([, s]) => s === 'late' || s === 'now');
+    shown = [...open, ...st.filter(([x, s]) => s === '' ).slice(0, 6)].sort((p, q) => p[0].a - q[0].a);
+  }
+  let h = '', out = '';
+  for (const [x, s] of shown) {
+    if (hourOf(x.a) !== h) { h = hourOf(x.a); out += `<li class="grp"><b>${h} h</b></li>`; }
+    out += `<li class="tk ${s}"><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Hecha: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
+      + `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span><span class="tkn">${html(x.t)}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
+      + `${s === 'late' ? '<span class="tkf">Tarde</span>' : s === 'now' ? '<span class="tkf">Ahora</span>' : ''}</li>`;
+  }
+  const rest = mine.length - shown.length;
+  box.innerHTML = (late ? `<p class="pllate">${late === 1 ? 'Tienes 1 tarea pendiente de antes' : `Tienes ${late} tareas pendientes de antes`}</p>` : '')
+    + (shown.length ? `<ul class="tklist">${out}</ul>` : '<p class="empty">¡Todo hecho! 🎉</p>')
+    + (rest > 0 || planAll ? `<button type="button" class="linkbtn" id="planAll">${planAll ? 'Ver solo lo que toca' : `Ver todo el día (${mine.length})`}</button>` : '');
+}
+document.getElementById('plan').addEventListener('click', e => {
+  if (e.target.closest('#planAll')) { planAll = !planAll; renderPlan(true); return; }
+  const b = e.target.closest('[data-tk]');
+  if (!b) return;
+  const id = b.dataset.tk, on = !DONE.has(id);
+  if (on) DONE.add(id); else DONE.delete(id);
+  DQ = DQ.filter(q => q.id !== id); DQ.push({ id, v: on });
+  saveDone();
+  try { if (on && navigator.vibrate) navigator.vibrate(30); } catch (e) {}
+  renderPlan(true);
+  if (on && !RM.matches) { const nb = document.querySelector(`[data-tk="${CSS.escape(id)}"]`); if (nb && nb.animate) nb.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.3,1.6,.5,1)' }); }
+  flushDone();
+});
+// Les ✓ van al servidor; si no hi ha cobertura, es queden a la cua i s'envien més tard
+let flushing = false;
+async function flushDone() {
+  if (!ONLINE || !PUSH || !PUSH.url || flushing || !YO || YO === '-') return;
+  flushing = true;
+  while (DQ.length) {
+    const q = DQ[0];
+    try {
+      const r = await fetchT(PUSH.url + '/done', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ who: YO, id: q.id, v: q.v }) }, 8000);
+      if (!r.ok && r.status !== 400) break;
+    } catch (e) { break; }
+    DQ.shift(); saveDone();
+  }
+  flushing = false;
+}
+// Les meves ✓ del servidor (si s'ha reinstal·lat l'app o s'han marcat des d'un altre mòbil); el que està a la cua guanya
+let doneAll = null;
+async function pullDone() {
+  if (!ONLINE || !PUSH || !PUSH.url) return null;
+  try {
+    const r = await fetchT(PUSH.url + '/done?t=' + Date.now(), { cache: 'no-store' }, 8000);
+    if (!r.ok) return null;
+    doneAll = (await r.json()).done || {};
+    if (YO && YO !== '-') {
+      DONE = new Set(Object.keys(doneAll[YO] || {}));
+      for (const q of DQ) if (q.v) DONE.add(q.id); else DONE.delete(q.id);
+      saveDone();
+      renderPlan();
+    }
+    return doneAll;
+  } catch (e) { return null; }
+}
+// Avisos amb l'app oberta (amb el mòbil bloquejat els envia el servidor)
+function checkTaskAlerts(t) {
+  if (!prefs.tb) return;
+  for (const x of mineTasks()) {
+    if (DONE.has(x.id)) continue;
+    const left = x.a - t, k = `tk-${x.id}@${x.a}`;
+    if (left > 0 && left <= prefs.tb * MIN && !told.has(k + ':pre')) {
+      remember(k + ':pre');
+      toast(`✓ <b>${html(x.t)}</b> · ${inDur(left)} (${lbl(x.a)})`, 'info', null, 15000);
+      sysNotify(`Tarea ${inDur(left)}`, x.t, k + ':pre');
+    }
+    if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
+      remember(k + ':go'); remember(k + ':pre');
+      toast(`✓ <b>${html(x.t)}</b> · ahora`, 'info', null, 15000);
+      sysNotify('Tarea: ahora', x.t, k + ':go');
+    }
+  }
+}
+// Després de publicar, durant uns minuts la web encara pot servir el tasks.json d'abans
+let tkPub = '', tkPubUntil = 0;
+async function pullTasks() {
+  if (!ONLINE) return;
+  try {
+    const r = await fetchT(`tasks.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (okTasks(d) && !(tkPub && Date.now() < tkPubUntil && d.updated !== tkPub) && d.updated !== TASKS.updated) {
+        applyTasks(d);
+        try { localStorage.setItem(TKK, JSON.stringify(d)); } catch (e) {}
+      }
+    }
+  } catch (e) {}
+  await flushDone();
+  if (YO && YO !== '-') await pullDone();
+}
+let tkMin = -1;
+setInterval(() => {
+  if (document.hidden) return;
+  const t = now(), m = Math.floor(t / MIN);
+  if (m !== tkMin) { tkMin = m; renderPlan(); if (sim === null) checkTaskAlerts(t); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
+}, 1000);
+let tkN = 0;
+setInterval(() => { if (!document.hidden && ++tkN % 2 === 0) pullTasks(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pullTasks(); });
+try { const c = JSON.parse(localStorage.getItem(TKK) || 'null'); if (okTasks(c)) applyTasks(c); } catch (e) {}
+paintYo();
+renderPlan(true);
+pullTasks();
+
+// --- Organización → Tareas: escriure l'equip i les tasques i publicar docs/tasks.json ---
+const tkTeam = document.getElementById('tkTeam'), tkList = document.getElementById('tkList');
+let tkBase = null, tkLoaded = false;
+async function remoteTasks() {
+  try {
+    const cur = await gh(`/contents/docs/tasks.json?ref=main&t=${Date.now()}`);
+    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+function tkPreview() {
+  const team = parseTeam(tkTeam.value), tasks = parseTasks(tkList.value, team.people);
+  const warn = [...team.warn, ...tasks.warn];
+  document.getElementById('tkInfo').innerHTML = `<b>${tasks.list.length}</b> tareas · <b>${team.people.length}</b> personas`
+    + (warn.length ? `<ul class="tkwarn">${warn.slice(0, 12).map(w => `<li>${html(w)}</li>`).join('')}${warn.length > 12 ? `<li>…y ${warn.length - 12} más</li>` : ''}</ul>` : '');
+  return { team, tasks, warn };
+}
+async function loadTk() {
+  edMsg('Cargando las tareas publicadas…');
+  let remote = null;
+  try { remote = await remoteTasks(); } catch (e) {}
+  const base = okTasks(remote) ? remote : TASKS;
+  tkBase = okTasks(remote) ? String(remote.updated || '') : '';
+  let dr = null;
+  try { dr = JSON.parse(sessionStorage.getItem(TDK) || 'null'); } catch (e) {}
+  if (dr && typeof dr.team === 'string') { tkTeam.value = dr.team; tkList.value = dr.tasks; tkBase = dr.base; edMsg('Hemos recuperado las tareas que aún no habías publicado.'); }
+  else { tkTeam.value = base.team || ''; tkList.value = base.tasks || ''; edMsg(''); }
+  tkLoaded = true;
+  tkPreview();
+}
+const tkDraft = () => { try { sessionStorage.setItem(TDK, JSON.stringify({ team: tkTeam.value, tasks: tkList.value, base: tkBase })); } catch (e) {} };
+tkTeam.addEventListener('input', () => { tkDraft(); tkPreview(); });
+tkList.addEventListener('input', () => { tkDraft(); tkPreview(); });
+document.querySelector('.orgmenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-panel]');
+  if (!b || b.getAttribute('aria-expanded') !== 'true') return;
+  if (b.dataset.panel === 'pTareas' && !tkLoaded) loadTk();
+  if (b.dataset.panel === 'pGlobal') { renderGlobal(); pullDone().then(renderGlobal); }
+});
+document.getElementById('tkSave').addEventListener('click', async () => {
+  const { team, tasks, warn } = tkPreview();
+  if (!team.people.length) return edMsg('Escribe primero el equipo (una persona por línea).', true);
+  if (warn.length && !confirm(`Hay ${warn.length} cosas para revisar (en rojo). ¿Publicar igualmente?`)) return;
+  const btn = document.getElementById('tkSave');
+  btn.disabled = true;
+  edMsg('Publicando las tareas…');
+  try {
+    const remote = await remoteTasks();
+    const rs = okTasks(remote) ? String(remote.updated || '') : '';
+    if (rs !== (tkBase || '') && !confirm('Otra persona ha publicado tareas mientras editabas. Si sigues, se cambian por las tuyas. ¿Continuar?')) throw new Error('cancelado');
+    const data = { v: 1, fest: FEST.id, updated: new Date().toISOString(), by: whoNow(), team: tkTeam.value, tasks: tkList.value, people: team.people, list: tasks.list };
+    await commitFiles([{ path: 'docs/tasks.json', content: JSON.stringify(data, null, 1) }], `${data.by}: Tareas del equipo`);
+    tkBase = data.updated; tkPub = data.updated; tkPubUntil = Date.now() + 15 * MIN;
+    try { sessionStorage.removeItem(TDK); localStorage.setItem(TKK, JSON.stringify(data)); } catch (e) {}
+    applyTasks(data);
+    edMsg('Tareas publicadas. Cada uno las verá en «Mi plan» en 1 o 2 minutos.');
+  } catch (err) {
+    edMsg(err.message === 'cancelado' ? 'No se ha publicado nada.' : err.status === 401 || err.status === 403 ? 'GitHub no deja publicar: revisa el token.' : 'No se ha podido publicar. Mira la conexión y vuelve a probar.', true);
+  }
+  btn.disabled = false;
+});
+
+// --- Organización → Vista global: qui ha de fer què a cada hora i què està fet ---
+let gvWho = '';
+function renderGlobal() {
+  const t = now(), box = document.getElementById('gvBody'), d = doneAll || {};
+  if (!TASKS.list.length) { box.innerHTML = '<p class="empty">Aún no hay tareas publicadas.</p>'; return; }
+  const isDone = (k, id) => !!(d[k] && d[k][id]);
+  const stats = TASKS.people.map(p => {
+    const m = TASKS.list.filter(x => x.p.includes(p.k));
+    return { p, n: m.length, ok: m.filter(x => isDone(p.k, x.id)).length, late: m.filter(x => !isDone(p.k, x.id) && t >= tkEnd(x)).length };
+  }).filter(s => s.n);
+  let out = `<div class="gvppl">${stats.map(s => `<button type="button" class="gvp${s.late ? ' late' : ''}" data-gv="${s.p.k}" aria-pressed="${gvWho === s.p.k}">${html(s.p.n)} <b>${s.ok}/${s.n}</b>${s.late ? ` <i>${s.late} tarde</i>` : ''}</button>`).join('')}</div>`;
+  if (gvWho) out += `<button type="button" class="linkbtn" data-gv="">Ver a todo el equipo</button>`;
+  if (!doneAll) out += `<p class="note">${PUSH && PUSH.url ? 'Cargando lo que ya está hecho…' : 'Sin servidor: aquí no se ve lo que está hecho.'}</p>`;
+  let h = '', rows = '';
+  for (const x of TASKS.list) {
+    if (gvWho && !x.p.includes(gvWho)) continue;
+    if (hourOf(x.a) !== h) { h = hourOf(x.a); rows += `<li class="grp"><b>${h} h</b></li>`; }
+    const late = t >= tkEnd(x);
+    const chips = x.p.map(k => { const ok = isDone(k, x.id); return `<span class="gvc ${ok ? 'ok' : late ? 'late' : ''}">${ok ? '✓ ' : ''}${html((person(k) || { n: k }).n)}</span>`; }).join('') || '<span class="gvc late">Nadie</span>';
+    rows += `<li class="gvt"><span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span><span class="tkn">${html(x.t)}<span class="gvcs">${chips}</span></span></li>`;
+  }
+  box.innerHTML = out + `<ul class="tklist">${rows}</ul>`;
+}
+document.getElementById('pGlobal').addEventListener('click', e => {
+  const b = e.target.closest('[data-gv]');
+  if (b) { gvWho = gvWho === b.dataset.gv ? '' : b.dataset.gv; renderGlobal(); }
+  if (e.target.closest('#gvRefresh')) pullDone().then(renderGlobal);
+});
+setInterval(() => { if (!document.hidden && !document.getElementById('pGlobal').hidden) pullDone().then(renderGlobal); }, 30000);
+// ==== /MI PLAN ====
+
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();

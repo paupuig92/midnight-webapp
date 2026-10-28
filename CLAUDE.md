@@ -54,6 +54,13 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - `festivals/bass-in-the-park-2026/original/` = còpia exacta de tota l'app tal com va funcionar al Bass.
 - Comptador «⏳ quedan X h» fins al final (status + barra fina de dalt).
 
+## Mi plan · tasques de l'equip (des del 28-10-2026)
+- L'organització escriu l'equip i les tasques a Organización → **Tareas** (contrasenya) → publica `docs/tasks.json` (mateix commit per API que changes.json). Porta `fest`.
+- Equip: `Nom: grup1, grup2`. Tasques: `18:30 Text @Nom @grup @todos`, `18:30-19:00 …`, línia només amb `@Marc` = per a les de sota, o enganxar d'Excel (hora⇥tasca⇥qui). 6:00–12:00 = muntatge del mateix dia; de matinada = l'endemà.
+- Cadascú tria **«Soy…»** a Configuración (sense codi, decisió d'en Pau: no passa res si algú veu la feina d'un altre). Secció «Mi plan» a dalt: el que va tard, el que toca i les 6 següents; ✓ per marcar.
+- ✓ al mòbil + servidor d'avisos (`POST/GET /done`, taula `done`) → **Vista global** a Organización (persona × hora, verd fet / vermell tard).
+- Avisos de tasques: `subs.yo` + `subs.tb` (Configuración → «Avisarme de mis tareas»); el cron llegeix `tasks.json`. Cal `push/instala.sh` després de publicar el worker.
+
 ## Pendent
 - Post-festival (24-10 ja passat): treure el cron del servidor, esborrar les dades dels mòbils, revocar els tokens de GitHub i Cloudflare (el de Cloudflare caduca sol ~21-11).
 - Per al proper festival: fer l'app genèrica (dades i colors per festival), canviar `END` del servidor.
