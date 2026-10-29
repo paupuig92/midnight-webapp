@@ -603,6 +603,7 @@ PAIRS = [
     ("`Precisión: ±${Math.round(p.coords.accuracy)} m`", "`Precisió: ±${Math.round(p.coords.accuracy)} m`"),
     ("'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.'", "'Sense permís d’ubicació: activa’l a Configuració de l’iPhone → Privadesa → Localització.'"),
     ("'No encontramos tu ubicación. Prueba al aire libre.'", "'No trobem la teva ubicació. Prova-ho a l’aire lliure.'"),
+    ("'Estás fuera de este mapa. Usa Google Maps (abajo).'", "'Ets fora d\\'aquest mapa. Fes servir Google Maps (a sota).'"),
 ]
 
 

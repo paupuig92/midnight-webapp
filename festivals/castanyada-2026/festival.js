@@ -60,7 +60,10 @@ const FEST = {
             [41.56442172780457, 2.2506536969768542, 816 / 2573, 866 / 1819],      // Escenari Cultura (la bandera verda)
             [41.56382965221928, 2.2510648823627126, 1080 / 2573, 1332 / 1819]] }, // Atraccions (al costat de l'entrada)
     { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'] },  // el mateix lloc: el 2 per si Maps no entén bé l'1
+      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'],
+      geo: [[41.567911089905145, 2.2490694926647645, 1357 / 2573, 806 / 1819],    // Primera rotonda (venint de la C-17)
+            [41.56732443030398, 2.25185982389714, 1600 / 2573, 898 / 1819],       // Rotonda Rocco's Ranch
+            [41.563275572060846, 2.2524024833555014, 1605 / 2573, 1384 / 1819]] }, // Pàrquing  // el mateix lloc: el 2 per si Maps no entén bé l'1
   ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
