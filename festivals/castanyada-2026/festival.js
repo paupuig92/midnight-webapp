@@ -9,7 +9,7 @@ const FEST = {
   // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
   bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
   // «A continuación» sense el farciment: aquests escenaris i importàncies no hi surten (sí a «Ahora suena», a l'horari, als preferits i a la pantalla d'un escenari)
-  nextHide: { stages: ['photo'], imp: [1] },
+  nextHide: { stages: [], imp: [1] },
   date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
   dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
   start: '12:00', end: '05:00',
@@ -45,7 +45,7 @@ const FEST = {
   impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
-  ridesName: 'Atracciones',
+  ridesName: 'Actividades',  // com al PDF: atraccions, photocall i cultura popular, cadascuna amb el seu lloc
   // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
   logos: {
     'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
@@ -60,9 +60,11 @@ const FEST = {
   ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
-    { name: 'Burro català', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
-    { name: 'Calçot mecànic', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
-    { name: 'Túnel del Terror', from: '18:00', to: '00:00', img: 'img/ride-tunel.png' },
+    { name: 'Nena Posseïda · Photocall', from: '18:00', to: '21:00' },
+    { name: 'Cabronàs · Photocall', from: '17:40', to: '20:00' },
+    { name: 'Túnel del terror · Atraccions', from: '18:00', to: '00:00', img: 'img/ride-tunel.png' },
+    { name: 'Burro català · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
+    { name: 'Calçot mecànic · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
     { name: 'Cultura popular · Entrada', from: '18:00', to: '20:00' },  // castellers, gegants, gitanes i bastoners
   ],
   // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
@@ -71,7 +73,6 @@ const FEST = {
   stages: [
     { id: 'principal', name: 'Escenari Principal' },
     { id: 'festa', name: 'Escenari Cultura' },
-    { id: 'photo', name: 'Photocall' },
   ],
   // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol, efectes (FOC, CO2, SPARK, PIRO, CONFETI o un altre)]
   // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
@@ -100,17 +101,6 @@ const FEST = {
       ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
       ['17:15', '17:45', 'Lo Pau de Ponts', 0],
       ['19:00', '19:30', 'Havaneres', 0, 'i cremat popular'],
-    ],
-    photo: [
-      ['17:40', '18:00', 'Cabronàs', 0],
-      ['18:00', '18:20', 'Nena Posseïda', 0],
-      ['18:20', '18:40', 'Cabronàs i entitats', 0],
-      ['18:40', '19:00', 'Nena Posseïda', 0],
-      ['19:00', '19:20', 'Cabronàs i entitats', 0],
-      ['19:20', '19:40', 'Nena Posseïda', 0],
-      ['19:40', '20:00', 'Cabronàs i entitats', 0],
-      ['20:00', '20:20', 'Nena Posseïda', 0],
-      ['20:40', '21:00', 'Nena Posseïda', 0],
     ],
   },
 };
