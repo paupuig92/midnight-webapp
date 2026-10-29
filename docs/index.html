@@ -1500,13 +1500,13 @@ const FEST = {
       ['17:45', '19:00', 'Els Pets', 2],
       ['19:30', '20:40', 'La Ludwig Band', 5],
       ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
-      ['21:10', '22:30', 'Lax’n’Busto', 5, '', ['FOC', 'CONFETI']],
+      ['21:10', '22:30', 'Lax’n’Busto', 5],
       ['22:30', '23:00', 'DJ K-Zu', 1],
       ['23:00', '00:15', 'Els Catarres', 4],
       ['00:15', '00:45', 'DJ K-Zu', 1],
       ['00:45', '01:55', 'The Tyets', 3],
       ['01:55', '02:25', 'Anna Gisbert', 1],
-      ['02:25', '03:35', 'Figa Flawas', 4],
+      ['02:25', '03:35', 'Figa Flawas', 4, '', ['FOC']],
       ['03:35', '04:00', 'Anna Gisbert', 1],
       ['04:00', '05:00', 'Doctor Prats', 2],
     ],
@@ -2521,7 +2521,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '29/10 18:00';
+const BUILD = '29/10 18:33';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
