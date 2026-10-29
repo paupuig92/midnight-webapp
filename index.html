@@ -1410,11 +1410,11 @@ const FEST = {
     'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
     'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
   },
-  // Mapes (opcional): pestanya «Mapa» a la barra de baix. link = botó per obrir-lo a Google Maps
+  // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
   maps: [
     { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias' },
     { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', link: 'https://maps.app.goo.gl/9siyp7kMKsdeeAABA' },
+      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'] },  // el mateix lloc: el 2 per si Maps no entén bé l'1
   ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
@@ -2632,7 +2632,7 @@ document.getElementById('tabMapa').hidden = !MAPS.length;
 if (MAPS.length) {
   document.getElementById('mapList').innerHTML = MAPS.map(m => `<div class="mapit"><h2>${html(m.title)}</h2>
     <div class="mapbox"><img src="${m.img}" alt="${html(m.alt || m.title)}" decoding="async" loading="lazy"></div>
-    ${m.text || m.link ? `<div class="mapaddr">${m.text ? `<p>${html(m.text)}</p>` : ''}${m.link ? `<a class="btn primary" href="${m.link}" target="_blank" rel="noopener">${ICO.loc}Abrir en Google Maps</a>` : ''}</div>` : ''}</div>`).join('');
+    ${m.text || m.links ? `<div class="mapaddr">${m.text ? `<p>${html(m.text)}</p>` : ''}${(m.links || []).map((l, i) => i ? `<a class="linkbtn" href="${l}" target="_blank" rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>` : `<a class="btn primary" href="${l}" target="_blank" rel="noopener">${ICO.loc}Abrir en Google Maps</a>`).join('')}</div>` : ''}</div>`).join('');
   document.getElementById('mapa').hidden = false;
   document.getElementById('mapList').addEventListener('click', e => {
     const mi = e.target.closest('.mapbox img');

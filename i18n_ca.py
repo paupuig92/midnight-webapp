@@ -593,6 +593,7 @@ PAIRS = [
     ('<p class="legend">Toca un mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>', '<p class="legend">Toca un mapa per ampliar-lo i mou-lo amb el dit. Torna a tocar per veure’l sencer.</p>'),
     ("ridesName: 'Actividades',", "ridesName: 'Activitats',"),
     ("openR.length === 1 ? 'En marcha' : `${openR.length} en marcha`", "openR.length === 1 ? 'En marxa' : `${openR.length} en marxa`"),
+    ('rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>', 'rel="noopener">No surt bé? Prova aquesta altra ubicació</a>'),
 ]
 
 

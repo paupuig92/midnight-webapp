@@ -52,11 +52,11 @@ const FEST = {
     'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
     'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
   },
-  // Mapes (opcional): pestanya «Mapa» a la barra de baix. link = botó per obrir-lo a Google Maps
+  // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
   maps: [
     { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias' },
     { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', link: 'https://maps.app.goo.gl/9siyp7kMKsdeeAABA' },
+      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'] },  // el mateix lloc: el 2 per si Maps no entén bé l'1
   ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
