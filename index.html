@@ -743,12 +743,12 @@ body.tvon { overflow: hidden; }
 .mapbox img { display: block; width: 100%; height: auto; cursor: zoom-in; }
 .mapbox.z img { cursor: zoom-out; }
 .gpsdot, .gpsacc { position: absolute; transform: translate(-50%, -50%); pointer-events: none; border-radius: 50%; }
-.gpsdot { width: 9px; height: 9px; background: #1a73e8; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.4); z-index: 3; animation: gpsp 2s ease-in-out infinite; }
+.gpsdot { width: 6px; height: 6px; background: #1a73e8; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.4); z-index: 3; animation: gpsp 2s ease-in-out infinite; }
 /* con de la direcció (com a Google Maps): surt del punt cap on mira el mòbil */
-.gpscone { position: absolute; width: 38px; height: 34px; transform-origin: 50% 100%; transform: translate(-50%, -100%); pointer-events: none; z-index: 2;
+.gpscone { position: absolute; width: 26px; height: 24px; transform-origin: 50% 100%; transform: translate(-50%, -100%); pointer-events: none; z-index: 2;
   background: radial-gradient(farthest-side at 50% 100%, rgba(26, 115, 232, .65), rgba(26, 115, 232, 0)); clip-path: polygon(50% 100%, 0 0, 100% 0); }
-.gpsacc { background: rgba(26, 115, 232, .18); border: 1.5px solid rgba(26, 115, 232, .55); min-width: 24px; min-height: 24px; z-index: 1; }
-@keyframes gpsp { 50% { box-shadow: 0 0 0 5px rgba(26, 115, 232, .25); } }
+.gpsacc { background: rgba(26, 115, 232, .12); border: 1px solid rgba(26, 115, 232, .4); min-width: 14px; min-height: 14px; z-index: 1; }
+@keyframes gpsp { 50% { box-shadow: 0 0 0 3px rgba(26, 115, 232, .25); } }
 @media (prefers-reduced-motion: reduce) { .gpsdot { animation: none; } }
 .gpsbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
 .gpsbtn { display: inline-flex; align-items: center; gap: 8px; }
