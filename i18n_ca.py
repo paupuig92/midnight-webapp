@@ -594,6 +594,15 @@ PAIRS = [
     ("ridesName: 'Actividades',", "ridesName: 'Activitats',"),
     ("openR.length === 1 ? 'En marcha' : `${openR.length} en marcha`", "openR.length === 1 ? 'En marxa' : `${openR.length} en marxa`"),
     ('rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>', 'rel="noopener">No surt bé? Prova aquesta altra ubicació</a>'),
+    ("<span>Dónde estoy</span>", "<span>On soc</span>"),
+    ("textContent = 'Dónde estoy';", "textContent = 'On soc';"),
+    ("textContent = 'Ocultar';", "textContent = 'Amagar';"),
+    ("'Este móvil no da la ubicación.'", "'Aquest mòbil no dona la ubicació.'"),
+    ("msg.textContent = 'Buscando…';", "msg.textContent = 'Buscant…';"),
+    ("'Estás fuera del recinto. Para llegar, usa Google Maps (abajo).'", "'Ets fora del recinte. Per arribar-hi, fes servir Google Maps (a sota).'"),
+    ("`Precisión: ±${Math.round(p.coords.accuracy)} m`", "`Precisió: ±${Math.round(p.coords.accuracy)} m`"),
+    ("'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.'", "'Sense permís d’ubicació: activa’l a Configuració de l’iPhone → Privadesa → Localització.'"),
+    ("'No encontramos tu ubicación. Prueba al aire libre.'", "'No trobem la teva ubicació. Prova-ho a l’aire lliure.'"),
 ]
 
 
