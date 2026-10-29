@@ -1584,7 +1584,7 @@ const LOGOS = FEST.logos || {};
 const bandImg = (x, cls) => x && Object.hasOwn(LOGOS, x.n) ? `<img class="${cls} band" src="${esc(LOGOS[x.n])}" alt="">` : '';
 // Importància: amb colors i número (FEST.impColors, per defecte) o només amb la mida (impColors: false)
 const IMPC = FEST.impColors !== false;
-const impc = t => (!IMPC || FEST.impSize) && t ? (t >= 4 ? ' main' : t <= 2 ? ' minor' : '') : '';
+const impc = t => (!IMPC || FEST.impSize) && t ? (t >= 4 ? ' main' : t <= 1 ? ' minor' : '') : '';  // 1 = DJ entre concerts (ratllat); 2 i 3 = concert normal
 const imp = t => IMPC && t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5">${t}</i>` : '';
 // Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
 // Durades: «2 h 5 min», «8 h», sense zeros i sense partir número i unitat
