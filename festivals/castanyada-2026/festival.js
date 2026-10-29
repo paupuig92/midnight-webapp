@@ -77,17 +77,17 @@ const FEST = {
   // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
   sets: {
     principal: [
-      // importància (en Pau, 29-10): vermell 5 · taronja 4 · groc 3 · verd 2. «TV3» = la retransmet TV3
+      // importància (en Pau, 29-10): vermell 5 · taronja 4 · groc 3 · verd 2
       ['12:30', '13:10', 'Juls', 2],
-      ['13:30', '14:10', 'Ven’nus', 2, 'TV3'],
+      ['13:30', '14:10', 'Ven’nus', 2],
       ['14:30', '15:30', '31 FAM', 5],
-      ['16:00', '17:15', 'Els Amics de les Arts', 3, 'TV3'],
-      ['17:45', '19:00', 'Els Pets', 2, 'TV3'],
-      ['19:30', '20:40', 'La Ludwig Band', 5, 'TV3'],
+      ['16:00', '17:15', 'Els Amics de les Arts', 3],
+      ['17:45', '19:00', 'Els Pets', 2],
+      ['19:30', '20:40', 'La Ludwig Band', 5],
       ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
       ['21:10', '22:30', 'Lax’n’Busto', 5, '', ['FOC', 'CONFETI']],
       ['22:30', '23:00', 'DJ K-Zu', 1],
-      ['23:00', '00:15', 'Els Catarres', 4, 'TV3'],
+      ['23:00', '00:15', 'Els Catarres', 4],
       ['00:15', '00:45', 'DJ K-Zu', 1],
       ['00:45', '01:55', 'The Tyets', 3],
       ['01:55', '02:25', 'Anna Gisbert', 1],
