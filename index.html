@@ -738,8 +738,22 @@ body.tvon { overflow: hidden; }
 .tvone .o-cue .fx { font-size: 1em; }
 .tvst .btn { border-color: var(--sc, var(--line)); }
 .mapbox { box-sizing: border-box; overflow: auto; border-radius: 12px; border: 1px solid var(--rule); background: var(--panel); overscroll-behavior: contain; }
+.mapbox .mapin { position: relative; width: 100%; }
+.mapbox.z .mapin { width: 230%; }
 .mapbox img { display: block; width: 100%; height: auto; cursor: zoom-in; }
-.mapbox.z img { width: 230%; max-width: none; cursor: zoom-out; }
+.mapbox.z img { cursor: zoom-out; }
+.gpsdot, .gpsacc { position: absolute; transform: translate(-50%, -50%); pointer-events: none; border-radius: 50%; }
+.gpsdot { width: 6px; height: 6px; background: #1a73e8; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.4); z-index: 3; animation: gpsp 2s ease-in-out infinite; }
+/* con de la direcció (com a Google Maps): surt del punt cap on mira el mòbil */
+.gpscone { position: absolute; width: 26px; height: 24px; transform-origin: 50% 100%; transform: translate(-50%, -100%); pointer-events: none; z-index: 2;
+  background: radial-gradient(farthest-side at 50% 100%, rgba(26, 115, 232, .65), rgba(26, 115, 232, 0)); clip-path: polygon(50% 100%, 0 0, 100% 0); }
+.gpsacc { background: rgba(26, 115, 232, .12); border: 1px solid rgba(26, 115, 232, .4); min-width: 14px; min-height: 14px; z-index: 1; }
+@keyframes gpsp { 50% { box-shadow: 0 0 0 3px rgba(26, 115, 232, .25); } }
+@media (prefers-reduced-motion: reduce) { .gpsdot { animation: none; } }
+.gpsbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
+.gpsbtn { display: inline-flex; align-items: center; gap: 8px; }
+.gpsbtn svg { width: 18px; height: 18px; }
+.gpsmsg { margin: 0; }
 .tvx { min-height: 40px; padding: 0 16px; font-size: max(13px, .7em); color: var(--muted); }
 @media (orientation: portrait) {
   .tv.alert { grid-template: "top" auto "alert" auto "now" auto "next" minmax(0, 1fr) / minmax(0, 1fr); }
@@ -1412,9 +1426,16 @@ const FEST = {
   },
   // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
   maps: [
-    { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias' },
+    { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias',
+      // «Estás aquí» (opcional): 3 punts del plànol amb les seves coordenades de Google Maps → [lat, lon, x, y] (x i y de 0 a 1 sobre la imatge = píxel / mida; posa el número ja dividit, build_web.py no entén divisions)
+      geo: [[41.563835330953154, 2.2497897580528172, 0.1788, 0.8422],    // Escenari principal
+            [41.56442172780457, 2.2506536969768542, 0.3171, 0.4761],      // Escenari Cultura (la bandera verda)
+            [41.56382965221928, 2.2510648823627126, 0.4197, 0.7323]] }, // Atraccions (al costat de l'entrada)
     { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'] },  // el mateix lloc: el 2 per si Maps no entén bé l'1
+      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'],
+      geo: [[41.567911089905145, 2.2490694926647645, 0.5274, 0.4431],    // Primera rotonda (venint de la C-17)
+            [41.56732443030398, 2.25185982389714, 0.6218, 0.4937],       // Rotonda Rocco's Ranch
+            [41.563275572060846, 2.2524024833555014, 0.6238, 0.7609]] }, // Pàrquing  // el mateix lloc: el 2 per si Maps no entén bé l'1
   ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
@@ -1584,7 +1605,7 @@ const LOGOS = FEST.logos || {};
 const bandImg = (x, cls) => x && Object.hasOwn(LOGOS, x.n) ? `<img class="${cls} band" src="${esc(LOGOS[x.n])}" alt="">` : '';
 // Importància: amb colors i número (FEST.impColors, per defecte) o només amb la mida (impColors: false)
 const IMPC = FEST.impColors !== false;
-const impc = t => (!IMPC || FEST.impSize) && t ? (t >= 4 ? ' main' : t <= 2 ? ' minor' : '') : '';
+const impc = t => (!IMPC || FEST.impSize) && t ? (t >= 4 ? ' main' : t <= 1 ? ' minor' : '') : '';  // 1 = DJ entre concerts (ratllat); 2 i 3 = concert normal
 const imp = t => IMPC && t ? `<i class="imp" style="--tc:var(--t${t})" role="img" aria-label="importancia ${t} de 5">${t}</i>` : '';
 // Temps que queda/falta: sempre cap amunt (mai "0 min" mentre encara no ha passat)
 // Durades: «2 h 5 min», «8 h», sense zeros i sense partir número i unitat
@@ -2631,17 +2652,83 @@ const MAPS = FEST.maps || (FEST.map ? [{ img: FEST.map, title: 'Mapa del recinto
 document.getElementById('tabMapa').hidden = !MAPS.length;
 if (MAPS.length) {
   document.getElementById('mapList').innerHTML = MAPS.map(m => `<div class="mapit"><h2>${html(m.title)}</h2>
-    <div class="mapbox"><img src="${m.img}" alt="${html(m.alt || m.title)}" decoding="async" loading="lazy"></div>
+    <div class="mapbox"><div class="mapin"><img src="${m.img}" alt="${html(m.alt || m.title)}" decoding="async" loading="lazy">${m.geo ? '<i class="gpsacc" hidden></i><i class="gpscone" hidden></i><i class="gpsdot" hidden></i>' : ''}</div></div>
+    ${m.geo ? `<div class="gpsbar"><button type="button" class="btn gpsbtn">${ICO.loc}<span>Dónde estoy</span></button><span class="note gpsmsg" role="status"></span></div>` : ''}
     ${m.text || m.links ? `<div class="mapaddr">${m.text ? `<p>${html(m.text)}</p>` : ''}${(m.links || []).map((l, i) => i ? `<a class="linkbtn" href="${l}" target="_blank" rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>` : `<a class="btn primary" href="${l}" target="_blank" rel="noopener">${ICO.loc}Abrir en Google Maps</a>`).join('')}</div>` : ''}</div>`).join('');
   document.getElementById('mapa').hidden = false;
   document.getElementById('mapList').addEventListener('click', e => {
+    if (e.target.closest('.gpsbtn')) return gpsToggle(e.target.closest('.mapit'));
     const mi = e.target.closest('.mapbox img');
     if (!mi) return;
-    const box = mi.parentElement, r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    const box = mi.closest('.mapbox'), r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
     box.style.height = box.classList.contains('z') ? '' : box.getBoundingClientRect().height + 'px';  // el requadre no canvia de mida, només s'amplia la imatge
     box.classList.toggle('z');
     if (box.classList.contains('z')) { box.scrollLeft = fx * mi.offsetWidth - box.clientWidth / 2; box.scrollTop = fy * mi.offsetHeight - box.clientHeight / 2; }
   });
+}
+// «Dónde estoy»: el punt del GPS sobre el plànol. Amb 3 punts coneguts (lat/lon → x/y) es fa una transformació afí,
+// que també absorbeix que el plànol està girat i no del tot a escala. Només es demana la ubicació en tocar el botó
+let gpsWatch = null, gpsEl = null, gpsHead = null;
+// Brúixola: cap on mira el mòbil (iPhone: webkitCompassHeading; Android: deviceorientationabsolute)
+function gpsOrient(e) {
+  let h = typeof e.webkitCompassHeading === 'number' ? e.webkitCompassHeading : e.absolute && e.alpha !== null ? 360 - e.alpha : null;
+  if (h === null || !gpsEl) return;
+  h += (screen.orientation && screen.orientation.angle) || 0;
+  const c = gpsEl.querySelector('.gpscone'), img = gpsEl.querySelector('.mapbox img');
+  c.style.transform = `translate(-50%, -100%) rotate(${h + gpsEl._fit.north(img.naturalWidth || 2573, img.naturalHeight || 1819)}deg)`;
+  c.hidden = gpsEl.querySelector('.gpsdot').hidden;
+  gpsHead = h;
+}
+function gpsFit(geo) {
+  const [lat0, lon0] = geo[0], kx = 111320 * Math.cos(lat0 * Math.PI / 180), ky = 110574;
+  const m = g => [(g[1] - lon0) * kx, (g[0] - lat0) * ky];  // metres est i nord des del primer punt
+  const [[e1, n1], [e2, n2], [e3, n3]] = geo.map(m), det = e1 * (n2 - n3) - n1 * (e2 - e3) + (e2 * n3 - e3 * n2);
+  const solve = v => [(v[0] * (n2 - n3) - n1 * (v[1] - v[2]) + (v[1] * n3 - v[2] * n2)) / det,
+    (e1 * (v[1] - v[2]) - v[0] * (e2 - e3) + (e2 * v[2] - e3 * v[1])) / det,
+    (e1 * (n2 * v[2] - n3 * v[1]) - n1 * (e2 * v[2] - e3 * v[1]) + v[0] * (e2 * n3 - e3 * n2)) / det];
+  const X = solve(geo.map(g => g[2])), Y = solve(geo.map(g => g[3]));
+  return { at: (lat, lon) => { const [e, n] = m([lat, lon]); return [X[0] * e + X[1] * n + X[2], Y[0] * e + Y[1] * n + Y[2]]; },
+    perM: Math.sqrt(Math.abs(X[0] * Y[1] - X[1] * Y[0])),  // fracció de la imatge per metre (aprox.)
+    north: (W, H) => Math.atan2(X[1] * W, -Y[1] * H) * 180 / Math.PI };  // cap on queda el nord al plànol (graus, 0 = amunt)
+}
+function gpsStop() {
+  if (gpsWatch !== null) navigator.geolocation.clearWatch(gpsWatch);
+  gpsWatch = null; gpsHead = null;
+  removeEventListener('deviceorientation', gpsOrient); removeEventListener('deviceorientationabsolute', gpsOrient);
+  if (!gpsEl) return;
+  gpsEl.querySelectorAll('.gpsdot, .gpsacc, .gpscone').forEach(d => d.hidden = true);
+  gpsEl.querySelector('.gpsbtn span').textContent = 'Dónde estoy';
+  gpsEl.querySelector('.gpsmsg').textContent = '';
+  gpsEl = null;
+}
+function gpsToggle(it) {
+  if (gpsWatch !== null) return gpsStop();
+  const m = MAPS[[...it.parentElement.children].indexOf(it)], msg = it.querySelector('.gpsmsg');
+  if (!('geolocation' in navigator)) { msg.textContent = 'Este móvil no da la ubicación.'; return; }
+  const fit = gpsFit(m.geo), dot = it.querySelector('.gpsdot'), acc = it.querySelector('.gpsacc'), img = it.querySelector('.mapbox img'), cone = it.querySelector('.gpscone');
+  gpsEl = it; it._fit = fit;
+  // La brúixola a l'iPhone demana permís, i només es pot demanar en tocar un botó (ara)
+  const DO = window.DeviceOrientationEvent;
+  const listen = () => { if (gpsEl) addEventListener('ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation', gpsOrient); };
+  if (DO && typeof DO.requestPermission === 'function') DO.requestPermission().then(r => { if (r !== 'denied') listen(); }).catch(listen);
+  else listen();
+  it.querySelector('.gpsbtn span').textContent = 'Ocultar';
+  msg.textContent = 'Buscando…';
+  gpsWatch = navigator.geolocation.watchPosition(p => {
+    const [x, y] = fit.at(p.coords.latitude, p.coords.longitude), W = img.naturalWidth || 2573, H = img.naturalHeight || 1819;
+    const out = x < -0.05 || x > 1.05 || y < -0.05 || y > 1.05;
+    dot.hidden = acc.hidden = out;
+    cone.hidden = out || gpsHead === null;
+    if (out) { msg.textContent = m.links ? 'Estás fuera de este mapa. Usa Google Maps (abajo).' : 'Estás fuera del recinto. Para llegar, usa Google Maps (abajo).'; return; }
+    dot.style.left = acc.style.left = cone.style.left = x * 100 + '%';
+    dot.style.top = acc.style.top = cone.style.top = y * 100 + '%';
+    const rp = Math.min(W / 4, p.coords.accuracy * fit.perM * Math.sqrt(W * H));  // el cercle = el marge d'error del GPS (en píxels de la imatge)
+    acc.style.width = rp * 200 / W + '%'; acc.style.height = rp * 200 / H + '%';
+    msg.textContent = `Precisión: ±${Math.round(p.coords.accuracy)} m`;
+  }, err => {
+    msg.textContent = err.code === 1 ? 'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.' : 'No encontramos tu ubicación. Prueba al aire libre.';
+    dot.hidden = acc.hidden = cone.hidden = true;
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
 }
 // Logo a la barra fina (per defecte, el títol del banner animat)
 { const ml = FEST.miniLogo || (FEST.bannerAnim && FEST.bannerAnim.title), mi = document.getElementById('mlogo');
@@ -4100,6 +4187,7 @@ function showTab(t, top = true) {
   for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
+  if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => scrollToNow(false));
 }
