@@ -904,7 +904,14 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa) { display: none !important; }
+body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
+.mapit + .mapit { margin-top: 26px; }
+.mapit h2 { margin-bottom: 10px; }
+.mapaddr { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 10px; }
+.mapaddr p { margin: 0; color: var(--muted); }
+.mapaddr .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.mapaddr svg { width: 18px; height: 18px; }
 body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar) { display: none !important; }
 body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !important; }
 .whobar { margin-bottom: -14px; }
@@ -927,7 +934,7 @@ body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !impo
 .yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 body[data-tab="ajustes"] .wrap > :not(#config) { display: none !important; }
 body[data-tab="org"] .wrap > :not(#admin):not(#orgOff) { display: none !important; }
-body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
 .terows { display: flex; flex-direction: column; gap: 8px; }
 .terow { display: grid; grid-template-columns: 1fr auto 44px; gap: 6px; align-items: center; padding: 8px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--panel); }
 .terow .teg { grid-column: 1 / 3; }
@@ -1146,9 +1153,8 @@ li.tk.late .tkchk::before { border-color: var(--now); }
   </section>
 
   <section id="mapa" hidden>
-    <h2 style="margin-bottom:10px">Mapa <span>del recinto</span></h2>
-    <div class="mapbox" id="mapBox"><img id="mapImg" alt="Mapa del recinto" decoding="async"></div>
-    <p class="legend">Toca el mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
+    <div id="mapList"></div>
+    <p class="legend">Toca un mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
   </section>
 
   <section class="tvbox tvsec" id="pantallaSec">
@@ -1364,7 +1370,8 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
-  <button type="button" data-tab="org"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Organización</span></button>
+  <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
+  <button type="button" data-tab="org" aria-label="Organización"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Admin</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
 </nav>
 <button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1395,7 +1402,7 @@ const FEST = {
   // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
   bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
   // «A continuación» sense el farciment: aquests escenaris i importàncies no hi surten (sí a «Ahora suena», a l'horari, als preferits i a la pantalla d'un escenari)
-  nextHide: { stages: ['photo'], imp: [1] },
+  nextHide: { stages: [], imp: [1] },
   date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
   dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
   start: '12:00', end: '05:00',
@@ -1431,65 +1438,62 @@ const FEST = {
   impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
   impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
   stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
-  ridesName: 'Atracciones',
+  ridesName: 'Actividades',  // com al PDF: atraccions, photocall i cultura popular, cadascuna amb el seu lloc
   // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
   logos: {
     'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
     'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
     'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
   },
-  // map: 'img/mapa.jpg',       // mapa del recinte (opcional): surt a sota de l'horari (en Pau el va treure el 28-10)
+  // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
+  maps: [
+    { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias' },
+    { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
+      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'] },  // el mateix lloc: el 2 per si Maps no entén bé l'1
+  ],
   // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
   rides: [
-    { name: 'Burro mecànic', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
-    { name: 'Calçot mecànic', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
-    { name: 'Túnel del Terror', from: '18:30', to: '00:30', img: 'img/ride-tunel.png' },
+    { name: 'Nena Posseïda · Photocall', from: '18:00', to: '21:00' },
+    { name: 'Cabronàs · Photocall', from: '17:40', to: '20:00' },
+    { name: 'Túnel del terror · Atraccions', from: '18:00', to: '00:00', img: 'img/ride-tunel.png' },
+    { name: 'Burro català · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
+    { name: 'Calçot mecànic · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
+    { name: 'Cultura popular · Entrada', from: '18:00', to: '20:00' },  // castellers, gegants, gitanes i bastoners
   ],
   // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
   colorLogos: true,
   // Escenaris: el logo és img/<id>.png
   stages: [
     { id: 'principal', name: 'Escenari Principal' },
-    { id: 'festa', name: 'Escenari Festa Major' },
-    { id: 'photo', name: 'Photocall' },
+    { id: 'festa', name: 'Escenari Cultura' },
   ],
   // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol, efectes (FOC, CO2, SPARK, PIRO, CONFETI o un altre)]
   // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
   sets: {
     principal: [
-      ['12:30', '13:10', 'Juls', 5],
-      ['13:30', '14:10', 'Ven’nus', 5],
+      // importància (en Pau, 29-10): vermell 5 · taronja 4 · groc 3 · verd 2
+      ['12:30', '13:10', 'Juls', 2],
+      ['13:30', '14:10', 'Ven’nus', 2],
       ['14:30', '15:30', '31 FAM', 5],
-      ['16:00', '17:15', 'Els Amics de les Arts', 5],
-      ['17:45', '19:00', 'Els Pets', 5],
+      ['16:00', '17:15', 'Els Amics de les Arts', 3],
+      ['17:45', '19:00', 'Els Pets', 2],
       ['19:30', '20:40', 'La Ludwig Band', 5],
+      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
       ['21:10', '22:30', 'Lax’n’Busto', 5, '', ['FOC', 'CONFETI']],
       ['22:30', '23:00', 'DJ K-Zu', 1],
-      ['23:00', '00:15', 'Els Catarres', 5],
+      ['23:00', '00:15', 'Els Catarres', 4],
       ['00:15', '00:45', 'DJ K-Zu', 1],
-      ['00:45', '01:55', 'The Tyets', 5],
+      ['00:45', '01:55', 'The Tyets', 3],
       ['01:55', '02:25', 'Anna Gisbert', 1],
-      ['02:25', '03:35', 'Figa Flawas', 5],
+      ['02:25', '03:35', 'Figa Flawas', 4],
       ['03:35', '04:00', 'Anna Gisbert', 1],
-      ['04:00', '05:00', 'Doctor Prats', 5],
+      ['04:00', '05:00', 'Doctor Prats', 2],
     ],
     festa: [
       ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
       ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
       ['17:15', '17:45', 'Lo Pau de Ponts', 0],
-      ['19:00', '19:30', 'Lo Pau de Ponts', 0, 'Havaneres i cremat popular'],
-      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
-    ],
-    photo: [
-      ['17:40', '18:00', 'Cabronàs', 0],
-      ['18:00', '18:20', 'Nena Posseïda', 0],
-      ['18:20', '18:40', 'Cabronàs i entitats', 0],
-      ['18:40', '19:00', 'Nena Posseïda', 0],
-      ['19:00', '19:20', 'Cabronàs i entitats', 0],
-      ['19:20', '19:40', 'Nena Posseïda', 0],
-      ['19:40', '20:00', 'Cabronàs i entitats', 0],
-      ['20:00', '20:20', 'Nena Posseïda', 0],
-      ['20:40', '21:00', 'Nena Posseïda', 0],
+      ['19:00', '19:30', 'Havaneres', 0, 'i cremat popular'],
     ],
   },
 };
@@ -1635,6 +1639,7 @@ const ICO = Object.fromEntries(Object.entries({
   time: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M10 3h4"/>',
   user: '<circle cx="12" cy="9" r="3.6"/><path d="M5.5 19.5c1-3.6 3.6-5.3 6.5-5.3s5.5 1.7 6.5 5.3"/>',
   alert: '<path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/>',
+  loc: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
 }).map(([k, d]) => [k, `<svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`]));
 const FXI = {};  // abans emojis: ara l'etiqueta sola (es llegeix millor i no fa «app genèrica»)
 const fxPill = f => `<span class="fx">${html(f)}</span>`;
@@ -1775,8 +1780,9 @@ function buildGrid() {
   tl.innerHTML = g;
   // Tantes columnes com escenaris i atraccions
   const NS = STAGES.length, NR = RIDE_LIST.length ? 1 : 0;
-  tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ' minmax(108px, 1fr)' : ''} 14px`;
-  tl.style.minWidth = `calc(var(--gut) + ${(NS + NR) * 108 + 14}px)`;
+  const RW = Math.max(108, RIDE_LIST.length * 30);  // cada activitat una franja d'uns 30 px: si n'hi ha moltes, la columna s'eixampla
+  tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ` minmax(${RW}px, 1fr)` : ''} 14px`;
+  tl.style.minWidth = `calc(var(--gut) + ${NS * 108 + NR * RW + 14}px)`;
   tl.querySelector('.nowline').style.gridColumn = `2 / ${NS + NR + 2}`;
   document.querySelector('.scale').hidden = !IMPC || !ALL.some(x => x.t);  // sense importàncies, sense llegenda
   blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
@@ -2163,7 +2169,7 @@ function tick(force) {
     const byEnd = [...new Set(openR.map(r => r.b))].sort((p, q) => p - q)
       .map(e => `${openR.filter(r => r.b === e).map(r => html(r.name)).join(' · ')} hasta las ${lbl(e)}`).join('<br>');
     const soon = later[0] ? ` · ${html(later[0].name)}: abre a las ${lbl(later[0].a)}` : '';
-    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">${openR.length === 1 ? 'Abierta' : `${openR.length} abiertas`}</div><div class="after">${byEnd}${soon}</div></div><div class="right"><div class="left"><span>quedan</span><b>${dur(last - t)}</b></div></div><div class="bar"><div></div></div>`
+    const rin = rstate === 'live' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">${openR.length === 1 ? 'En marcha' : `${openR.length} en marcha`}</div><div class="after">${byEnd}${soon}</div></div><div class="right"><div class="left"><span>quedan</span><b>${dur(last - t)}</b></div></div><div class="bar"><div></div></div>`
       : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abren a las ${lbl(later[0].a)}</div><div class="after">${later.map(r => html(r.name)).join(' · ')}</div></div><div class="right"><div class="left"><span>abren en</span><b>${dur(later[0].a - t)}</b></div></div>`
       : '';
     if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
@@ -2494,7 +2500,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '28/10 18:15';
+const BUILD = '29/10 17:18';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2656,12 +2662,17 @@ function tvOne(t) {
 document.getElementById('tvStages').innerHTML = STAGES.map(s => `<button class="btn" type="button" data-st="${s.id}"${stc(s)}>Solo ${html(s.name)}</button>`).join('');
 document.getElementById('tvStages').addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (b) tvOpen(b.dataset.st); });
 // Mapa del recinte: tocar amplia (al punt tocat) i es mou amb el dit; tornar a tocar el mostra sencer
-if (FEST.map) {
-  const box = document.getElementById('mapBox'), mi = document.getElementById('mapImg');
-  mi.src = FEST.map;
+const MAPS = FEST.maps || (FEST.map ? [{ img: FEST.map, title: 'Mapa del recinto' }] : []);
+document.getElementById('tabMapa').hidden = !MAPS.length;
+if (MAPS.length) {
+  document.getElementById('mapList').innerHTML = MAPS.map(m => `<div class="mapit"><h2>${html(m.title)}</h2>
+    <div class="mapbox"><img src="${m.img}" alt="${html(m.alt || m.title)}" decoding="async" loading="lazy"></div>
+    ${m.text || m.links ? `<div class="mapaddr">${m.text ? `<p>${html(m.text)}</p>` : ''}${(m.links || []).map((l, i) => i ? `<a class="linkbtn" href="${l}" target="_blank" rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>` : `<a class="btn primary" href="${l}" target="_blank" rel="noopener">${ICO.loc}Abrir en Google Maps</a>`).join('')}</div>` : ''}</div>`).join('');
   document.getElementById('mapa').hidden = false;
-  mi.addEventListener('click', e => {
-    const r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+  document.getElementById('mapList').addEventListener('click', e => {
+    const mi = e.target.closest('.mapbox img');
+    if (!mi) return;
+    const box = mi.parentElement, r = mi.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
     box.style.height = box.classList.contains('z') ? '' : box.getBoundingClientRect().height + 'px';  // el requadre no canvia de mida, només s'amplia la imatge
     box.classList.toggle('z');
     if (box.classList.contains('z')) { box.scrollLeft = fx * mi.offsetWidth - box.clientWidth / 2; box.scrollTop = fy * mi.offsetHeight - box.clientHeight / 2; }

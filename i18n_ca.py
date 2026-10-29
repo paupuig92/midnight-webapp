@@ -583,6 +583,17 @@ PAIRS = [
     ("'El Excel no tiene tareas.'", "'L’Excel no té tasques.'"),
     ("`Hemos encontrado ${full.length} tareas. Se cambian todas las tareas por las del Excel. ¿Continuar?`", "`Hem trobat ${full.length} tasques. Es canvien totes les tasques per les de l’Excel. Vols continuar?`"),
     ("`Excel leído: ${full.length} tareas. Revísalas y pulsa «Guardar y publicar».`", "`Excel llegit: ${full.length} tasques. Revisa-les i prem «Desar i publicar».`"),
+    ('data-tab="org" aria-label="Organización"', 'data-tab="org" aria-label="Organització"'),
+    ('<h2>${html(m.title)}</h2>', '<h2>${html(m.title)}</h2>'),
+    ("title: 'El plano'", "title: 'El plànol'"),
+    ("title: 'Cómo llegar'", "title: 'Com arribar-hi'"),
+    ("alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias'", "alt: 'Plànol del recinte: escenaris, barres, cashless, photocall, atraccions, foodtrucks, lockers, WC i emergències'"),
+    ("alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas'", "alt: 'Accés al festival per la C-17 i la C-35, amb els pàrquings públic i d’artistes'"),
+    ("Abrir en Google Maps</a>", "Obrir a Google Maps</a>"),
+    ('<p class="legend">Toca un mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>', '<p class="legend">Toca un mapa per ampliar-lo i mou-lo amb el dit. Torna a tocar per veure’l sencer.</p>'),
+    ("ridesName: 'Actividades',", "ridesName: 'Activitats',"),
+    ("openR.length === 1 ? 'En marcha' : `${openR.length} en marcha`", "openR.length === 1 ? 'En marxa' : `${openR.length} en marxa`"),
+    ('rel="noopener">¿No sale bien? Prueba esta otra ubicación</a>', 'rel="noopener">No surt bé? Prova aquesta altra ubicació</a>'),
 ]
 
 
