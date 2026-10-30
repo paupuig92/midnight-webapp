@@ -606,6 +606,8 @@ PAIRS = [
     ("'Estás fuera de este mapa. Usa Google Maps (abajo).'", "'Ets fora d\\'aquest mapa. Fes servir Google Maps (a sota).'"),
     ("`Señal GPS débil (±${ac} m): puedes estar en cualquier punto del círculo. Espera unos segundos al aire libre.`", "`Senyal GPS fluix (±${ac} m): pots ser a qualsevol punt del cercle. Espera uns segons a l'aire lliure.`"),
     ("`Precisión: ±${ac} m`", "`Precisió: ±${ac} m`"),
+    ("`<h3>${same ? `Todo el turno <b>", "`<h3>${same ? `Tot el torn <b>"),
+    ("'Durante el turno'}</h3>", "'Durant el torn'}</h3>"),
 ]
 
 

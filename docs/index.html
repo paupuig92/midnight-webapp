@@ -877,7 +877,25 @@ li.tk.free .tkt { color: var(--muted); }
 .tgrail { position: absolute; width: 14px; box-sizing: border-box; border: 1.5px solid var(--accent-dim); border-radius: 4px; background: var(--accent-deep); padding: 0; overflow: hidden; font: inherit; color: var(--ink); cursor: default; }
 .tgrail.mine { border-color: var(--fav); cursor: pointer; }
 .tgrail.done { opacity: .5; }
-.tglong span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tgall { margin: 0 0 12px; }
+.tgall h3 { margin: 0 0 6px; font: 900 var(--fs-s)/1.1 var(--cond); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.tgall h3 b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.tgall-l { display: grid; gap: 6px; }
+.tgai { display: grid; grid-template-columns: 22px 1fr; gap: 2px 8px; align-items: start; text-align: left; width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--accent-dim); background: #000; color: var(--ink); font: inherit; cursor: default; }
+.tgai.mine { border-color: var(--fav); cursor: pointer; }
+.tgai i { grid-row: span 2; width: 18px; height: 18px; border-radius: 5px; border: 2px solid currentColor; font-style: normal; font-size: 12px; line-height: 15px; text-align: center; color: var(--muted); }
+.tgai.mine i { color: var(--fav); }
+.tgai.done i { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tgai.done .tn { text-decoration: line-through; opacity: .6; }
+.tgai .tn { font: 800 var(--fs-s)/1.2 var(--body); }
+.tgai .tt { font-size: var(--fs-xs); color: var(--muted); }
+.tgb.grp { gap: 2px; z-index: 3; }
+.tgb.grp .tn { margin-bottom: 1px; }
+.tgsub { display: flex; gap: 5px; align-items: baseline; text-align: left; font: 700 11px/1.2 var(--body); color: var(--ink); background: none; border: 0; padding: 1px 0; cursor: inherit; }
+.tgsub::before { content: "○"; color: var(--muted); }
+.tgsub.done::before { content: "✓"; color: var(--accent); }
+.tgsub.done { text-decoration: line-through; opacity: .6; }
+.tgnone { margin: 0 0 8px; }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
 .tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 5; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
 .tgnow::before { content: ""; position: absolute; left: -5px; top: -6.5px; width: 10px; height: 10px; border-radius: 50%; background: var(--now); }
@@ -1181,9 +1199,9 @@ li.tk.late .tkchk::before { border-color: var(--now); }
       </section>
   <section id="tkgrid" hidden>
     <div class="shead"><h2>Horario <span>de tareas</span></h2><div class="mygrp"><button class="chip" id="tgTeam" type="button" aria-pressed="false">Equipo</button></div></div>
-    <div class="tlbox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
-    <p class="legend">Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona.</p>
-    <p class="legend tglong" id="tgLong" hidden></p>
+    <div class="tgall" id="tgAll" hidden></div>
+    <div class="tlbox" id="tgBox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
+    <p class="legend" id="tgLeg">Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona.</p>
     <p class="legend" id="tgFree"></p>
   </section>
 
@@ -2522,7 +2540,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '30/10 15:10';
+const BUILD = '30/10 15:25';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3568,7 +3586,7 @@ function lanes(list) {
   // Tasques que es trepitgen a la mateixa columna: una al costat de l'altra
   const end = [], out = [];
   for (const x of list) {
-    const b = Math.max(tkEnd(x), x.a + 42 / TPX * MIN);
+    const b = Math.max(tkEnd(x), x.a + (x.minH || 42) / TPX * MIN);
     let l = end.findIndex(e => e <= x.a);
     if (l < 0) { l = end.length; end.push(b); } else end[l] = b;
     out.push([x, l]);
@@ -3602,24 +3620,37 @@ function renderTg(force) {
   const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
   const colW = [], longs = [];
   let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
+  const stOf = (ok, a, e) => ok ? 'done' : t >= e ? 'late' : t >= a ? 'now' : '';
+  let shortN = 0;
   cols.forEach((p, ci) => {
     g += `<div class="tgc" style="grid-column:${ci + 2};height:${HT}px;${bg}">`;
     const own = timed.filter(x => x.p.includes(p.k));
-    // Les llargues (més de 2 h 30: «de dia», «obertura a 22 h») van com una franja estreta a la dreta i no prenen lloc
-    const long = own.filter(x => x.b && x.b - x.a > 150 * MIN), R = long.length * 16;
     const mine = p === me;
-    if (mine || !team) for (const x of long) if (!longs.includes(x)) longs.push(x);
-    const ln = lanes(own.filter(x => !long.includes(x)));
+    // Les llargues (més de 2 h 30: «de 14 a 02 h», «de dia») no van a la graella: surten a dalt, a «Todo el turno»
+    for (const x of own) if (x.b && x.b - x.a > 150 * MIN) { const L = longs.find(l => l.x === x); if (L) L.who.push(p); else longs.push({ x, who: [p] }); }
+    // Tasques del mateix artista a la mateixa hora («31 FAM · Missatges», «31 FAM · Joc»): una sola caixa amb la llista
+    const grp = [];
+    for (const x of own.filter(x => !(x.b && x.b - x.a > 150 * MIN))) {
+      const subj = x.t.split(/\s+·\s+/)[0].trim(), G = grp.find(o => o.a === x.a && o.subj === subj && x.t.length > subj.length);
+      if (G && G.items[0].t.length > subj.length) { G.items.push(x); G.b = Math.max(G.b || 0, x.b || 0); }
+      else grp.push({ a: x.a, b: x.b, subj, items: [x], t: x.t, id: x.id });
+    }
+    for (const G of grp) if (G.items.length > 1) G.minH = 26 + G.items.length * 16;
+    shortN += grp.length;
+    const ln = lanes(grp);
     // Prou ample perquè cada tasca d'una mateixa hora tingui ~84 px (si no, la graella fa scroll de costat)
-    colW[ci] = Math.max(team ? 112 : 160, Math.max(1, ...ln.map(([, , n]) => n)) * 84 + R);
-    const tag = (x, cls, style, inner) => {
-      const ok = isDone(p.k, x.id), st = ok ? 'done' : t >= tkEnd(x) ? 'late' : t >= x.a ? 'now' : '';
-      return `<${mine ? 'button type="button"' : 'div'} class="${cls} ${st}${mine ? ' mine' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(x.t)}" style="${style}">${inner(ok)}</${mine ? 'button' : 'div'}>`;
-    };
-    long.forEach((x, i) => { g += tag(x, 'tgrail', `top:${yy(x.a)}px;height:${(x.b - x.a) / MIN * TPX - 2}px;right:${2 + i * 16}px`, ok => `<span>${ok ? '✓ ' : ''}${html(x.t)}</span>`); });
-    for (const [x, l, n] of ln) {
-      const h = Math.max(40, (tkEnd(x) - x.a) / MIN * TPX - 2);
-      g += tag(x, 'tgb', `top:${yy(x.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px - ${R}px) / ${n});width:calc((100% - 4px - ${R}px) / ${n} - 3px)`, ok => `<span class="tt">${ok ? '✓ ' : ''}${lbl(x.a)}</span><span class="tn">${html(x.t)}</span>`);
+    colW[ci] = Math.max(team ? 112 : 160, Math.max(1, ...ln.map(([, , n]) => n)) * 84);
+    for (const [G, l, n] of ln) {
+      const h = Math.max(G.minH || 40, (tkEnd(G) - G.a) / MIN * TPX - 2), pos = `top:${yy(G.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px) / ${n});width:calc((100% - 4px) / ${n} - 3px)`;
+      if (G.items.length > 1) {
+        const all = G.items.every(x => isDone(p.k, x.id));
+        g += `<div class="tgb grp ${stOf(all, G.a, tkEnd(G))}${mine ? ' mine' : ''}" style="${pos.replace(/height:([\d.]+)px/, 'min-height:$1px')}"><span class="tt">${lbl(G.a)}</span><span class="tn">${html(G.subj)}</span>` +
+          G.items.map(x => { const ok = isDone(p.k, x.id), rest = x.t.slice(x.t.indexOf('·') + 1).trim();
+            return mine ? `<button type="button" class="tgsub${ok ? ' done' : ''}" data-tk="${x.id}" aria-pressed="${ok}" aria-label="${html(x.t)}">${html(rest)}</button>` : `<span class="tgsub${ok ? ' done' : ''}">${html(rest)}</span>`; }).join('') + '</div>';
+      } else {
+        const x = G.items[0], ok = isDone(p.k, x.id);
+        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(x.t)}" style="${pos}"><span class="tt">${ok ? '✓ ' : ''}${lbl(x.a)}</span><span class="tn">${html(x.t)}</span></${mine ? 'button' : 'div'}>`;
+      }
     }
     g += '</div>';
   });
@@ -3627,13 +3658,23 @@ function renderTg(force) {
   const tg = document.getElementById('tg');
   tg.style.gridTemplateColumns = `var(--gut) ${colW.map(w => `minmax(${w}px, 1fr)`).join(' ')}`;
   tg.style.minWidth = `calc(var(--gut) + ${colW.reduce((a, w) => a + w, 0)}px)`;
-  // Les franges llargues (les barretes verticals de la dreta) també en text, que en vertical no es llegeixen
-  const lg = document.getElementById('tgLong');
-  lg.hidden = !longs.length;
-  lg.innerHTML = longs.length ? `<b>Franjas largas:</b> ${longs.sort(byTime).map(x => `${html(x.t)} <span>${lbl(x.a)}–${lbl(x.b)}</span>`).join(' · ')}` : '';
+  // «Todo el turno»: les franges llargues, en targetes que es llegeixen i es poden marcar
+  const all = document.getElementById('tgAll');
+  all.hidden = !longs.length;
+  if (longs.length) {
+    longs.sort((p, q) => p.x.a - q.x.a);
+    const same = longs.every(L => L.x.a === longs[0].x.a && L.x.b === longs[0].x.b);
+    all.innerHTML = `<h3>${same ? `Todo el turno <b>${lbl(longs[0].x.a)}–${lbl(longs[0].x.b)}</b>` : 'Durante el turno'}</h3><div class="tgall-l">` + longs.map(({ x, who }) => {
+      const mine = who.includes(me), k = mine ? YO : who[0].k, ok = isDone(k, x.id);
+      const sub = [same ? '' : `${lbl(x.a)}–${lbl(x.b)}`, team ? who.map(p => p.n).join(', ') : ''].filter(Boolean).join(' · ');
+      return `<${mine ? 'button type="button"' : 'div'} class="tgai${ok ? ' done' : ''}${mine ? ' mine' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}><i>${ok ? '✓' : ''}</i><span class="tn">${html(x.t)}</span>${sub ? `<span class="tt">${html(sub)}</span>` : ''}</${mine ? 'button' : 'div'}>`;
+    }).join('') + '</div>';
+  }
+  // Si algú només té franges llargues, la graella buida no serveix de res
+  document.getElementById('tgBox').hidden = document.getElementById('tgLeg').hidden = !shortN;
   tg.innerHTML = g;
   // Si el text no hi cap: fora l'hora, i el nom a 2 línies (mai tallat per dalt i per baix)
-  requestAnimationFrame(() => { for (const b of tg.querySelectorAll('.tgb')) if (b.scrollHeight > b.clientHeight + 1) b.classList.add('fit'); });
+  requestAnimationFrame(() => { for (const b of tg.querySelectorAll('.tgb:not(.grp)')) if (b.scrollHeight > b.clientHeight + 1) b.classList.add('fit'); });
   const nf = (team ? TASKS.list : mineTasks()).filter(x => x.a === null).length;
   document.getElementById('tgFree').textContent = nf ? `${nf === 1 ? '1 tarea' : `${nf} tareas`} sin hora: salen en «Mis tareas», en «Durante el día».` : '';
   const w = document.getElementById('tgWrap');
@@ -3645,7 +3686,7 @@ document.getElementById('tgTeam').addEventListener('click', () => {
   renderTg(true);
   if (tgTeam) pullDone().then(() => renderTg(true));
 });
-document.getElementById('tg').addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (b) toggleTask(b.dataset.tk); });
+for (const id of ['tg', 'tgAll']) document.getElementById(id).addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (b) toggleTask(b.dataset.tk); });
 // Canvi de perfil: tot el de les tasques apareix o desapareix
 for (const r of document.querySelectorAll('input[name="prof"]')) r.addEventListener('change', () => setTimeout(() => { paintYo(); renderPlan(true); renderTg(true); syncPush(); }, 0));
 // Les ✓ van al servidor; si no hi ha cobertura, es queden a la cua i s'envien més tard
