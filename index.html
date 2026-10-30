@@ -1802,6 +1802,7 @@ function buildGrid() {
 }
 // Encaix: si el nom no cap al bloc, treu subtítol, després hora, i al final talla a 2 línies
 function fitBlocks() {
+  if (!tl.offsetWidth) return;  // pestanya amagada: no es pot mesurar (es torna a fer en obrir Horarios)
   for (const b of tl.querySelectorAll('.blk:not(.ridesblk)')) {
     b.classList.remove('fit-s', 'fit-z', 'fit-t', 'fit-c');
     for (const c of ['fit-s', 'fit-z', 'fit-t', 'fit-c']) {
@@ -4253,7 +4254,7 @@ function showTab(t, top = true) {
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
-  if (t === 'ahora' && ch) requestAnimationFrame(() => scrollToNow(false));
+  if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
   const bd = document.getElementById('tabBadge');
