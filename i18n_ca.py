@@ -406,7 +406,7 @@ PAIRS = [
     ("Avisarme de mis tareas", "Avisa’m de les meves tasques"),
     ("Horario <span>de tareas</span>", "Horari <span>de tasques</span>"),
     ('aria-pressed="false">Equipo</button>', 'aria-pressed="false">Equip</button>'),
-    ("Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona.", "Línia vermella = ara. Toca una tasca teva per marcar-la com a feta. «Equip» = una columna per persona."),
+    ("Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona. Pellizca con dos dedos para separar o juntar las horas.", "Línia vermella = ara. Toca una tasca teva per marcar-la com a feta. «Equip» = una columna per persona. Pinça amb dos dits per separar o ajuntar les hores."),
     ("'Durante el día'", "'Durant el dia'"),
     ("«Durante el día»", "«Durant el dia»"),
     ("`${nf === 1 ? '1 tarea' : `${nf} tareas`} sin hora: salen en «Mis tareas», en «Durante el día».`", "`${nf === 1 ? '1 tasca' : `${nf} tasques`} sense hora: surten a «Les meves tasques», a «Durant el dia».`"),
