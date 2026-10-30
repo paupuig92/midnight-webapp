@@ -2522,7 +2522,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '30/10 15:03';
+const BUILD = '30/10 15:10';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2718,12 +2718,21 @@ function gpsOrient(e) {
 function gpsFit(geo) {
   const [lat0, lon0] = geo[0], kx = 111320 * Math.cos(lat0 * Math.PI / 180), ky = 110574;
   const m = g => [(g[1] - lon0) * kx, (g[0] - lat0) * ky];  // metres est i nord des del primer punt
-  const [[e1, n1], [e2, n2], [e3, n3]] = geo.map(m), det = e1 * (n2 - n3) - n1 * (e2 - e3) + (e2 * n3 - e3 * n2);
-  const solve = v => [(v[0] * (n2 - n3) - n1 * (v[1] - v[2]) + (v[1] * n3 - v[2] * n2)) / det,
-    (e1 * (v[1] - v[2]) - v[0] * (e2 - e3) + (e2 * v[2] - e3 * v[1])) / det,
-    (e1 * (n2 * v[2] - n3 * v[1]) - n1 * (e2 * v[2] - e3 * v[1]) + v[0] * (e2 * n3 - e3 * n2)) / det];
+  const P = geo.map(m);
+  // Transformació afí per mínims quadrats (amb 3 punts és exacta; amb més, la que s'hi ajusta millor)
+  const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (const [e, n] of P) { const r = [e, n, 1]; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) A[i][j] += r[i] * r[j]; }
+  const det3 = M => M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+  const D = det3(A);
+  const solve = v => { const b = [0, 0, 0]; P.forEach(([e, n], k) => { b[0] += e * v[k]; b[1] += n * v[k]; b[2] += v[k]; });
+    return [0, 1, 2].map(c => det3(A.map((row, i) => row.map((x, j) => j === c ? b[i] : x))) / D); };
   const X = solve(geo.map(g => g[2])), Y = solve(geo.map(g => g[3]));
-  return { at: (lat, lon) => { const [e, n] = m([lat, lon]); return [X[0] * e + X[1] * n + X[2], Y[0] * e + Y[1] * n + Y[2]]; },
+  const aff = (e, n) => [X[0] * e + X[1] * n + X[2], Y[0] * e + Y[1] * n + Y[2]];
+  // Plànols dibuixats a mà (no a escala): el que l'afí no encerta a cada punt es corregeix a prop seu (pes 1/d²)
+  const res = P.map(([e, n], k) => { const [x, y] = aff(e, n); return [geo[k][2] - x, geo[k][3] - y]; });
+  return { at: (lat, lon) => { const [e, n] = m([lat, lon]); let [x, y] = aff(e, n), sw = 1 / 150 ** 2, dx = 0, dy = 0;  // a 150 m d'un punt, la correcció ja pesa la meitat
+      P.forEach(([pe, pn], k) => { const w = 1 / Math.max(1, (e - pe) ** 2 + (n - pn) ** 2); sw += w; dx += w * res[k][0]; dy += w * res[k][1]; });
+      return [x + dx / sw, y + dy / sw]; },
     perM: Math.sqrt(Math.abs(X[0] * Y[1] - X[1] * Y[0])),  // fracció de la imatge per metre (aprox.)
     north: (W, H) => Math.atan2(X[1] * W, -Y[1] * H) * 180 / Math.PI };  // cap on queda el nord al plànol (graus, 0 = amunt)
 }
