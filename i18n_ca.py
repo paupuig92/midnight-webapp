@@ -608,6 +608,7 @@ PAIRS = [
     ("`Precisión: ±${ac} m`", "`Precisió: ±${ac} m`"),
     ("`<h3>${same ? `Todo el turno <b>", "`<h3>${same ? `Tot el torn <b>"),
     ("'Durante el turno'}</h3>", "'Durant el torn'}</h3>"),
+    ("' · ★ IMPORTANTE'", "' · ★ IMPORTANT'"),
 ]
 
 
