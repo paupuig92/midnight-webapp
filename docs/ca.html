@@ -2550,7 +2550,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '30/10 22:39';
+const BUILD = '30/10 22:49';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3600,10 +3600,10 @@ function lanes(list) {
     const b = Math.max(tkEnd(x), x.a + (x.minH || 42) / TPX * MIN);
     let l = end.findIndex(e => e <= x.a);
     if (l < 0) { l = end.length; end.push(b); } else end[l] = b;
-    out.push([x, l]);
+    out.push([x, l, b]);
   }
-  // Quantes n'hi ha alhora per a cada tasca (per a l'amplada)
-  return out.map(([x, l]) => [x, l, Math.max(...out.filter(([o]) => o.a < tkEnd(x) && tkEnd(o) > x.a).map(([, ol]) => ol)) + 1]);
+  // Quantes n'hi ha alhora per a cada tasca (per a l'amplada), comptant l'alçada mínima de les curtes
+  return out.map(([x, l, b]) => [x, l, Math.max(...out.filter(([o, , ob]) => o.a < b && ob > x.a).map(([, ol]) => ol)) + 1]);
 }
 function renderTg(force) {
   const sec = document.getElementById('tkgrid'), t = now();
@@ -3693,35 +3693,48 @@ function renderTg(force) {
   if (!tgScrolled && w.clientHeight) { tgScrolled = true; w.scrollTop = Math.max(0, yy(Math.min(Math.max(t, H0), H1)) - 80); }
 }
 // Pinça amb dos dits a l'horari i a les tasques: no és zoom, és més o menys espai entre hores (cada mòbil ho recorda).
-// La pàgina no fa zoom (gesturestart bloquejat). Mentre es pinça només s'estira la graella (si es redibuixés, el dit
-// perdria l'element que toca); en deixar-la, es redibuixa amb la nova escala i l'hora sota els dits es queda al seu lloc
+// La pàgina no fa zoom (gesturestart bloquejat). Es redibuixa en directe (un cop per fotograma) i l'hora sota els dits
+// es queda al seu lloc. En redibuixar, l'element que toca el dit surt del document i els seus «touchmove» ja no
+// arriben a la graella: per això també s'escolten a l'element tocat
 function pinchY(w, inner, K, get, set) {
   try { const z = +localStorage.getItem(K); if (z >= .8 && z <= 4) set(z, true); } catch (e) {}
-  let p0 = 0, z0 = 0, z = 0, a0 = 0, my = 0;
+  let p0 = 0, z0 = 0, z = 0, m0 = 0, my = 0, c = 0, raf = 0, tgts = [];
+  const seen = new WeakSet();
   const dist = e => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-  w.addEventListener('touchstart', e => {
-    if (e.touches.length !== 2) return;
-    p0 = dist(e); z0 = z = get(); my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - w.getBoundingClientRect().top; a0 = w.scrollTop + my;
-    inner.style.transformOrigin = `0 ${a0 - inner.offsetTop}px`;
-  }, { passive: true });
-  w.addEventListener('touchmove', e => {
+  const midY = e => (e.touches[0].clientY + e.touches[1].clientY) / 2 - w.getBoundingClientRect().top;
+  const draw = () => { raf = 0; if (Math.abs(z - get()) < .01) return; set(z); w.scrollTop = c + m0 * z - my; };
+  const move = e => {
+    if (seen.has(e)) return; seen.add(e);
     if (e.touches.length !== 2 || !p0) return;
     e.preventDefault();
-    z = Math.min(4, Math.max(.8, z0 * dist(e) / p0));
-    inner.style.transform = `scaleY(${z / z0})`;
-  }, { passive: false });
-  const end = e => {
-    if (e.touches.length >= 2 || !p0) return;
-    p0 = 0; inner.style.transform = '';
-    if (Math.abs(z - get()) < .02) return;
-    set(z);
-    w.scrollTop = a0 * z / z0 - my;
-    try { localStorage.setItem(K, String(z)); } catch (er) {}
+    z = Math.min(4, Math.max(.8, z0 * dist(e) / p0)); my = midY(e);
+    if (!raf) raf = requestAnimationFrame(draw);
   };
+  const end = e => {
+    if (seen.has(e)) return; seen.add(e);
+    if (e.touches.length >= 2 || !p0) return;
+    p0 = 0;
+    for (const t of tgts) { t.removeEventListener('touchmove', move); t.removeEventListener('touchend', end); t.removeEventListener('touchcancel', end); }
+    tgts = [];
+    if (raf) { cancelAnimationFrame(raf); draw(); }
+    try { localStorage.setItem(K, String(get())); } catch (er) {}
+  };
+  w.addEventListener('touchstart', e => {
+    if (e.touches.length !== 2) return;
+    p0 = dist(e); z0 = z = get(); my = midY(e);
+    // on comença l'hora (sota les capçaleres, + PAD), que no canvia amb l'escala; m0 = minut de la graella sota els dits
+    const gt = inner.querySelector('.gut');
+    c = (gt ? gt.getBoundingClientRect().top - w.getBoundingClientRect().top : 0) + w.scrollTop + PAD;
+    m0 = (w.scrollTop + my - c) / z0;
+    for (const t of new Set([...e.touches].map(t => t.target))) if (t !== w && !tgts.includes(t)) {
+      tgts.push(t); t.addEventListener('touchmove', move, { passive: false }); t.addEventListener('touchend', end); t.addEventListener('touchcancel', end);
+    }
+  }, { passive: true });
+  w.addEventListener('touchmove', move, { passive: false });
   w.addEventListener('touchend', end); w.addEventListener('touchcancel', end);
 }
 pinchY(document.getElementById('tgWrap'), document.getElementById('tg'), 'cast-tgzoom-v1', () => TPX, (z, init) => { TPX = z; if (!init) renderTg(true); });
-pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (TEND - T0) / MIN * PX; if (!init) { buildGrid(); paintFavs(); tick(true); } else { buildGrid(); requestAnimationFrame(() => scrollToNow(false)); } });
+pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (TEND - T0) / MIN * PX; buildGrid(); paintFavs(); tick(true); if (init) requestAnimationFrame(() => scrollToNow(false)); });  // en obrir: sense paintFavs es perdien els meus (groc)
 document.getElementById('tgTeam').addEventListener('click', () => {
   tgTeam = !tgTeam;
   try { localStorage.setItem(TGK, tgTeam ? '1' : '0'); } catch (e) {}
