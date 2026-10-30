@@ -604,6 +604,8 @@ PAIRS = [
     ("'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.'", "'Sense permís d’ubicació: activa’l a Configuració de l’iPhone → Privadesa → Localització.'"),
     ("'No encontramos tu ubicación. Prueba al aire libre.'", "'No trobem la teva ubicació. Prova-ho a l’aire lliure.'"),
     ("'Estás fuera de este mapa. Usa Google Maps (abajo).'", "'Ets fora d\\'aquest mapa. Fes servir Google Maps (a sota).'"),
+    ("`Señal GPS débil (±${ac} m): puedes estar en cualquier punto del círculo. Espera unos segundos al aire libre.`", "`Senyal GPS fluix (±${ac} m): pots ser a qualsevol punt del cercle. Espera uns segons a l'aire lliure.`"),
+    ("`Precisión: ±${ac} m`", "`Precisió: ±${ac} m`"),
 ]
 
 

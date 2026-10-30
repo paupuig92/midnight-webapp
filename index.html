@@ -748,6 +748,7 @@ body.tvon { overflow: hidden; }
 .gpscone { position: absolute; width: 26px; height: 24px; transform-origin: 50% 100%; transform: translate(-50%, -100%); pointer-events: none; z-index: 2;
   background: radial-gradient(farthest-side at 50% 100%, rgba(26, 115, 232, .65), rgba(26, 115, 232, 0)); clip-path: polygon(50% 100%, 0 0, 100% 0); }
 .gpsacc { background: rgba(26, 115, 232, .12); border: 1px solid rgba(26, 115, 232, .4); min-width: 14px; min-height: 14px; z-index: 1; }
+.gpsdot.weak { opacity: .5; animation: none; } .gpscone.weak { opacity: .35; }
 @keyframes gpsp { 50% { box-shadow: 0 0 0 3px rgba(26, 115, 232, .25); } }
 @media (prefers-reduced-motion: reduce) { .gpsdot { animation: none; } }
 .gpsbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
@@ -2724,11 +2725,14 @@ function gpsToggle(it) {
     dot.style.top = acc.style.top = cone.style.top = y * 100 + '%';
     const rp = Math.min(W / 4, p.coords.accuracy * fit.perM * Math.sqrt(W * H));  // el cercle = el marge d'error del GPS (en píxels de la imatge)
     acc.style.width = rp * 200 / W + '%'; acc.style.height = rp * 200 / H + '%';
-    msg.textContent = `Precisión: ±${Math.round(p.coords.accuracy)} m`;
+    // Senyal fluix (sota sostre, entre estructures, o just en obrir): el punt surt pàl·lid i s'avisa, el cercle diu on pots ser
+    const ac = Math.round(p.coords.accuracy), weak = ac > 30;
+    dot.classList.toggle('weak', weak); cone.classList.toggle('weak', weak);
+    msg.textContent = weak ? `Señal GPS débil (±${ac} m): puedes estar en cualquier punto del círculo. Espera unos segundos al aire libre.` : `Precisión: ±${ac} m`;
   }, err => {
     msg.textContent = err.code === 1 ? 'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.' : 'No encontramos tu ubicación. Prueba al aire libre.';
     dot.hidden = acc.hidden = cone.hidden = true;
-  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+  }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
 }
 // Logo a la barra fina (per defecte, el títol del banner animat)
 { const ml = FEST.miniLogo || (FEST.bannerAnim && FEST.bannerAnim.title), mi = document.getElementById('mlogo');
