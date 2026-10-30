@@ -1174,7 +1174,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
     <div class="shead"><h2>Horario <span>de tareas</span></h2><div class="mygrp"><button class="chip" id="tgTeam" type="button" aria-pressed="false">Equipo</button></div></div>
     <div class="tgall" id="tgAll" hidden></div>
     <div class="tlbox" id="tgBox"><div class="tg-wrap" id="tgWrap"><div class="tg" id="tg"></div></div></div>
-    <p class="legend" id="tgLeg">Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona. Pellizca con dos dedos para acercar o alejar.</p>
+    <p class="legend" id="tgLeg">Línea roja = ahora. Toca una tarea tuya para marcarla como hecha. «Equipo» = una columna por persona. Pellizca con dos dedos para separar o juntar las horas.</p>
     <p class="legend" id="tgFree"></p>
   </section>
 
@@ -1605,7 +1605,8 @@ const RIDE_LIST = [].concat(FEST.rides || []).map((r, i) => ({ ...r, i, a: T(r.f
 const RIDES_NAME = FEST.ridesName || (RIDE_LIST.length === 1 ? RIDE_LIST[0].name : 'Atracciones');
 // Nit del canvi d'hora (si n'hi ha): W0 = 2:00 (1a), DUP = 2:00 (2a), W1 = 3:00
 const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00') : W0;
-const MIN = 60000, PX = 1.6, PAD = 12;
+const MIN = 60000, PAD = 12;
+let PX = 1.6;  // px per minut (la pinça ho canvia)
 let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
 const y = t => PAD + (t - T0) / MIN * PX;
 
@@ -3656,35 +3657,36 @@ function renderTg(force) {
   const w = document.getElementById('tgWrap');
   if (!tgScrolled && w.clientHeight) { tgScrolled = true; w.scrollTop = Math.max(0, yy(Math.min(Math.max(t, H0), H1)) - 80); }
 }
-// Pinça a la graella de tasques: més o menys espai entre hores (es recorda). La pàgina no fa zoom (gesturestart bloquejat).
-// Mentre es pinça només s'estira la graella (si es redibuixés, el dit perdria la tasca que toca); en deixar-la, es redibuixa
-(() => {
-  const w = document.getElementById('tgWrap'), tg = document.getElementById('tg'), K = 'cast-tgzoom-v1';
-  try { const z = +localStorage.getItem(K); if (z >= .8 && z <= 4) TPX = z; } catch (e) {}
+// Pinça amb dos dits a l'horari i a les tasques: no és zoom, és més o menys espai entre hores (cada mòbil ho recorda).
+// La pàgina no fa zoom (gesturestart bloquejat). Mentre es pinça només s'estira la graella (si es redibuixés, el dit
+// perdria l'element que toca); en deixar-la, es redibuixa amb la nova escala i l'hora sota els dits es queda al seu lloc
+function pinchY(w, inner, K, get, set) {
+  try { const z = +localStorage.getItem(K); if (z >= .8 && z <= 4) set(z, true); } catch (e) {}
   let p0 = 0, z0 = 0, z = 0, a0 = 0, my = 0;
   const dist = e => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-  const midY = e => (e.touches[0].clientY + e.touches[1].clientY) / 2 - w.getBoundingClientRect().top;
   w.addEventListener('touchstart', e => {
     if (e.touches.length !== 2) return;
-    p0 = dist(e); z0 = z = TPX; my = midY(e); a0 = w.scrollTop + my;  // punt de la graella sota els dits
-    tg.style.transformOrigin = `0 ${a0 - tg.offsetTop}px`;
+    p0 = dist(e); z0 = z = get(); my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - w.getBoundingClientRect().top; a0 = w.scrollTop + my;
+    inner.style.transformOrigin = `0 ${a0 - inner.offsetTop}px`;
   }, { passive: true });
   w.addEventListener('touchmove', e => {
     if (e.touches.length !== 2 || !p0) return;
     e.preventDefault();
     z = Math.min(4, Math.max(.8, z0 * dist(e) / p0));
-    tg.style.transform = `scaleY(${z / z0})`;
+    inner.style.transform = `scaleY(${z / z0})`;
   }, { passive: false });
   const end = e => {
     if (e.touches.length >= 2 || !p0) return;
-    p0 = 0; tg.style.transform = '';
-    if (Math.abs(z - TPX) < .02) return;
-    TPX = z; renderTg(true);
-    w.scrollTop = a0 * z / z0 - my;  // l'hora que hi havia sota els dits es queda al mateix lloc
-    try { localStorage.setItem(K, String(TPX)); } catch (er) {}
+    p0 = 0; inner.style.transform = '';
+    if (Math.abs(z - get()) < .02) return;
+    set(z);
+    w.scrollTop = a0 * z / z0 - my;
+    try { localStorage.setItem(K, String(z)); } catch (er) {}
   };
   w.addEventListener('touchend', end); w.addEventListener('touchcancel', end);
-})();
+}
+pinchY(document.getElementById('tgWrap'), document.getElementById('tg'), 'cast-tgzoom-v1', () => TPX, (z, init) => { TPX = z; if (!init) renderTg(true); });
+pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (TEND - T0) / MIN * PX; if (!init) { buildGrid(); paintFavs(); tick(true); } else { buildGrid(); requestAnimationFrame(() => scrollToNow(false)); } });
 document.getElementById('tgTeam').addEventListener('click', () => {
   tgTeam = !tgTeam;
   try { localStorage.setItem(TGK, tgTeam ? '1' : '0'); } catch (e) {}
