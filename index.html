@@ -3388,24 +3388,52 @@ function whoOf(tok, people) {
   if (role.length) return role.map(p => p.k);
   return null;
 }
+// Casella «qui»: «Anna Maria, Laia y Marc» → AnnaMaria · Laia · Marc. Primer el nom sencer (amb espais), perquè «Anna Maria» no sigui la «Maria»; si no és de ningú, paraula per paraula
+function whoToks(w, ppl) {
+  return String(w || '').split(/[,;\/&+@]+|\s+(?:y|i|-|–)\s+/).map(x => x.trim()).filter(Boolean)
+    .flatMap(x => /\s/.test(x) && ppl && whoOf(x, ppl) ? [x.replace(/\s+/g, '')] : x.split(/\s+/));
+}
+// «@Anna Maria» dins el text: si el @ i les paraules de després són el nom sencer d'algú, és aquesta persona (no «@Anna» + «Maria» al text)
+function fullNames(s, ppl) {
+  const multi = (ppl || []).filter(p => /\s/.test(p.n)).map(p => p.k);
+  if (!multi.length) return s;
+  return s.replace(/@([^\s@,;]+)((?:\s+[^\s@,;]+){1,3})/g, (m, a, rest) => {
+    const w = rest.match(/\s+[^\s@,;]+/g);
+    for (let n = w.length; n > 0; n--) if (multi.includes(nk(a + w.slice(0, n).join('')))) return '@' + a + w.slice(0, n).join('').replace(/\s+/g, '') + w.slice(n).join('');
+    return m;
+  });
+}
 const END_M = (([h, m]) => h * 60 + m)(FEST.end.split(':').map(Number));
 // Hora d'una tasca: com a l'horari (de matinada = l'endemà), però el matí abans d'obrir (muntatge) és el mateix dia
+// Una hora com l'escriu la gent: «18:30», «18.30», «9:00», «18h», «18:30h», «18h30», «6:30 PM», «24:00» (= 00:00 de la nit) → «HH:MM». «19» sol no és cap hora.
+function tmNorm(s) {
+  s = String(s ?? '').trim();
+  const m = s.match(/^(\d{1,2})(?:[:.h](\d{2})(?::\d{2})?)?\s*h?\s*(?:([aApP])\.?\s?[mM]\.?)?$/);
+  if (!m || (!m[2] && !/[hamp]/i.test(s))) return '';
+  let h = +m[1];
+  const mi = +(m[2] || 0);
+  if (m[3]) { if (h < 1 || h > 12) return ''; h = h % 12 + (/p/i.test(m[3]) ? 12 : 0); }
+  if (h === 24 && !mi) h = 0;
+  return h < 24 && mi < 60 ? `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}` : '';
+}
+// El mateix a l'inici d'una línia de text («18:30-19:00 Tasca», «18h Tasca», «6:30 PM Tasca»; «amb» no és «am»)
+const TMR = String.raw`\d{1,2}(?:[:.h]\d{2}(?::\d{2})?h?|h|(?=\s?[aApP]\.?[mM]\.?(?![A-Za-z])))(?:\s?[aApP]\.?[mM]\.?(?![A-Za-z]))?`;
+const TLINE = new RegExp(`^(${TMR})(?:\\s*[-–]\\s*(${TMR}))?\\s+(.+)$`);
 function taskTime(s) {
-  const m = String(s).trim().match(/^(\d{1,2})[:.h](\d{2})$/);
-  if (!m) return NaN;
-  const h = +m[1], mi = +m[2];
-  if (h > 23 || mi > 59) return NaN;
-  let t = T(`${String(h).padStart(2, '0')}:${m[2]}`);
-  const wm = h * 60 + mi;
-  if (wm < START_M && wm > END_M + 60) t -= 24 * 60 * MIN;
+  const n = tmNorm(s);
+  if (!n) return NaN;
+  let t = T(n);
+  const wm = (([h, mi]) => h * 60 + mi)(n.split(':').map(Number));
+  // Abans d'obrir i a partir de les 6:00 (o d'1 h després del final) = muntatge del mateix dia, com diu l'ajuda; abans = de matinada, l'endemà
+  if (wm < START_M && wm >= Math.max(6 * 60, END_M + 60)) t -= 24 * 60 * MIN;
   return t;
 }
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 // Tasques, una per línia: «18:30 Grabar la entrada @Marc @Laia», «18:30-19:00 …», «@audiovisual» sol = per a les línies de sota.
 // També es pot enganxar d'un Excel: hora ⇥ tasca ⇥ qui.
 function parseTasks(src, people) {
-  const list = [], warn = [], ids = new Set();
-  let group = [];
+  const list = [], warn = [], ids = new Set(), seen = new Set();
+  let group = [], bad = 0;  // bad = línies que no es publiquen
   const TOK = /@([^\s@,;]+)/g;
   for (let line of String(src).split('\n')) {
     line = line.trim();
@@ -3413,21 +3441,27 @@ function parseTasks(src, people) {
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [ta, tb] = c[0].split(/\s*[-–]\s*/);
       text = c[1] || '';
-      toks = (c.slice(2).join(' ').match(/[^\s,;@]+/g) || []);
+      toks = whoToks(c.slice(2).join(', '), people);
     } else {
+      line = fullNames(line, people);
       if (/^(@[^\s@,;]+[\s,;]*)+$/.test(line)) { group = [...line.matchAll(TOK)].map(m => m[1]); continue; }
       const u = line.match(/^[-–•·]\s*(.+)$/);
-      const m = u ? [line, '', '', u[1]] : line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/);
-      if (!m) { warn.push(`Sin hora: «${line.slice(0, 40)}»`); continue; }
+      const m = u ? [line, '', '', u[1]] : line.match(TLINE);
+      if (!m) { bad++; warn.push(/^[!\d]/.test(line) ? `Hora rara: «${line.slice(0, 40)}»` : `Sin hora: «${line.slice(0, 40)}»`); continue; }
       [, ta, tb] = m;
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = ta ? taskTime(ta) : null, b = ta && tb ? taskTime(tb) : 0;
-    if (a !== null && !Number.isFinite(a)) { warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
-    if (!text) { warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
+    const a = ta ? taskTime(ta) : null;
+    let b = ta && tb ? taskTime(tb) : 0;
+    if (a !== null && !Number.isFinite(a)) { bad++; warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
+    if (!text) { bad++; warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
+    // Un final que no s'entén («19») o al revés («19:00-18:00») no es perd en silenci; «04:00-06:00» és de la mateixa nit
+    if (tb && !Number.isFinite(b)) { warn.push(`Hora final rara: «${line.slice(0, 40)}»`); b = 0; }
+    if (a !== null && b && b <= a) { if (b + 24 * 60 * MIN - a <= 12 * 60 * MIN) b += 24 * 60 * MIN; else { warn.push(`La hora final es antes que la de inicio: «${line.slice(0, 40)}»`); b = 0; } }
     if (!toks.length) toks = group;
     const p = new Set();
     for (const tk of toks) {
@@ -3435,13 +3469,16 @@ function parseTasks(src, people) {
       if (w) w.forEach(k => p.add(k)); else warn.push(`No sé quién es «@${tk}» (${ta} ${text.slice(0, 30)})`);
     }
     if (!p.size) warn.push(`Nadie para «${ta || '–'} ${text.slice(0, 30)}»`);
+    const dk = a + '|' + nk(text) + '|' + [...p].sort();
+    if (seen.has(dk)) warn.push(`Repetida: «${ta || '–'} ${text.slice(0, 30)}»`);
+    seen.add(dk);
     let id = 't' + hash(a + '|' + nk(text)), n = 2;
     while (ids.has(id)) id = 't' + hash(a + '|' + nk(text)) + '-' + n++;
     ids.add(id);
     list.push({ id, a, b: a !== null && Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 200), p: [...p] });
   }
   list.sort(byTime);
-  return { list, warn };
+  return { list, warn, bad };
 }
 
 // --- Qui sóc (Configuración) ---
@@ -3838,6 +3875,7 @@ function tkPreview() {
   if (noTeam.length) warn.unshift(`Sin equipo: ${noTeam.join(', ')} (ponlo en Organización → Equipo)`);
   const over = tkOverlaps(tasks.list, team.people);
   document.getElementById('tkInfo').innerHTML = `<b>${tasks.list.length}</b> tareas · <b>${team.people.length}</b> personas`
+    + (tasks.bad ? ` · <b>${tasks.bad}</b> líneas sin entender (no se publican)` : '')
     + (warn.length ? `<ul class="tkwarn">${warn.slice(0, 12).map(w => `<li>${html(w)}</li>`).join('')}${warn.length > 12 ? `<li>…y ${warn.length - 12} más</li>` : ''}</ul>` : '')
     + (over.length ? `<p class="tkover-h">${ICO.alert}Coincidencias (puedes publicar igual):</p><ul class="tkwarn tkover">${over.slice(0, 10).map(w => `<li>${html(w)}</li>`).join('')}${over.length > 10 ? `<li>…y ${over.length - 10} más</li>` : ''}</ul>` : '');
   return { team, tasks, warn };
@@ -3864,46 +3902,55 @@ tkList.addEventListener('input', () => { tkDraft(); tkPreview(); tkRowsSync(); }
 // Es manté la capçalera «# pestanya» de cada tasca, perquè tornar a pujar l'Excel per pestanyes només canviï aquella pestanya.
 const tkRowsEl = document.getElementById('tkRows'), tkWhoF = document.getElementById('tkWhoF');
 let tkRowsData = [];
-const hhmm = s => { const m = String(s || '').trim().match(/^(\d{1,2})[:.h](\d{2})$/); return m && +m[1] < 24 ? `${m[1].padStart(2, '0')}:${m[2]}` : ''; };
-const whoToks = w => String(w || '').split(/[\s,;@]+/).filter(Boolean);
-function tkToRows(src) {
+const hhmm = tmNorm;
+function tkToRows(src, ppl = parseTeam(tkTeam.value).people) {
   const rows = [], TOK = /@([^\s@,;]+)/g;
   let h = '', group = [];
   for (let line of String(src).split('\n')) {
     line = line.trim();
     if (!line) continue;
-    if (line.startsWith('#')) { h = line; group = []; continue; }
-    let a = '', b = '', t = '', who = [];
+    if (line.startsWith('#')) { h = line; continue; }  // com parseTasks: el «@grup» de dalt continua
+    let a = '', b = '', t = '', who = [], ok = true;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [a, b = ''] = c[0].split(/\s*[-–]\s*/);
-      t = c[1] || ''; who = c.slice(2).join(' ').match(/[^\s,;@]+/g) || [];
+      t = c[1] || ''; who = whoToks(c.slice(2).join(', '), ppl);
     } else {
+      line = fullNames(line, ppl);
       if (/^(@[^\s@,;]+[\s,;]*)+$/.test(line)) { group = [...line.matchAll(TOK)].map(m => m[1]); continue; }
       const u = line.match(/^[-–•·]\s*(.+)$/);
-      const m = u ? [line, '', '', u[1]] : line.match(/^(\d{1,2}[:.h]\d{2})(?:\s*[-–]\s*(\d{1,2}[:.h]\d{2}))?\s+(.+)$/) || [line, '', '', line];
-      [, a, b = ''] = m;
-      who = [...m[3].matchAll(TOK)].map(x => x[1]);
-      t = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
+      const m = u ? [line, '', '', u[1]] : line.match(TLINE);
+      if (!m) ok = false;
+      else {
+        [, a, b = ''] = m;
+        who = [...m[3].matchAll(TOK)].map(x => x[1]);
+        t = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
+      }
     }
+    // El que parseTasks no entén (o el final que no entén) es queda tal com està i en vermell: si no, en tocar qualsevol fila es tornava una tasca «durante el día» i l'avís desapareixia
+    if (!ok || !t || (a && !hhmm(a)) || (b && !hhmm(b))) { rows.push({ h, a: '', b: '', t: line, w: '', raw: true }); continue; }
     rows.push({ h, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
   }
   return rows;
 }
 function tkFromRows() {
-  const out = [];
+  const out = [], ppl = parseTeam(tkTeam.value).people;
   for (const h of [...new Set(tkRowsData.map(r => r.h))]) {
     if (h) out.push('', h);
     for (const r of tkRowsData.filter(r => r.h === h)) {
-      const t = r.t.replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      // Línia que no s'entenia: tal qual (continua l'avís) fins que se li posa hora; llavors els «@» del text compten
+      if (r.raw && !r.a) { const l = r.t.replace(/\n/g, ' ').trim(); if (l) out.push(l); continue; }
+      const t = r.t.replace(r.raw ? /[\n\t]/g : /[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
       if (!t) continue;
-      const w = whoToks(r.w).map(x => '@' + x).join(' ');
+      const w = whoToks(r.w, ppl).map(x => '@' + x).join(' ');
       out.push(`${r.a ? r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
     }
   }
   return out.join('\n').trim();
 }
-function tkRowWho(r, ppl) { const s = new Set(); for (const x of whoToks(r.w)) (whoOf(x, ppl) || []).forEach(k => s.add(k)); return s; }
+function tkRowWho(r, ppl) { const s = new Set(); for (const x of whoToks(r.w, ppl)) (whoOf(x, ppl) || []).forEach(k => s.add(k)); return s; }
+const tkRowBad = (r, ppl) => r.raw ? !r.a : !!r.t && !tkRowWho(r, ppl).size;  // la línia que no s'entenia, en vermell fins que té hora (els seus «@» són al text)
 function tkRowsRender() {
   const ppl = parseTeam(tkTeam.value).people, f = tkWhoF.value;
   tkWhoF.innerHTML = `<option value="">Todas las tareas</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
@@ -3911,7 +3958,7 @@ function tkRowsRender() {
   const fk = tkWhoF.value;
   const key = r => r.nw ? Infinity : r.a ? taskTime(r.a) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
   const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
-  tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = r.t && !tkRowWho(r, ppl).size; return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}">
+  tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = tkRowBad(r, ppl); return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}"${r.raw && !r.a ? ' title="No se entiende: ponle hora o bórrala"' : ''}>
     <input type="time" class="tka" value="${r.a}" aria-label="Hora (vacía = durante el día)">
     <input type="time" class="tkb" value="${r.b}" aria-label="Hasta (opcional)">
     <button type="button" class="btn quiet tkx" aria-label="Quitar">✕</button>
@@ -3930,7 +3977,7 @@ tkRowsEl.addEventListener('input', e => {
   if (c.contains('tkt')) tkGrow(e.target);
   if (c.contains('tka')) r.a = e.target.value; else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
   tkRowsWrite();
-  row.classList.toggle('bad', !!r.t && !tkRowWho(r, parseTeam(tkTeam.value).people).size);
+  row.classList.toggle('bad', tkRowBad(r, parseTeam(tkTeam.value).people));
 });
 tkRowsEl.addEventListener('click', e => {
   if (!e.target.closest('.tkx')) return;
@@ -3941,7 +3988,7 @@ tkRowsEl.addEventListener('click', e => {
 tkWhoF.addEventListener('change', () => { for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
 document.getElementById('tkAdd').addEventListener('click', () => {
   const p = person(tkWhoF.value);
-  tkRowsData.push({ h: '', a: '', b: '', t: '', w: p ? p.n.split(/\s+/)[0] : '', nw: true });
+  tkRowsData.push({ h: '', a: '', b: '', t: '', w: p ? p.n : '', nw: true });
   tkRowsRender();
   tkRowsEl.querySelector(`[data-i="${tkRowsData.length - 1}"] .tkt`)?.focus();
 });
@@ -3950,7 +3997,7 @@ document.getElementById('tkXls').addEventListener('click', async () => {
   try {
     const X = await loadXlsx();
     const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a) : -Infinity) - (q.a ? taskTime(q.a) : -Infinity));
-    const ws = X.utils.aoa_to_sheet([['HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [r.a, r.b, r.t, r.w])]);
+    const ws = X.utils.aoa_to_sheet([['HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [r.raw && !r.a ? '¿?' : r.a, r.b, r.t.replace(/\t/g, ' '), r.w])]);
     ws['!cols'] = [{ wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
     const wb = X.utils.book_new();
     X.utils.book_append_sheet(wb, ws, 'TAREAS');
@@ -3967,7 +4014,8 @@ document.querySelector('.orgmenu').addEventListener('click', e => {
 document.getElementById('tkSave').addEventListener('click', async () => {
   const { team, tasks, warn } = tkPreview();
   if (!team.people.length) return edMsg('Escribe primero el equipo (una persona por línea).', true);
-  if (warn.length && !confirm(`Hay ${warn.length} cosas para revisar (en rojo). ¿Publicar igualmente?`)) return;
+  // Les línies que no s'entenen no es publiquen: s'ha de dir clar abans
+  if (tasks.bad ? !confirm(`Hay ${tasks.bad} líneas que no se entienden (en rojo) y NO se publicarán. ¿Publicar igualmente sin ellas?`) : warn.length && !confirm(`Hay ${warn.length} cosas para revisar (en rojo). ¿Publicar igualmente?`)) return;
   const btn = document.getElementById('tkSave');
   btn.disabled = true;
   edMsg('Publicando las tareas…');
@@ -4047,9 +4095,13 @@ document.querySelector('.orgmenu').addEventListener('click', async e => {
 // Una fila sense hora és de l'hora de dalt (i de l'artista de dalt). «Obertura», «De dia (12h a 00h)», «19h», «De 18 a 20h»… s'entenen;
 // el que no té hora clara («Atardecer», «???») queda sense hora, amb el text original entre parèntesis.
 const cap = s => s.toLowerCase().replace(/(^|[\s'-])\p{L}/gu, c => c.toUpperCase());
+const xlHM = v => { const n = Math.round((v - Math.floor(v)) * 1440) % 1440; return `${String(n / 60 | 0).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`; };
 function fuzzyTime(s) {
-  s = String(s || '').trim();
+  s = String(s || '').trim().replace(/^(?:\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}|\d{4}-\d{1,2}-\d{1,2})[\sT,]+(?=\d)/, '');  // «31/10/2026 18:30»: l'hora, no el mes
   if (!s) return null;
+  const one = tmNorm(s);
+  if (one) return { a: one, b: '', note: '' };
+  if (/^0?[.,]\d+$/.test(s)) return { a: xlHM(parseFloat(s.replace(',', '.'))), b: '', note: '' };  // hora d'Excel sense format (0,77 = 18:30)
   if (/^(obertura|apertura|obrir|abrir)/i.test(s) && !/\d/.test(s)) return { a: FEST.start };
   const m = [...s.matchAll(/(\d{1,2})(?:[:.](\d{2}))?\s*h?/g)].filter(x => +x[1] < 24);
   if (!m.length) return null;
@@ -4058,15 +4110,18 @@ function fuzzyTime(s) {
   return { a: f(m[0]), b: range ? f(m[1]) : '', note: /^\s*\d{1,2}([:.]\d{2})?\s*h?\s*$/.test(s) ? '' : s };
 }
 const isBool = v => /^(true|false|verdadero|falso|vertader|fals)$/i.test(String(v).trim());
-function sheetTasks(name, rows) {
+// Títols de columna: «HORA», «HORA INICIO», «INICIO», «HORA:», «FIN», «HASTA», «RESPONSABLE», «QUIÉN/QUI», «DESCRIPCIÓN»… (també en català)
+const HD = { a: ['hora', 'horainicio', 'inicio', 'horainici', 'inici', 'desde', 'comienzo', 'start', 'time'], b: ['hasta', 'fins', 'fin', 'fi', 'final', 'horafin', 'horafinal', 'horafi', 'end'], t: ['tarea', 'tareas', 'tasca', 'tasques', 'descripcion', 'descripcio', 'actividad', 'activitat', 'task'], w: ['quien', 'qui', 'quienes', 'responsable', 'responsables', 'persona', 'personas', 'encargado', 'who'] };
+const isHd = (v, k) => String(v || '').split(/[\/|]/).some(x => HD[k].includes(nk(x)));
+function sheetTasks(name, rows, team) {
   const parts = name.split(/\s*[\/,&+_]\s*|\s+-\s+|\s+(?:i|y)\s+/).map(x => x.trim()).filter(Boolean);
   let grp = '';
-  const names = parts.map(x => { const w = x.split(/\s+/); if (w.length > 1) { grp = w.slice(0, -1).join(' '); return w[w.length - 1]; } return x; }).map(cap);
+  const names = parts.map(x => { if (team && whoOf(x, team)) return x; const w = x.split(/\s+/); if (w.length > 1) { grp = w.slice(0, -1).join(' '); return w[w.length - 1]; } return x; }).map(cap);
   const cells = r => r.map(v => String(v ?? '').trim());
-  let hi = rows.findIndex(r => cells(r).some(v => /^hora$/i.test(v)));
+  let hi = rows.findIndex(r => cells(r).some(v => isHd(v, 'a')));
   if (hi < 0) hi = rows.findIndex(r => cells(r).filter(v => v && !isBool(v)).length >= 2);
   const head = hi >= 0 ? cells(rows[hi]) : [];
-  const hc = head.findIndex(v => /^hora$/i.test(v));
+  const hc = head.findIndex(v => isHd(v, 'a'));
   const lines = [`@${names.map(n => n.replace(/\s+/g, '')).join(' @')}`];
   let lastT = null, carry = [];
   for (const raw of rows.slice(hi + 1)) {
@@ -4092,23 +4147,40 @@ function sheetTasks(name, rows) {
   }
   return { names, grp, lines: lines.length > 1 ? lines : [] };
 }
-function fullSheet(rows) {
+function fullSheet(rows, ppl) {
   const cells = r => r.map(v => String(v ?? '').trim());
-  const hi = rows.findIndex(r => cells(r).some(v => /^(qui[eé]n|qui)$/i.test(v)));
+  const hi = rows.findIndex(r => cells(r).some(v => isHd(v, 'w')));
   if (hi < 0) return null;
-  const hd = cells(rows[hi]), col = re => hd.findIndex(v => re.test(v));
-  const ca = col(/^hora$/i), cb = col(/^(hasta|fins|fin|final)$/i), ct = col(/^(tarea|tasca|tareas|tasques)$/i), cw = col(/^(qui[eé]n|qui)$/i);
+  const hd = cells(rows[hi]), col = k => hd.findIndex(v => isHd(v, k));
+  const ca = col('a'), cb = col('b'), ct = col('t'), cw = col('w');
   if (ct < 0) return null;
-  const out = ['# TAREAS'];
+  const out = [];
+  let up = null, inh = 0;
   for (const raw of rows.slice(hi + 1)) {
     const r = cells(raw), t = (r[ct] || '').replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    if (!t) continue;
-    const ft = ca >= 0 && r[ca] ? fuzzyTime(r[ca]) : null, a = ft && ft.a ? hhmm(ft.a) : '';
-    const b = a ? hhmm(cb >= 0 ? r[cb] : '') || (ft.b ? hhmm(ft.b) : '') : '';
-    const w = whoToks(cw >= 0 ? r[cw] : '').map(x => '@' + x).join(' ');
-    out.push(`${a ? a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+    if (!t) { up = null; continue; }
+    let hv = ca >= 0 ? r[ca] : '', bv = cb >= 0 ? r[cb] : '';
+    // Casella d'hora buida just sota una amb hora = casella combinada: la mateixa hora (i s'avisa)
+    if (!hv && up && ca >= 0) { [hv, bv] = [up[0], bv || up[1]]; inh++; }
+    up = hv ? [hv, bv] : null;
+    const ft = hv ? fuzzyTime(hv) : null, a = ft && ft.a ? hhmm(ft.a) : '';
+    const fb = a && bv ? fuzzyTime(bv) : null, b = a ? (bv ? (fb && fb.a ? hhmm(fb.a) : '') : ft.b ? hhmm(ft.b) : '') : '';
+    const wr = cw >= 0 ? r[cw] : '', w = whoToks(wr, ppl).map(x => '@' + x).join(' ');
+    // Una hora (o un final) que no s'entén no es converteix en «durante el día»: la fila queda tal qual i en vermell
+    if (hv && !a) out.push(`${hv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
+    else if (bv && !b) out.push(`${a}-${bv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
+    else out.push(`${a ? a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
   }
-  return out.slice(1);
+  out.inh = inh;
+  return out;
+}
+// Les caselles amb hora o data de veritat: l'hora del valor (no el text formatat, que pot ser «31/10/2026 18:30» o «6:30 PM»)
+function xlRows(X, ws) {
+  const s = X.utils.decode_range(ws['!ref'] || 'A1').s;
+  return X.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' }).map((r, i) => r.map((v, j) => {
+    const c = ws[X.utils.encode_cell({ r: s.r + i, c: s.c + j })];
+    return c && c.t === 'n' && c.z && X.SSF.is_date(c.z) && (c.v % 1 || c.v < 1) ? xlHM(c.v) : v;
+  }));
 }
 let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
@@ -4124,29 +4196,35 @@ document.getElementById('tkFile').addEventListener('change', async e => {
   edMsg('Leyendo el Excel…');
   try {
     const X = await loadXlsx();
-    const wb = X.read(await f.arrayBuffer(), { type: 'array' });
+    const buf = await f.arrayBuffer();
+    // Un CSV en UTF-8 sense BOM es llegia com a Latin-1 («QUIÃ‰N» i no trobava les columnes): es descodifica abans (UTF-8 o, si no ho és, Windows-1252)
+    let csv = null;
+    if (/\.csv$/i.test(f.name)) { try { csv = new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (e) { csv = new TextDecoder('windows-1252').decode(buf); } }
+    const wb = csv !== null ? X.read(csv.replace(/^\uFEFF/, ''), { type: 'string', cellNF: true }) : X.read(buf, { type: 'array', cellNF: true });
+    const team = parseTeam(tkTeam.value).people;
     // El que fa «Descargar Excel» (HORA · HASTA · TAREA · QUIÉN): és la llista sencera, la canvia tota
-    const full = wb.SheetNames.map(sn => fullSheet(X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: false, defval: '' }))).find(Boolean);
+    const full = wb.SheetNames.map(sn => fullSheet(xlRows(X, wb.Sheets[sn]), team)).find(Boolean);
     if (full) {
       if (!full.length) return edMsg('El Excel no tiene tareas.', true);
       if (tkList.value.trim() && !confirm(`Hemos encontrado ${full.length} tareas. Se cambian todas las tareas por las del Excel. ¿Continuar?`)) return edMsg('');
       tkList.value = ['# TAREAS', ...full].join('\n');
       tkDraft(); tkPreview(); tkRowsSync();
-      return edMsg(`Excel leído: ${full.length} tareas. Revísalas y pulsa «Guardar y publicar».`);
+      return edMsg(`Excel leído: ${full.length} tareas. Revísalas y pulsa «Guardar y publicar».` + (full.inh ? ` ${full.inh} sin hora tienen la hora de la fila de arriba (celdas combinadas): revísalas.` : ''), !!full.inh);
     }
-    const team = parseTeam(tkTeam.value).people;
-    const out = [];
-    let n = 0;
+    const out = [], unk = [];
+    let n = 0, grpAdd = false;
     for (const sn of wb.SheetNames) {
-      const rows = X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: false, defval: '' });
-      const st = sheetTasks(sn, rows);
+      const rows = xlRows(X, wb.Sheets[sn]);
+      const st = sheetTasks(sn, rows, team);
       if (!st.lines.length) continue;
       n += st.lines.length - 1;
       out.push(`# ${sn}`, ...st.lines, '');
+      // Una pestanya que no és de ningú de l'equip («Hoja1», «Video», «Checks») no crea cap persona: s'avisa
       for (const nm of st.names) {
-        const p = team.find(q => q.k === nk(nm));
-        if (!p) team.push({ k: nk(nm), n: nm, r: st.grp ? [cap(st.grp)] : [] });
-        else if (st.grp && !p.r.some(r => nk(r) === nk(st.grp))) p.r.push(cap(st.grp));
+        const w = whoOf(nm, team);
+        if (!w) { if (!unk.includes(sn)) unk.push(sn); continue; }
+        const p = w.length === 1 && team.find(q => q.k === w[0]);
+        if (p && st.grp && !p.r.some(r => nk(r) === nk(st.grp))) { p.r.push(cap(st.grp)); grpAdd = true; }
       }
     }
     if (!n) return edMsg('No hemos encontrado tareas en el Excel. ¿Tiene una pestaña por persona?', true);
@@ -4157,12 +4235,12 @@ document.getElementById('tkFile').addEventListener('change', async e => {
     for (const l of cur) { if (l.startsWith('# ')) { blk = { h: nk(l), lines: [l] }; blocks.push(blk); } else { if (!blk) { blk = { h: '', lines: [] }; blocks.push(blk); } blk.lines.push(l); } }
     const keep = blocks.filter(b => !mine.has(b.h)).map(b => b.lines.join('\n').trim()).filter(Boolean);
     if (keep.join('').trim() && !confirm(`Hemos encontrado ${n} tareas en ${nTabs} pestañas. Se cambian las de esas pestañas y se queda el resto. ¿Continuar?`)) return edMsg('');
-    tkTeam.value = team.map(p => p.n + (p.r.length ? ': ' + p.r.join(', ') : '')).join('\n');
+    if (grpAdd) tkTeam.value = team.map(p => p.n + (p.r.length ? ': ' + p.r.join(', ') : '')).join('\n');
     tkList.value = [...keep, out.join('\n').trim()].join('\n\n').trim();
     tkDraft();
     tkPreview();
     tkRowsSync();
-    edMsg(`Excel leído: ${n} tareas. Revísalas y pulsa «Guardar y publicar».`);
+    edMsg(`Excel leído: ${n} tareas. Revísalas y pulsa «Guardar y publicar».` + (unk.length ? ` Pestañas que no son de nadie del equipo: ${unk.join(', ')}. Añádelos en Equipo o pon una columna QUIÉN.` : ''), !!unk.length);
   } catch (err) {
     edMsg(err.message === 'xlsx' ? 'No se ha podido cargar el lector de Excel. Mira la conexión.' : 'No hemos podido leer el archivo. ¿Es un Excel (.xlsx)?', true);
   }
