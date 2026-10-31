@@ -902,6 +902,9 @@ li.tk.free .tkt { color: var(--muted); }
 .tgnone { margin: 0 0 8px; }
 /* Importants («!» al davant de la tasca, o «important» al text): fons i vora magenta, que es vegin d'una ullada */
 /* Important: color del festival (el lila és «canvi» i l'estrella «meus artistes») i per sobre del bloc del costat */
+.tgb.tc, .tgai.tc { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 20%, #000); }
+.tgb.tc .tt { color: color-mix(in srgb, var(--tc) 60%, #fff); }
+li.tk.tc { box-shadow: inset 4px 0 0 var(--tc); }
 .tgb.tkhi, .tgai.tkhi { background: color-mix(in srgb, var(--accent) 22%, #000); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); z-index: 4; }
 .tgb.tkhi .tt { color: #fff; font-weight: 800; }
 .tkx { color: var(--accent); font-weight: 900; }
@@ -2553,7 +2556,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '31/10 11:19';
+const BUILD = '31/10 11:31';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3378,7 +3381,7 @@ function applyTasks(d) {
   TASKS = {
     updated: String(d.updated || ''), team: String(d.team || ''), tasks: String(d.tasks || ''),
     people: d.people.filter(p => p && p.k && p.n).map(p => ({ k: nk(p.k), n: String(p.n).slice(0, 40), r: Array.isArray(p.r) ? p.r.map(String) : [], e: PROF_OK(p.e) })),
-    list: d.list.filter(x => x && x.id && (x.a === null || Number.isFinite(x.a)) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: Number.isFinite(x.a) ? x.a : null, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String) })).sort(byTime),
+    list: d.list.filter(x => x && x.id && (x.a === null || Number.isFinite(x.a)) && x.t && Array.isArray(x.p)).map(x => ({ id: String(x.id), a: Number.isFinite(x.a) ? x.a : null, b: Number.isFinite(x.b) ? x.b : 0, t: String(x.t), p: x.p.map(String), ...(TK_COL[x.c] ? { c: x.c } : {}) })).sort(byTime),
   };
   paintYo();
   renderPlan(true);
@@ -3466,13 +3469,21 @@ function taskTime(s) {
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 // Tasques, una per línia: «18:30 Grabar la entrada @Marc @Laia», «18:30-19:00 …», «@audiovisual» sol = per a les línies de sota.
 // També es pot enganxar d'un Excel: hora ⇥ tasca ⇥ qui.
+// Color d'una tasca o d'un bloc: «[rosa]» sol en una línia = per a les de sota (fins a la propera «# …» o «[ ]»); al final d'una tasca = només aquella
+const TK_COL = { rojo: '#ff4d4d', naranja: '#ff8a1f', amarillo: '#ffd21f', verde: '#3ddc84', cian: '#22d3ee', azul: '#4d7cff', lila: '#b26bff', rosa: '#ff4fa3' };
+const tkCol = x => TK_COL[x && x.c] || '';
 function parseTasks(src, people) {
   const list = [], warn = [], ids = new Set(), seen = new Set();
-  let group = [], bad = 0;  // bad = línies que no es publiquen
+  let group = [], bad = 0, col = '';  // bad = línies que no es publiquen
   const TOK = /@([^\s@,;]+)/g;
   for (let line of String(src).split('\n')) {
     line = line.trim();
-    if (!line || line.startsWith('#')) continue;
+    if (line.startsWith('#')) { col = ''; continue; }
+    if (!line) continue;
+    const cm = line.match(/^\[\s*([a-záéíóú]*)\s*\]$/i);
+    if (cm) { const k = cm[1].toLowerCase(); if (k && !TK_COL[k]) warn.push(`Color desconocido: «${cm[1]}» (${Object.keys(TK_COL).join(', ')})`); col = TK_COL[k] ? k : ''; continue; }
+    let lc = col;
+    line = line.replace(/\s*\[\s*([a-záéíóú]+)\s*\]\s*$/i, (w, k) => TK_COL[k.toLowerCase()] ? (lc = k.toLowerCase(), '') : w);
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
@@ -3510,7 +3521,7 @@ function parseTasks(src, people) {
     let id = 't' + hash(a + '|' + nk(text)), n = 2;
     while (ids.has(id)) id = 't' + hash(a + '|' + nk(text)) + '-' + n++;
     ids.add(id);
-    list.push({ id, a, b: a !== null && Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 200), p: [...p] });
+    list.push({ id, a, b: a !== null && Number.isFinite(b) && b > a ? b : 0, t: text.slice(0, 2000), p: [...p], ...(lc ? { c: lc } : {}) });
   }
   list.sort(byTime);
   return { list, warn, bad };
@@ -3599,7 +3610,7 @@ function renderPlan(force) {
   let h = '', out = '';
   for (const [x, s] of shown) {
     if (grpOf(x.a) !== h) { h = grpOf(x.a); out += `<li class="grp"><b>${h}</b></li>`; }
-    out += `<li class="tk ${s}"><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Hecha: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
+    out += `<li class="tk ${s}${tkCol(x) ? ' tc' : ''}"${tkCol(x) ? ` style="--tc:${tkCol(x)}"` : ''}><button type="button" class="tkchk" data-tk="${x.id}" aria-pressed="${s === 'done'}" aria-label="Hecha: ${html(x.t)}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
       + `${tkWhen(x)}<span class="tkn">${html(tkTxt(x.t))}${tkMust(x) ? '<span class="tkmust">IMPORTANTE</span>' : ''}${withWho(x) ? `<small>${withWho(x)}</small>` : ''}</span>`
       + `${s === 'late' ? '<span class="tkf">Tarde</span>' : s === 'now' ? (x.b ? '<span class="tkf run">En curso</span>' : '<span class="tkf">Ahora</span>') : ''}</li>`;
   }
@@ -3701,7 +3712,7 @@ function renderTg(force) {
       } else {
         // Curta (menys de ~25 min): hora i text en una sola línia, com els blocs petits de l'horari
         const x = G.items[0], ok = isDone(p.k, x.id), sm = h < 40;
-        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${sm ? ' sm' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}"><span class="tt">${ok ? '✓ ' : ''}${tkMust(x) ? '<b class="tkx">!</b> ' : ''}${lbl(x.a)}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
+        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${sm ? ' sm' : ''}${tkCol(x) ? ' tc' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}${tkCol(x) ? ';--tc:' + tkCol(x) : ''}"><span class="tt">${ok ? '✓ ' : ''}${tkMust(x) ? '<b class="tkx">!</b> ' : ''}${lbl(x.a)}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
       }
     }
     g += '</div>';
@@ -3719,7 +3730,7 @@ function renderTg(force) {
     all.innerHTML = `<h3>${same ? `Todo el turno <b>${lbl(longs[0].x.a)}–${lbl(longs[0].x.b)}</b>` : 'Durante el turno'}</h3><div class="tgall-l">` + longs.map(({ x, who }) => {
       const mine = who.includes(me), k = mine ? YO : who[0].k, ok = isDone(k, x.id);
       const sub = [same ? '' : `${lbl(x.a)}–${lbl(x.b)}`, team ? who.map(p => p.n).join(', ') : ''].filter(Boolean).join(' · ');
-      return `<${mine ? 'button type="button"' : 'div'} class="tgai${ok ? ' done' : ''}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}><i>${ok ? '✓' : ''}</i><span class="tn">${html(tkTxt(x.t))}</span>${sub ? `<span class="tt">${html(sub)}</span>` : ''}</${mine ? 'button' : 'div'}>`;
+      return `<${mine ? 'button type="button"' : 'div'} class="tgai${ok ? ' done' : ''}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${tkCol(x) ? ' tc' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}${tkCol(x) ? `style="--tc:${tkCol(x)}"` : ''}><i>${ok ? '✓' : ''}</i><span class="tn">${html(tkTxt(x.t))}</span>${sub ? `<span class="tt">${html(sub)}</span>` : ''}</${mine ? 'button' : 'div'}>`;
     }).join('') + '</div>';
   }
   // Si algú només té franges llargues, la graella buida no serveix de res
