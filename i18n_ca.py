@@ -565,6 +565,7 @@ PAIRS = [
     ("${ICO.alert}Coincidencias (puedes publicar igual):", "${ICO.alert}Coincidències (pots publicar igualment):"),
     ("'¡Todo hecho!'}</b>", "'Tot fet!'}</b>"),
     ("'<p class=\"empty\">¡Todo hecho!</p>'", "'<p class=\"empty\">Tot fet!</p>'"),
+    ("'Nada más por ahora.' : '¡Todo hecho!'", "'Res més per ara.' : 'Tot fet!'"),
     ('id="tkXls">Descargar Excel</button>', 'id="tkXls">Baixar Excel</button>'),
     ("Para cambiar muchas: «Descargar Excel», edítalo (Excel, Numbers o Google Sheets) y vuelve a «Subir Excel». También vale el Excel por pestañas, una por persona («LAIA», «MARTÍ / CALVINS»).", "Per canviar-ne moltes: «Baixar Excel», edita’l (Excel, Numbers o Google Sheets) i torna a «Pujar Excel». També val l’Excel per pestanyes, una per persona («LAIA», «MARTÍ / CALVINS»)."),
     ('<span>Hora</span><span>Hasta</span><span>Tarea</span><span>Quién</span>', '<span>Hora</span><span>Fins</span><span>Tasca</span><span>Qui</span>'),
@@ -609,6 +610,16 @@ PAIRS = [
     ("`<h3>${same ? `Todo el turno <b>", "`<h3>${same ? `Tot el torn <b>"),
     ("'Durante el turno'}</h3>", "'Durant el torn'}</h3>"),
     ("' · ★ IMPORTANTE'", "' · ★ IMPORTANT'"),
+    # --- Importar tasques: línies que no s'entenen, hores i Excel (31-10) ---
+    ("`Hora final rara: «${line.slice(0, 40)}»`", "`Hora final estranya: «${line.slice(0, 40)}»`"),
+    ("`La hora final es antes que la de inicio: «${line.slice(0, 40)}»`", "`L’hora final és abans que la d’inici: «${line.slice(0, 40)}»`"),
+    ("`Repetida: «${ta || '–'} ${text.slice(0, 30)}»`", "`Repetida: «${ta || '–'} ${text.slice(0, 30)}»`"),
+    ("` · <b>${tasks.bad}</b> líneas sin entender (no se publican)`", "` · <b>${tasks.bad}</b> línies que no s’entenen (no es publiquen)`"),
+    ("`Hay ${tasks.bad} líneas que no se entienden (en rojo) y NO se publicarán. ¿Publicar igualmente sin ellas?`", "`Hi ha ${tasks.bad} línies que no s’entenen (en vermell) i NO es publicaran. Vols publicar igualment sense aquestes línies?`"),
+    ("' title=\"No se entiende: ponle hora o bórrala\"'", "' title=\"No s’entén: posa-hi hora o esborra-la\"'"),
+    ("r.raw && !r.a ? '¿?' : r.a", "r.raw && !r.a ? '?' : r.a"),
+    ("` ${full.inh} sin hora tienen la hora de la fila de arriba (celdas combinadas): revísalas.`", "` ${full.inh} sense hora tenen l’hora de la fila de dalt (cel·les combinades): revisa-les.`"),
+    ("` Pestañas que no son de nadie del equipo: ${unk.join(', ')}. Añádelos en Equipo o pon una columna QUIÉN.`", "` Pestanyes que no són de ningú de l’equip: ${unk.join(', ')}. Afegeix-los a Equip o posa una columna QUI.`"),
 ]
 
 
