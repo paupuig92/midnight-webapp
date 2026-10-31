@@ -862,6 +862,9 @@ li.tk.free .tkt { color: var(--muted); }
 .tgh:first-child { left: 0; z-index: 8; }
 .tgh.me { color: var(--fav); }
 .tgc { grid-row: 2; position: relative; border-left: 1px solid var(--rule); }
+.tgc > .hl { position: absolute; left: 0; right: 0; height: 1px; background: var(--rule); pointer-events: none; }
+.tgb.past { opacity: .4; }
+li.tk.past .tkn, li.tk.past .tkt { opacity: .45; }
 .tgb { position: absolute; box-sizing: border-box; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); padding: 3px 5px; overflow: hidden; text-align: left; font: inherit; display: flex; flex-direction: column; gap: 1px; cursor: default; }
 .tgb.mine { cursor: pointer; border-color: var(--fav); }
 .tgb .tt { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.1; }
@@ -2556,7 +2559,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '31/10 11:31';
+const BUILD = '31/10 11:43';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3464,6 +3467,8 @@ function taskTime(s) {
   const wm = (([h, mi]) => h * 60 + mi)(n.split(':').map(Number));
   // Abans d'obrir i a partir de les 6:00 (o d'1 h després del final) = muntatge del mateix dia, com diu l'ajuda; abans = de matinada, l'endemà
   if (wm < START_M && wm >= Math.max(6 * 60, END_M + 60)) t -= 24 * 60 * MIN;
+  const sec = String(s).match(/^\s*\d{1,2}[:.]\d{2}:(\d{2})/);  // «00:01:22»: amb segons (cançons d'un setlist)
+  if (sec && +sec[1] < 60) t += +sec[1] * 1000;
   return t;
 }
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -3563,10 +3568,12 @@ const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.
 const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
 const grpOf = t => t === null ? 'Durant el dia' : `${hourOf(t)} h`;
 const tkWhen = x => x.a === null ? '<span class="tkt"></span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
+// «Cue»: tasca de menys de 5 min (una cançó d'un setlist, un tall): quan passa, passa (no va «tarde», no avisa, no compta)
+const tkCue = x => x.a !== null && x.b > x.a && x.b - x.a < 5 * MIN;
 function tkState(x, t) {
   if (DONE.has(x.id)) return 'done';
   if (x.a === null) return 'free';
-  if (t >= tkEnd(x)) return 'late';
+  if (t >= tkEnd(x)) return tkCue(x) ? 'past' : 'late';
   if (t >= x.a) return 'now';
   return '';
 }
@@ -3593,7 +3600,7 @@ function renderPlan(force) {
     paintYo();
     return;
   }
-  const nDone = mine.filter(x => DONE.has(x.id)).length, left = mine.length - nDone;
+  const nDone = mine.filter(x => DONE.has(x.id) || tkState(x, t) === 'past').length, left = mine.length - nDone;
   who.textContent = WHO_L[me.e] || WHO_L[PROF] || '';
   const C = 2 * Math.PI * 17, pc = mine.length ? nDone / mine.length : 0;
   const prog = `<div class="plprog"><svg viewBox="0 0 40 40" width="44" height="44" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--rule)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/></svg><span><b>${left ? (left === 1 ? 'Et queda 1 tasca' : `Et queden ${left} tasques`) : 'Tot fet!'}</b><small>${nDone} de ${mine.length} fetes</small></span></div>`;
@@ -3644,17 +3651,17 @@ const TGK = FEST.key + '-tgteam-v1';
 let tgTeam = false, tgKey = '', tgScrolled = false;
 try { tgTeam = localStorage.getItem(TGK) === '1'; } catch (e) {}
 let TPX = 1.6;  // px per minut, com l'horari (les tasques curtes es fan d'una línia); amb la pinça es canvia
-function lanes(list) {
-  // Tasques que es trepitgen a la mateixa columna: una al costat de l'altra
+function lanes(list, yy) {
+  // Tasques que es trepitgen a la mateixa columna: una al costat de l'altra (en píxels: l'escala pot no ser igual a totes les hores)
   const end = [], out = [];
   for (const x of list) {
-    const b = Math.max(tkEnd(x), x.a + (x.minH || 42) / TPX * MIN);
-    let l = end.findIndex(e => e <= x.a);
+    const a = yy(x.a), b = Math.max(yy(tkEnd(x)), a + (x.minH || 42)) - 0.5;
+    let l = end.findIndex(e => e <= a);
     if (l < 0) { l = end.length; end.push(b); } else end[l] = b;
-    out.push([x, l, b]);
+    out.push([x, l, b, a]);
   }
   // Quantes n'hi ha alhora per a cada tasca (per a l'amplada), comptant l'alçada mínima de les curtes
-  return out.map(([x, l, b]) => [x, l, Math.max(...out.filter(([o, , ob]) => o.a < b && ob > x.a).map(([, ol]) => ol)) + 1]);
+  return out.map(([x, l, b, a]) => [x, l, Math.max(...out.filter(([, , ob, oa]) => oa < b && ob > a).map(([, ol]) => ol)) + 1]);
 }
 function renderTg(force) {
   const sec = document.getElementById('tkgrid'), t = now();
@@ -3674,18 +3681,24 @@ function renderTg(force) {
   const timed = TASKS.list.filter(x => x.a !== null);
   const H0 = Math.floor(Math.min(T0, ...timed.map(x => x.a)) / 3600000) * 3600000;
   const H1 = Math.ceil(Math.max(TEND, ...timed.map(tkEnd)) / 3600000) * 3600000;
-  const yy = v => PAD + (v - H0) / MIN * TPX, HT = (H1 - H0) / MIN * TPX + 2 * PAD;
+  // Escala per trams de 5 min: on hi ha «cues» seguits (cançons d'un setlist), el tram s'eixampla perquè cadascun tingui la seva línia
+  const SL = 5 * MIN, nS = Math.max(1, Math.ceil((H1 - H0) / SL)), rate = new Array(nS).fill(TPX);
+  for (const x of timed) if (tkCue(x) && cols.some(p => x.p.includes(p.k))) { const i = Math.floor((x.a - H0) / SL); if (i >= 0 && i < nS) rate[i] = Math.max(rate[i], 24 / ((x.b - x.a) / MIN)); }
+  const off = [0];
+  for (let i = 0; i < nS; i++) off.push(off[i] + rate[i] * 5);
+  const yy = v => { const r = (v - H0) / SL, i = Math.max(0, Math.min(nS - 1, Math.floor(r))); return PAD + off[i] + (r - i) * (off[i + 1] - off[i]); }, HT = off[nS] + 2 * PAD;
   let gut = '';
   for (let h = H0; h <= H1; h += 3600000) if (!(t >= H0 && t <= H1 && Math.abs(t - h) < 12 * MIN)) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
   const inNow = t >= H0 && t <= H1;
   if (inNow) gut += `<span class="nowlbl" style="top:${yy(t)}px">${hm(t)}</span>`;
-  const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
+  let hl = '';
+  for (let h = H0; h <= H1; h += 3600000) hl += `<i class="hl" style="top:${yy(h)}px"></i>`;
   const colW = [], longs = [];
   let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
-  const stOf = (ok, a, e) => ok ? 'done' : t >= e ? 'late' : t >= a ? 'now' : '';
+  const stOf = (ok, a, e, cue) => ok ? 'done' : t >= e ? (cue ? 'past' : 'late') : t >= a ? 'now' : '';
   let shortN = 0;
   cols.forEach((p, ci) => {
-    g += `<div class="tgc" style="grid-column:${ci + 2};height:${HT}px;${bg}">`;
+    g += `<div class="tgc" style="grid-column:${ci + 2};height:${HT}px">${hl}`;
     const own = timed.filter(x => x.p.includes(p.k));
     const mine = p === me;
     // Les llargues (més de 2 h 30: «de 14 a 02 h», «de dia») no van a la graella: surten a dalt, a «Todo el turno»
@@ -3699,11 +3712,11 @@ function renderTg(force) {
     }
     for (const G of grp) G.minH = G.items.length > 1 ? 26 + G.items.length * 16 : 22;
     shortN += grp.length;
-    const ln = lanes(grp);
+    const ln = lanes(grp, yy);
     // Prou ample perquè cada tasca d'una mateixa hora tingui ~84 px (si no, la graella fa scroll de costat)
     colW[ci] = Math.max(team ? 112 : 160, Math.max(1, ...ln.map(([, , n]) => n)) * 84);
     for (const [G, l, n] of ln) {
-      const h = Math.max(G.minH, (tkEnd(G) - G.a) / MIN * TPX - 2), pos = `top:${yy(G.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px) / ${n});width:calc((100% - 4px) / ${n} - 3px)`;
+      const h = Math.max(G.minH, yy(tkEnd(G)) - yy(G.a) - 2), pos = `top:${yy(G.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px) / ${n});width:calc((100% - 4px) / ${n} - 3px)`;
       if (G.items.length > 1) {
         const all = G.items.every(x => isDone(p.k, x.id));
         g += `<div class="tgb grp ${stOf(all, G.a, tkEnd(G))}${mine ? ' mine' : ''}${G.items.some(tkMust) ? ' tkhi' : ''}" style="${pos.replace(/height:([\d.]+)px/, 'min-height:$1px')}"><span class="tt">${G.items.some(tkMust) ? '<b class="tkx">!</b> ' : ''}${lbl(G.a)}</span><span class="tn">${html(G.subj)}</span>` +
@@ -3712,7 +3725,7 @@ function renderTg(force) {
       } else {
         // Curta (menys de ~25 min): hora i text en una sola línia, com els blocs petits de l'horari
         const x = G.items[0], ok = isDone(p.k, x.id), sm = h < 40;
-        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${sm ? ' sm' : ''}${tkCol(x) ? ' tc' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}${tkCol(x) ? ';--tc:' + tkCol(x) : ''}"><span class="tt">${ok ? '✓ ' : ''}${tkMust(x) ? '<b class="tkx">!</b> ' : ''}${lbl(x.a)}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
+        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x), tkCue(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${sm ? ' sm' : ''}${tkCol(x) ? ' tc' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}${tkCol(x) ? ';--tc:' + tkCol(x) : ''}"><span class="tt">${ok ? '✓ ' : ''}${tkMust(x) ? '<b class="tkx">!</b> ' : ''}${lbl(x.a)}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
       }
     }
     g += '</div>';
@@ -3836,7 +3849,7 @@ async function pullDone() {
 function checkTaskAlerts(t) {
   if (!prefs.tb) return;
   for (const x of mineTasks()) {
-    if (DONE.has(x.id)) continue;
+    if (DONE.has(x.id) || tkCue(x)) continue;
     const left = x.a - t, k = `tk-${x.id}@${x.a}`;
     if (left > 0 && left <= prefs.tb * MIN && !told.has(k + ':pre')) {
       remember(k + ':pre');
@@ -4309,7 +4322,7 @@ function renderGlobal() {
   for (const x of TASKS.list) {
     if (gvWho && !x.p.includes(gvWho)) continue;
     if (grpOf(x.a) !== h) { h = grpOf(x.a); rows += `<li class="grp"><b>${h}</b></li>`; }
-    const late = t >= tkEnd(x);
+    const late = t >= tkEnd(x) && !tkCue(x);
     const chips = x.p.map(k => { const ok = isDone(k, x.id); return `<span class="gvc ${ok ? 'ok' : late ? 'late' : ''}">${ok ? '✓ ' : ''}${html((person(k) || { n: k }).n)}</span>`; }).join('') || '<span class="gvc late">Ningú</span>';
     rows += `<li class="gvt">${tkWhen(x)}<span class="tkn">${html(tkTxt(x.t))}<span class="gvcs">${chips}</span></span></li>`;
   }
