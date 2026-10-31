@@ -862,6 +862,7 @@ li.tk.free .tkt { color: var(--muted); }
 .tgall-l { display: grid; gap: 6px; }
 .tgai { display: grid; grid-template-columns: 22px 1fr; gap: 2px 8px; align-items: start; text-align: left; width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--accent-dim); background: #000; color: var(--ink); font: inherit; cursor: default; }
 .tgai.mine { border-color: var(--fav); cursor: pointer; }
+.tgai:not(.mine) > i { visibility: hidden; }  /* les dels altres no es poden marcar */
 .tgai i { grid-row: span 2; width: 18px; height: 18px; border-radius: 5px; border: 2px solid currentColor; font-style: normal; font-size: 12px; line-height: 15px; text-align: center; color: var(--muted); }
 .tgai.mine i { color: var(--fav); }
 .tgai.done i { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
@@ -876,12 +877,14 @@ li.tk.free .tkt { color: var(--muted); }
 .tgsub.done { text-decoration: line-through; opacity: .6; }
 .tgnone { margin: 0 0 8px; }
 /* Importants («!» al davant de la tasca, o «important» al text): fons i vora magenta, que es vegin d'una ullada */
-.tgb.tkimp, .tgai.tkimp { background: color-mix(in srgb, var(--chg) 30%, #000); border-color: var(--chg); box-shadow: 0 0 0 1px var(--chg); }
-.tgb.tkimp .tt { color: #fff; font-weight: 800; }
-.tgsub.tkimp { color: #fff; font-weight: 900; }
-.tgsub.tkimp::before { content: "★"; color: var(--chg); }
+/* Important: color del festival (el lila és «canvi» i l'estrella «meus artistes») i per sobre del bloc del costat */
+.tgb.tkhi, .tgai.tkhi { background: color-mix(in srgb, var(--accent) 22%, #000); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); z-index: 4; }
+.tgb.tkhi .tt { color: #fff; font-weight: 800; }
+.tkx { color: var(--accent); font-weight: 900; }
+.tgsub.tkhi { color: #fff; font-weight: 900; }
+.tgsub.tkhi::before { content: "! "; color: var(--accent); }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
-.tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 5; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
+.tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 1; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
 .tgnow::before { content: ""; position: absolute; left: -5px; top: -6.5px; width: 10px; height: 10px; border-radius: 50%; background: var(--now); }
 .tgpast { position: absolute; grid-row: 2; left: 0; right: 0; top: 0; background: color-mix(in srgb, var(--bg) 45%, transparent); z-index: 1; pointer-events: none; }  /* el que ja ha passat, una mica apagat (per sota de les tasques) */
 .tgb, .tgrail { z-index: 2; }
@@ -945,7 +948,7 @@ body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !impo
 .plprog svg { flex: none; }
 .plprog b { display: block; font: 800 var(--fs-l)/1.15 var(--display); color: var(--ink); }
 .plprog small { color: var(--muted); }
-.tkmust { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--chg, #e0f); color: #fff; font: 800 11px/1.5 var(--ui, inherit); letter-spacing: .05em; vertical-align: 2px; }
+.tkmust { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--accent); color: #000; font: 800 11px/1.5 var(--ui, inherit); letter-spacing: .05em; vertical-align: 2px; }
 .tvsec { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .tvsec h2 { margin-bottom: 4px; }
 .yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
@@ -3488,8 +3491,8 @@ function withWho(x) {
   const o = x.p.filter(k => k !== YO).map(k => (person(k) || { n: k }).n);
   return !o.length ? '' : o.length <= 3 ? `con ${o.map(html).join(', ')}` : `con ${o.length} personas más`;
 }
-// «IMPORTANTE»: una tasca que comença o acaba amb «!» o que diu IMPORTANT
-const tkMust = x => /^!|!\s*$|\bimportant/i.test(x.t);
+// «IMPORTANTE»: només si la tasca comença amb «!» («Bon concert!» o «no és important» no ho són)
+const tkMust = x => /^!/.test(x.t);
 const tkTxt = t => String(t).replace(/^!\s*/, '');  // «!» al davant = important (no es mostra)
 function renderPlan(force) {
   const sec = document.getElementById('plan'), t = now();
@@ -3508,7 +3511,7 @@ function renderPlan(force) {
     return;
   }
   const nDone = mine.filter(x => DONE.has(x.id)).length, left = mine.length - nDone;
-  who.textContent = WHO_L[PROF] || '';
+  who.textContent = WHO_L[me.e] || WHO_L[PROF] || '';
   const C = 2 * Math.PI * 17, pc = mine.length ? nDone / mine.length : 0;
   const prog = `<div class="plprog"><svg viewBox="0 0 40 40" width="44" height="44" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--rule)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/></svg><span><b>${left ? (left === 1 ? 'Te queda 1 tarea' : `Te quedan ${left} tareas`) : '¡Todo hecho!'}</b><small>${nDone} de ${mine.length} hechas</small></span></div>`;
   if (!mine.length) { box.innerHTML = '<p class="empty">No tienes tareas asignadas. Si falta algo, díselo a la organización.</p>'; return; }
@@ -3530,7 +3533,7 @@ function renderPlan(force) {
   }
   const rest = mine.length - shown.length;
   box.innerHTML = prog + (late ? `<button type="button" class="pllate" id="planLate" aria-expanded="${planLate || planAll}">${late === 1 ? 'Tienes 1 tarea pendiente de antes' : `Tienes ${late} tareas pendientes de antes`}${planAll ? '' : planLate ? ' ▾' : ' ▸'}</button>` : '')
-    + (shown.length ? `<ul class="tklist">${out}</ul>` : '<p class="empty">¡Todo hecho!</p>')
+    + (shown.length ? `<ul class="tklist">${out}</ul>` : `<p class="empty">${left ? 'Nada más por ahora.' : '¡Todo hecho!'}</p>`)
     + (rest > 0 || planAll ? `<button type="button" class="linkbtn" id="planAll">${planAll ? 'Ver solo lo que toca' : `Ver todo el día (${mine.length})`}</button>` : '');
 }
 document.getElementById('plan').addEventListener('click', e => {
@@ -3590,7 +3593,7 @@ function renderTg(force) {
   const H1 = Math.ceil(Math.max(TEND, ...timed.map(tkEnd)) / 3600000) * 3600000;
   const yy = v => PAD + (v - H0) / MIN * TPX, HT = (H1 - H0) / MIN * TPX + 2 * PAD;
   let gut = '';
-  for (let h = H0; h <= H1; h += 3600000) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
+  for (let h = H0; h <= H1; h += 3600000) if (!(t >= H0 && t <= H1 && Math.abs(t - h) < 12 * MIN)) gut += `<span style="top:${yy(h)}px">${hm(h)}</span>`;
   const inNow = t >= H0 && t <= H1;
   if (inNow) gut += `<span class="nowlbl" style="top:${yy(t)}px">${hm(t)}</span>`;
   const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * TPX}px);background-position:0 ${PAD}px;`;
@@ -3620,13 +3623,13 @@ function renderTg(force) {
       const h = Math.max(G.minH, (tkEnd(G) - G.a) / MIN * TPX - 2), pos = `top:${yy(G.a)}px;height:${h}px;left:calc(2px + ${l} * (100% - 4px) / ${n});width:calc((100% - 4px) / ${n} - 3px)`;
       if (G.items.length > 1) {
         const all = G.items.every(x => isDone(p.k, x.id));
-        g += `<div class="tgb grp ${stOf(all, G.a, tkEnd(G))}${mine ? ' mine' : ''}${G.items.some(tkMust) ? ' tkimp' : ''}" style="${pos.replace(/height:([\d.]+)px/, 'min-height:$1px')}"><span class="tt">${lbl(G.a)}${G.items.some(tkMust) ? ' · ★ IMPORTANTE' : ''}</span><span class="tn">${html(G.subj)}</span>` +
+        g += `<div class="tgb grp ${stOf(all, G.a, tkEnd(G))}${mine ? ' mine' : ''}${G.items.some(tkMust) ? ' tkhi' : ''}" style="${pos.replace(/height:([\d.]+)px/, 'min-height:$1px')}"><span class="tt">${G.items.some(tkMust) ? '<b class="tkx">!</b> ' : ''}${lbl(G.a)}</span><span class="tn">${html(G.subj)}</span>` +
           G.items.map(x => { const ok = isDone(p.k, x.id), tx = tkTxt(x.t), rest = tx.slice(tx.indexOf('·') + 1).trim();
-            return mine ? `<button type="button" class="tgsub${ok ? ' done' : ''}${tkMust(x) ? ' tkimp' : ''}" data-tk="${x.id}" aria-pressed="${ok}" aria-label="${html(x.t)}">${html(rest)}</button>` : `<span class="tgsub${ok ? ' done' : ''}${tkMust(x) ? ' tkimp' : ''}">${html(rest)}</span>`; }).join('') + '</div>';
+            return mine ? `<button type="button" class="tgsub${ok ? ' done' : ''}${tkMust(x) ? ' tkhi' : ''}" data-tk="${x.id}" aria-pressed="${ok}" aria-label="${html(x.t)}">${html(rest)}</button>` : `<span class="tgsub${ok ? ' done' : ''}${tkMust(x) ? ' tkhi' : ''}">${html(rest)}</span>`; }).join('') + '</div>';
       } else {
         // Curta (menys de ~25 min): hora i text en una sola línia, com els blocs petits de l'horari
         const x = G.items[0], ok = isDone(p.k, x.id), sm = h < 40;
-        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkimp' : ''}${sm ? ' sm' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}"><span class="tt">${ok ? '✓ ' : ''}${lbl(x.a)}${tkMust(x) ? (sm ? ' ★' : ' · ★ IMPORTANTE') : ''}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
+        g += `<${mine ? 'button type="button"' : 'div'} class="tgb ${stOf(ok, x.a, tkEnd(x))}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}${sm ? ' sm' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}aria-label="${lbl(x.a)}${x.b ? '–' + lbl(x.b) : ''}: ${html(tkTxt(x.t))}" style="${pos}"><span class="tt">${ok ? '✓ ' : ''}${tkMust(x) ? '<b class="tkx">!</b> ' : ''}${lbl(x.a)}</span><span class="tn">${html(tkTxt(x.t))}</span></${mine ? 'button' : 'div'}>`;
       }
     }
     g += '</div>';
@@ -3640,11 +3643,11 @@ function renderTg(force) {
   all.hidden = !longs.length;
   if (longs.length) {
     longs.sort((p, q) => p.x.a - q.x.a);
-    const same = longs.every(L => L.x.a === longs[0].x.a && L.x.b === longs[0].x.b);
+    const same = longs.length > 1 && longs.every(L => L.x.a === longs[0].x.a && L.x.b === longs[0].x.b);
     all.innerHTML = `<h3>${same ? `Todo el turno <b>${lbl(longs[0].x.a)}–${lbl(longs[0].x.b)}</b>` : 'Durante el turno'}</h3><div class="tgall-l">` + longs.map(({ x, who }) => {
       const mine = who.includes(me), k = mine ? YO : who[0].k, ok = isDone(k, x.id);
       const sub = [same ? '' : `${lbl(x.a)}–${lbl(x.b)}`, team ? who.map(p => p.n).join(', ') : ''].filter(Boolean).join(' · ');
-      return `<${mine ? 'button type="button"' : 'div'} class="tgai${ok ? ' done' : ''}${mine ? ' mine' : ''}${tkMust(x) ? ' tkimp' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}><i>${ok ? '✓' : ''}</i><span class="tn">${html(tkTxt(x.t))}</span>${sub ? `<span class="tt">${html(sub)}</span>` : ''}</${mine ? 'button' : 'div'}>`;
+      return `<${mine ? 'button type="button"' : 'div'} class="tgai${ok ? ' done' : ''}${mine ? ' mine' : ''}${tkMust(x) ? ' tkhi' : ''}" ${mine ? `data-tk="${x.id}" aria-pressed="${ok}" ` : ''}><i>${ok ? '✓' : ''}</i><span class="tn">${html(tkTxt(x.t))}</span>${sub ? `<span class="tt">${html(sub)}</span>` : ''}</${mine ? 'button' : 'div'}>`;
     }).join('') + '</div>';
   }
   // Si algú només té franges llargues, la graella buida no serveix de res
@@ -3656,7 +3659,11 @@ function renderTg(force) {
   document.getElementById('tgFree').textContent = nf ? `${nf === 1 ? '1 tarea' : `${nf} tareas`} sin hora: salen en «Mis tareas», en «Durante el día».` : '';
   const w = document.getElementById('tgWrap');
   if (!tgScrolled && w.clientHeight) { tgScrolled = true; w.scrollTop = Math.max(0, yy(Math.min(Math.max(t, H0), H1)) - 80); }
+  tgFade();
 }
+// Vora difuminada a la dreta mentre hi ha més columnes per veure (com a l'horari)
+function tgFade() { const w = document.getElementById('tgWrap'); w.parentElement.classList.toggle('atend', w.scrollLeft + w.clientWidth >= w.scrollWidth - 4); }
+document.getElementById('tgWrap').addEventListener('scroll', tgFade, { passive: true });
 // Pinça amb dos dits a l'horari i a les tasques: no és zoom, és més o menys espai entre hores (cada mòbil ho recorda).
 // La pàgina no fa zoom (gesturestart bloquejat). Es redibuixa en directe (un cop per fotograma) i l'hora sota els dits
 // es queda al seu lloc. En redibuixar, l'element que toca el dit surt del document i els seus «touchmove» ja no
@@ -4303,7 +4310,7 @@ function showTab(t, top = true) {
 function paintBadge() {
   const bd = document.getElementById('tabBadge');
   if (!bd) return;
-  const late = taskOn() ? mineTasks().filter(x => tkState(x, now()) === 'late').length : 0;
+  const t = now(), late = taskOn() ? mineTasks().filter(x => tkState(x, t) === 'late' && t - tkEnd(x) < 3600000).length : 0;
   bd.hidden = !late; bd.textContent = late > 9 ? '9+' : late;
 }
 function paintTabs() {

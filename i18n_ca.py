@@ -565,6 +565,7 @@ PAIRS = [
     ("${ICO.alert}Coincidencias (puedes publicar igual):", "${ICO.alert}Coincidències (pots publicar igualment):"),
     ("'¡Todo hecho!'}</b>", "'Tot fet!'}</b>"),
     ("'<p class=\"empty\">¡Todo hecho!</p>'", "'<p class=\"empty\">Tot fet!</p>'"),
+    ("'Nada más por ahora.' : '¡Todo hecho!'", "'Res més per ara.' : 'Tot fet!'"),
     ('id="tkXls">Descargar Excel</button>', 'id="tkXls">Baixar Excel</button>'),
     ("Para cambiar muchas: «Descargar Excel», edítalo (Excel, Numbers o Google Sheets) y vuelve a «Subir Excel». También vale el Excel por pestañas, una por persona («LAIA», «MARTÍ / CALVINS»).", "Per canviar-ne moltes: «Baixar Excel», edita’l (Excel, Numbers o Google Sheets) i torna a «Pujar Excel». També val l’Excel per pestanyes, una per persona («LAIA», «MARTÍ / CALVINS»)."),
     ('<span>Hora</span><span>Hasta</span><span>Tarea</span><span>Quién</span>', '<span>Hora</span><span>Fins</span><span>Tasca</span><span>Qui</span>'),
