@@ -104,6 +104,7 @@ function dueTasks(sub, list, from, to) {
   if (!sub.yo || !(sub.tb > 0) || !list) return items;
   for (const x of list) {
     if (!x.p.includes(sub.yo)) continue;
+    if (x.b > x.a && x.b - x.a < 5 * MIN) continue;  // «cues» de menys de 5 min (cançons d'un setlist): no s'avisen
     const pre = x.a - sub.tb * MIN;
     if (pre > from && pre <= to) items.push({ title: `Tasca · d’aquí a ${sub.tb} min`, body: x.t, tag: `tk-${x.id}@${x.a}:pre` });
     if (x.a > from && x.a <= to) items.push({ title: 'Tasca · ara', body: x.t, tag: `tk-${x.id}@${x.a}:go` });
