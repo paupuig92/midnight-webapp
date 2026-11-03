@@ -1411,113 +1411,60 @@ document.documentElement.lang = 'es';
 /* ==== FESTIVAL ==== */
 // Tot el que canvia d'un festival a un altre és dins d'aquest bloc. Cada festival en té una còpia a
 // festivals/<id>/festival.js, i `python3 festival.py <id>` la posa aquí i copia els seus logos a img/.
+// ESBORRANY (03-11): branding del cartell i horari d'en Pau (2 dies, 1 escenari). Falten importàncies i mapa.
 const FEST = {
-  id: 'castanyada-2026',        // també separa els canvis de l'organització (changes.json) d'un festival a un altre
-  key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
-  name: 'La Castanyada',
-  banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
-  // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
-  bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
-  // «A continuación» sense el farciment: aquests escenaris i importàncies no hi surten (sí a «Ahora suena», a l'horari, als preferits i a la pantalla d'un escenari)
-  nextHide: { stages: [], imp: [1] },
-  date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
-  dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
-  start: '12:00', end: '05:00',
-  accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
-  // Colors de base propis (opcional): els del Bass eren verdosos
-  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428',
-    '--display': '"Bricolage", "Archivo", sans-serif', '--body': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
-  // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
+  id: 'duro-black-hangar-2026', // també separa els canvis de l'organització (changes.json) d'un festival a un altre
+  key: 'duro',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
+  name: 'Black Hangar',
+  banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
+  date: [2026, 12, 5],          // primer dia
+  // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
+  days: ['Sábado 5', 'Domingo 6'],
+  start: '11:00', end: '23:00',
+  // Blanc i negre com el cartell: l'accent és blanc (el vermell d'«ara» i el groc dels meus artistes es queden)
+  accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
+  theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
+    '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
+    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif' },
+  // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
-    { family: 'Blogh', file: 'Blogh.woff2', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
-    { family: 'Bricolage', file: 'Bricolage-Regular.woff2', weight: '300 400' },
-    { family: 'Bricolage', file: 'Bricolage-SemiBold.woff2', weight: '500 600' },
-    { family: 'Bricolage', file: 'Bricolage-Bold.woff2', weight: 700 },
-    { family: 'Bricolage', file: 'Bricolage-ExtraBold.woff2', weight: '800 900' },
-    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.woff2', weight: '600 900' },
+    { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
+    { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
+    { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
   ],
-  // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
-  deco: {
-    // strip: 'img/deco-strip.png',   // garlanda sota la capçalera (en Pau la va treure el 26-10)
-    before: 'img/deco-before.png',    // abans de començar
-    end: 'img/deco-end.png',          // quan s'ha acabat
-    empty: 'img/deco-empty.png',      // «Solo mis artistas» sense cap artista triat
-    done: 'img/deco-done.png',        // «Solo mis artistas» quan ja no en queda cap per cobrir
-    sheet: 'img/deco-sheet.png',      // full «Mis artistas»
-    heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
-    // la cabra de «Quedan» canvia d'humor al llarg del festival: de la festa (12:00) al plor (05:00)
-    moods: ['img/deco-m-festa.png', 'img/deco-m-enamorat.png', 'img/deco-m-guai.png', 'img/deco-m-crack.png', 'img/deco-m-flipat.png', 'img/deco-m-xocat.png', 'img/deco-m-enfadat.png', 'img/deco-m-plora.png'],
-    prod: 'img/deco-mecanic.png',     // mascota que corre al costat del rellotge amb el perfil Producció
-    mkt: 'img/deco-foto.png',         // …la que fa fotos, amb Màrqueting
-    base: 'img/deco-got.png',         // …la que brinda, sense perfil («Només horaris»)
-  },
-  // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
-  impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
-  impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
-  stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
-  ridesName: 'Actividades',  // com al PDF: atraccions, photocall i cultura popular, cadascuna amb el seu lloc
-  // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
-  logos: {
-    'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
-    'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
-    'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
-  },
-  // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
-  maps: [
-    { img: 'img/mapa-plano.jpg', title: 'El plano', alt: 'Plano del recinto: escenarios, barras, cashless, photocall, atracciones, foodtrucks, lockers, WC y emergencias',
-      // «Estás aquí» (opcional): 3 punts del plànol amb les seves coordenades de Google Maps → [lat, lon, x, y] (x i y de 0 a 1 sobre la imatge = píxel / mida; posa el número ja dividit, build_web.py no entén divisions)
-      geo: [[41.563835330953154, 2.2497897580528172, 0.1788, 0.8422],    // Escenari principal
-            [41.56442172780457, 2.2506536969768542, 0.3171, 0.4761],      // Escenari Cultura (la bandera verda)
-            [41.56382965221928, 2.2510648823627126, 0.4197, 0.7323]] }, // Atraccions (al costat de l'entrada)
-    { img: 'img/mapa-acceso.jpg', title: 'Cómo llegar', alt: 'Acceso al festival por la C-17 y la C-35, con los párkings público y de artistas',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'],
-      geo: [[41.567911089905145, 2.2490694926647645, 0.5274, 0.4431],    // Primera rotonda (venint de la C-17)
-            [41.56732443030398, 2.25185982389714, 0.6218, 0.4937],       // Rotonda Rocco's Ranch
-            [41.563275572060846, 2.2524024833555014, 0.6238, 0.7609]] }, // Pàrquing  // el mateix lloc: el 2 per si Maps no entén bé l'1
-  ],
-  // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
-  rides: [
-    { name: 'Nena Posseïda · Photocall', from: '18:00', to: '21:00' },
-    { name: 'Cabronàs · Photocall', from: '17:40', to: '20:00' },
-    { name: 'Túnel del terror · Atraccions', from: '18:00', to: '00:00', img: 'img/ride-tunel.png' },
-    { name: 'Burro català · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
-    { name: 'Calçot mecànic · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
-    { name: 'Cultura popular · Entrada', from: '18:00', to: '20:00' },  // castellers, gegants, gitanes i bastoners
-  ],
-  // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
-  colorLogos: true,
-  // Escenaris: el logo és img/<id>.png
+  nextHide: { stages: [], imp: [1] },
+  impColors: true,
+  impSize: true,
+  rides: [],
+  colorLogos: true,             // el logo de l'escenari és blanc: sobre fons fosc i amb el nom a sota
+  // Un sol escenari: el logo és img/hangar.png. Dissabte Universo Makina, diumenge 240 km/h (img/logo-makina.png i logo-240.png, per si calen)
   stages: [
-    { id: 'principal', name: 'Escenari Principal' },
-    { id: 'festa', name: 'Escenari Cultura' },
+    { id: 'hangar', name: 'Black Hangar' },
   ],
-  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol, efectes (FOC, CO2, SPARK, PIRO, CONFETI o un altre)]
-  // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
+  // Horari (en Pau, 03-11): [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // El final és l'inici del següent; l'últim, les 23:00. PENDENT: importàncies (de moment 0)
   sets: {
-    principal: [
-      // importància (en Pau, 29-10): vermell 5 · taronja 4 · groc 3 · verd 2
-      ['12:30', '13:10', 'Juls', 2],
-      ['13:30', '14:10', 'Ven’nus', 2],
-      ['14:30', '15:30', '31 FAM', 5],
-      ['16:00', '17:15', 'Els Amics de les Arts', 3],
-      ['17:45', '19:00', 'Els Pets', 2],
-      ['19:30', '20:40', 'La Ludwig Band', 5],
-      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
-      ['21:10', '22:30', 'Lax’n’Busto', 5],
-      ['22:30', '23:00', 'DJ K-Zu', 1],
-      ['23:00', '00:15', 'Els Catarres', 4],
-      ['00:15', '00:45', 'DJ K-Zu', 1],
-      ['00:45', '01:55', 'The Tyets', 3],
-      ['01:55', '02:25', 'Anna Gisbert', 1],
-      ['02:25', '03:35', 'Figa Flawas', 4, '', ['FOC']],
-      ['03:35', '04:00', 'Anna Gisbert', 1],
-      ['04:00', '05:00', 'Doctor Prats', 2],
-    ],
-    festa: [
-      ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
-      ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
-      ['17:15', '17:45', 'Lo Pau de Ponts', 0],
-      ['19:00', '19:30', 'Havaneres', 0, 'i cremat popular'],
+    hangar: [
+      // Sábado 5 · Universo Makina
+      ['11:00', '12:30', 'Nhymph', 0],
+      ['12:30', '13:30', 'Anna Jevills', 0],
+      ['13:30', '14:30', 'Cristian Varela', 0, 'Late 90’s – early 00’s set'],
+      ['14:30', '15:30', 'Carlos Perez & K-Style', 0, 'Esencia del Norte 00’s'],
+      ['15:30', '17:00', 'Héctor Oaks aka DJ Kaos11', 0, 'Bakala set'],
+      ['17:00', '23:00', 'Pastis & Buenri & Sisu', 0, '6 hours set'],
+      // Domingo 6 · 240 km/h
+      ['2/11:00', '2/12:00', 'Føbia', 0],
+      ['2/12:00', '2/13:00', 'Anna Jevills', 0],
+      ['2/13:00', '2/14:00', 'Inés Isla', 0],
+      ['2/14:00', '2/15:00', 'H1pnos1s b2b Quince', 0],
+      ['2/15:00', '2/16:00', 'Giø', 0],
+      ['2/16:00', '2/17:00', 'Human Error', 0],
+      ['2/17:00', '2/18:00', 'Carnada', 0],
+      ['2/18:00', '2/19:00', 'Adrián Mills', 0],
+      ['2/19:00', '2/20:00', 'Cloudy', 0],
+      ['2/20:00', '2/21:00', 'Aerea', 0, 'Live'],
+      ['2/21:00', '2/22:00', 'Clara Cuvé', 0],
+      ['2/22:00', '2/23:00', 'Kuko b2b Nikolina', 0],
     ],
   },
 };

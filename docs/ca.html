@@ -2,8 +2,10 @@
 <html lang="ca">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://midnight-push.midnightgroup.workers.dev; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0a0604">
+<meta name="theme-color" content="#050608">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!-- «black» i no «black-translucent»: amb la barra translúcida, l'iOS 26 difumina sempre la franja de dalt (no hi ha manera de treure-ho des de la web) -->
@@ -660,6 +662,7 @@ body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):no
 .edtabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 6px; }
 .edtabs button { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .edtabs button span { color: var(--muted); font-weight: 600; margin-left: 2px; }
+.gdays[hidden] { display: none; }
 .edtabs button[aria-selected="true"] { border-color: var(--sc, var(--accent)); background: color-mix(in srgb, var(--sc, var(--accent)) 22%, transparent); }
 .edhelp { margin: 4px 0 0; }
 .edrow { padding: 0; gap: 0; overflow: hidden; }
@@ -1103,13 +1106,10 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 
 </style>
 <style data-fest>/* colors i lletres del festival */
-@font-face{font-family:"Blogh";src:url("img/Blogh.woff2");font-weight:100 900;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-Regular.woff2");font-weight:300 400;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-SemiBold.woff2");font-weight:500 600;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-Bold.woff2");font-weight:700;font-display:swap}
-@font-face{font-family:"Bricolage";src:url("img/Bricolage-ExtraBold.woff2");font-weight:800 900;font-display:swap}
-@font-face{font-family:"Bricolage Cond";src:url("img/Bricolage-SemiCondensed-SemiBold.woff2");font-weight:600 900;font-display:swap}
-:root{--accent:#ff7a1a;--accent-rgb:255, 122, 26;--accent-dim:#8f430f;--accent-deep:#2e1606;--accent-ink:#1a0b02;--bg:#0a0604;--panel:#160e09;--ink:#fdf4e3;--muted:#c9b29a;--rule:#6b3d1c;--line:#8a5428;--display:"Bricolage", "Archivo", sans-serif;--body:"Bricolage", "Archivo", sans-serif;--title:"Blogh", "Bricolage", sans-serif;--cond:"Bricolage Cond", "Bricolage", sans-serif}</style>
+@font-face{font-family:"Nimbus";src:url("img/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
+@font-face{font-family:"Nimbus";src:url("img/NimbusSanL-Bold.woff2");font-weight:600 900;font-display:swap}
+@font-face{font-family:"Nimbus Cond";src:url("img/NimbusSanL-BoldCond.woff2");font-weight:400 900;font-display:swap}
+:root{--accent:#f2f2f2;--accent-rgb:242, 242, 242;--accent-dim:#7a7c80;--accent-deep:#16171a;--accent-ink:#050608;--bg:#050608;--panel:#0f1013;--ink:#f5f5f5;--muted:#9a9ca2;--rule:#2a2c31;--line:#3d4046;--display:"Nimbus", "Helvetica Neue", sans-serif;--body:"Nimbus", "Helvetica Neue", sans-serif;--title:"Nimbus", "Helvetica Neue", sans-serif;--cond:"Nimbus Cond", "Nimbus", sans-serif}</style>
 </head>
 <body>
 
@@ -1196,6 +1196,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 
   <section id="horario">
     <h2 style="margin-bottom:10px">Horari</h2>
+    <div class="edtabs gdays" id="gdays" role="tablist" aria-label="Dia" hidden></div>
     <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
     <p class="legend" id="gridLegend">Línia vermella = ara. Les 2:00 surten dues vegades pel canvi d’hora (1a i 2a).</p>
     <p class="legend upd" id="updated" hidden></p>
@@ -1284,7 +1285,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
         <details class="tktx"><summary>Tasques com a text</summary>
         <label for="tkList">Tasques (una per línia: hora, tasca i @qui)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Muntar càmeres @audiovisual&#10;18:30 Gravar l’entrada dels Catarres @Marc @Laia&#10;20:00-20:30 Canviar bateries @Marc&#10;23:00 Foto de grup @tothom" spellcheck="false"></textarea>
-        <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.</p>
+        <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.<span id="tkDays" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia.</span></p>
         </details>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Desar i publicar</button></div>
@@ -1444,113 +1445,60 @@ document.documentElement.lang = 'ca';
 /* ==== FESTIVAL ==== */
 // Tot el que canvia d'un festival a un altre és dins d'aquest bloc. Cada festival en té una còpia a
 // festivals/<id>/festival.js, i `python3 festival.py <id>` la posa aquí i copia els seus logos a img/.
+// ESBORRANY (03-11): branding del cartell i horari d'en Pau (2 dies, 1 escenari). Falten importàncies i mapa.
 const FEST = {
-  id: 'castanyada-2026',        // també separa els canvis de l'organització (changes.json) d'un festival a un altre
-  key: 'cast',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
-  name: 'La Castanyada',
-  banner: 'La Castanyada del Cabró Rock · 31 oct · Montmeló',  // text alternatiu de img/banner.jpg
-  // banner animat per capes (opcional): fons en degradat, títol al mig i la mascota a banda i banda. Sense això surt img/banner.jpg quiet
-  bannerAnim: { bg: 'linear-gradient(#fe5e08, #fe8e04)', title: 'img/bn-titol.webp', side: 'img/bn-cabra.webp' },
-  // «A continuación» sense el farciment: aquests escenaris i importàncies no hi surten (sí a «Ahora suena», a l'horari, als preferits i a la pantalla d'un escenari)
-  nextHide: { stages: [], imp: [1] },
-  date: [2026, 10, 31],         // dia que comença (any, mes, dia). Les hores més d'hora que «start» són de l'endemà
-  dayLabel: 'el sábado 31.10',  // «Empieza el sábado 31.10 a las 12:00»
-  start: '12:00', end: '05:00',
-  accent: '#ff7a1a', accentRgb: '255, 122, 26', accentDim: '#8f430f', accentDeep: '#2e1606', accentInk: '#1a0b02',
-  // Colors de base propis (opcional): els del Bass eren verdosos
-  theme: { '--bg': '#0a0604', '--panel': '#160e09', '--ink': '#fdf4e3', '--muted': '#c9b29a', '--rule': '#6b3d1c', '--line': '#8a5428',
-    '--display': '"Bricolage", "Archivo", sans-serif', '--body': '"Bricolage", "Archivo", sans-serif', '--title': '"Blogh", "Bricolage", sans-serif', '--cond': '"Bricolage Cond", "Bricolage", sans-serif' },
-  // Tipografies de la marca (opcional): els fitxers van a img/ amb els logos. Es fan servir a theme (--display, --title, --cond)
+  id: 'duro-black-hangar-2026', // també separa els canvis de l'organització (changes.json) d'un festival a un altre
+  key: 'duro',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
+  name: 'Black Hangar',
+  banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
+  date: [2026, 12, 5],          // primer dia
+  // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
+  days: ['Sábado 5', 'Domingo 6'],
+  start: '11:00', end: '23:00',
+  // Blanc i negre com el cartell: l'accent és blanc (el vermell d'«ara» i el groc dels meus artistes es queden)
+  accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
+  theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
+    '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
+    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif' },
+  // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
-    { family: 'Blogh', file: 'Blogh.woff2', weight: '100 900' },  // només té un pes: així no se'n fa una negreta falsa
-    { family: 'Bricolage', file: 'Bricolage-Regular.woff2', weight: '300 400' },
-    { family: 'Bricolage', file: 'Bricolage-SemiBold.woff2', weight: '500 600' },
-    { family: 'Bricolage', file: 'Bricolage-Bold.woff2', weight: 700 },
-    { family: 'Bricolage', file: 'Bricolage-ExtraBold.woff2', weight: '800 900' },
-    { family: 'Bricolage Cond', file: 'Bricolage-SemiCondensed-SemiBold.woff2', weight: '600 900' },
+    { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
+    { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
+    { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
   ],
-  // Il·lustracions del kit de marca (opcional, cada clau també): PNG transparents a 2x a img/. Sense deco, l'app queda neta
-  deco: {
-    // strip: 'img/deco-strip.png',   // garlanda sota la capçalera (en Pau la va treure el 26-10)
-    before: 'img/deco-before.png',    // abans de començar
-    end: 'img/deco-end.png',          // quan s'ha acabat
-    empty: 'img/deco-empty.png',      // «Només els meus artistes» sense cap artista triat
-    done: 'img/deco-done.png',        // «Només els meus artistes» quan ja no en queda cap per cobrir
-    sheet: 'img/deco-sheet.png',      // full «Mis artistas»
-    heads: { ahora: 'img/deco-h-ahora.png', siguiente: 'img/deco-h-siguiente.png', horario: 'img/deco-h-horario.png' },  // icona davant del títol de secció
-    // la cabra de «Quedan» canvia d'humor al llarg del festival: de la festa (12:00) al plor (05:00)
-    moods: ['img/deco-m-festa.png', 'img/deco-m-enamorat.png', 'img/deco-m-guai.png', 'img/deco-m-crack.png', 'img/deco-m-flipat.png', 'img/deco-m-xocat.png', 'img/deco-m-enfadat.png', 'img/deco-m-plora.png'],
-    prod: 'img/deco-mecanic.png',     // mascota que corre al costat del rellotge amb el perfil Producció
-    mkt: 'img/deco-foto.png',         // …la que fa fotos, amb Màrqueting
-    base: 'img/deco-got.png',         // …la que brinda, sense perfil («Només horaris»)
-  },
-  // Atraccions: cadascuna amb el seu horari i la seva columna a la graella ([] si no n'hi ha)
-  impColors: true,              // la importància (0–5) es veu amb un quadrat de color i número…
-  impSize: true,                // …i també per la mida: 5 = concert destacat, 1 = entre concerts
-  stageColors: true,            // cada escenari amb el seu color (el quadrat de la importància és una altra forma: no es confonen)
-  ridesName: 'Activitats',  // com al PDF: atraccions, photocall i cultura popular, cadascuna amb el seu lloc
-  // Logos de les bandes (opcional), pel nom exacte del cartell: surten a «Ahora suena» i a la pantalla. Si es canvia el nom, torna al text
-  logos: {
-    'Juls': 'img/logo-juls.png', 'Ven’nus': 'img/logo-vennus.png', '31 FAM': 'img/logo-31fam.png', 'Els Amics de les Arts': 'img/logo-amics.png',
-    'Els Pets': 'img/logo-pets.png', 'La Ludwig Band': 'img/logo-ludwig.png', 'Gran Aplec de la Cultura Catalana': 'img/logo-aplec.png',
-    'Lax’n’Busto': 'img/logo-lax.png', 'Els Catarres': 'img/logo-catarres.png', 'The Tyets': 'img/logo-tyets.png', 'Figa Flawas': 'img/logo-figa.png', 'Doctor Prats': 'img/logo-prats.png',
-  },
-  // Mapes (opcional): pestanya «Mapa» a la barra de baix. links = botons per obrir-lo a Google Maps
-  maps: [
-    { img: 'img/mapa-plano.jpg', title: 'El plànol', alt: 'Plànol del recinte: escenaris, barres, cashless, photocall, atraccions, foodtrucks, lockers, WC i emergències',
-      // «Estás aquí» (opcional): 3 punts del plànol amb les seves coordenades de Google Maps → [lat, lon, x, y] (x i y de 0 a 1 sobre la imatge = píxel / mida; posa el número ja dividit, build_web.py no entén divisions)
-      geo: [[41.563835330953154, 2.2497897580528172, 0.1788, 0.8422],    // Escenari principal
-            [41.56442172780457, 2.2506536969768542, 0.3171, 0.4761],      // Escenari Cultura (la bandera verda)
-            [41.56382965221928, 2.2510648823627126, 0.4197, 0.7323]] }, // Atraccions (al costat de l'entrada)
-    { img: 'img/mapa-acceso.jpg', title: 'Com arribar-hi', alt: 'Accés al festival per la C-17 i la C-35, amb els pàrquings públic i d’artistes',
-      text: 'Rotonda Rocco’s Ranch · C/ Camí Fondo de Can Guitet · Circuit de Catalunya, Montmeló', links: ['https://maps.app.goo.gl/1kbExVse2GGi4xou6', 'https://maps.app.goo.gl/B9ZxxtwEz6eiBrDs9'],
-      geo: [[41.567911089905145, 2.2490694926647645, 0.5274, 0.4431],    // Primera rotonda (venint de la C-17)
-            [41.56732443030398, 2.25185982389714, 0.6218, 0.4937],       // Rotonda Rocco's Ranch
-            [41.563275572060846, 2.2524024833555014, 0.6238, 0.7609]] }, // Pàrquing  // el mateix lloc: el 2 per si Maps no entén bé l'1
-  ],
-  // img (opcional): il·lustració de l'atracció; si no n'hi ha, surt la sínia
-  rides: [
-    { name: 'Nena Posseïda · Photocall', from: '18:00', to: '21:00' },
-    { name: 'Cabronàs · Photocall', from: '17:40', to: '20:00' },
-    { name: 'Túnel del terror · Atraccions', from: '18:00', to: '00:00', img: 'img/ride-tunel.png' },
-    { name: 'Burro català · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-burro.png' },
-    { name: 'Calçot mecànic · Atraccions', from: '12:00', to: '00:00', img: 'img/ride-calcot.png' },
-    { name: 'Cultura popular · Entrada', from: '18:00', to: '20:00' },  // castellers, gegants, gitanes i bastoners
-  ],
-  // Logos d'escenari en color (personatges): es veuen amb el nom a sota i sense invertir
-  colorLogos: true,
-  // Escenaris: el logo és img/<id>.png
+  nextHide: { stages: [], imp: [1] },
+  impColors: true,
+  impSize: true,
+  rides: [],
+  colorLogos: true,             // el logo de l'escenari és blanc: sobre fons fosc i amb el nom a sota
+  // Un sol escenari: el logo és img/hangar.png. Dissabte Universo Makina, diumenge 240 km/h (img/logo-makina.png i logo-240.png, per si calen)
   stages: [
-    { id: 'principal', name: 'Escenari Principal' },
-    { id: 'festa', name: 'Escenari Cultura' },
+    { id: 'hangar', name: 'Black Hangar' },
   ],
-  // Horari del cartell: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol, efectes (FOC, CO2, SPARK, PIRO, CONFETI o un altre)]
-  // Les nits que es canvia l'hora: "02:00a" = la 1a vegada que són les 2, "02:00b" = la 2a.
+  // Horari (en Pau, 03-11): [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // El final és l'inici del següent; l'últim, les 23:00. PENDENT: importàncies (de moment 0)
   sets: {
-    principal: [
-      // importància (en Pau, 29-10): vermell 5 · taronja 4 · groc 3 · verd 2
-      ['12:30', '13:10', 'Juls', 2],
-      ['13:30', '14:10', 'Ven’nus', 2],
-      ['14:30', '15:30', '31 FAM', 5],
-      ['16:00', '17:15', 'Els Amics de les Arts', 3],
-      ['17:45', '19:00', 'Els Pets', 2],
-      ['19:30', '20:40', 'La Ludwig Band', 5],
-      ['20:40', '21:10', 'Gran Aplec de la Cultura Catalana', 0, 'Castellers · Bastoners · Gitanes · Gegants'],
-      ['21:10', '22:30', 'Lax’n’Busto', 5],
-      ['22:30', '23:00', 'DJ K-Zu', 1],
-      ['23:00', '00:15', 'Els Catarres', 4],
-      ['00:15', '00:45', 'DJ K-Zu', 1],
-      ['00:45', '01:55', 'The Tyets', 3],
-      ['01:55', '02:25', 'Anna Gisbert', 1],
-      ['02:25', '03:35', 'Figa Flawas', 4, '', ['FOC']],
-      ['03:35', '04:00', 'Anna Gisbert', 1],
-      ['04:00', '05:00', 'Doctor Prats', 2],
-    ],
-    festa: [
-      ['14:10', '14:30', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
-      ['15:30', '16:00', 'Sardanes', 0, 'Cobla Contemporània · Colla Sardanista Riallera'],
-      ['17:15', '17:45', 'Lo Pau de Ponts', 0],
-      ['19:00', '19:30', 'Havaneres', 0, 'i cremat popular'],
+    hangar: [
+      // Sábado 5 · Universo Makina
+      ['11:00', '12:30', 'Nhymph', 0],
+      ['12:30', '13:30', 'Anna Jevills', 0],
+      ['13:30', '14:30', 'Cristian Varela', 0, 'Late 90’s – early 00’s set'],
+      ['14:30', '15:30', 'Carlos Perez & K-Style', 0, 'Esencia del Norte 00’s'],
+      ['15:30', '17:00', 'Héctor Oaks aka DJ Kaos11', 0, 'Bakala set'],
+      ['17:00', '23:00', 'Pastis & Buenri & Sisu', 0, '6 hours set'],
+      // Domingo 6 · 240 km/h
+      ['2/11:00', '2/12:00', 'Føbia', 0],
+      ['2/12:00', '2/13:00', 'Anna Jevills', 0],
+      ['2/13:00', '2/14:00', 'Inés Isla', 0],
+      ['2/14:00', '2/15:00', 'H1pnos1s b2b Quince', 0],
+      ['2/15:00', '2/16:00', 'Giø', 0],
+      ['2/16:00', '2/17:00', 'Human Error', 0],
+      ['2/17:00', '2/18:00', 'Carnada', 0],
+      ['2/18:00', '2/19:00', 'Adrián Mills', 0],
+      ['2/19:00', '2/20:00', 'Cloudy', 0],
+      ['2/20:00', '2/21:00', 'Aerea', 0, 'Live'],
+      ['2/21:00', '2/22:00', 'Clara Cuvé', 0],
+      ['2/22:00', '2/23:00', 'Kuko b2b Nikolina', 0],
     ],
   },
 };
@@ -1611,13 +1559,15 @@ function wallOf(ms) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
 }
 const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
+// Festivals de diversos dies (FEST.days): «2/11:00» = les 11:00 del 2n dia; «11:00» sol = el 1r
+const NDAYS = Math.max(1, (FEST.days || []).length);
 function T(s) {
-  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  const m = String(s).match(/^(?:(\d)\/)?(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
-  const h = +m[1], mi = +m[2], f = m[3];
-  if (h > 23 || mi > 59) return NaN;
+  const dd = m[1] ? +m[1] - 1 : 0, h = +m[2], mi = +m[3], f = m[4];
+  if (h > 23 || mi > 59 || dd < 0 || dd >= NDAYS) return NaN;
   const [Y, M, D] = FEST.date;
-  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  const wall = Date.UTC(Y, M - 1, D + dd + (h * 60 + mi < START_M ? 1 : 0), h, mi);
   // Espanya és UTC+1 o UTC+2: es miren les dues possibilitats
   const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
   return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
@@ -1643,7 +1593,12 @@ const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =
   [id, arr.map(([a, b, n, t, sub, fx], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx) }))]));
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 
-const T0 = T(FEST.start), TEND0 = T(FEST.end);
+// Cada dia, de FEST.start a FEST.end. T0 = obertura del 1r dia, TEND0 = final de l'últim
+const dpre = d => d ? `${d + 1}/` : '';
+const DAYS = Array.from({ length: NDAYS }, (_, d) => ({ d, t0: T(dpre(d) + FEST.start), tend0: T(dpre(d) + FEST.end), name: (FEST.days || [])[d] || '' }));
+const T0 = DAYS[0].t0, TEND0 = DAYS[NDAYS - 1].tend0;
+// Dia d'una hora: el de l'última obertura que ja ha passat (abans d'obrir el 1r dia, el 1r)
+const dayAt = t => DAYS.reduce((a, x) => t >= x.t0 ? x.d : a, 0);
 // Atraccions (abans només n'hi havia una, com a objecte)
 const RIDE_LIST = [].concat(FEST.rides || []).map((r, i) => ({ ...r, i, a: T(r.from), b: T(r.to) }));
 const RIDES_NAME = FEST.ridesName || (RIDE_LIST.length === 1 ? RIDE_LIST[0].name : 'Atraccions');
@@ -1652,7 +1607,15 @@ const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00
 const MIN = 60000, PAD = 12;
 let PX = 1.6;  // px per minut (la pinça ho canvia)
 let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
-const y = t => PAD + (t - T0) / MIN * PX;
+// Graella: amb diversos dies només se'n veu un (G0–GEND). GDAY = el dia que es veu; gPick = l'ha triat la persona
+let GDAY = 0, G0 = T0, GEND = TEND0, gPick = false;
+const y = t => PAD + (t - G0) / MIN * PX;
+// Final d'un dia: el seu, o més tard si l'organització hi allarga una actuació (el del darrer dia és TEND)
+const dayEnd = d => d === NDAYS - 1 ? TEND : Math.max(DAYS[d].tend0, ...ALL.filter(x => dayAt(x.a) === d).map(x => x.b));
+function setGridDay(d) { GDAY = d; G0 = DAYS[d].t0; GEND = dayEnd(d); H = (GEND - G0) / MIN * PX; }
+// Entre dos dies: el dia que ve (o -1 si no és entre dies)
+const gapNext = t => { const d = dayAt(t); return d < NDAYS - 1 && t >= dayEnd(d) ? d + 1 : -1; };
+const autoDay = t => { const g = gapNext(t); return g >= 0 ? g : dayAt(t); };
 
 // Idioma: aquesta és la versió en castellà; build_web.py en genera la catalana (ca.html) amb i18n_ca.py
 const LANG = 'ca';
@@ -1668,6 +1631,13 @@ const hm = t => fmtHM.format(t);
 // Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
 const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
+// Amb diversos dies, davant el nom curt del dia («Domingo 14:00»)
+// (el dia de calendari: les 00:30 de la nit de dissabte ja són diumenge)
+const lblD = t => {
+  if (NDAYS < 2) return lbl(t);
+  const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
+  return `${x && x.name ? x.name.split(' ')[0] : new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(t).replace(/^./, c => c.toUpperCase())} ${lbl(t)}`;
+};
 const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
@@ -1733,7 +1703,7 @@ function load(raw) {
   GONE = raw === DEFAULT_RAW ? [] : STAGES.flatMap(s => (DEFAULT_RAW[s.id] || []).filter(r => !BYID[r.id])
     .map(r => ({ id: r.id, s, a: T(r.a), b: T(r.b), n: String(r.n), gone: true }))).sort((x, y) => x.a - y.a);
   TEND = Math.max(TEND0, ...all.map(x => x.b));
-  H = (TEND - T0) / MIN * PX;
+  setGridDay(GDAY);
 }
 load(DEFAULT_RAW);
 
@@ -1806,22 +1776,23 @@ function buildGrid() {
     : `<div class="hd rides">${RIMG ? `<img src="${esc(RIMG)}" alt="">` : RIDE_SVG}${html(RIDES_NAME)}</div>`;
   g += '<div class="hdend"></div>';
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
-  for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+  for (let t = G0; t <= GEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
   STAGES.forEach((s, i) => {
     const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
     g += `<div class="col" style="--sc:${s.color};grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}background-color:color-mix(in srgb, var(--sc) 6%, transparent)">`;
-    for (const x of SETS[s.id]) {
-      const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
+    const day = SETS[s.id].filter(x => dayAt(x.a) === GDAY);
+    for (const x of day) {
+      const top = y(Math.max(x.a, G0)), h = y(Math.min(x.b, GEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
       const tc = IMPC && x.t ? `--tc:var(--t${x.t});` : '';
       const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importància ${x.t} de 5` : ''}${x.chg === 'new' ? ', afegit per l’organització' : x.chg ? `, canviat (abans ${x.was})` : ''}${x.fx.length ? `, efectes: ${x.fx.join(', ')}` : ''}`;
       g += `<button type="button" class="blk${tiny}${impc(x.t)}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
         + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NOU' : 'CANVI'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
     }
-    const last = SETS[s.id][SETS[s.id].length - 1];
+    const last = day[day.length - 1];
     if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sense actuacions</div>`;
-    else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Tancat</div>`;
+    else if (last.b < GEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Tancat</div>`;
     g += '</div>';
   });
   // Atraccions: no són artistes (no es poden marcar com a meus). Una columna, i dins una franja vertical per a cadascuna
@@ -1829,6 +1800,7 @@ function buildGrid() {
     const NRL = RIDE_LIST.length;
     g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`;
     for (const r of RIDE_LIST) {
+      if (dayAt(r.a) !== GDAY) continue;
       const rt = y(r.a), rh = y(r.b) - rt, rn = html(r.name);
       g += `<div class="blk ridesblk lane" id="ridesBlk-${r.i}" role="img" aria-label="${rn}: oberta de ${lbl(r.a)} a ${lbl(r.b)}" style="top:${rt + 1.5}px;height:${rh - 3}px;left:calc(3px + ${r.i} * (100% - 6px) / ${NRL});right:auto;width:calc((100% - 6px) / ${NRL} - 3px)"><i class="pl"></i><span class="vt"><b>${rn}</b> ${lbl(r.a)}–${lbl(r.b)}</span></div>`;
     }
@@ -1860,6 +1832,7 @@ function fitBlocks() {
   }
 }
 function edgeFade() { tlwrap.parentElement.classList.toggle('atend', tlwrap.scrollLeft + tlwrap.clientWidth >= tlwrap.scrollWidth - 4); }
+setGridDay(autoDay(now()));
 buildGrid();
 tlwrap.addEventListener('scroll', edgeFade, { passive: true });
 edgeFade();
@@ -1879,11 +1852,29 @@ function paintFavs() {
 function scrollToNow(smooth) {
   const t = now();
   const head = tl.querySelector('.hd').offsetHeight;
-  const top = t < T0 || t >= TEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
+  const top = t < G0 || t >= GEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
   tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
 }
+// Pestanyes de dia (només amb diversos dies). Sense triar-ne cap, la graella segueix el dia d'ara (entre dies, el que ve)
+const gdays = document.getElementById('gdays');
+function paintDays() {
+  gdays.hidden = NDAYS < 2;
+  if (NDAYS > 1) gdays.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-d="${x.d}" aria-selected="${x.d === GDAY}">${html(x.name || `Dia ${x.d + 1}`)}</button>`).join('');
+}
+function showDay(d) {
+  if (d === GDAY && G0 === DAYS[d].t0) return;
+  setGridDay(d); buildGrid(); paintFavs(); paintDays(); tick(true);
+}
+paintDays();
+document.getElementById('tkDays').hidden = NDAYS < 2;
+gdays.addEventListener('click', e => {
+  const b = e.target.closest('button[data-d]');
+  if (!b) return;
+  gPick = true; showDay(+b.dataset.d); scrollToNow(false);
+});
 function goNow() {
   if (typeof showTab === 'function') showTab('ahora');
+  gPick = false; if (NDAYS > 1) showDay(autoDay(now()));
   tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   scrollToNow(true);
 }
@@ -2012,7 +2003,7 @@ function upHTML(t) {
   }
   let out = '', last = null;
   for (const x of list.slice(0, 6)) {
-    if (x.a !== last) { out += `<li class="grp"><b>${lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
+    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
     <img class="logo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
@@ -2168,11 +2159,12 @@ function tick(force) {
   document.getElementById('mclock').textContent = hm(t);
   if (tvOn) tvClock(t);
   const ml = document.getElementById('mleft');
-  ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
-  if (!ml.hidden) ml.innerHTML = ICO.time + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
+  ml.hidden = !(t >= T0 && t < TEND) || gapNext(t) >= 0 || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
+  if (!ml.hidden) ml.innerHTML = ICO.time + dur((NDAYS > 1 ? dayEnd(dayAt(t)) : TEND) - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
+  if (NDAYS > 1 && !gPick && autoDay(t) !== GDAY) return showDay(autoDay(t));  // ha canviat el dia: la graella el segueix
   if (FEEDK) paintFeed();
   paintChg(t);
   if (tvOn) tvRender(t);
@@ -2182,9 +2174,12 @@ function tick(force) {
   if (t < T0) {
     const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
     st.innerHTML = `Comença ${today ? 'avui' : tomorrow ? 'demà' : dayLabel} a les <strong>${lbl(T0)}</strong> · falten <strong>${dur(T0 - t)}</strong>`;
+  } else if (gapNext(t) >= 0) {
+    const o = DAYS[gapNext(t)].t0, tomorrow = fmtD.format(t + 86400000) === fmtD.format(o);
+    st.innerHTML = `<strong>Tancat</strong> · torna ${tomorrow ? 'demà' : fmtD.format(t) === fmtD.format(o) ? 'avui' : DAYS[gapNext(t)].name.toLowerCase()} a les <strong>${lbl(o)}</strong> · falten <strong>${dur(o - t)}</strong>`;
   } else if (t < TEND) {
     const nextA = Math.min(...ALL.filter(x => x.a > t).map(x => x.a));
-    st.innerHTML = `<strong>En marxa</strong> · <span class="nw">${live ? `${live} sonant` : isFinite(nextA) ? `pausa fins a les ${lbl(nextA)}` : 'última recta'}</span> · <span class="endat">fins a les ${lbl(TEND)}</span>`;
+    st.innerHTML = `<strong>En marxa</strong> · <span class="nw">${live ? `${live} sonant` : isFinite(nextA) ? `pausa fins a les ${lbl(nextA)}` : 'última recta'}</span> · <span class="endat">fins a les ${lbl(NDAYS > 1 ? dayEnd(dayAt(t)) : TEND)}</span>`;
   } else {
     st.innerHTML = '<strong>S’ha acabat.</strong> Fins a la propera!';
   }
@@ -2252,9 +2247,9 @@ function tick(force) {
   const rimg = re.querySelector('img'), rsrc = done ? '' : none ? DECO.empty : DECO.done;
   if (rimg) { rimg.hidden = !rsrc; if (rsrc && rimg.getAttribute('src') !== rsrc) rimg.src = rsrc; }
   // Targeta: abans (compte enrere), durant (frase + barra de progrés + proper concert gran) i al final (gràcies + contacte)
-  const during = t >= T0 && t < TEND;
+  const gap = gapNext(t), during = t >= T0 && t < TEND && gap < 0, dEnd = NDAYS > 1 ? dayEnd(dayAt(t)) : TEND;
   const ms = document.getElementById('mascot'), moods = DECO.moods || [],
-    msrc = t < T0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
+    msrc = t < T0 || gap >= 0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
   ms.hidden = !re.hidden && !done;
   ms.classList.toggle('during', during);
   document.getElementById('status').closest('.statusrow').hidden = !ms.hidden;  // la targeta ja diu el mateix: no repetir-ho sota el rellotge
@@ -2262,8 +2257,10 @@ function tick(force) {
   if (!ms.hidden) {
     const pct = Math.min(100, Math.max(0, (t - T0) / (TEND - T0) * 100));
     const mh = during
-      ? `<span class="mk">Queden</span><span class="mbig">${dur(TEND - t)} <small>de festival</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
-        + `<span class="msub">Fins a les ${lbl(TEND)}</span>`
+      ? `<span class="mk">Queden</span><span class="mbig">${dur(dEnd - t)} <small>${dEnd < TEND ? 'avui' : 'de festival'}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
+        + `<span class="msub">Fins a les ${lbl(dEnd)}</span>`
+      : gap >= 0
+      ? `<span class="mk">Queden</span><span class="mbig">${dur(DAYS[gap].t0 - t)}</span><span class="msub">Torna a obrir a les ${lbl(DAYS[gap].t0)}${DAYS[gap].name ? ` · ${html(DAYS[gap].name)}` : ''}</span>`
       : t < T0
       ? `<span class="mk">Queden</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Obre a les ${lbl(T0)}${FIRST ? ` · Primer concert: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
       : `<span class="mk">Fi de festa</span><span class="mbig">Fins a la propera</span><span class="msub">Gràcies per venir. Dubtes o millores: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
@@ -2293,7 +2290,7 @@ function tick(force) {
     const on = t >= x.a && t < x.b;
     b.classList.toggle('on', on);
     b.classList.toggle('past', t >= x.b);
-    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, G0)) + 1.5) - 2.5}px`;
   }
   for (const r of RIDE_LIST) {
     const rb = document.getElementById('ridesBlk-' + r.i), on = t >= r.a && t < r.b;
@@ -2302,7 +2299,7 @@ function tick(force) {
     rb.classList.toggle('past', t >= r.b);
     if (on) rb.querySelector('.pl').style.top = `${y(t) - (y(r.a) + 1.5) - 2.5}px`;
   }
-  const inside = t >= T0 && t < TEND;
+  const inside = t >= G0 && t < GEND;
   nowline.hidden = !inside;
   nowlbl.hidden = !inside;
   document.getElementById('gridLegend').hidden = !inside || !DST;  // sense canvi d'hora, la pestanya vermella ja ho diu
@@ -2342,8 +2339,8 @@ function applySim() {
   sim = simOn.checked ? +simRange.value : null;
   simCtl.hidden = !simOn.checked;
   if (simOn.checked) {
-    simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
-    simOut.textContent = `Simulant: ${lbl(+simRange.value)}`;
+    simRange.setAttribute('aria-valuetext', lblD(+simRange.value));
+    simOut.textContent = `Simulant: ${lblD(+simRange.value)}`;
   }
   // Els avisos del Modo prueba no compten per als de veritat
   if (!was && simOn.checked) { realTold = told; told = new Set(); }
@@ -2366,9 +2363,10 @@ for (const a of document.querySelectorAll('.langsel [data-lang]')) {
   if (a.dataset.lang === LANG) a.setAttribute('aria-current', 'true');
   a.addEventListener('click', () => { try { localStorage.setItem('midnight-lang', a.dataset.lang); } catch (e) {} });
 }
-document.getElementById('simPresets').innerHTML = [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000,
-  ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0]
-  .map(t => `<button type="button" data-t="${t}">${lbl(t)}</button>`).join('');
+document.getElementById('simPresets').innerHTML = (NDAYS > 1
+  ? DAYS.flatMap(x => [x.t0 - 10 * MIN, x.t0, Math.round((x.t0 + x.tend0) / 2 / 3600000) * 3600000, x.tend0 - 60 * MIN, x.tend0])
+  : [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000, ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0])
+  .map(t => `<button type="button" data-t="${t}">${lblD(t)}</button>`).join('');
 document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setSim(+b.dataset.t); });
 function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
@@ -2559,7 +2557,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 12:13';
+const BUILD = '03/11 13:15';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2924,6 +2922,7 @@ function applyChanges(d, quiet) {
     buildGrid();
   } catch (e) {
     ({ SETS, ALL, BYID, TEND, H } = prev);  // dades dolentes: l'app es queda amb l'horari que tenia
+    setGridDay(GDAY);
     buildGrid();
     return;
   }
@@ -3003,34 +3002,43 @@ async function pullChanges() {
 }
 
 // Organització: editor protegit amb contrasenya.
-// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
-// clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
-const ADMIN = {"salt": "/zBpJWrWiFgT0tlp6wRUWg==", "iter": 1500000, "nonce": "ulVjz7izyQaRF0Xb0jiiIA==", "ct": "LHUSJuZQ0tKTvYz0NhuVGFHT47tpfadxUBBX5ooHXuiWWEgt+u4fUxosUmOI2N3DjPLd7VFAbK9NVoxZ8xqrV7GvOWieayMzwJOVPOht6VPnGioBvz/rlBGWif80", "check": "l4Anl4eCQYvhXioLaFdxtjKgSW4+TVut9GHuVPGQFNI="};
+// Des del 03-11-2026 el token de GitHub NO va dins la web: viu al servidor d'avisos. La contrasenya s'envia a POST /admin/login
+// (màxim 10 intents cada 15 min) i el servidor torna una sessió de 12 h; amb la sessió, el servidor llegeix i publica
+// NOMÉS changes.json i tasks.json. ADMIN = true si l'editor està disponible (el posa build_web.py; a l'artifact és null).
+const ADMIN = true;
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-const b64e = u => btoa(String.fromCharCode(...u));
-async function unlock(pw) {
-  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
-  const k = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, base, 256));
-  const hk = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const mac = async data => new Uint8Array(await crypto.subtle.sign('HMAC', hk, data));
-  if (b64e(await mac(new TextEncoder().encode('check'))) !== ADMIN.check) throw new Error('pw');
-  const ct = b64d(ADMIN.ct), nonce = b64d(ADMIN.nonce), out = new Uint8Array(ct.length);
-  for (let i = 0; i * 32 < ct.length; i++) {
-    const block = await mac(new Uint8Array([...nonce, i >> 24 & 255, i >> 16 & 255, i >> 8 & 255, i & 255]));
-    for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ block[j];
+async function adm(path, body) {
+  if (!PUSH || !PUSH.url) throw new Error('sin servidor');
+  const r = await fetchT(PUSH.url + '/admin/' + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }, 20000);
+  let d = {};
+  try { d = await r.json(); } catch (e) {}
+  if (!r.ok) {
+    const err = new Error(r.status === 401 && d.error === 'session' ? 'la sesión ha caducado: sal y vuelve a entrar' : r.status === 429 ? 'demasiados intentos, espera unos minutos' : d.error === 'github' ? `GitHub ${d.status}` : d.error === 'busy' ? 'GitHub ocupado' : d.error || `servidor ${r.status}`);
+    err.status = r.status; err.code = d.error;
+    throw err;
   }
-  return new TextDecoder().decode(out);
+  return d;
+}
+async function unlock(pw) {
+  return (await adm('login', { pw })).session;
 }
 let token = null, draft = null, edStage = STAGES[0].id;
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
 const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
-adminEl.hidden = !(ONLINE && ADMIN);
+adminEl.hidden = !(ONLINE && ADMIN && PUSH && PUSH.url);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
-const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+// Amb diversos dies, el codi porta el dia («2/11:00») i l'etiqueta també («Domingo 11:00»)
+const code = t => {
+  const s0 = hm(t), s = DST && s0.startsWith('02:') ? s0 + (t < DUP ? 'a' : 'b') : s0;
+  return NDAYS < 2 ? s : dpre(Math.max(0, DAYS.findIndex(x => T(dpre(x.d) + s) === t))) + s;
+};
 const TIMES = [];
-for (let t = T0; t <= TEND0 + 55 * MIN; t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
+  const c = code(t);
+  if (!TIMES.some(([k]) => k === c)) TIMES.push([c, NDAYS > 1 ? `${(x.name || `Dia ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]);
+}
 const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Comença' : 'Acaba'}: ${esc(who || 'actuació nova')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
@@ -3164,7 +3172,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     renderEditor();
     edMsg(saved && saved.draft ? 'Hem recuperat els canvis que encara no havies publicat.' : '');
   } catch (err) {
-    msg.textContent = 'Contrasenya incorrecta.';
+    msg.textContent = err.code === 'pw' ? 'Contrasenya incorrecta.' : err.status === 429 ? 'Demasiados intentos. Espera 15 minutos y vuelve a probar.' : err.name === 'AbortError' || err instanceof TypeError ? 'Sin conexión con el servidor. Vuelve a probar en un momento.' : 'No se ha podido entrar (' + err.message + ').';
   }
   go.disabled = false;
 });
@@ -3241,32 +3249,12 @@ document.getElementById('edNoticeTeam').addEventListener('change', e => { draft.
 
 // Publicar: changes.json en un commit (API de dades de Git), comprovant abans
 // que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
-const GH = 'https://api.github.com/repos/' + REPO;
-const gh = async (path, opts = {}) => {
-  const r = await fetchT(GH + path, { ...opts, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...(opts.headers || {}) }, cache: 'no-store' }, 15000);
-  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; throw err; }
-  return r.status === 204 ? null : r.json();
-};
+// (via servidor: el servidor comprova la sessió i només deixa tocar changes.json i tasks.json)
 async function remoteChanges() {
-  try {
-    const cur = await gh(`/contents/docs/changes.json?ref=main&t=${Date.now()}`);
-    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
-  } catch (e) {
-    if (e.status === 404) return null;
-    throw e;
-  }
+  return (await adm('read', { s: token, path: 'docs/changes.json' })).data;
 }
 async function commitFiles(files, message) {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const ref = await gh('/git/ref/heads/main');
-    const head = await gh(`/git/commits/${ref.object.sha}`);
-    const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
-    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
-    try { return await gh('/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); }
-    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
-    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
-  }
-  throw new Error('GitHub ocupat');
+  return adm('commit', { s: token, files, message });
 }
 async function publish(data) {
   const remote = await remoteChanges();
@@ -3460,13 +3448,23 @@ function tmNorm(s) {
 // El mateix a l'inici d'una línia de text («18:30-19:00 Tasca», «18h Tasca», «6:30 PM Tasca»; «amb» no és «am»)
 const TMR = String.raw`\d{1,2}(?:[:.h]\d{2}(?::\d{2})?h?|h|(?=\s?[aApP]\.?[mM]\.?(?![A-Za-z])))(?:\s?[aApP]\.?[mM]\.?(?![A-Za-z]))?`;
 const TLINE = new RegExp(`^(${TMR})(?:\\s*[-–]\\s*(${TMR}))?\\s+(.+)$`);
-function taskTime(s) {
+// Festival de diversos dies: un títol «# Domingo» (o «# Día 2») fa que les tasques de sota siguin d'aquell dia. -1 = no és cap dia
+const fold = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function headDay(h) {
+  if (NDAYS < 2) return -1;
+  const w = fold(h.replace(/^#+/, '')).trim();
+  const n = w.match(/^d[ií]a\s*(\d)\b/);
+  if (n && +n[1] >= 1 && +n[1] <= NDAYS) return +n[1] - 1;
+  return DAYS.findIndex(x => x.name && w.startsWith(fold(x.name.split(' ')[0])));
+}
+function taskTime(s, d = 0) {
   const n = tmNorm(s);
   if (!n) return NaN;
-  let t = T(n);
+  let t = T(dpre(d) + n);
   const wm = (([h, mi]) => h * 60 + mi)(n.split(':').map(Number));
   // Abans d'obrir i a partir de les 6:00 (o d'1 h després del final) = muntatge del mateix dia, com diu l'ajuda; abans = de matinada, l'endemà
-  if (wm < START_M && wm >= Math.max(6 * 60, END_M + 60)) t -= 24 * 60 * MIN;
+  // (si el festival acaba abans de mitjanit, de 6:00 fins a obrir sempre és muntatge del mateix dia)
+  if (wm < START_M && wm >= Math.max(6 * 60, END_M > START_M ? 0 : END_M + 60)) t -= 24 * 60 * MIN;
   const sec = String(s).match(/^\s*\d{1,2}[:.]\d{2}:(\d{2})/);  // «00:01:22»: amb segons (cançons d'un setlist)
   if (sec && +sec[1] < 60) t += +sec[1] * 1000;
   return t;
@@ -3479,11 +3477,11 @@ const TK_COL = { rojo: '#ff4d4d', naranja: '#ff8a1f', amarillo: '#ffd21f', verde
 const tkCol = x => TK_COL[x && x.c] || '';
 function parseTasks(src, people) {
   const list = [], warn = [], ids = new Set(), seen = new Set();
-  let group = [], bad = 0, col = '';  // bad = línies que no es publiquen
+  let group = [], bad = 0, col = '', tday = 0;  // bad = línies que no es publiquen; tday = dia (amb diversos dies)
   const TOK = /@([^\s@,;]+)/g;
   for (let line of String(src).split('\n')) {
     line = line.trim();
-    if (line.startsWith('#')) { col = ''; continue; }
+    if (line.startsWith('#')) { col = ''; if (headDay(line) >= 0) tday = headDay(line); continue; }
     if (!line) continue;
     const cm = line.match(/^\[\s*([a-záéíóú]*)\s*\]$/i);
     if (cm) { const k = cm[1].toLowerCase(); if (k && !TK_COL[k]) warn.push(`Color desconocido: «${cm[1]}» (${Object.keys(TK_COL).join(', ')})`); col = TK_COL[k] ? k : ''; continue; }
@@ -3506,8 +3504,8 @@ function parseTasks(src, people) {
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = ta ? taskTime(ta) : null;
-    let b = ta && tb ? taskTime(tb) : 0;
+    const a = ta ? taskTime(ta, tday) : null;
+    let b = ta && tb ? taskTime(tb, tday) : 0;
     if (a !== null && !Number.isFinite(a)) { bad++; warn.push(`Hora estranya: «${line.slice(0, 40)}»`); continue; }
     if (!text) { bad++; warn.push(`Falta la tasca: «${line.slice(0, 40)}»`); continue; }
     // Un final que no s'entén («19») o al revés («19:00-18:00») no es perd en silenci; «04:00-06:00» és de la mateixa nit
@@ -3802,7 +3800,7 @@ function pinchY(w, inner, K, get, set) {
   w.addEventListener('touchend', end); w.addEventListener('touchcancel', end);
 }
 pinchY(document.getElementById('tgWrap'), document.getElementById('tg'), 'cast-tgzoom-v1', () => TPX, (z, init) => { TPX = z; if (!init) renderTg(true); });
-pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (TEND - T0) / MIN * PX; buildGrid(); paintFavs(); tick(true); if (init) requestAnimationFrame(() => scrollToNow(false)); });  // en obrir: sense paintFavs es perdien els meus (groc)
+pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (GEND - G0) / MIN * PX; buildGrid(); paintFavs(); tick(true); if (init) requestAnimationFrame(() => scrollToNow(false)); });  // en obrir: sense paintFavs es perdien els meus (groc)
 document.getElementById('tgTeam').addEventListener('click', () => {
   tgTeam = !tgTeam;
   try { localStorage.setItem(TGK, tgTeam ? '1' : '0'); } catch (e) {}
@@ -3900,13 +3898,7 @@ pullTasks();
 const tkTeam = document.getElementById('tkTeam'), tkList = document.getElementById('tkList');
 let tkBase = null, tkLoaded = false;
 async function remoteTasks() {
-  try {
-    const cur = await gh(`/contents/docs/tasks.json?ref=main&t=${Date.now()}`);
-    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
-  } catch (e) {
-    if (e.status === 404) return null;
-    throw e;
-  }
+  return (await adm('read', { s: token, path: 'docs/tasks.json' })).data;
 }
 // Una persona amb dues tasques a la mateixa hora o amb franges que es trepitgen (no compten les franges llargues, de més de 2 h 30: són torns)
 function tkOverlaps(list, people) {
@@ -4015,7 +4007,9 @@ function tkRowsRender() {
   tkWhoF.innerHTML = `<option value="">Totes les tasques</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
   tkWhoF.value = ppl.some(p => p.k === f) ? f : '';
   const fk = tkWhoF.value;
-  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
+  const hd = {}; let cd = 0;
+  for (const h of new Set(tkRowsData.map(r => r.h))) { if (headDay(h) >= 0) cd = headDay(h); hd[h] = cd; }  // el dia de cada títol (com parseTasks)
+  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, hd[r.h]) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
   const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
   tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = tkRowBad(r, ppl); return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}"${r.raw && !r.a ? ' title="No s’entén: posa-hi hora o esborra-la"' : ''}>
     <input type="time" class="tka" value="${r.a}" aria-label="Hora (buida = durant el dia)">
@@ -4089,7 +4083,7 @@ document.getElementById('tkSave').addEventListener('click', async () => {
     applyTasks(data);
     edMsg('Tasques publicades. Cadascú les veurà a «Tasques» en 1 o 2 minuts.');
   } catch (err) {
-    edMsg(err.message === 'cancelado' ? 'No s’ha publicat res.' : err.status === 401 || err.status === 403 ? 'GitHub no deixa publicar: revisa el token.' : 'No s’ha pogut publicar. Mira la connexió i torna-ho a provar.', true);
+    edMsg(err.message === 'cancelado' ? 'No s’ha publicat res.' : err.code === 'session' ? 'La sesión ha caducado: sal y vuelve a entrar.' : /^GitHub 40[13]/.test(err.message) ? 'GitHub no deja publicar: hay que revisar el token del servidor.' : err.status === 429 ? 'Demasiadas peticiones: espera unos minutos.' : 'No s’ha pogut publicar. Mira la connexió i torna-ho a provar.', true);
   }
   btn.disabled = false;
 });
@@ -4245,6 +4239,9 @@ let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
   const sc = document.createElement('script');
   sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  // Empremta del fitxer: si algú el canviés a jsDelivr, el navegador no l'executaria
+  sc.integrity = 'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw';
+  sc.crossOrigin = 'anonymous';
   sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; no(new Error('xlsx')); };
   document.head.appendChild(sc);
 }));

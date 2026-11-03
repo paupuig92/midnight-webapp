@@ -1,6 +1,6 @@
-const VERSION = 'bitp-efd0f36b';
+const VERSION = 'bitp-065c3c4b';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  "img/Blogh.woff2", "img/Bricolage-Bold.woff2", "img/Bricolage-ExtraBold.woff2", "img/Bricolage-Regular.woff2", "img/Bricolage-SemiBold.woff2", "img/Bricolage-SemiCondensed-SemiBold.woff2", "img/banner.jpg", "img/bn-cabra.webp", "img/bn-titol.webp", "img/deco-before.png", "img/deco-done.png", "img/deco-empty.png", "img/deco-end.png", "img/deco-foto.png", "img/deco-got.png", "img/deco-h-ahora.png", "img/deco-h-horario.png", "img/deco-h-siguiente.png", "img/deco-m-crack.png", "img/deco-m-enamorat.png", "img/deco-m-enfadat.png", "img/deco-m-festa.png", "img/deco-m-flipat.png", "img/deco-m-guai.png", "img/deco-m-plora.png", "img/deco-m-xocat.png", "img/deco-mecanic.png", "img/deco-sheet.png", "img/deco-strip.png", "img/festa.png", "img/logo-31fam.png", "img/logo-amics.png", "img/logo-aplec.png", "img/logo-catarres.png", "img/logo-figa.png", "img/logo-juls.png", "img/logo-lax.png", "img/logo-ludwig.png", "img/logo-pets.png", "img/logo-prats.png", "img/logo-tyets.png", "img/logo-vennus.png", "img/mapa-acceso.jpg", "img/mapa-plano.jpg", "img/mapa.jpg", "img/photo.png", "img/principal.png", "img/ride-burro.png", "img/ride-calcot.png", "img/ride-tunel.png"];
+  "img/NimbusSanL-Bold.woff2", "img/NimbusSanL-BoldCond.woff2", "img/NimbusSanL-Regu.woff2", "img/banner.jpg", "img/hangar.png", "img/logo-240.png", "img/logo-blackhangar.png", "img/logo-duro.png", "img/logo-makina.png"];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {
