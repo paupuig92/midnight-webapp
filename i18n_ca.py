@@ -688,6 +688,23 @@ PAIRS = [
      "'Sense permís per a la brúixola. Tanca l’app del tot i torna-la a obrir perquè el torni a demanar.'"),
     ("msg.textContent = 'Buscando…';\n  navigator.geolocation.getCurrentPosition", "msg.textContent = 'Buscant…';\n  navigator.geolocation.getCurrentPosition"),
 
+    # Sol amb la càmera
+    ("<span>Ver con la cámara</span>", "<span>Veure amb la càmera</span>"),
+    ('aria-label="Camino del sol sobre la imagen de la cámara"', 'aria-label="Camí del sol sobre la imatge de la càmera"'),
+    ('id="solArX">Cerrar</button>', 'id="solArX">Tancar</button>'),
+    ("Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.",
+     "Brúixola aproximada (±5–15°), lluny del metall. Mou el mòbil fent un 8 per calibrar-la. Si el dibuix no coincideix amb el sol, ajusta el camp de visió."),
+    ('id="solArNow">Ahora</button>', 'id="solArNow">Ara</button>'),
+    ("<span>Campo de visión</span>", "<span>Camp de visió</span>"),
+    ('aria-label="Reducir campo de visión"', 'aria-label="Reduir el camp de visió"'),
+    ('aria-label="Ampliar campo de visión"', 'aria-label="Ampliar el camp de visió"'),
+    ("'Apunta el móvil al cielo: la línea es el camino del sol hoy.'", "'Apunta el mòbil al cel: la línia és el camí del sol d’avui.'"),
+    ("'Sin cámara: se dibuja el cielo. Apunta el móvil para mirar alrededor.'", "'Sense càmera: es dibuixa el cel. Apunta el mòbil per mirar al voltant.'"),
+    ("`${cam ? '' : 'Sin cámara. '}Sin sensores de orientación: vista fija hacia el sol. Arrastra para mirar alrededor.`",
+     "`${cam ? '' : 'Sense càmera. '}Sense sensors d’orientació: vista fixa cap al sol. Arrossega per mirar al voltant.`"),
+    ("(AR.scrub !== null ? '' : 'Ahora · ')", "(AR.scrub !== null ? '' : 'Ara · ')"),
+    ("`Cámara ${Math.round(caz)", "`Càmera ${Math.round(caz)"),
+    ("'Vista fija (sin brújula)'", "'Vista fixa (sense brúixola)'"),
 ]
 
 
