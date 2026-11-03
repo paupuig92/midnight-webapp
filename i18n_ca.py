@@ -637,7 +637,6 @@ PAIRS = [
     ('aria-pressed="false">Oscuro</button>', 'aria-pressed="false">Fosc</button>'),
     ('<p class="note" style="margin:0">«Sistema» sigue el modo claro u oscuro del móvil.</p>', '<p class="note" style="margin:0">«Sistema» segueix el mode clar o fosc del mòbil.</p>'),
     # --- Sol (pestanya per a foto i vídeo, 03-11) ---
-    ("Sol <span>para foto y vídeo</span>", "Sol <span>per a foto i vídeo</span>"),
     ("Dirección", "Direcció"),
     ("Activar brújula", "Activar brúixola"),
     ("Apagar brújula", "Apagar brúixola"),
@@ -673,7 +672,6 @@ PAIRS = [
     ("'Lo tienes delante'", "'El tens davant'"),
     ("`Gira ${Math.abs(d)}° a la ${d > 0 ? 'derecha' : 'izquierda'}`", "`Gira ${Math.abs(d)}° a la ${d > 0 ? 'dreta' : 'esquerra'}`"),
     (" · el móvil mira a ${", " · el mòbil mira a ${"),
-    ("`Bajo el horizonte. ${sub}`", "`Sota l’horitzó. ${sub}`"),
     ("'bajo el horizonte'", "'sota l’horitzó'"),
     ("'sobre el horizonte'", "'sobre l’horitzó'"),
     ("Ubicación: <b>la tuya</b>", "Ubicació: <b>la teva</b>"),
@@ -705,6 +703,24 @@ PAIRS = [
     ("(AR.scrub !== null ? '' : 'Ahora · ')", "(AR.scrub !== null ? '' : 'Ara · ')"),
     ("`Cámara ${Math.round(caz)", "`Càmera ${Math.round(caz)"),
     ("'Vista fija (sin brújula)'", "'Vista fixa (sense brúixola)'"),
+    # Sol: compte enrere i on mirar (04-11)
+    ("`El sol está bajo el horizonte (${solDeg(p.alt)})`", "`El sol és sota l’horitzó (${solDeg(p.alt)})`"),
+    ("`Mira ${solDeg(ap)} por encima del horizonte`", "`Mira ${solDeg(ap)} per sobre de l’horitzó`"),
+    ('aria-label="Horizonte: dónde está el sol respecto al móvil"', 'aria-label="Horitzó: on és el sol respecte del mòbil"'),
+    ("l = 'Hora azul: quedan'; v = left(mb1); sub = `Amanecer a las ${hm(rise)}`;", "l = 'Hora blava: queden'; v = left(mb1); sub = `Sortida del sol a les ${hm(rise)}`;"),
+    ("l = 'Amanecer en';", "l = 'Sortida del sol d’aquí a';"),
+    ("`Hora dorada hasta las ${hm(mg)}` : mb0 ? `Hora azul a las ${hm(mb0)}`", "`Hora daurada fins a les ${hm(mg)}` : mb0 ? `Hora blava a les ${hm(mb0)}`"),
+    ("l = 'Hora dorada: quedan'; v = left(mg); sub = `Atardecer a las ${hm(set)}`;", "l = 'Hora daurada: queden'; v = left(mg); sub = `Posta de sol a les ${hm(set)}`;"),
+    ("l = 'Atardecer en'; v = left(set); at = hm(set); sub = `Hora dorada a las ${hm(g0)} (",
+     "l = 'Posta de sol d’aquí a'; v = left(set); at = hm(set); sub = `Hora daurada a les ${hm(g0)} ("),
+    ("l = 'Hora dorada: quedan'; v = left(g1); sub = t < set ? `Atardecer en ${left(set)} · ${hm(set)}` : `Hora azul a las ${hm(g1)}`;",
+     "l = 'Hora daurada: queden'; v = left(g1); sub = t < set ? `Posta de sol d’aquí a ${left(set)} · ${hm(set)}` : `Hora blava a les ${hm(g1)}`;"),
+    ("l = 'Hora azul: quedan'; v = left(b1); sub = solRise2 ? `Mañana amanece a las ${hm(solRise2)}`", "l = 'Hora blava: queden'; v = left(b1); sub = solRise2 ? `Demà surt el sol a les ${hm(solRise2)}`"),
+    ("l = 'Mañana amanece a las';", "l = 'Demà surt el sol a les';"),
+    ("sub = solRise2 ? `En ${dur(solRise2 - t)}` : '';", "sub = solRise2 ? `D’aquí a ${dur(solRise2 - t)}` : '';"),
+    ("Dónde está, cuánta luz queda y cuándo llega la hora dorada.", "On és, quanta llum queda i quan arriba l’hora daurada."),
+    ("[['azul', D.blue], ['dorada', D.gold]]", "[['blava', D.blue], ['daurada', D.gold]]"),
+    ("'start'}\">Ahora</text>`", "'start'}\">Ara</text>`"),
 ]
 
 
