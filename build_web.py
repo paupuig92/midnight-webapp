@@ -80,7 +80,7 @@ _vars = {"--accent": FEST.get("accent"), "--accent-rgb": FEST.get("accentRgb"), 
          "--accent-deep": FEST.get("accentDeep"), "--accent-ink": FEST.get("accentInk"), **FEST.get("theme", {})}
 BG = _css(FEST.get("theme", {}).get("--bg", "#040704"))
 FESTCSS = "<style data-fest>/* colors i lletres del festival */\n" + "".join(
-    f'@font-face{{font-family:"{_css(f["family"])}";src:url("img/{_css(f["file"])}");font-weight:{_css(f.get("weight", 400))};font-display:swap}}\n'
+    f'@font-face{{font-family:"{_css(f["family"])}";src:url("img/{_css(f["file"])}");font-weight:{_css(f.get("weight", 400))};{"font-stretch:" + _css(f["stretch"]) + ";" if f.get("stretch") else ""}font-display:swap}}\n'
     for f in FEST.get("fonts", [])) + ":root{" + ";".join(f"{k}:{_css(v)}" for k, v in _vars.items() if v) + "}</style>"
 
 page = f"""<!doctype html>
