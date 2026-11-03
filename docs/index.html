@@ -1564,8 +1564,8 @@ if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.ins
 document.title = FEST.name;
 if (navigator.standalone === true) document.documentElement.classList.add('sa');
 // Adreça nova (Cloudflare). Des de l'antiga (GitHub Pages): al navegador s'hi va directament; l'app de la pantalla d'inici avisa
-const HOME = 'https://midnight-app.midnightgroup.workers.dev/';
-const MOVED = false;  // es posa a true quan la nova adreça sigui la definitiva (app.midnight.es)
+const HOME = 'https://visualcrew.midnightgroup.app/';
+const MOVED = true;  // nova adreça definitiva: visualcrew.midnightgroup.app (03-11-2026)
 if (MOVED && /github\.io$/.test(location.hostname)) {
   const dest = HOME + (/[/]ca([.]html)?$/.test(location.pathname) ? 'ca' : '') + location.hash;
   if (!(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true)) location.replace(dest);
@@ -2559,7 +2559,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '31/10 11:44';
+const BUILD = '03/11 12:13';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');

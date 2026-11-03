@@ -1529,8 +1529,8 @@ if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.ins
 document.title = FEST.name;
 if (navigator.standalone === true) document.documentElement.classList.add('sa');
 // Adreça nova (Cloudflare). Des de l'antiga (GitHub Pages): al navegador s'hi va directament; l'app de la pantalla d'inici avisa
-const HOME = 'https://midnight-app.midnightgroup.workers.dev/';
-const MOVED = false;  // es posa a true quan la nova adreça sigui la definitiva (app.midnight.es)
+const HOME = 'https://visualcrew.midnightgroup.app/';
+const MOVED = true;  // nova adreça definitiva: visualcrew.midnightgroup.app (03-11-2026)
 if (MOVED && /github\.io$/.test(location.hostname)) {
   const dest = HOME + (/[/]ca([.]html)?$/.test(location.pathname) ? 'ca' : '') + location.hash;
   if (!(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true)) location.replace(dest);
