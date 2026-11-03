@@ -326,6 +326,8 @@ self.addEventListener('fetch', e => {{
   }}
   // «Actualizar la app» demana ./?t=…: ha d'anar a la xarxa de debò (si no, mai detectaria que no hi ha connexió)
   if (url.searchParams.has('t')) return;
+  // Vídeos (el banner): directe de la xarxa. L'iPhone els demana a trossos (Range) i una còpia sencera de la cache no la reprodueix; sense xarxa es veu el pòster
+  if (url.pathname.endsWith('.mp4')) return;
   // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
   if (e.request.mode === 'navigate') {{
     // Cada idioma, la seva còpia. Adreces sense «.html» (Cloudflare Pages redirigeix ca.html → ca; GitHub serveix totes dues)

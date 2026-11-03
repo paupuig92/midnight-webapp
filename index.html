@@ -673,7 +673,7 @@ body.tvon { overflow: hidden; }
 .tvclock { font-family: var(--title); font-weight: 900; font-stretch: 125%; line-height: .85; white-space: nowrap; color: var(--accent); flex: none; width: max-content; font-variant-numeric: tabular-nums; }
 .tvclock small { font-size: .3em; color: var(--muted); margin-left: .12em; }
 .tvinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .5em; align-items: flex-end; text-align: right; }
-.tvinfo img { max-width: 100%; max-height: 11vh; width: auto; object-fit: contain; }
+.tvinfo img, .tvinfo video { max-width: 100%; max-height: 11vh; width: auto; object-fit: contain; }
 .tvstatus { font-weight: 700; font-size: 1.15em; color: var(--muted); }
 .tvstatus b { color: var(--ink); }
 .tvprog { width: min(100%, 22em); height: .4em; border-radius: 1em; background: var(--rule); overflow: hidden; }
@@ -1418,6 +1418,7 @@ const FEST = {
   key: 'duro',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
   name: 'Black Hangar',
   banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
+  bannerVideo: 'img/banner.mp4',  // la cúpula del cartell animat (black-hangar-cartell-anim.mov) que s'encén, 2 s en bucle; img/banner.jpg n'és el pòster
   date: [2026, 12, 5],          // primer dia
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
@@ -1491,6 +1492,17 @@ if (MOVED && /github\.io$/.test(location.hostname)) {
 if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
 document.getElementById('festName').textContent = FEST.name;
 document.getElementById('banner').alt = FEST.banner;
+// Banner en vídeo (FEST.bannerVideo, opcional): un bucle curt sense so; mentre carrega (o sense vídeo) es veu img/banner.jpg
+if (FEST.bannerVideo) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
+  const v = document.createElement('video');
+  v.className = im.className; if (im.id) v.id = im.id;
+  v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.disablePictureInPicture = true;
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-label', FEST.banner); v.setAttribute('role', 'img');
+  v.poster = im.getAttribute('src'); v.src = FEST.bannerVideo; v.preload = 'auto';
+  im.replaceWith(v);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { v.autoplay = false; return; }  // sense animacions: el pòster quiet
+  v.play().catch(() => {});  // mode estalvi d'energia: es queda el pòster quiet
+});
 // Banner animat (FEST.bannerAnim): substitueix la imatge quieta a dalt i a la pantalla
 if (FEST.bannerAnim) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
   const BA = FEST.bannerAnim, d = document.createElement('div'), tv = !im.classList.contains('banner');
@@ -1509,7 +1521,11 @@ if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
   document.querySelectorAll('.banim, #mecanic, #mascot').forEach(el => io.observe(el));
 }
-document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('off', document.hidden));
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('off', document.hidden);
+  // el vídeo del banner: aturat en segon pla (bateria) i en marxa en tornar
+  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay ? v.pause() : v.play().catch(() => {}));
+});
 // Il·lustracions (FEST.deco): les que no hi són, simplement no surten
 const DECO = FEST.deco || {};
 if (DECO.strip) { document.documentElement.classList.add('hdeco'); document.documentElement.style.setProperty('--deco-strip', `url("${DECO.strip}")`); }
