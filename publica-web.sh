@@ -47,4 +47,4 @@ if [[ $code == 404 ]]; then
   code=$(api -X POST https://api.github.com/repos/$REPO/pages -d '{"source":{"branch":"main","path":"/docs"}}')
   [[ $code == 201 ]] && echo "ok Pages activat" || echo "No s'ha pogut activar Pages (HTTP $code): fes-ho a Settings → Pages"
 fi
-echo "Web: https://paupuig92.github.io/midnight-webapp/"
+echo "Web: https://visualcrew.midnightgroup.app/"
