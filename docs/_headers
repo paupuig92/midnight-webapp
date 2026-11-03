@@ -20,4 +20,4 @@
 /manifest.webmanifest
   Cache-Control: no-cache
 /img/*
-  Cache-Control: public, max-age=3600
+  Cache-Control: no-cache

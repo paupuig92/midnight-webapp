@@ -64,6 +64,7 @@ img { max-width: 100%; }
   --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --title: var(--display);  /* rellotge i títols: la lletra de cartell del festival, si en té */
   --cond: var(--display);   /* noms dins la graella: millor estreta */
+  --mono: var(--body);      /* hores i subtítols petits: un festival hi pot posar una mono (theme['--mono']) */
   /* Escala de text: 11 / 13 / 15 / 18 / 24 */
   --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
   --gut: 48px;
@@ -317,7 +318,7 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
 .corner { left: 0; }
 .gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
-.gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
+.gut span { font-family: var(--mono); position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
   font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
 .gut span[data-n] { color: var(--now); }
 body.offline .status::after { content: " · sense connexió (horari desat)"; color: var(--muted); }
@@ -329,8 +330,8 @@ body.offline .status::after { content: " · sense connexió (horari desat)"; col
 .blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
 .blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
 .blk .n { font: 900 12px/1.08 var(--cond); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
-.blk .s { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
-.blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk .s { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .blk.tiny .s { display: none; }
 .blk.tiny .t { font-size: 10px; }
 .blk.tiny .n { line-height: 1; }
@@ -1106,10 +1107,11 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 
 </style>
 <style data-fest>/* colors i lletres del festival */
-@font-face{font-family:"Nimbus";src:url("img/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
-@font-face{font-family:"Nimbus";src:url("img/NimbusSanL-Bold.woff2");font-weight:600 900;font-display:swap}
-@font-face{font-family:"Nimbus Cond";src:url("img/NimbusSanL-BoldCond.woff2");font-weight:400 900;font-display:swap}
-:root{--accent:#f2f2f2;--accent-rgb:242, 242, 242;--accent-dim:#7a7c80;--accent-deep:#16171a;--accent-ink:#050608;--bg:#050608;--panel:#0f1013;--ink:#f5f5f5;--muted:#9a9ca2;--rule:#2a2c31;--line:#3d4046;--display:"Nimbus", "Helvetica Neue", sans-serif;--body:"Nimbus", "Helvetica Neue", sans-serif;--title:"Nimbus", "Helvetica Neue", sans-serif;--cond:"Nimbus Cond", "Nimbus", sans-serif}</style>
+@font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
+@font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Bold.woff2");font-weight:600 900;font-display:swap}
+@font-face{font-family:"Nimbus Cond";src:url("img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2");font-weight:400 900;font-display:swap}
+@font-face{font-family:"Martian Mono";src:url("img/duro-black-hangar-2026/MartianMono.woff2");font-weight:100 800;font-display:swap}
+:root{--accent:#f2f2f2;--accent-rgb:242, 242, 242;--accent-dim:#7a7c80;--accent-deep:#16171a;--accent-ink:#050608;--bg:#050608;--panel:#0f1013;--ink:#f5f5f5;--muted:#9a9ca2;--rule:#2a2c31;--line:#3d4046;--display:"Nimbus", "Helvetica Neue", sans-serif;--body:"Nimbus", "Helvetica Neue", sans-serif;--title:"Nimbus", "Helvetica Neue", sans-serif;--cond:"Nimbus Cond", "Nimbus", sans-serif;--mono:"Martian Mono", ui-monospace, monospace}</style>
 </head>
 <body>
 
@@ -1133,7 +1135,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 <div class="tv" id="tv" hidden aria-label="Mode pantalla completa">
   <div class="tvtop">
     <div class="tvclock" id="tvClock"></div>
-    <div class="tvinfo"><button class="btn tvx" id="tvX" type="button">Sortir de la pantalla</button><img src="img/banner.jpg" alt=""><div class="tvstatus" id="tvStatus"></div><div class="tvprog"><i id="tvProg"></i></div></div>
+    <div class="tvinfo"><button class="btn tvx" id="tvX" type="button">Sortir de la pantalla</button><img src="img/duro-black-hangar-2026/banner.jpg" alt=""><div class="tvstatus" id="tvStatus"></div><div class="tvprog"><i id="tvProg"></i></div></div>
   </div>
   <div class="tvalert" id="tvAlert" hidden></div>
   <section class="tvnow"><h2>Ara <span>sona</span></h2><div id="tvNow" class="tvnow" style="flex:1"></div><div class="tvrides" id="tvRides" hidden></div></section>
@@ -1141,7 +1143,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 </div>
 
 <div class="wrap">
-  <img class="banner" id="banner" src="img/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
+  <img class="banner" id="banner" src="img/duro-black-hangar-2026/banner.jpg" alt="Bass in the Park · 24.10.2026 · de 12 h a 5:00 h · Montmeló, Espai Can Guitet" width="1100" height="242">
   <header class="hero">
     <div class="brandline"><b>Midnight</b> — <span id="festName">Bass in the Park</span><button class="mwho big" id="hwho" type="button" aria-label="El teu perfil"><b class="mav"></b><span class="mwt"><span class="mwn"></span><small class="mwd"></small></span></button><i class="firma" role="img" aria-label="Puig"></i></div>
     <button class="sim-badge" id="simBadge" type="button" hidden>MODE PROVA ✕ Sortir</button>
@@ -1459,19 +1461,21 @@ const FEST = {
   accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
   theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
     '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
-    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif' },
+    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
+    '--mono': '"Martian Mono", ui-monospace, monospace' },
   // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
     { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
     { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
     { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
+    { family: 'Martian Mono', file: 'MartianMono.woff2', weight: '100 800' },  // Google Fonts, llicència OFL (MartianMono-OFL.txt)
   ],
   nextHide: { stages: [], imp: [1] },
   impColors: true,
   impSize: true,
   rides: [],
   colorLogos: true,             // el logo de l'escenari és blanc: sobre fons fosc i amb el nom a sota
-  // Un sol escenari: el logo és img/hangar.png. Dissabte Universo Makina, diumenge 240 km/h (img/logo-makina.png i logo-240.png, per si calen)
+  // Un sol escenari: el logo és img/hangar.png. Dissabte Universo Makina, diumenge 240 km/h (img/duro-black-hangar-2026/logo-makina.png i logo-240.png, per si calen)
   stages: [
     { id: 'hangar', name: 'Black Hangar' },
   ],
@@ -1508,7 +1512,7 @@ for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': F
   document.documentElement.style.setProperty(k, v);
 for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.style.setProperty(k, v);  // colors de base propis (opcional)
 if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
-  `@font-face{font-family:"${f.family}";src:url("img/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
+  `@font-face{font-family:"${f.family}";src:url("img/duro-black-hangar-2026/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
 document.title = FEST.name;
 if (navigator.standalone === true) document.documentElement.classList.add('sa');
 // Adreça nova (Cloudflare). Des de l'antiga (GitHub Pages): al navegador s'hi va directament; l'app de la pantalla d'inici avisa
@@ -1769,7 +1773,7 @@ const tlwrap = document.getElementById('tlwrap');
 let blocks = [], nowline, nowlbl;
 function buildGrid() {
   let g = '<div class="corner"></div>';
-  for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color" style="--sc:${s.color}"><img src="img/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd" style="--sc:${s.color}"><img src="img/${s.id}.png" alt="${s.name}"></div>`;
+  for (const s of STAGES) g += FEST.colorLogos ? `<div class="hd color" style="--sc:${s.color}"><img src="img/duro-black-hangar-2026/${s.id}.png" alt=""><span>${html(s.name)}</span></div>` : `<div class="hd" style="--sc:${s.color}"><img src="img/duro-black-hangar-2026/${s.id}.png" alt="${s.name}"></div>`;
   // Atraccions: totes en una sola columna, una franja per atracció
   const RIMG = FEST.ridesImg || (RIDE_LIST.find(r => r.img) || {}).img;
   if (RIDE_LIST.length) g += RIMG && FEST.colorLogos ? `<div class="hd color"><img src="${esc(RIMG)}" alt=""><span>${html(RIDES_NAME)}</span></div>`
@@ -1920,7 +1924,7 @@ function rowHTML(s, t) {
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1940,7 +1944,7 @@ function rowMine(s, t) {
   const mine = SETS[s.id].filter(x => favs.has(x.id));
   const cur = mine.find(x => t >= x.a && t < x.b);
   const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1965,7 +1969,7 @@ function renderPick() {
     const items = SETS[s.id].filter(x => x.b > t || favs.has(x.id));
     past += SETS[s.id].length - items.length;
     if (!items.length) return '';
-    return `<h3 style="--sc:${s.color}"><img src="img/${s.id}.png" alt="">${s.name}</h3><ul>${items.map(x =>
+    return `<h3 style="--sc:${s.color}"><img src="img/duro-black-hangar-2026/${s.id}.png" alt="">${s.name}</h3><ul>${items.map(x =>
       `<li class="${favs.has(x.id) ? 'on' : ''}"><span class="tm">${lbl(x.a)}–${lbl(x.b)}</span><span class="nm${impc(x.t)}">${imp(x.t)}${deco(x.n)}${fxTags(x)}${chgTag(x)}</span><span class="acts">${star(x)}</span></li>`).join('')}</ul>`;
   }).join('');
   setHTML(document.getElementById('pickList'), (h || '<p class="empty">Ja no queden actuacions.</p>')
@@ -2005,7 +2009,7 @@ function upHTML(t) {
   for (const x of list.slice(0, 6)) {
     if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
-    <img class="logo" src="img/${x.s.id}.png" alt="">
+    <img class="logo" src="img/duro-black-hangar-2026/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
     <span class="acts">${star(x)}</span></li>`;
   }
@@ -2557,7 +2561,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 13:16';
+const BUILD = '03/11 13:25';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -2667,7 +2671,7 @@ function tvRender(t) {
   if (tvStage) tvOne(t);
   else document.getElementById('tvNow').innerHTML = STAGES.map(s => {
     const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
-    const head = `${bandImg(cur, 'tlogo') || `<img src="img/${s.id}.png" alt="">`}<div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
+    const head = `${bandImg(cur, 'tlogo') || `<img src="img/duro-black-hangar-2026/${s.id}.png" alt="">`}<div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
     if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
       ${fxTags(cur)}<div class="taf">${nxt ? `Després: <b>${deco(nxt.n)}</b> a les ${lbl(nxt.a)}` : 'Després: tanca l’escenari'}</div></div>
       <div class="tleft"><span>queden</span><b>${dur(cur.b - t)}</b></div><div class="tbar"><i style="width:${((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1)}%"></i></div></div>`;
@@ -2704,7 +2708,7 @@ function tvOne(t) {
   const cue = list.find(x => x.b > t && x.fx.length);
   const pct = cur ? ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) : 0;
   document.getElementById('tvNow').innerHTML = `<div class="tvone"${stc(s)}>
-    <div class="o-st">${bandImg(big, 'olg') || `<img src="img/${s.id}.png" alt="">`}${html(s.name)}</div>
+    <div class="o-st">${bandImg(big, 'olg') || `<img src="img/duro-black-hangar-2026/${s.id}.png" alt="">`}${html(s.name)}</div>
     ${big ? `<div class="o-lbl">${cur ? 'Ara' : 'Canvi · comença a les ' + lbl(big.a)}</div>
       <div class="o-dj">${imp(big.t)}${deco(big.n)}${big.sub ? ` <span class="sub">${html(big.sub)}</span>` : ''}${chgTag(big)}</div>
       <div class="o-cd"><span>${cur ? 'queden' : 'comença en'}</span><b>${dur(cur ? cur.b - t : big.a - t)}</b>${cur ? `<small>acaba a les ${lbl(cur.b)}</small>` : ''}</div>
