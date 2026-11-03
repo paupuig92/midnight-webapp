@@ -693,9 +693,6 @@ PAIRS = [
     ("Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.",
      "Brúixola aproximada (±5–15°), lluny del metall. Mou el mòbil fent un 8 per calibrar-la. Si el dibuix no coincideix amb el sol, ajusta el camp de visió."),
     ('id="solArNow">Ahora</button>', 'id="solArNow">Ara</button>'),
-    ("<span>Campo de visión</span>", "<span>Camp de visió</span>"),
-    ('aria-label="Reducir campo de visión"', 'aria-label="Reduir el camp de visió"'),
-    ('aria-label="Ampliar campo de visión"', 'aria-label="Ampliar el camp de visió"'),
     ("'Apunta el móvil al cielo: la línea es el camino del sol hoy.'", "'Apunta el mòbil al cel: la línia és el camí del sol d’avui.'"),
     ("'Sin cámara: se dibuja el cielo. Apunta el móvil para mirar alrededor.'", "'Sense càmera: es dibuixa el cel. Apunta el mòbil per mirar al voltant.'"),
     ("`${cam ? '' : 'Sin cámara. '}Sin sensores de orientación: vista fija hacia el sol. Arrastra para mirar alrededor.`",
@@ -721,6 +718,9 @@ PAIRS = [
     ("Dónde está, cuánta luz queda y cuándo llega la hora dorada.", "On és, quanta llum queda i quan arriba l’hora daurada."),
     ("[['azul', D.blue], ['dorada', D.gold]]", "[['blava', D.blue], ['daurada', D.gold]]"),
     ("'start'}\">Ahora</text>`", "'start'}\">Ara</text>`"),
+    ('<label for="solArFov">Campo</label>', '<label for="solArFov">Camp</label>'),
+    ('aria-label="Campo de visión"', 'aria-label="Camp de visió"'),
+    ('aria-label="Instrucciones">i</button>', 'aria-label="Instruccions">i</button>'),
 ]
 
 

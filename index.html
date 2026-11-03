@@ -1042,14 +1042,16 @@ body.aron .tabbar, body.aron .totop { display: none !important; }
 .arbot .arbox { padding: 6px 10px; }
 .armsg { margin: 0; font: 600 var(--fs-s)/1.35 var(--body); color: var(--ink); }
 .armsg small { display: block; color: var(--muted); font-size: var(--fs-xs); margin-top: 2px; }
-.artime { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
-.artime label { font: 800 var(--fs-xs)/1 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
-.artime input { width: 100%; min-height: 44px; accent-color: var(--sol-gold); }
-.artime .btn, .arfov .btn { min-height: 44px; padding: 0 14px; }
-.arfov { display: flex; align-items: center; gap: 8px; font: 700 var(--fs-s)/1.2 var(--body); color: var(--muted); }
-.arfov output { min-width: 3.2em; text-align: center; color: var(--ink); font: 800 var(--fs-m)/1 var(--mono); }
-.arfov .btn { width: 44px; padding: 0; font-size: 22px; }
-.arfov span { flex: 1; }
+.armsgbox[hidden] { display: none; }
+/* Un sol quadre prim a baix (hora i camp de visió): la major part de la pantalla és càmera */
+.arctl { display: grid; gap: 0; padding: 2px 10px !important; }
+.arrow2 { display: grid; grid-template-columns: 3.4em 1fr 4.2em; align-items: center; gap: 8px; min-height: 42px; }
+.arrow2 label { font: 800 var(--fs-xs)/1 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.arrow2 input { width: 100%; min-height: 40px; margin: 0; accent-color: var(--sol-gold); }
+.arrow2 .btn { min-height: 36px; padding: 0 8px; font-size: 13px; }
+.arrow2 output { text-align: center; color: var(--ink); font: 800 var(--fs-m)/1 var(--mono); }
+.solar .ari { flex: none; width: 48px; min-height: 48px; padding: 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line, var(--rule)); font: 900 20px/1 Georgia, serif; font-style: italic; }
+.solar .ari[aria-expanded="true"] { background: var(--ink); color: var(--panel); }
 .mapit + .mapit { margin-top: 26px; }
 .mapit h2 { margin-bottom: 10px; }
 .mapaddr { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 10px; }
@@ -1336,12 +1338,15 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
       <canvas id="solArC" role="img" aria-label="Camino del sol sobre la imagen de la cámara"></canvas>
       <div class="arhud">
         <div class="arbox arinfo" aria-live="off"><b id="solArT">Sol</b><span class="s" id="solArSun"></span><span id="solArCam"></span></div>
+        <button class="btn ari" type="button" id="solArI" aria-expanded="true" aria-controls="solArMsgBox" aria-label="Instrucciones">i</button>
         <button class="btn arx" type="button" id="solArX">Cerrar</button>
       </div>
       <div class="arbot">
-        <div class="arbox"><p class="armsg" id="solArMsg" role="status"></p><p class="armsg"><small>Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.</small></p></div>
-        <div class="arbox artime"><label for="solArR">Hora</label><input type="range" id="solArR" step="300000"><button class="btn" type="button" id="solArNow">Ahora</button></div>
-        <div class="arbox arfov"><span>Campo de visión</span><button class="btn" type="button" id="solArF0" aria-label="Reducir campo de visión">−</button><output id="solArF" aria-live="polite">63°</output><button class="btn" type="button" id="solArF1" aria-label="Ampliar campo de visión">+</button></div>
+        <div class="arbox armsgbox" id="solArMsgBox"><p class="armsg" id="solArMsg" role="status"></p><p class="armsg"><small>Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.</small></p></div>
+        <div class="arbox arctl">
+          <div class="arrow2"><label for="solArR">Hora</label><input type="range" id="solArR" step="300000"><button class="btn" type="button" id="solArNow">Ahora</button></div>
+          <div class="arrow2"><label for="solArFov">Campo</label><input type="range" id="solArFov" min="60" max="140" step="1" aria-label="Campo de visión"><output id="solArF" for="solArFov">90°</output></div>
+        </div>
       </div>
     </div>
   </section>
@@ -3441,8 +3446,10 @@ document.getElementById('solSrc').addEventListener('click', e => {
 // Només funciona amb la finestra oberta: en tancar-la, canviar de pestanya o anar-se'n l'app, s'aturen la càmera i els sensors
 const AR = { on: false, stream: null, cam: null, up: null, raw: null, sensor: false, az: 0, el: 10, scrub: null, dirty: true, raf: 0, evt: '', wait: 0, tick: 0, drag: null, tmw: null, font: '' };
 const ARFK = 'midnight-sol-fov-v1';
-let AR_FOV = 63;  // camp de visió (graus) en el costat llarg de la pantalla: càmera principal de l'iPhone en vertical ≈ 63°
-try { const v = +localStorage.getItem(ARFK); if (v >= 30 && v <= 120) AR_FOV = v; } catch (e) {}
+// Camp de visió (graus) al llarg del costat llarg de la imatge de la càmera. A l'iPhone d'en Pau (03-11) quadrava entre 90° i 120°
+// (el Safari sembla obrir-hi la càmera gran angular): per defecte 90°. Els 63° d'abans (valor per defecte antic) passen a 90°
+let AR_FOV = 90;
+try { let v = +localStorage.getItem(ARFK); if (v === 63) v = 90; if (v >= 60 && v <= 140) AR_FOV = v; } catch (e) {}
 const arEl = document.getElementById('solAr'), arC = document.getElementById('solArC'), arV = document.getElementById('solArV'), arR = document.getElementById('solArR');
 const D2R = Math.PI / 180, AR_DB = Math.cos(D2R);
 const arVec = (az, alt) => [Math.cos(alt * D2R) * Math.sin(az * D2R), Math.cos(alt * D2R) * Math.cos(az * D2R), Math.sin(alt * D2R)];  // est, nord, amunt
@@ -3470,6 +3477,7 @@ function arMsg() {
   const m = document.getElementById('solArMsg'), cam = !arEl.classList.contains('nocam');
   m.textContent = AR.sensor ? (cam ? 'Apunta el móvil al cielo: la línea es el camino del sol hoy.' : 'Sin cámara: se dibuja el cielo. Apunta el móvil para mirar alrededor.')
     : `${cam ? '' : 'Sin cámara. '}Sin sensores de orientación: vista fija hacia el sol. Arrastra para mirar alrededor.`;
+  if (AR.on && m.textContent !== AR.lastMsg) { AR.lastMsg = m.textContent; arHelp(true); }
 }
 // Vista de la càmera: eixos de la pantalla (amb el gir de la pantalla) i focal a partir del camp de visió
 function arView() {
@@ -3479,7 +3487,11 @@ function arView() {
   const th = ((screen.orientation && screen.orientation.angle) || 0) * D2R, c = Math.cos(th), s = Math.sin(th);
   const r2 = right.map((x, i) => x * c + up[i] * s), u2 = right.map((x, i) => -x * s + up[i] * c);
   const W = arC.clientWidth, H = arC.clientHeight;
-  return { cam, right: r2, up: u2, W, H, cx: W / 2, cy: H / 2, f: Math.max(W, H) / 2 / Math.tan(AR_FOV / 2 * D2R) };
+  // La imatge de la càmera omple la pantalla retallada (object-fit: cover): el camp de visió va sobre la imatge sencera,
+  // així que es mesura el seu costat llarg tal com es veu (pot sortir de la pantalla). Sense càmera, el costat llarg de la pantalla
+  const vw = arV.videoWidth, vh = arV.videoHeight;
+  const L = !arEl.classList.contains('nocam') && vw && vh ? Math.max(W / vw, H / vh) * Math.max(vw, vh) : Math.max(W, H);
+  return { cam, right: r2, up: u2, W, H, cx: W / 2, cy: H / 2, f: L / 2 / Math.tan(AR_FOV / 2 * D2R) };
 }
 const arP = (V, az, alt) => { const d = arVec(az, alt), z = arDot(d, V.cam), x = arDot(d, V.right), y = arDot(d, V.up);
   return { x: V.cx + V.f * x / z, y: V.cy - V.f * y / z, z, vx: x, vy: y, ok: z > .08 }; };
@@ -3510,10 +3522,17 @@ function arDraw() {
       if ((za < 0) !== (zb < 0)) { const k = za / (za - zb); P.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]); } });
     if (P.length > 2) { g.fillStyle = '#16171c'; g.beginPath(); P.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); }
   }
+  // Sortida i posta: primer es decideix on va la seva hora (si el sol d'ara hi cau a sobre, al costat contrari),
+  // i després les hores del camí i els punts cardinals que hi xocarien no s'escriuen
+  const sn = (q => q.ok ? q : null)(arP(V, ...(o => [o.az, o.alt])(SUN.pos(arTime(), D.lat, D.lon))));
+  const RS = [[D.up(SOL_RISE), '↑'], [D.dn(SOL_RISE), '↓']].filter(([t]) => t).map(([t, ch]) => { const s = SUN.pos(t, D.lat, D.lon); return { s: `${ch}${hm(t)}`, p: arP(V, s.az, 0) }; }).filter(r => r.p.ok).map(r => {
+    const hit = sn && Math.abs(sn.x - r.p.x) < 60 && Math.abs(sn.y - (r.p.y + 20)) < 40;
+    return { ...r, x: hit ? r.p.x + (sn.x > r.p.x ? -1 : 1) * (62 - Math.abs(sn.x - r.p.x)) : r.p.x, y: r.p.y + 24 }; });
+  const near = (x, y) => RS.some(r => (Math.abs(x - r.p.x) < 42 && y > r.p.y - 30 && y < r.p.y + 12) || (Math.abs(x - r.x) < 52 && Math.abs(y - r.y) < 18));
   // Horitzó i punts cardinals
   arLine(g, V, Array.from({ length: 181 }, (_, i) => [i * 2, 0]), 'rgba(255,255,255,.85)', 2);
   for (let a = 0; a < 360; a += 10) { const p = arP(V, a, 0), q = arP(V, a, a % 90 ? 1 : 2.5); if (p.ok && q.ok) { g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = a % 90 ? 1.5 : 3; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke(); } }
-  for (let i = 0; i < 16; i += 2) { const p = arP(V, i * 22.5, -2.2); if (p.ok) { g.font = `${i % 4 ? 700 : 900} ${i % 4 ? 12 : 16}px ${AR.font}`; arText(g, SOL16[i], p.x, p.y + 6, i ? '#fff' : NOW); } }
+  for (let i = 0; i < 16; i += 2) { const p = arP(V, i * 22.5, -2.2); if (p.ok && !near(p.x, p.y + 2)) { g.font = `${i % 4 ? 700 : 900} ${i % 4 ? 12 : 16}px ${AR.font}`; arText(g, SOL16[i], p.x, p.y + 6, i ? '#fff' : NOW); } }
   g.font = `700 12px ${AR.font}`;
   // Camí de demà (fluix) i el d'avui: blanc de dia, daurat i blau a les seves hores, puntejat sota l'horitzó
   if (AR.tmw) arLine(g, V, AR.tmw.filter(s => s[2] > -8).map(s => [s[1], s[2]]), 'rgba(255,255,255,.28)', 1.5, [3, 5]);
@@ -3527,11 +3546,11 @@ function arDraw() {
     const s = SUN.pos(h, D.lat, D.lon); if (s.alt < -6) continue;
     const p = arP(V, s.az, s.alt); if (!p.ok) continue;
     g.fillStyle = '#fff'; g.beginPath(); g.arc(p.x, p.y, 4, 0, 7); g.fill();
-    arText(g, hm(h), p.x, p.y - 10, '#fff');
+    if (!near(p.x, p.y - 10)) arText(g, hm(h), p.x, p.y - 10, '#fff');
   }
-  for (const [t, ch] of [[D.up(SOL_RISE), '↑'], [D.dn(SOL_RISE), '↓']]) if (t) {
-    const s = SUN.pos(t, D.lat, D.lon), p = arP(V, s.az, 0);
-    if (p.ok) { g.fillStyle = GOLD; g.beginPath(); g.moveTo(p.x, p.y - 9); g.lineTo(p.x - 7, p.y + 3); g.lineTo(p.x + 7, p.y + 3); g.closePath(); g.fill(); arText(g, `${ch}${hm(t)}`, p.x, p.y + 20, GOLD); }
+  for (const r of RS) {
+    g.fillStyle = GOLD; g.beginPath(); g.moveTo(r.p.x, r.p.y - 9); g.lineTo(r.p.x - 7, r.p.y + 3); g.lineTo(r.p.x + 7, r.p.y + 3); g.closePath(); g.fill();
+    arText(g, r.s, r.x, r.y, GOLD);
   }
   // El sol (ara o a l'hora triada); si no hi cap, una fletxa a la vora que hi apunta
   const t = arTime(), sp = SUN.pos(t, D.lat, D.lon), p = arP(V, sp.az, sp.alt), M = 28;
@@ -3582,12 +3601,12 @@ function arRange() {
 function arOpen() {
   if (AR.on) return;
   solPaint(true);
-  AR.on = true; AR.sensor = false; AR.raw = null; AR.lt = 0; AR.scrub = null; AR.dirty = true;
+  AR.on = true; AR.sensor = false; AR.raw = null; AR.lt = 0; AR.lastMsg = ''; AR.scrub = null; AR.dirty = true;
   const sp = SUN.pos(now(), solD.lat, solD.lon);
   AR.az = sp.az; AR.el = Math.max(0, Math.min(25, sp.alt));  // sense sensors: mirant cap al sol, una mica per sobre l'horitzó
   AR.tmw = solDay(solD.b + 3600000, solD.lat, solD.lon).S.map(s => { const p = SUN.pos(s[0], solD.lat, solD.lon); return [s[0], p.az, p.alt]; });
   AR.font = getComputedStyle(document.querySelector('.arinfo')).fontFamily;
-  document.getElementById('solArF').textContent = `${AR_FOV}°`;
+  document.getElementById('solArF').textContent = `${AR_FOV}°`; arFov.value = AR_FOV;
   arEl.classList.add('nocam'); arEl.hidden = false; document.body.classList.add('aron');
   arRange(); arMsg();
   document.getElementById('solArX').focus();
@@ -3623,12 +3642,21 @@ document.getElementById('solArX').addEventListener('click', arClose);
 arEl.addEventListener('keydown', e => { if (e.key === 'Escape') arClose(); });
 arR.addEventListener('input', () => { AR.scrub = +arR.value; arR.setAttribute('aria-valuetext', hm(AR.scrub)); AR.dirty = true; });
 document.getElementById('solArNow').addEventListener('click', () => { AR.scrub = null; arRange(); AR.dirty = true; });
-for (const [id, d] of [['solArF0', -3], ['solArF1', 3]]) document.getElementById(id).addEventListener('click', () => {
-  AR_FOV = Math.max(30, Math.min(120, AR_FOV + d));
+const arFov = document.getElementById('solArFov');
+arFov.addEventListener('input', () => {
+  AR_FOV = Math.max(60, Math.min(140, +arFov.value || 90));
   document.getElementById('solArF').textContent = `${AR_FOV}°`;
   try { localStorage.setItem(ARFK, String(AR_FOV)); } catch (e) {}
   AR.dirty = true;
 });
+// Instruccions: es veuen uns segons en obrir (o quan canvien) i després s'amaguen; la «i» les torna a mostrar
+function arHelp(on) {
+  clearTimeout(AR.helpT);
+  document.getElementById('solArMsgBox').hidden = !on;
+  document.getElementById('solArI').setAttribute('aria-expanded', on ? 'true' : 'false');
+  if (on) AR.helpT = setTimeout(() => arHelp(false), 7000);
+}
+document.getElementById('solArI').addEventListener('click', () => arHelp(document.getElementById('solArMsgBox').hidden));
 // Sense sensors (ordinador): arrossegar per mirar al voltant
 arC.addEventListener('pointerdown', e => { if (!AR.sensor) { AR.drag = [e.clientX, e.clientY]; arC.setPointerCapture(e.pointerId); } });
 arC.addEventListener('pointermove', e => {
