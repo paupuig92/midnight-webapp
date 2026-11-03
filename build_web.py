@@ -20,39 +20,23 @@ OUT = ROOT / "docs"
 
 src = (ROOT / "index.html").read_text(encoding="utf-8")
 
-# Editor de l'organització: el token de GitHub va xifrat amb la contrasenya. Ni el token ni la contrasenya es mostren mai.
-#   clau        = PBKDF2-SHA256(contrasenya, sal, ITER) → 32 bytes (un sol bloc: costa el mateix a l'iPhone que a qui la vulgui endevinar)
-#   comprovació = HMAC-SHA256(clau, "check")
-#   flux        = HMAC-SHA256(clau, nonce ‖ comptador); nonce = SHA-256("nonce" ‖ token)[:16], així un token nou mai reutilitza el flux
-import hmac
+# Editor de l'organització (des del 03-11-2026): la contrasenya i el token de GitHub ja NO van dins la web.
+# Viuen només al servidor d'avisos (push/instala.sh els puja com a secrets) i l'app hi entra amb POST /admin/login.
+# Aquí només es diu si l'editor està disponible (cal el servidor). Ni el token ni la contrasenya es llegeixen.
 CONF = pathlib.Path.home() / ".config" / "midnight-webapp"
-ITER = 1_500_000
-tok_f, pw_f, salt_f = CONF / "github-token", CONF / "admin-password", CONF / "admin-salt"
-admin = "null"
-if tok_f.is_file() and pw_f.is_file():
-    tok = tok_f.read_bytes().strip()
-    pw = pw_f.read_bytes().strip()
-    if len(pw) < 4:
-        sys.exit("ATURAT: la contrasenya d'admin és buida o massa curta (" + str(pw_f) + "). No es publica res.")
-    if not salt_f.is_file():
-        salt_f.write_bytes(os.urandom(16))
-        salt_f.chmod(0o600)
-    salt = salt_f.read_bytes()
-    key = hashlib.pbkdf2_hmac("sha256", pw, salt, ITER, dklen=32)
-    nonce = hashlib.sha256(b"nonce" + tok).digest()[:16]
-    stream = b"".join(hmac.new(key, nonce + i.to_bytes(4, "big"), hashlib.sha256).digest() for i in range((len(tok) + 31) // 32))
-    b64 = lambda b: base64.b64encode(b).decode()
-    admin = json.dumps({"salt": b64(salt), "iter": ITER, "nonce": b64(nonce),
-                        "ct": b64(bytes(a ^ b for a, b in zip(tok, stream))),
-                        "check": b64(hmac.new(key, b"check", hashlib.sha256).digest())})
-    print("Editor de l'organització: activat")
-else:
-    print("Editor de l'organització: desactivat (falta", "la contrasenya" if tok_f.is_file() else "el token", "a", CONF, ")")
-src = src.replace("/*ADMIN*/null/*ADMIN*/", admin)
 # Servidor de notificacions (push/instala.sh escriu push.json). Sense push.json, l'app només avisa amb l'app oberta
 push_f = CONF / "push.json"
 push = json.loads(push_f.read_text()) if push_f.is_file() else None
 src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "public": push["public"]}) if push else "null")
+src = src.replace("/*ADMIN*/null/*ADMIN*/", "true" if push else "null")
+# Content-Security-Policy: segona capa per si mai s'hi colés codi estrany. La pàgina només pot parlar amb ella mateixa
+# i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts i la llibreria d'Excel de jsDelivr.
+import re
+PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
+CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
+       "img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' " + PUSH_ORIGIN + "; "
+       "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
 import datetime
@@ -97,6 +81,8 @@ page = f"""<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="{CSP}">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="{BG}">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +163,12 @@ if _left:
 (OUT / "index.html").write_text(page, encoding="utf-8")
 (OUT / "ca.html").write_text(page_ca, encoding="utf-8")
 # Cloudflare Pages: la pàgina, el service worker i els canvis sempre es comproven (versions noves a l'instant); GitHub Pages ho ignora
-(OUT / "_headers").write_text("""/
+(OUT / "_headers").write_text("""/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+/
   Cache-Control: no-cache
 /ca
   Cache-Control: no-cache

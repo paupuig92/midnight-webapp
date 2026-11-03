@@ -2968,29 +2968,31 @@ async function pullChanges() {
 }
 
 // Organització: editor protegit amb contrasenya.
-// ADMIN porta el token de GitHub xifrat amb la contrasenya (el posa build_web.py; a l'artifact és null):
-// clau = PBKDF2-SHA256(contrasenya, sal); flux = HMAC-SHA256(clau, nonce‖comptador); comprovació = HMAC(clau, "check").
+// Des del 03-11-2026 el token de GitHub NO va dins la web: viu al servidor d'avisos. La contrasenya s'envia a POST /admin/login
+// (màxim 10 intents cada 15 min) i el servidor torna una sessió de 12 h; amb la sessió, el servidor llegeix i publica
+// NOMÉS changes.json i tasks.json. ADMIN = true si l'editor està disponible (el posa build_web.py; a l'artifact és null).
 const ADMIN = /*ADMIN*/null/*ADMIN*/;
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-const b64e = u => btoa(String.fromCharCode(...u));
-async function unlock(pw) {
-  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
-  const k = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(ADMIN.salt), iterations: ADMIN.iter, hash: 'SHA-256' }, base, 256));
-  const hk = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const mac = async data => new Uint8Array(await crypto.subtle.sign('HMAC', hk, data));
-  if (b64e(await mac(new TextEncoder().encode('check'))) !== ADMIN.check) throw new Error('pw');
-  const ct = b64d(ADMIN.ct), nonce = b64d(ADMIN.nonce), out = new Uint8Array(ct.length);
-  for (let i = 0; i * 32 < ct.length; i++) {
-    const block = await mac(new Uint8Array([...nonce, i >> 24 & 255, i >> 16 & 255, i >> 8 & 255, i & 255]));
-    for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ block[j];
+async function adm(path, body) {
+  if (!PUSH || !PUSH.url) throw new Error('sin servidor');
+  const r = await fetchT(PUSH.url + '/admin/' + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' }, 20000);
+  let d = {};
+  try { d = await r.json(); } catch (e) {}
+  if (!r.ok) {
+    const err = new Error(r.status === 401 && d.error === 'session' ? 'la sesión ha caducado: sal y vuelve a entrar' : r.status === 429 ? 'demasiados intentos, espera unos minutos' : d.error === 'github' ? `GitHub ${d.status}` : d.error === 'busy' ? 'GitHub ocupado' : d.error || `servidor ${r.status}`);
+    err.status = r.status; err.code = d.error;
+    throw err;
   }
-  return new TextDecoder().decode(out);
+  return d;
+}
+async function unlock(pw) {
+  return (await adm('login', { pw })).session;
 }
 let token = null, draft = null, edStage = STAGES[0].id;
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
 const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
-adminEl.hidden = !(ONLINE && ADMIN);
+adminEl.hidden = !(ONLINE && ADMIN && PUSH && PUSH.url);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
 const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
@@ -3129,7 +3131,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
     renderEditor();
     edMsg(saved && saved.draft ? 'Hemos recuperado los cambios que aún no habías publicado.' : '');
   } catch (err) {
-    msg.textContent = 'Contraseña incorrecta.';
+    msg.textContent = err.code === 'pw' ? 'Contraseña incorrecta.' : err.status === 429 ? 'Demasiados intentos. Espera 15 minutos y vuelve a probar.' : err.name === 'AbortError' || err instanceof TypeError ? 'Sin conexión con el servidor. Vuelve a probar en un momento.' : 'No se ha podido entrar (' + err.message + ').';
   }
   go.disabled = false;
 });
@@ -3206,32 +3208,12 @@ document.getElementById('edNoticeTeam').addEventListener('change', e => { draft.
 
 // Publicar: changes.json en un commit (API de dades de Git), comprovant abans
 // que ningú hagi publicat mentrestant. Si una altra persona ha publicat després de començar a editar, es pregunta.
-const GH = 'https://api.github.com/repos/' + REPO;
-const gh = async (path, opts = {}) => {
-  const r = await fetchT(GH + path, { ...opts, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', ...(opts.headers || {}) }, cache: 'no-store' }, 15000);
-  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; throw err; }
-  return r.status === 204 ? null : r.json();
-};
+// (via servidor: el servidor comprova la sessió i només deixa tocar changes.json i tasks.json)
 async function remoteChanges() {
-  try {
-    const cur = await gh(`/contents/docs/changes.json?ref=main&t=${Date.now()}`);
-    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
-  } catch (e) {
-    if (e.status === 404) return null;
-    throw e;
-  }
+  return (await adm('read', { s: token, path: 'docs/changes.json' })).data;
 }
 async function commitFiles(files, message) {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const ref = await gh('/git/ref/heads/main');
-    const head = await gh(`/git/commits/${ref.object.sha}`);
-    const tree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
-    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
-    try { return await gh('/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); }
-    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }  // algú ha fet un commit just ara: es torna a provar
-    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
-  }
-  throw new Error('GitHub ocupado');
+  return adm('commit', { s: token, files, message });
 }
 async function publish(data) {
   const remote = await remoteChanges();
@@ -3865,13 +3847,7 @@ pullTasks();
 const tkTeam = document.getElementById('tkTeam'), tkList = document.getElementById('tkList');
 let tkBase = null, tkLoaded = false;
 async function remoteTasks() {
-  try {
-    const cur = await gh(`/contents/docs/tasks.json?ref=main&t=${Date.now()}`);
-    return JSON.parse(new TextDecoder().decode(b64d(cur.content.replace(/\s/g, ''))));
-  } catch (e) {
-    if (e.status === 404) return null;
-    throw e;
-  }
+  return (await adm('read', { s: token, path: 'docs/tasks.json' })).data;
 }
 // Una persona amb dues tasques a la mateixa hora o amb franges que es trepitgen (no compten les franges llargues, de més de 2 h 30: són torns)
 function tkOverlaps(list, people) {
@@ -4054,7 +4030,7 @@ document.getElementById('tkSave').addEventListener('click', async () => {
     applyTasks(data);
     edMsg('Tareas publicadas. Cada uno las verá en «Tareas» en 1 o 2 minutos.');
   } catch (err) {
-    edMsg(err.message === 'cancelado' ? 'No se ha publicado nada.' : err.status === 401 || err.status === 403 ? 'GitHub no deja publicar: revisa el token.' : 'No se ha podido publicar. Mira la conexión y vuelve a probar.', true);
+    edMsg(err.message === 'cancelado' ? 'No se ha publicado nada.' : err.code === 'session' ? 'La sesión ha caducado: sal y vuelve a entrar.' : /^GitHub 40[13]/.test(err.message) ? 'GitHub no deja publicar: hay que revisar el token del servidor.' : err.status === 429 ? 'Demasiadas peticiones: espera unos minutos.' : 'No se ha podido publicar. Mira la conexión y vuelve a probar.', true);
   }
   btn.disabled = false;
 });
@@ -4210,6 +4186,9 @@ let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
   const sc = document.createElement('script');
   sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  // Empremta del fitxer: si algú el canviés a jsDelivr, el navegador no l'executaria
+  sc.integrity = 'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw';
+  sc.crossOrigin = 'anonymous';
   sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; no(new Error('xlsx')); };
   document.head.appendChild(sc);
 }));

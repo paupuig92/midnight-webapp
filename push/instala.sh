@@ -30,8 +30,18 @@ fi
 # Clau secreta dels lots d'enviament (el servidor es crida a si mateix; ningú més pot fer servir /send)
 [[ -s $CONF/send-key ]] || { openssl rand -hex 24 > $CONF/send-key; chmod 600 $CONF/send-key; }
 
+# Editor de l'organització: la contrasenya i el token de GitHub viuen NOMÉS al servidor (secrets de Cloudflare), ja no dins la web.
+# Token: editor-token (recomanat: un token només per a l'editor, «Contents: write» de midnight-webapp) o, si no n'hi ha, github-token.
+EDTOK=$CONF/editor-token
+[[ -s $EDTOK ]] || EDTOK=$CONF/github-token
+[[ -s $CONF/admin-password && -s $EDTOK ]] || { echo "Falta la contrasenya ($CONF/admin-password) o el token de l'editor ($EDTOK)"; exit 1; }
+python3 -I -c 'import sys; sys.exit(0 if len(open(sys.argv[1], "rb").read().strip()) >= 12 else 1)' $CONF/admin-password || {
+  echo "ATURAT: la contrasenya de l'organització ha de tenir 12 caràcters o més (millor 4 paraules: cabra-llanterna-sofa-tren)."
+  echo "Canvia-la amb:  read -rs 'p?Contrasenya nova: ' && print -rn -- \"\$p\" > $CONF/admin-password && chmod 600 $CONF/admin-password"
+  exit 1; }
+
 # Codi (amb el cartell a dins) + enllaços. La clau privada va com a secret; mai surt per pantalla
-python3 -I - $CONF/vapid.json $KV $PRIV/meta.json $CONF/send-key ../docs/cartel.json worker.js $PRIV/worker.js <<'PY'
+python3 -I - $CONF/vapid.json $KV $PRIV/meta.json $CONF/send-key ../docs/cartel.json worker.js $PRIV/worker.js $CONF/admin-password $EDTOK <<'PY'
 import sys, json
 v = json.load(open(sys.argv[1]))
 cartel = json.load(open(sys.argv[5]))
@@ -43,6 +53,8 @@ meta = {"main_module": "worker.js", "compatibility_date": "2024-09-23", "binding
   {"type": "service", "name": "SELF", "service": "midnight-push"},
   {"type": "secret_text", "name": "VAPID_JWK", "text": json.dumps(v["jwk"])},
   {"type": "secret_text", "name": "SEND_KEY", "text": open(sys.argv[4]).read().strip()},
+  {"type": "secret_text", "name": "ADMIN_PW", "text": open(sys.argv[8], encoding="utf-8").read().strip()},
+  {"type": "secret_text", "name": "GH_TOKEN", "text": open(sys.argv[9]).read().strip()},
   {"type": "plain_text", "name": "VAPID_PUBLIC", "text": v["public"]}],
   "migrations": {"new_tag": "v1", "new_sqlite_classes": ["Store"]}}
 open(sys.argv[3], "w").write(json.dumps(meta))
