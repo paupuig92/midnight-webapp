@@ -267,6 +267,14 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
 .upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
 .upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
+/* Un sol escenari: el seu logo a cada fila no aporta res (Black Hangar, en Pau 03-11) */
+.onestage .stlogo, .onestage .upnext .where { display: none; }
+.onestage .row:has(> .stlogo) { grid-template-columns: minmax(0, 1fr) auto; }
+.onestage .upnext li.it:has(> .stlogo) { grid-template-columns: minmax(0, 1fr) auto; }
+/* …i el text passa a la 1a columna (si no, quedava una columna buida a l'esquerra amb els noms curts) */
+.onestage .row:has(> .stlogo) .sn, .onestage .row:has(> .stlogo) .after { grid-column: 1; }
+.onestage .row:has(> .stlogo) .dj { grid-column: 1 / 3; }
+.onestage .row:has(> .stlogo) .right { grid-column: 2; }
 .upnext .where { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
 .empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
 .note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
@@ -664,6 +672,7 @@ body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):no
 .edtabs button { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .edtabs button span { color: var(--muted); font-weight: 600; margin-left: 2px; }
 .gdays[hidden] { display: none; }
+.gdays .dlogo { height: 20px; width: auto; vertical-align: middle; margin-right: 6px; }  /* logo del dia (FEST.deco.days) */
 .edtabs button[aria-selected="true"] { border-color: var(--sc, var(--accent)); background: color-mix(in srgb, var(--sc, var(--accent)) 22%, transparent); }
 .edhelp { margin: 4px 0 0; }
 .edrow { padding: 0; gap: 0; overflow: hidden; }
@@ -699,7 +708,7 @@ body.tvon { overflow: hidden; }
 .tvclock { font-family: var(--title); font-weight: 900; font-stretch: 125%; line-height: .85; white-space: nowrap; color: var(--accent); flex: none; width: max-content; font-variant-numeric: tabular-nums; }
 .tvclock small { font-size: .3em; color: var(--muted); margin-left: .12em; }
 .tvinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .5em; align-items: flex-end; text-align: right; }
-.tvinfo img { max-width: 100%; max-height: 11vh; width: auto; object-fit: contain; }
+.tvinfo img, .tvinfo video { max-width: 100%; max-height: 11vh; width: auto; object-fit: contain; }
 .tvstatus { font-weight: 700; font-size: 1.15em; color: var(--muted); }
 .tvstatus b { color: var(--ink); }
 .tvprog { width: min(100%, 22em); height: .4em; border-radius: 1em; background: var(--rule); overflow: hidden; }
@@ -1110,8 +1119,9 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 @font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
 @font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Bold.woff2");font-weight:600 900;font-display:swap}
 @font-face{font-family:"Nimbus Cond";src:url("img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2");font-weight:400 900;font-display:swap}
+@font-face{font-family:"Anybody";src:url("img/duro-black-hangar-2026/Anybody.woff2");font-weight:100 900;font-stretch:50% 150%;font-display:swap}
 @font-face{font-family:"Martian Mono";src:url("img/duro-black-hangar-2026/MartianMono.woff2");font-weight:100 800;font-display:swap}
-:root{--accent:#f2f2f2;--accent-rgb:242, 242, 242;--accent-dim:#7a7c80;--accent-deep:#16171a;--accent-ink:#050608;--bg:#050608;--panel:#0f1013;--ink:#f5f5f5;--muted:#9a9ca2;--rule:#2a2c31;--line:#3d4046;--display:"Nimbus", "Helvetica Neue", sans-serif;--body:"Nimbus", "Helvetica Neue", sans-serif;--title:"Nimbus", "Helvetica Neue", sans-serif;--cond:"Nimbus Cond", "Nimbus", sans-serif;--mono:"Martian Mono", ui-monospace, monospace}</style>
+:root{--accent:#f2f2f2;--accent-rgb:242, 242, 242;--accent-dim:#7a7c80;--accent-deep:#16171a;--accent-ink:#050608;--bg:#050608;--panel:#0f1013;--ink:#f5f5f5;--muted:#9a9ca2;--rule:#2a2c31;--line:#3d4046;--display:"Nimbus", "Helvetica Neue", sans-serif;--body:"Nimbus", "Helvetica Neue", sans-serif;--title:"Anybody", "Nimbus", "Helvetica Neue", sans-serif;--cond:"Nimbus Cond", "Nimbus", sans-serif;--mono:"Martian Mono", ui-monospace, monospace}</style>
 </head>
 <body>
 
@@ -1453,6 +1463,7 @@ const FEST = {
   key: 'duro',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
   name: 'Black Hangar',
   banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
+  bannerVideo: 'img/duro-black-hangar-2026/banner.mp4',  // la cúpula del cartell animat (black-hangar-cartell-anim.mov) que s'encén, 2 s en bucle; img/banner.jpg n'és el pòster
   date: [2026, 12, 5],          // primer dia
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
@@ -1461,19 +1472,22 @@ const FEST = {
   accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
   theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
     '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
-    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
+    '--title': '"Anybody", "Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
     '--mono': '"Martian Mono", ui-monospace, monospace' },
   // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
     { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
     { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
     { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
+    { family: 'Anybody', file: 'Anybody.woff2', weight: '100 900', stretch: '50% 150%' },  // textos grans; Google Fonts, OFL (Anybody-OFL.txt). La Nickel Gothic del cartell és de pagament
     { family: 'Martian Mono', file: 'MartianMono.woff2', weight: '100 800' },  // Google Fonts, llicència OFL (MartianMono-OFL.txt)
   ],
   nextHide: { stages: [], imp: [1] },
   impColors: true,
   impSize: true,
   rides: [],
+  // Logos de cada dia (dissabte Universo Makina, diumenge 240 km/h): a les pestanyes de dia i a la targeta «Quedan»; al final, el de Black Hangar
+  deco: { days: ['img/duro-black-hangar-2026/logo-makina.png', 'img/duro-black-hangar-2026/logo-240.png'], end: 'img/duro-black-hangar-2026/logo-blackhangar.png' },
   colorLogos: true,             // el logo de l'escenari és blanc: sobre fons fosc i amb el nom a sota
   // Un sol escenari: el logo és img/hangar.png. Dissabte Universo Makina, diumenge 240 km/h (img/duro-black-hangar-2026/logo-makina.png i logo-240.png, per si calen)
   stages: [
@@ -1506,6 +1520,82 @@ const FEST = {
     ],
   },
 };
+// Estil del cartell (FEST.css): creus «+» a les cantonades, fons de punts, etiquetes en mono amb «↓», línies blanques fines,
+// la cúpula de reixa a la targeta «Quedan» (blava el dissabte, com el cartell d'Universo Makina) i el terra de llum a baix.
+// Res no es mou (bateria). img/deco-dome.webp i deco-floor.webp surten dels carrusels i del cartell per dies.
+// Compte: fora de l'objecte FEST (build_web.py només llegeix l'objecte) i sense «}» seguit de «;» aquí dins.
+FEST.css = `
+:root { --plus: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%23fff%27 stroke-width=%271.3%27/%3E%3C/svg%3E");
+  --plus-dim: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%23fff%27 stroke-opacity=%27.55%27 stroke-width=%271.2%27/%3E%3C/svg%3E");
+  --hair: rgba(255, 255, 255, .2); --r-card: 3px; --r-btn: 3px; --mk-blue: #1d2fb4; }
+/* fons de punts finíssims, com el del cartell */
+body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px, transparent 1.2px); background-size: 16px 16px; }
+/* seccions: línia blanca fina amb una creu a cada punta; títol amb fletxa en mono */
+.wrap > section:not(.admin):not(.tools) { padding-top: 20px;
+  background: var(--plus) 0 0 no-repeat, var(--plus) 100% 0 no-repeat, linear-gradient(var(--hair), var(--hair)) 0 5px / 100% 1px no-repeat; }
+.wrap > section h2 { letter-spacing: -.005em; }
+.wrap > section h2::after { content: " ↓"; font: 300 .72em/1 var(--mono); color: var(--muted); letter-spacing: 0; vertical-align: .08em; }
+.wrap > section .shead h2::after, #horario > h2::after { white-space: nowrap; }
+/* etiquetes petites en mono, com «11:00 A 23:00 H» del cartell */
+.brandline { font-family: var(--mono); font-weight: 500; font-size: 10px; letter-spacing: .06em; }
+.brandline b { font-weight: 700; }
+.brandline .mwho { font-family: var(--body); letter-spacing: 0; }
+.clock { letter-spacing: -.045em; }
+.clock small { font: 400 .2em var(--mono); letter-spacing: 0; margin-left: .3em; }
+.row .sn, .mascot .mk, .upnext li.grp, .upnext .where, .blk .t, .legend { font-family: var(--mono); }
+.row .sn { font-size: 10px; font-weight: 500; letter-spacing: .06em; }
+.mascot .mk { font-size: 10px; font-weight: 500; letter-spacing: .08em; color: var(--ink); }
+.mascot .mk::after { content: " ↓"; color: var(--muted); }
+.upnext li.grp b { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.upnext li.grp span { color: var(--muted); font-size: 11px; }
+/* «Ahora suena»: targeta quadrada amb vora blanca fina, creus i una mica de llum des de dalt (el feix del cartell) */
+.row.live { border-radius: var(--r-card);
+  background: var(--plus-dim) left 5px top 5px / 8px no-repeat, var(--plus-dim) right 5px top 5px / 8px no-repeat,
+    radial-gradient(90% 120% at 82% -20%, rgba(255, 255, 255, .11), transparent 62%), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .26), inset 3px 0 0 var(--sc, transparent); }
+.row .bar { height: 2px; }
+/* «Quedan»: la cúpula de reixa dels carrusels; dissabte, el blau d'Universo Makina; diumenge, grafit com el 240 km/h */
+.mascot { position: relative; border-radius: var(--r-card); overflow: hidden; box-shadow: inset 0 0 0 1px var(--hair);
+  background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/duro-black-hangar-2026/deco-dome.webp") center top / 100% auto no-repeat, var(--panel); padding: 22px 18px 18px; }
+[data-day="0"] .mascot { box-shadow: inset 0 0 0 1px rgba(140, 160, 255, .35);
+  background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/duro-black-hangar-2026/deco-dome.webp") center top / 100% auto no-repeat,
+    radial-gradient(130% 110% at 100% 0%, #2a3fd6 0%, #1426a0 38%, #0a1258 72%, #070b30 100%); }
+[data-day="0"] .mascot .msub, [data-day="0"] .mascot .mbig small, [data-day="0"] .mascot .mk::after { color: #c3cbff; }
+[data-day="0"] .mprog { background: rgba(255, 255, 255, .18); }
+[data-day="1"] .mascot { background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/duro-black-hangar-2026/deco-dome.webp") center top / 100% auto no-repeat,
+    radial-gradient(circle, rgba(255, 255, 255, .13) .8px, transparent 1.2px) 0 0 / 9px 9px, linear-gradient(160deg, #24262c, #121317 70%); }
+.mascot img { width: 112px; height: 62px; }
+.mascot.during img { width: 84px; height: 48px; }
+.mascot .mbig { letter-spacing: -.02em; }
+.mascot.during .mbig { font-size: 28px; }
+.mprog { height: 6px; border-radius: 0; }
+.mprog i { border-radius: 0; }
+/* pestanyes de dia: el logo de cada dia, etiqueta en mono; dissabte en blau */
+.gdays { gap: 8px; }
+.gdays button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px; padding: 8px 10px;
+  border-radius: var(--r-card); border: 1px solid var(--hair); font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.gdays .dlogo { height: 26px; width: auto; margin: 0; opacity: .55; }
+.gdays button[aria-selected="true"] { color: var(--ink); border-color: rgba(255, 255, 255, .7); background: rgba(255, 255, 255, .08); }
+.gdays button[aria-selected="true"] .dlogo { opacity: 1; }
+.gdays button[data-d="0"][aria-selected="true"] { border-color: #6f82ff; background: linear-gradient(160deg, #1d2fb4, #0b1460); }
+/* graella: cantonades rectes, el concert d'ara encès com la reixa de llum */
+.tlbox { border-width: 1px; border-color: var(--hair); border-radius: var(--r-card); }
+.blk { border-radius: 2px; }
+.blk.on { box-shadow: 0 0 0 1px rgba(255, 255, 255, .55), 0 0 16px rgba(255, 255, 255, .22); }
+/* al final de cada pàgina, el terra de reixa de llum amb el feix (del cartell) */
+.wrap::after { content: ""; display: block; height: 170px; margin: -8px calc(-1 * max(16px, env(safe-area-inset-right, 0px))) -40px; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(236, 240, 255, .85)) 71% 0 / 2px 54% no-repeat, url("img/duro-black-hangar-2026/deco-floor.webp") center bottom / cover no-repeat; }
+/* Textos grans en Anybody Black (alternativa gratuïta a la Nickel Gothic del cartell): rellotge, títols, «Quedan» i l'artista que sona */
+.row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
+.clock, .minibar .mclock { font-stretch: 112%; }
+h2 { font-stretch: 115%; }
+`;
 /* ==== /FESTIVAL ==== */
 
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
@@ -1525,7 +1615,19 @@ if (MOVED && /github\.io$/.test(location.hostname)) {
 }
 if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
 document.getElementById('festName').textContent = FEST.name;
+document.body.classList.toggle('onestage', FEST.stages.length === 1);
 document.getElementById('banner').alt = FEST.banner;
+// Banner en vídeo (FEST.bannerVideo, opcional): un bucle curt sense so; mentre carrega (o sense vídeo) es veu img/banner.jpg
+if (FEST.bannerVideo) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
+  const v = document.createElement('video');
+  v.className = im.className; if (im.id) v.id = im.id;
+  v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.disablePictureInPicture = true;
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-label', FEST.banner); v.setAttribute('role', 'img');
+  v.poster = im.getAttribute('src'); v.src = FEST.bannerVideo; v.preload = 'auto';
+  im.replaceWith(v);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { v.autoplay = false; return; }  // sense animacions: el pòster quiet
+  v.play().catch(() => {});  // mode estalvi d'energia: es queda el pòster quiet
+});
 // Banner animat (FEST.bannerAnim): substitueix la imatge quieta a dalt i a la pantalla
 if (FEST.bannerAnim) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
   const BA = FEST.bannerAnim, d = document.createElement('div'), tv = !im.classList.contains('banner');
@@ -1544,7 +1646,11 @@ if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
   document.querySelectorAll('.banim, #mecanic, #mascot').forEach(el => io.observe(el));
 }
-document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('off', document.hidden));
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('off', document.hidden);
+  // el vídeo del banner: aturat en segon pla (bateria) i en marxa en tornar
+  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay ? v.pause() : v.play().catch(() => {}));
+});
 // Il·lustracions (FEST.deco): les que no hi són, simplement no surten
 const DECO = FEST.deco || {};
 if (DECO.strip) { document.documentElement.classList.add('hdeco'); document.documentElement.style.setProperty('--deco-strip', `url("${DECO.strip}")`); }
@@ -1554,6 +1660,12 @@ for (const [id, src] of Object.entries(DECO.heads || {})) {
 }
 if (DECO.sheet) { const n = document.querySelector('#sheet .body .note'); n.classList.add('withdeco'); n.insertAdjacentHTML('afterbegin', `<img src="${DECO.sheet}" alt="">`); }
 if (DECO.empty || DECO.done) { const re = document.getElementById('rowsEmpty'); re.classList.add('withdeco'); re.innerHTML = '<img alt="" hidden><span></span>'; }
+// Estil propi del festival (FEST.css, opcional): CSS que només fa servir aquest festival (creus, textures, etiquetes…).
+// Va al final de tot perquè mani sobre l'estil general; l'html porta la classe «fcss». Sense FEST.css, res no canvia
+if (FEST.css && !document.querySelector('style[data-fest-css]')) {
+  const st = document.createElement('style'); st.dataset.festCss = ''; st.textContent = FEST.css;
+  document.body.append(st); document.documentElement.classList.add('fcss');
+}
 
 // Hora local (Europe/Madrid) → instant. Si aquella nit es canvia l'hora, les 2:xx passen dues vegades:
 // "02:30a" és la primera, "02:30b" (o sense lletra) la segona.
@@ -1863,7 +1975,8 @@ function scrollToNow(smooth) {
 const gdays = document.getElementById('gdays');
 function paintDays() {
   gdays.hidden = NDAYS < 2;
-  if (NDAYS > 1) gdays.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-d="${x.d}" aria-selected="${x.d === GDAY}">${html(x.name || `Dia ${x.d + 1}`)}</button>`).join('');
+  // FEST.deco.days (opcional): un logo per dia, davant del nom de la pestanya
+  if (NDAYS > 1) gdays.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-d="${x.d}" aria-selected="${x.d === GDAY}">${(DECO.days || [])[x.d] ? `<img class="dlogo" src="${DECO.days[x.d]}" alt="">` : ''}${html(x.name || `Dia ${x.d + 1}`)}</button>`).join('');
 }
 function showDay(d) {
   if (d === GDAY && G0 === DAYS[d].t0) return;
@@ -1924,7 +2037,7 @@ function rowHTML(s, t) {
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1944,7 +2057,7 @@ function rowMine(s, t) {
   const mine = SETS[s.id].filter(x => favs.has(x.id));
   const cur = mine.find(x => t >= x.a && t < x.b);
   const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/duro-black-hangar-2026/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -2009,7 +2122,7 @@ function upHTML(t) {
   for (const x of list.slice(0, 6)) {
     if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
-    <img class="logo" src="img/duro-black-hangar-2026/${x.s.id}.png" alt="">
+    <img class="logo stlogo" src="img/duro-black-hangar-2026/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
     <span class="acts">${star(x)}</span></li>`;
   }
@@ -2253,7 +2366,10 @@ function tick(force) {
   // Targeta: abans (compte enrere), durant (frase + barra de progrés + proper concert gran) i al final (gràcies + contacte)
   const gap = gapNext(t), during = t >= T0 && t < TEND && gap < 0, dEnd = NDAYS > 1 ? dayEnd(dayAt(t)) : TEND;
   const ms = document.getElementById('mascot'), moods = DECO.moods || [],
-    msrc = t < T0 || gap >= 0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
+    msrc = (t < T0 || gap >= 0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end)
+      || (t < TEND && (DECO.days || [])[t < T0 ? 0 : gap >= 0 ? gap : dayAt(t)]);  // sense il·lustració: el logo del dia (FEST.deco.days)
+  // El dia d'ara (o el que ve) a l'html: data-day="0", "1"… perquè l'estil d'un festival pugui canviar per dia (FEST.css)
+  if (NDAYS > 1) { const dd = String(t < T0 ? 0 : gap >= 0 ? gap : dayAt(t)); if (document.documentElement.dataset.day !== dd) document.documentElement.dataset.day = dd; }
   ms.hidden = !re.hidden && !done;
   ms.classList.toggle('during', during);
   document.getElementById('status').closest('.statusrow').hidden = !ms.hidden;  // la targeta ja diu el mateix: no repetir-ho sota el rellotge
@@ -2561,7 +2677,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 13:25';
+const BUILD = '03/11 14:04';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
