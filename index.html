@@ -253,7 +253,11 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
 .note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
 .howto { margin-top: 8px; color: var(--muted); font-size: var(--fs-s); }
-.howto summary { cursor: pointer; color: var(--ink); font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+.howto summary { cursor: pointer; color: var(--accent); font-weight: 700; min-height: 32px; display: flex; align-items: center; gap: 6px; text-decoration: underline; text-underline-offset: 3px; }
+.howto summary::after { content: "+"; font-weight: 400; text-decoration: none; }
+.howto[open] summary::after { content: "−"; }
+.favhint { margin: 10px 0 0; padding: 10px 12px; border-radius: var(--r-chip, 8px); background: color-mix(in srgb, var(--fav) 12%, transparent); color: var(--ink); font-size: var(--fs-s); }
+.favhint[hidden] { display: none; }
 .howto p { margin: 6px 0 0; }
 
 /* Canvis de l'organització: magenta (un color que no fa servir res més) */
@@ -315,6 +319,10 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk .s { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
 .blk .t { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .blk.tiny .s { display: none; }
+/* Un sol escenari: es llegeix com una llista (nom i hora a dalt a l'esquerra, en gran) */
+.one .blk:not(.tiny) { align-items: flex-start; justify-content: flex-start; text-align: left; padding: 8px 12px 8px 16px; gap: 3px; }
+.one .blk:not(.tiny) .n { font-size: 16px; }
+.one .blk:not(.tiny) .t { font-size: var(--fs-s); }
 .blk.tiny .t { font-size: 10px; }
 .blk.tiny .n { line-height: 1; }
 /* Importància per mida (impColors: false): concerts destacats, el que hi ha entre concerts més discret */
@@ -1323,7 +1331,7 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <section id="siguiente">
     <div class="shead"><h2>A <span>continuación</span></h2></div>
     <ul class="upnext" id="upnext"></ul>
-    <p class="note">☆ marca tus artistas.</p>
+    <p class="favhint" id="favHint">Toca la ☆ de un artista para marcarlo: lo verás destacado y te avisaremos antes de que empiece.</p>
     <details class="howto">
       <summary>Cómo funcionan los avisos</summary>
       <p>Con la app abierta y la pantalla encendida, te avisamos de tus artistas antes de que empiecen y cuando empiezan. Cuánto antes, y si quieres notificaciones, lo eliges en Ajustes.<span id="howLocked"> Con el móvil bloqueado no llegan.</span></p>
@@ -1977,7 +1985,7 @@ const RIDES_NAME = FEST.ridesName || (RIDE_LIST.length === 1 ? RIDE_LIST[0].name
 // Nit del canvi d'hora (si n'hi ha): W0 = 2:00 (1a), DUP = 2:00 (2a), W1 = 3:00
 const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00') : W0;
 const MIN = 60000, PAD = 12;
-let PX = 1.6;  // px per minut (la pinça ho canvia)
+let PX = STAGES.length === 1 && !RIDE_LIST.length ? 1 : 1.6;  // px per minut (la pinça ho canvia); amb un sol escenari, més compacte
 let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
 // Graella: amb diversos dies només se'n veu un (G0–GEND). GDAY = el dia que es veu; gPick = l'ha triat la persona
 let GDAY = 0, G0 = T0, GEND = TEND0, gPick = false;
@@ -2010,7 +2018,7 @@ const lblD = t => {
   const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
   return `${x && x.name ? x.name.split(' ')[0] : new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(t).replace(/^./, c => c.toUpperCase())} ${lbl(t)}`;
 };
-const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
 const deco = n => html(n).replace(/ (B2B|VS|&amp;) /gi, ' <i>$1</i> ');
@@ -2185,6 +2193,7 @@ function buildGrid() {
   const RW = Math.max(108, RIDE_LIST.length * 30);  // cada activitat una franja d'uns 30 px: si n'hi ha moltes, la columna s'eixampla
   tl.style.gridTemplateColumns = `var(--gut) repeat(${NS}, minmax(108px, 1fr))${NR ? ` minmax(${RW}px, 1fr)` : ''} 14px`;
   tl.style.minWidth = `calc(var(--gut) + ${NS * 108 + NR * RW + 14}px)`;
+  tl.classList.toggle('one', NS === 1 && !NR);
   tl.querySelector('.nowline').style.gridColumn = `2 / ${NS + NR + 2}`;
   document.querySelector('.scale').hidden = !IMPC || !ALL.some(x => x.t);  // sense importàncies, sense llegenda
   blocks = [...tl.querySelectorAll('.blk:not(.ridesblk)')];
@@ -2304,7 +2313,7 @@ function rowHTML(s, t) {
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj">Abre a las ${lbl(nxt.a)}</div>
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
-    <div class="right"><div class="left"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>`, null];
+    ${document.getElementById('mascot').hidden ? `<div class="right"><div class="left"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>` : ''}`, null];  // amb la targeta «Quedan» a la vista, el compte enrere ja hi és
   return ['closed', '', null];
 }
 
@@ -2376,7 +2385,7 @@ function upHTML(t) {
   }
   let out = '', last = null;
   for (const x of list.slice(0, 6)) {
-    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
+    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b>${x.a - t < 1440 * MIN ? `<span>${inDur(x.a - t)}</span>` : ''}</li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
     <img class="logo stlogo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
@@ -2659,6 +2668,7 @@ function tick(force) {
 
   const up = upHTML(t);
   if (up !== upCache) { setHTML(upEl, up); upCache = up; }
+  document.getElementById('favHint').hidden = favs.size > 0;  // quan ja en tens, sobra
 
   for (const b of blocks) {
     const x = BYID[b.dataset.fav];
