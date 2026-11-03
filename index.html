@@ -941,8 +941,63 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol) { display: none !important; }
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
+/* Sol (per a foto i vídeo): on és el sol ara, brúixola, recorregut del dia i hores clau. Colors del festival (vars) */
+body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
+#sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; }
+#sol h2 { margin-bottom: 6px; }
+#sol h3 { margin: 22px 0 8px; font: 800 var(--fs-s)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.solsrc { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0; }
+.solsrc b { color: var(--ink); font-weight: 700; }
+.solnow { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 10px; margin-top: 12px; padding: 16px 12px 14px; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
+.soldial { width: min(78vw, 280px); aspect-ratio: 1; }
+.soldial svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.soldial .rose, .soldial .arw { transition: transform .25s linear; }
+.soldial .rose text { font: 800 15px/1 var(--mono); fill: var(--muted); }
+.soldial .rose text.n { fill: var(--now); }
+.soldial .arw path { fill: var(--accent); }
+.soldial.below .arw path { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 7 5; }
+.soldial .sun { fill: var(--sol-gold); }
+.soldial.below .sun { fill: var(--panel); stroke: var(--muted); stroke-width: 2.5; }
+.soldial .me { fill: var(--ink); }
+.solturn { margin: 0; text-align: center; font: 900 var(--fs-xl)/1.1 var(--title); font-stretch: 112%; text-transform: uppercase; letter-spacing: .02em; color: var(--ink); }
+.solturn small { display: block; max-width: 34ch; margin: 6px auto 0; font: 600 var(--fs-s)/1.35 var(--body); font-stretch: 100%; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.solstat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.solstat div { padding: 8px 10px; border-radius: var(--r-chip, 8px); background: var(--fill, rgba(255,255,255,.06)); text-align: center; }
+.solstat span { display: block; font: 700 var(--fs-xs)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.solstat b { display: block; margin-top: 2px; font: 900 22px/1.1 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
+.solstat em { display: block; font: 600 var(--fs-xs)/1.2 var(--body); font-style: normal; color: var(--muted); }
+.solbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.solbtns .btn svg { width: 18px; height: 18px; }
+.solwarn { display: flex; gap: 8px; align-items: flex-start; }
+.solwarn .ico { flex: none; margin-top: 1px; color: var(--accent); }
+.solphase { margin: 0 0 10px; font: 700 var(--fs-m)/1.35 var(--body); color: var(--ink); }
+.solphase b { color: var(--accent); }
+.solchart { display: block; width: 100%; height: auto; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
+.solchart .hz { stroke: var(--rule); stroke-width: 1.5; }
+.solchart .grid { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 4; opacity: .7; }
+.solchart text { font: 700 10.5px/1 var(--mono); fill: var(--muted); }
+.solchart text.k { fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+.solchart .day { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.solchart .night { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.solchart .gold { fill: var(--sol-gold); opacity: .32; }
+.solchart .blue { fill: var(--sol-blue); opacity: .45; }
+.solchart .nowl { stroke: var(--now); stroke-width: 2; }
+.solchart .nowd { fill: var(--now); stroke: var(--panel); stroke-width: 2.5; }
+.solchart .ev { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+.solkey { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: var(--fs-s); }
+.solkey i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; }
+.soltimes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.soltimes li { padding: 9px 11px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--line, var(--rule)); border-left: 4px solid var(--line, var(--rule)); }
+.soltimes li.g { border-left-color: var(--sol-gold); }
+.soltimes li.b { border-left-color: var(--sol-blue); }
+.soltimes li.past { opacity: .55; }
+.soltimes li.cur { border-color: var(--accent); border-left-color: var(--accent); }
+.soltimes span { display: block; font: 700 var(--fs-xs)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.soltimes b { display: block; margin-top: 3px; font: 800 var(--fs-l)/1.15 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
+.soltimes em { display: block; font: 600 var(--fs-xs)/1.3 var(--body); font-style: normal; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .soldial .rose, .soldial .arw { transition: none; } }
 .mapit + .mapit { margin-top: 26px; }
 .mapit h2 { margin-bottom: 10px; }
 .mapaddr { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 10px; }
@@ -971,7 +1026,7 @@ body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !impo
 .yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 body[data-tab="ajustes"] .wrap > :not(#config) { display: none !important; }
 body[data-tab="org"] .wrap > :not(#admin):not(#orgOff) { display: none !important; }
-body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"], [data-tab="sol"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
 .terows { display: flex; flex-direction: column; gap: 8px; }
 .terow { display: grid; grid-template-columns: 1fr auto 44px; gap: 6px; align-items: center; padding: 8px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--panel); }
 .terow .teg { grid-column: 1 / 3; }
@@ -1184,6 +1239,42 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     <p class="legend" id="gridLegend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
     <p class="legend upd" id="updated" hidden></p>
     <p class="legend" id="chgLegend" hidden><span class="chgtag">Cambio</span> = cambiado por la organización (borde lila en el horario).</p>
+  </section>
+
+  <section id="sol" aria-labelledby="solH">
+    <h2 id="solH">Sol <span>para foto y vídeo</span></h2>
+    <p class="note solsrc" id="solSrc"></p>
+    <div class="solnow">
+      <div class="soldial" id="solDial" role="img" aria-label="Dirección del sol">
+        <svg viewBox="-120 -120 240 240" aria-hidden="true">
+          <path class="me" d="M0-118l-8 13h16z"/>
+          <g class="rose" id="solRose">
+            <circle r="100" fill="none" stroke="var(--line, var(--rule))" stroke-width="2"/>
+            <g id="solTicks"></g>
+            <circle class="sun" id="solSun" r="11"/>
+          </g>
+          <g class="arw" id="solArw"><path d="M0-84l17 30h-10v58h-14v-58h-10z"/></g>
+          <circle r="5" fill="var(--ink)"/>
+        </svg>
+      </div>
+      <p class="solturn" id="solTurn"></p>
+      <div class="solstat">
+        <div><span>Dirección</span><b id="solAz">—</b><em id="solAzT"></em></div>
+        <div><span>Altura</span><b id="solAlt">—</b><em id="solAltT"></em></div>
+      </div>
+    </div>
+    <div class="solbtns">
+      <button class="btn" type="button" id="solCompass" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14.8 9.2l-1.9 4.7-4.7 1.9 1.9-4.7z" fill="currentColor"/></svg><span>Activar brújula</span></button>
+      <button class="btn" type="button" id="solLoc"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span>Usar mi ubicación</span></button>
+    </div>
+    <p class="note" id="solMsg" role="status"></p>
+    <p class="note solwarn"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/></svg><span>Brújula aproximada (±5–15°). Aléjate de metal, estructuras, escenarios e imanes (fundas con imán también). Para calibrarla, mueve el móvil en forma de 8.</span></p>
+    <h3 id="solDayH">Hoy</h3>
+    <p class="solphase" id="solPhase"></p>
+    <svg class="solchart" id="solChart" viewBox="0 0 340 180" role="img" aria-label="Recorrido del sol hoy"></svg>
+    <ul class="solkey" aria-hidden="true"><li><i style="background:var(--sol-gold)"></i>Hora dorada</li><li><i style="background:var(--sol-blue)"></i>Hora azul</li><li><i style="background:var(--now)"></i>Ahora</li></ul>
+    <ol class="soltimes" id="solTimes"></ol>
+    <p class="note">Hora dorada: el sol entre −4° y 6°. Hora azul: entre −6° y −4°. Calculado en el móvil, sin conexión. Tu ubicación solo se usa en este móvil: no se envía a ningún sitio.</p>
   </section>
 
   <section id="mapa" hidden>
@@ -1409,6 +1500,7 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
+  <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
   <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
   <button type="button" data-tab="org" aria-label="Organización"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Admin</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
@@ -2986,6 +3078,237 @@ function gpsToggle(it) {
     dot.hidden = acc.hidden = cone.hidden = true;
   }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
 }
+// ==== SOL ====
+// Pestanya «Sol» (equip de foto i vídeo): on és el sol ara (azimut i altura), una fletxa amb la brúixola del mòbil,
+// el recorregut del dia i les hores clau (sortida, posta, migdia solar, hora daurada −4°…6° i hora blava −6°…−4°).
+// Tot es calcula al mòbil (algoritme de la NOAA, error < 0,1°), sense xarxa. Fa servir now(): el Modo prueba també el mou.
+const SUN = (() => {
+  const R = Math.PI / 180, sin = x => Math.sin(x * R), cos = x => Math.cos(x * R), tan = x => Math.tan(x * R);
+  // Altura geomètrica (sense refracció) i azimut (des del nord, en sentit horari)
+  function pos(t, lat, lon) {
+    const T = (t / 86400000 + 2440587.5 - 2451545) / 36525;
+    const L0 = ((280.46646 + T * (36000.76983 + T * 0.0003032)) % 360 + 360) % 360;
+    const M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+    const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+    const C = sin(M) * (1.914602 - T * (0.004817 + 0.000014 * T)) + sin(2 * M) * (0.019993 - 0.000101 * T) + sin(3 * M) * 0.000289;
+    const om = 125.04 - 1934.136 * T, lam = L0 + C - 0.00569 - 0.00478 * sin(om);
+    const eps = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60 + 0.00256 * cos(om);
+    const dec = Math.asin(sin(eps) * sin(lam)) / R, yy = tan(eps / 2) ** 2;
+    const eqt = 4 / R * (yy * sin(2 * L0) - 2 * e * sin(M) + 4 * e * yy * sin(M) * cos(2 * L0) - .5 * yy * yy * sin(4 * L0) - 1.25 * e * e * sin(2 * M));
+    const ha = (((t / 60000 + eqt + 4 * lon) % 1440 + 1440) % 1440) / 4 - 180;
+    const alt = Math.asin(Math.max(-1, Math.min(1, sin(lat) * sin(dec) + cos(lat) * cos(dec) * cos(ha)))) / R;
+    const az = (Math.atan2(sin(ha), cos(ha) * sin(lat) - tan(dec) * cos(lat)) / R + 540) % 360;
+    return { alt, az };
+  }
+  // Refracció (el sol es veu una mica més amunt del que és, sobretot arran de l'horitzó)
+  const refr = a => a > 85 ? 0 : a > 5 ? (58.1 / tan(a) - .07 / tan(a) ** 3 + .000086 / tan(a) ** 5) / 3600
+    : a > -.575 ? (1735 + a * (-518.2 + a * (103.4 + a * (-12.79 + a * .711)))) / 3600 : -20.774 / tan(a) / 3600;
+  return { pos, refr };
+})();
+const SOL_RISE = -0.833;  // sortida i posta: la vora de dalt del sol toca l'horitzó (radi + refracció)
+// 0:00 (hora de Madrid) del dia de t, com a instant
+function solMidnight(t) {
+  const w = wallOf(t), d0 = w - ((w % 86400000) + 86400000) % 86400000;
+  const ok = [d0 - 2 * 3600000, d0 - 3600000].filter(c => wallOf(c) === d0);
+  return ok.length ? ok[0] : d0 - 3600000;
+}
+// Un dia sencer: mostres cada 2 min, i els moments exactes (bisecció) on el sol passa per −6°, −4°, −0,833° i 6°
+function solDay(t, lat, lon) {
+  const a = solMidnight(t), b = solMidnight(a + 30 * 3600000), N = Math.round((b - a) / (2 * MIN)), S = [];
+  for (let i = 0; i <= N; i++) { const ti = a + (b - a) * i / N; S.push([ti, SUN.pos(ti, lat, lon).alt]); }
+  const alt = ti => SUN.pos(ti, lat, lon).alt, X = [];
+  for (const h of [-6, -4, SOL_RISE, 6]) for (let i = 0; i < N; i++) {
+    if ((S[i][1] - h) * (S[i + 1][1] - h) >= 0) continue;
+    let lo = S[i][0], hi = S[i + 1][0];
+    const up = S[i + 1][1] > S[i][1];
+    for (let k = 0; k < 14; k++) { const m = (lo + hi) / 2; if ((alt(m) > h) === up) hi = m; else lo = m; }
+    X.push({ t: (lo + hi) / 2, h, up });
+  }
+  X.sort((p, q) => p.t - q.t);
+  let k = 0; S.forEach((s, i) => { if (s[1] > S[k][1]) k = i; });
+  let lo = S[Math.max(0, k - 1)][0], hi = S[Math.min(N, k + 1)][0];
+  for (let j = 0; j < 30; j++) { const m1 = lo + (hi - lo) / 3, m2 = hi - (hi - lo) / 3; if (alt(m1) < alt(m2)) lo = m1; else hi = m2; }
+  const noon = (lo + hi) / 2;
+  const up = h => (X.find(x => x.h === h && x.up) || {}).t, dn = h => (X.filter(x => x.h === h && !x.up).pop() || {}).t;
+  // Trams d'una franja d'altura (per pintar l'hora daurada i la blava a la gràfica)
+  const band = (l, u) => { const out = []; let st = S[0][1] >= l && S[0][1] < u ? a : null;
+    for (const x of X) if (x.h === l || x.h === u) { const inn = x.h === l ? x.up : !x.up; if (inn && st === null) st = x.t; else if (!inn && st !== null) { out.push([st, x.t]); st = null; } }
+    if (st !== null) out.push([st, b]); return out; };
+  return { a, b, S, X, noon, max: alt(noon), up, dn, gold: band(-4, 6), blue: band(-6, -4), lat, lon };
+}
+const SOLK = 'midnight-sol-v1';  // la ubicació: només en aquest mòbil (no és d'un festival, serveix per a tots)
+let solLoc = null;
+try { const v = JSON.parse(localStorage.getItem(SOLK) || 'null'); if (v && Math.abs(v.lat) <= 90 && Math.abs(v.lon) <= 180) solLoc = v; } catch (e) {}
+function solWhere() {
+  if (solLoc) return { lat: solLoc.lat, lon: solLoc.lon, mine: true };
+  const g = (FEST.maps || []).find(m => m.geo && m.geo.length);
+  if (g) return { lat: g.geo.reduce((s, p) => s + p[0], 0) / g.geo.length, lon: g.geo.reduce((s, p) => s + p[1], 0) / g.geo.length, fest: true };
+  return { lat: 41.5536, lon: 2.2492 };  // Montmeló (Espai Can Guitet)
+}
+const SOL16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const solCard = az => SOL16[Math.round(az / 22.5) % 16];
+const solDeg = d => `${Math.round(d) === 0 ? 0 : Math.round(d)}°`.replace('-', '−');
+let solD = null, solKey = '', solHead = null, solRaf = 0, solWant = false, solListen = '', solRose = 0, solArw = 0, solMin = -1, solNoCmp = 0;
+const solFmtDay = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long' });
+// Ticks de la rosa dels vents (fixos; la rosa gira sencera amb la brúixola)
+document.getElementById('solTicks').innerHTML = Array.from({ length: 36 }, (_, i) => { const c = i % 9 === 0, r1 = c ? 86 : i % 3 === 0 ? 90 : 94;
+  return `<line x1="0" y1="${-r1}" x2="0" y2="-100" transform="rotate(${i * 10})" stroke="var(--${c ? 'ink' : 'muted'})" stroke-width="${c ? 3 : 1.5}"/>`; }).join('')
+  + [['N', 0], ['E', 90], ['S', 180], ['O', 270]].map(([l, d]) => `<text class="${l === 'N' ? 'n' : ''}" x="${Math.sin(d * Math.PI / 180) * 70}" y="${-Math.cos(d * Math.PI / 180) * 70 + 5.5}" text-anchor="middle">${l}</text>`).join('');
+// Gira sense fer la volta llarga (de 359° a 1° són 2°, no 358°)
+const solTurnTo = (cur, to) => cur + ((to - cur) % 360 + 540) % 360 - 180;
+function solDial() {
+  if (!solD) return;
+  const t = now(), p = SUN.pos(t, solD.lat, solD.lon), below = p.alt < SOL_RISE, ap = p.alt + SUN.refr(p.alt);
+  const head = solHead === null ? 0 : solHead, rel = ((p.az - head) % 360 + 540) % 360 - 180;
+  solRose = solTurnTo(solRose, -head); solArw = solTurnTo(solArw, rel);
+  document.getElementById('solRose').style.transform = `rotate(${solRose}deg)`;
+  document.getElementById('solArw').style.transform = `rotate(${solArw}deg)`;
+  const sun = document.getElementById('solSun'), r = Math.PI / 180 * p.az;
+  sun.setAttribute('cx', (Math.sin(r) * 100).toFixed(1)); sun.setAttribute('cy', (-Math.cos(r) * 100).toFixed(1));
+  const dial = document.getElementById('solDial');
+  dial.classList.toggle('below', below);
+  const brg = `${Math.round(p.az) % 360}° (${solCard(p.az)})`;
+  let turn, sub;
+  if (solHead === null) { turn = `Sol a ${brg}`; sub = 'Rumbo desde el norte. Activa la brújula y la flecha seguirá al móvil.'; }
+  else {
+    const d = Math.round(rel);
+    turn = Math.abs(d) <= 5 ? 'Lo tienes delante' : `Gira ${Math.abs(d)}° a la ${d > 0 ? 'derecha' : 'izquierda'}`;
+    sub = `Sol a ${brg} · el móvil mira a ${Math.round(head) % 360}° (${solCard(head)})`;
+  }
+  if (below) sub = `Bajo el horizonte. ${sub}`;
+  document.getElementById('solTurn').innerHTML = `${html(turn)}<small>${html(sub)}</small>`;
+  document.getElementById('solAz').textContent = `${Math.round(p.az) % 360}°`;
+  document.getElementById('solAzT').textContent = solCard(p.az);
+  document.getElementById('solAlt').textContent = solDeg(below ? p.alt : ap);
+  document.getElementById('solAltT').textContent = below ? 'bajo el horizonte' : 'sobre el horizonte';
+  dial.setAttribute('aria-label', `${solHead === null ? '' : turn + '. '}Sol a ${brg}, ${solDeg(below ? p.alt : ap)} ${below ? 'bajo el horizonte' : 'sobre el horizonte'}.`);
+}
+// Què toca ara i quin és el proper canvi de llum
+const SOL_EV = { '-6u': 'Empieza la hora azul', '-4u': 'Empieza la hora dorada', [SOL_RISE + 'u']: 'Amanecer', '6u': 'Termina la hora dorada',
+  '6d': 'Empieza la hora dorada', [SOL_RISE + 'd']: 'Atardecer', '-4d': 'Empieza la hora azul', '-6d': 'Termina la hora azul' };
+function solPhase(t) {
+  const p = SUN.pos(t, solD.lat, solD.lon).alt;
+  const ph = p >= 6 ? 'De día' : p >= -4 ? 'Hora dorada' : p >= -6 ? 'Hora azul' : 'De noche';
+  let nx = solD.X.find(x => x.t > t);
+  if (!nx) nx = solDay(solD.b + 3600000, solD.lat, solD.lon).X.find(x => x.t > t);
+  return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}`;
+}
+function solChart(t) {
+  const D = solD, W = 340, x0 = 36, x1 = 330, yT = 18, yB = 150;
+  const s0 = D.up(-6), s1 = D.dn(-6);
+  let a = s0 ? s0 - 3600000 : D.a, b = s1 ? s1 + 3600000 : D.b;
+  if (t >= D.a && t <= D.b) { a = Math.min(a, t - 1800000); b = Math.max(b, t + 1800000); }
+  a = Math.max(D.a, a); b = Math.min(D.b, b);
+  const yMax = Math.max(20, Math.ceil((D.max + 6) / 10) * 10), yMin = -18;
+  const X = ti => x0 + (ti - a) / (b - a) * (x1 - x0), Y = h => yT + (yMax - Math.max(yMin, Math.min(yMax, h))) / (yMax - yMin) * (yB - yT);
+  const pts = D.S.filter(s => s[0] >= a - 2 * MIN && s[0] <= b + 2 * MIN).map(s => `${X(Math.max(a, Math.min(b, s[0]))).toFixed(1)},${Y(s[1]).toFixed(1)}`).join(' ');
+  const yh = Y(0);
+  let g = `<defs><clipPath id="solUp"><rect x="0" y="0" width="${W}" height="${yh}"/></clipPath><clipPath id="solDn"><rect x="0" y="${yh}" width="${W}" height="${180 - yh}"/></clipPath></defs>`;
+  for (const [cls, list] of [['blue', D.blue], ['gold', D.gold]]) for (const [p, q] of list) if (q > a && p < b) g += `<rect class="${cls}" x="${X(Math.max(a, p)).toFixed(1)}" y="${yT}" width="${(X(Math.min(b, q)) - X(Math.max(a, p))).toFixed(1)}" height="${yB - yT}"/>`;
+  for (let h = Math.ceil(yMin / 10) * 10; h <= yMax; h += 10) if (h) g += `<line class="grid" x1="${x0}" x2="${x1}" y1="${Y(h)}" y2="${Y(h)}"/><text x="${x0 - 5}" y="${Y(h) + 3.5}" text-anchor="end">${solDeg(h)}</text>`;
+  g += `<line class="hz" x1="${x0}" x2="${x1}" y1="${yh}" y2="${yh}"/><text x="${x0 - 5}" y="${yh + 3.5}" text-anchor="end">0°</text>`;
+  // Hores a baix (cada 2 o 3 h)
+  const step = (b - a) > 14 * 3600000 ? 3 : 2;
+  for (let h = Math.ceil(a / 3600000); h * 3600000 <= b; h++) { const ti = h * 3600000, hh = +hm(ti).slice(0, 2);
+    if (hh % step === 0 && X(ti) > x0 + 10 && X(ti) < x1 - 10) g += `<line class="grid" x1="${X(ti)}" x2="${X(ti)}" y1="${yB}" y2="${yB + 4}"/><text x="${X(ti)}" y="${yB + 16}" text-anchor="middle">${hm(ti)}</text>`; }
+  g += `<polyline class="day" clip-path="url(#solUp)" points="${pts}"/><polyline class="night" clip-path="url(#solDn)" points="${pts}"/>`;
+  const rise = D.up(SOL_RISE), set = D.dn(SOL_RISE);
+  if (rise) g += `<circle class="ev" cx="${X(rise)}" cy="${yh}" r="4"/><text class="k" x="${X(rise)}" y="${yh + 15}" text-anchor="middle">↑${hm(rise)}</text>`;
+  if (set) g += `<circle class="ev" cx="${X(set)}" cy="${yh}" r="4"/><text class="k" x="${X(set)}" y="${yh + 15}" text-anchor="middle">↓${hm(set)}</text>`;
+  if (D.max > 0) g += `<text class="k" x="${X(D.noon)}" y="${Y(D.max) - 7}" text-anchor="middle">${hm(D.noon)} · ${solDeg(D.max)}</text>`;
+  if (t >= a && t <= b) { const h = SUN.pos(t, D.lat, D.lon).alt; g += `<line class="nowl" x1="${X(t)}" x2="${X(t)}" y1="${yT}" y2="${yB}"/><circle class="nowd" cx="${X(t)}" cy="${Y(h)}" r="6"/>`; }
+  const c = document.getElementById('solChart');
+  c.innerHTML = g;
+  c.setAttribute('aria-label', `Recorrido del sol hoy: amanecer a las ${rise ? hm(rise) : '—'}, mediodía solar a las ${hm(D.noon)} con ${solDeg(D.max)} de altura, atardecer a las ${set ? hm(set) : '—'}.`);
+}
+function solTimes(t) {
+  const D = solD, r = (p, q) => p && q ? `${hm(p)}–${hm(q)}` : '—', az = ti => ti ? `${Math.round(SUN.pos(ti, D.lat, D.lon).az)}° ${solCard(SUN.pos(ti, D.lat, D.lon).az)}` : '';
+  const L = [
+    ['b', 'Hora azul', 'mañana', D.up(-6), D.up(-4)],
+    ['g', 'Hora dorada', 'mañana', D.up(-4), D.up(6)],
+    ['', 'Amanecer', az(D.up(SOL_RISE)), D.up(SOL_RISE)],
+    ['', 'Mediodía solar', `${solDeg(D.max)} de altura`, D.noon],
+    ['g', 'Hora dorada', 'tarde', D.dn(6), D.dn(-4)],
+    ['', 'Atardecer', az(D.dn(SOL_RISE)), D.dn(SOL_RISE)],
+    ['b', 'Hora azul', 'tarde', D.dn(-4), D.dn(-6)],
+  ];
+  document.getElementById('solTimes').innerHTML = L.map(([c, n, sub, p, q]) => {
+    const end = q === undefined ? p : q, st = end && end < t ? ' past' : q !== undefined && p && p <= t && t < q ? ' cur' : '';
+    return `<li class="${c}${st}"><span>${n}</span><b>${q === undefined ? (p ? hm(p) : '—') : r(p, q)}</b><em>${sub}</em></li>`; }).join('');
+}
+function solPaint(force) {
+  const t = now(), w = solWhere(), k = `${solMidnight(t)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
+  if (force || k !== solKey) { solKey = k; solD = solDay(t, w.lat, w.lon); }
+  const ac = solLoc && solLoc.acc ? ` (±${solLoc.acc < 1000 ? solLoc.acc + ' m' : Math.round(solLoc.acc / 1000) + ' km'})` : '';
+  document.getElementById('solSrc').innerHTML = w.mine ? `Ubicación: <b>la tuya</b>${ac} · <button type="button" class="linkbtn" id="solForget">Usar la del festival</button>`
+    : w.fest ? `Ubicación: <b>${html(FEST.name)}</b> (la del festival)` : 'Ubicación: <b>Montmeló</b> (por defecto)';
+  document.getElementById('solDayH').textContent = (solMidnight(t) === solMidnight(Date.now()) ? 'Hoy · ' : '') + solFmtDay.format(t);
+  document.getElementById('solPhase').innerHTML = solPhase(t);
+  solChart(t); solTimes(t); solDial();
+  solMin = Math.floor(t / MIN);
+}
+// Brúixola: iPhone → webkitCompassHeading (cal permís, i només es pot demanar en tocar un botó); Android → deviceorientationabsolute
+function solOrient(e) {
+  let h = typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0 ? e.webkitCompassHeading
+    : (e.absolute || e.type === 'deviceorientationabsolute') && typeof e.alpha === 'number' ? 360 - e.alpha : null;
+  if (h === null) return;
+  h += (screen.orientation && screen.orientation.angle) || 0;  // el mòbil de costat
+  solHead = (h % 360 + 360) % 360;
+  if (!solRaf) solRaf = requestAnimationFrame(() => { solRaf = 0; solDial(); });  // com a molt un cop per fotograma
+}
+function solListenOn() {
+  if (solListen) return;
+  solListen = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+  addEventListener(solListen, solOrient);
+  clearTimeout(solNoCmp);
+  solNoCmp = setTimeout(() => { if (solWant && solHead === null) document.getElementById('solMsg').textContent = 'Este dispositivo no da la brújula: la flecha marca el rumbo del sol desde el norte.'; }, 3000);
+}
+function solListenOff() {
+  if (solListen) removeEventListener(solListen, solOrient);
+  solListen = ''; cancelAnimationFrame(solRaf); solRaf = 0; clearTimeout(solNoCmp);
+}
+function solCompassUi() {
+  const b = document.getElementById('solCompass');
+  b.setAttribute('aria-pressed', solWant ? 'true' : 'false');
+  b.querySelector('span').textContent = solWant ? 'Apagar brújula' : 'Activar brújula';
+}
+document.getElementById('solCompass').addEventListener('click', () => {
+  const msg = document.getElementById('solMsg');
+  if (solWant) { solWant = false; solListenOff(); solHead = null; solCompassUi(); msg.textContent = ''; return solDial(); }
+  const DO = window.DeviceOrientationEvent;
+  if (!DO) { msg.textContent = 'Este dispositivo no da la brújula: la flecha marca el rumbo del sol desde el norte.'; return; }
+  const go = () => { solWant = true; solCompassUi(); msg.textContent = 'Sujeta el móvil plano, con la pantalla hacia arriba.'; solListenOn(); };
+  if (typeof DO.requestPermission === 'function') DO.requestPermission().then(r => { if (r === 'granted') go(); else msg.textContent = 'Sin permiso para la brújula. Cierra la app del todo y vuelve a abrirla para que lo pida otra vez.'; }).catch(go);
+  else go();
+});
+document.getElementById('solLoc').addEventListener('click', () => {
+  const msg = document.getElementById('solMsg');
+  if (!('geolocation' in navigator)) { msg.textContent = 'Este móvil no da la ubicación.'; return; }
+  msg.textContent = 'Buscando…';
+  navigator.geolocation.getCurrentPosition(p => {
+    solLoc = { lat: +p.coords.latitude.toFixed(4), lon: +p.coords.longitude.toFixed(4), acc: Math.round(p.coords.accuracy || 0) };
+    try { localStorage.setItem(SOLK, JSON.stringify(solLoc)); } catch (e) {}
+    msg.textContent = ''; solPaint(true);
+  }, err => {
+    msg.textContent = err.code === 1 ? 'Sin permiso de ubicación: actívalo en Ajustes del iPhone → Privacidad → Localización.' : 'No encontramos tu ubicación. Prueba al aire libre.';
+  }, { enableHighAccuracy: false, maximumAge: 10 * 60000, timeout: 15000 });
+});
+document.getElementById('solSrc').addEventListener('click', e => {
+  if (!e.target.closest('#solForget')) return;
+  solLoc = null; try { localStorage.removeItem(SOLK); } catch (er) {}
+  solPaint(true);
+});
+// Només treballa amb la pestanya a la vista (bateria): fora d'aquí o amb l'app de fons, la brúixola s'apaga
+function solShow(on) {
+  if (!on) return solListenOff();
+  solPaint(true);
+  if (solWant && !document.hidden) solListenOn();
+}
+document.addEventListener('visibilitychange', () => { if (TAB === 'sol') solShow(!document.hidden); });
+setInterval(() => { if (TAB === 'sol' && !document.hidden && Math.floor(now() / MIN) !== solMin) solPaint(); }, 1000);
+document.getElementById('simRange').addEventListener('input', () => setTimeout(() => { if (TAB === 'sol') solPaint(); }, 0));
+document.getElementById('simOn').addEventListener('change', () => setTimeout(() => { if (TAB === 'sol') solPaint(); }, 0));
+// ==== /SOL ====
 // Logo a la barra fina (per defecte, el títol del banner animat)
 { const ml = FEST.miniLogo || (FEST.bannerAnim && FEST.bannerAnim.title), mi = document.getElementById('mlogo');
   if (ml) { mi.src = ml; mi.alt = FEST.name; mi.hidden = false; if (FEST.bannerAnim && FEST.bannerAnim.bg) mi.style.setProperty('--mlogo-bg', FEST.bannerAnim.bg); } }
@@ -4599,7 +4922,7 @@ document.getElementById('faces').addEventListener('click', e => {
 holaPaint();
 whoReady = true; paintWho();
 
-// --- Pestanyes de baix: Horarios · Tareas · Organización (contrasenya) · Ajustes ---
+// --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
 var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
   const ch = t !== TAB;
@@ -4611,6 +4934,7 @@ function showTab(t, top = true) {
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
+  if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
