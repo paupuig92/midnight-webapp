@@ -38,6 +38,7 @@
   --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --title: var(--display);  /* rellotge i títols: la lletra de cartell del festival, si en té */
   --cond: var(--display);   /* noms dins la graella: millor estreta */
+  --mono: var(--body);      /* hores i subtítols petits: un festival hi pot posar una mono (theme['--mono']) */
   /* Escala de text: 11 / 13 / 15 / 18 / 24 */
   --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 18px; --fs-xl: 24px;
   --gut: 48px;
@@ -291,7 +292,7 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .corner, .hdend { position: sticky; top: 0; z-index: 8; background: var(--bg); }
 .corner { left: 0; }
 .gut { position: sticky; left: 0; z-index: 6; background: var(--bg); grid-row: 2; grid-column: 1; }
-.gut span { position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
+.gut span { font-family: var(--mono); position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
   font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
 .gut span[data-n] { color: var(--now); }
 body.offline .status::after { content: " · sin conexión (horario guardado)"; color: var(--muted); }
@@ -303,8 +304,8 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
 .blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
 .blk .n { font: 900 12px/1.08 var(--cond); font-stretch: 86%; text-transform: uppercase; overflow-wrap: break-word; hyphens: auto; }
-.blk .s { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
-.blk .t { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.blk .s { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; line-height: 1.1; font-stretch: 90%; }
+.blk .t { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .blk.tiny .s { display: none; }
 .blk.tiny .t { font-size: 10px; }
 .blk.tiny .n { line-height: 1; }
@@ -1425,12 +1426,14 @@ const FEST = {
   accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
   theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
     '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
-    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif' },
+    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
+    '--mono': '"Martian Mono", ui-monospace, monospace' },
   // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
     { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
     { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
     { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
+    { family: 'Martian Mono', file: 'MartianMono.woff2', weight: '100 800' },  // Google Fonts, llicència OFL (MartianMono-OFL.txt)
   ],
   nextHide: { stages: [], imp: [1] },
   impColors: true,
