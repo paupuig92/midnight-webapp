@@ -14,9 +14,14 @@ const FEST = {
   // Blanc i negre com el cartell: l'accent és blanc (el vermell d'«ara» i el groc dels meus artistes es queden)
   accent: '#f2f2f2', accentRgb: '242, 242, 242', accentDim: '#7a7c80', accentDeep: '#16171a', accentInk: '#050608',
   theme: { '--bg': '#050608', '--panel': '#0f1013', '--ink': '#f5f5f5', '--muted': '#9a9ca2', '--rule': '#2a2c31', '--line': '#3d4046',
-    '--display': '"Archivo", "Helvetica Neue", sans-serif', '--body': '"Archivo", "Helvetica Neue", sans-serif',
-    '--title': '"Archivo Black", "Archivo", sans-serif', '--cond': '"Archivo Narrow", "Archivo", sans-serif' },
-  // Tipografies: el cartell fa servir una grotesca negra + una mono. No són a la carpeta: de moment, Archivo
+    '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
+    '--title': '"Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif' },
+  // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
+  fonts: [
+    { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
+    { family: 'Nimbus', file: 'NimbusSanL-Bold.woff2', weight: '600 900' },
+    { family: 'Nimbus Cond', file: 'NimbusSanL-BoldCond.woff2', weight: '400 900' },
+  ],
   nextHide: { stages: [], imp: [1] },
   impColors: true,
   impSize: true,
