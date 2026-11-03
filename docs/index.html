@@ -972,24 +972,47 @@ body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #who
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
 /* Sol (per a foto i vídeo): on és el sol ara, brúixola, recorregut del dia i hores clau. Colors del festival (vars) */
 body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
-#sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; }
+#sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; --sol-day: #7cc0ff; --sol-night: #15214a; }
 #sol h2 { margin-bottom: 6px; }
 #sol h3 { margin: 22px 0 8px; font: 800 var(--fs-s)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.solsub { margin: 0 0 6px; color: var(--ink); font-weight: 600; }
 .solsrc { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 0; }
 .solsrc b { color: var(--ink); font-weight: 700; }
-.solnow { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 10px; margin-top: 12px; padding: 16px 12px 14px; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
-.soldial { width: min(78vw, 280px); aspect-ratio: 1; }
+.solnow { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 12px; margin-top: 10px; padding: 16px 12px 14px; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
+.soldial { width: min(58vw, 220px); aspect-ratio: 1; }
 .soldial svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.soldial .rose, .soldial .arw { transition: transform .25s linear; }
-.soldial .rose text { font: 800 15px/1 var(--mono); fill: var(--muted); }
+.soldial .rose text { font: 900 17px/1 var(--mono); fill: var(--ink); }
 .soldial .rose text.n { fill: var(--now); }
 .soldial .arw path { fill: var(--accent); }
 .soldial.below .arw path { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 7 5; }
 .soldial .sun { fill: var(--sol-gold); }
 .soldial.below .sun { fill: var(--panel); stroke: var(--muted); stroke-width: 2.5; }
 .soldial .me { fill: var(--ink); }
-.solturn { margin: 0; text-align: center; font: 900 var(--fs-xl)/1.1 var(--title); font-stretch: 112%; text-transform: uppercase; letter-spacing: .02em; color: var(--ink); }
+.solturn { margin: 0; text-align: center; font: 900 30px/1.05 var(--title); font-stretch: 112%; text-transform: uppercase; letter-spacing: .02em; color: var(--ink); text-wrap: balance; }
+.solturn .look { display: block; margin-top: 8px; font: 800 19px/1.25 var(--body); font-stretch: 100%; letter-spacing: 0; text-transform: none; color: var(--ink); }
 .solturn small { display: block; max-width: 34ch; margin: 6px auto 0; font: 600 var(--fs-s)/1.35 var(--body); font-stretch: 100%; letter-spacing: 0; text-transform: none; color: var(--muted); }
+/* Compte enrere (el més gran de la pestanya): quant falta per a la posta, l'hora daurada, la sortida… */
+.solcd { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 12px; margin-top: 12px; padding: 14px 16px 14px 14px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--line, var(--rule)); border-left: 7px solid var(--ink); }
+.solcd.g { border-left-color: var(--sol-gold); }
+.solcd.b { border-left-color: var(--sol-blue); }
+.solcd.n { border-left-color: var(--muted); }
+.solcd .l { grid-column: 1 / -1; font: 800 var(--fs-s)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
+.solcd .v { font: 900 36px/1.05 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
+.solcd .at { font: 900 24px/1.05 var(--title); color: var(--muted); font-variant-numeric: tabular-nums; }
+.solcd small { grid-column: 1 / -1; margin-top: 6px; font: 700 var(--fs-m)/1.3 var(--body); color: var(--ink); }
+/* Franja de l'horitzó: on és el sol (esquerra/dreta respecte del mòbil, i alçada). Lletres sempre dretes */
+.solstrip { display: block; width: 100%; height: auto; border-radius: var(--r-chip, 8px); }
+.solstrip .sky { fill: color-mix(in srgb, var(--sol-blue) 16%, var(--panel)); }
+.solstrip .gnd { fill: color-mix(in srgb, var(--ink) 12%, var(--panel)); }
+.solstrip .hz { stroke: var(--ink); stroke-width: 2; }
+.solstrip .tk { stroke: var(--muted); stroke-width: 1.5; }
+.solstrip text { font: 800 12px/1 var(--mono); fill: var(--ink); }
+.solstrip text.n { fill: var(--now); }
+.solstrip .path { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.solstrip .me { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.solstrip .meh { fill: var(--ink); }
+.solstrip .sun { fill: var(--sol-gold); stroke: var(--ink); stroke-width: 2; }
+.solstrip .sun.below { fill: var(--panel); stroke-dasharray: 3 3; }
 .solstat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
 .solstat div { padding: 8px 10px; border-radius: var(--r-chip, 8px); background: var(--fill, rgba(255,255,255,.06)); text-align: center; }
 .solstat span { display: block; font: 700 var(--fs-xs)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
@@ -1002,17 +1025,20 @@ body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
 .solphase { margin: 0 0 10px; font: 700 var(--fs-m)/1.35 var(--body); color: var(--ink); }
 .solphase b { color: var(--accent); }
 .solchart { display: block; width: 100%; height: auto; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
-.solchart .hz { stroke: var(--rule); stroke-width: 1.5; }
-.solchart .grid { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 4; opacity: .7; }
+.solchart .sky { opacity: .55; }
+.solchart .gnd { fill: color-mix(in srgb, var(--ink) 9%, var(--panel)); }
+.solchart .hz { stroke: var(--ink); stroke-width: 1.5; opacity: .6; }
 .solchart text { font: 700 10.5px/1 var(--mono); fill: var(--muted); }
 .solchart text.k { fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
-.solchart .day { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.solchart text.bl { font: 800 9px/1 var(--mono); fill: var(--ink); letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.solchart text.nowt { font: 900 11px/1 var(--mono); fill: var(--now); letter-spacing: .06em; text-transform: uppercase; }
+.solchart .day { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 .solchart .night { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
-.solchart .gold { fill: var(--sol-gold); opacity: .32; }
-.solchart .blue { fill: var(--sol-blue); opacity: .45; }
-.solchart .nowl { stroke: var(--now); stroke-width: 2; }
-.solchart .nowd { fill: var(--now); stroke: var(--panel); stroke-width: 2.5; }
-.solchart .ev { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+.solchart .nowl { stroke: var(--now); stroke-width: 2; stroke-dasharray: 4 3; }
+.solchart .nowd { fill: var(--sol-gold); stroke: var(--panel); stroke-width: 2.5; }
+.solchart .nowd.off { fill: var(--muted); }
+.solchart .rsd { fill: var(--sol-gold); }
+.solchart .rsr { fill: none; stroke: var(--sol-gold); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .solkey { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: var(--fs-s); }
 .solkey i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; }
 .soltimes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
@@ -1024,7 +1050,6 @@ body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
 .soltimes span { display: block; font: 700 var(--fs-xs)/1.2 var(--mono); letter-spacing: var(--caps, .08em); text-transform: uppercase; color: var(--muted); }
 .soltimes b { display: block; margin-top: 3px; font: 800 var(--fs-l)/1.15 var(--title); color: var(--ink); font-variant-numeric: tabular-nums; }
 .soltimes em { display: block; font: 600 var(--fs-xs)/1.3 var(--body); font-style: normal; color: var(--muted); }
-@media (prefers-reduced-motion: reduce) { .soldial .rose, .soldial .arw { transition: none; } }
 /* Sol amb la càmera (realitat augmentada): el camí del sol dibuixat sobre la imatge. Sense càmera, sobre un cel dibuixat */
 body.aron { overflow: hidden; }
 body.aron .tabbar, body.aron .totop { display: none !important; }
@@ -1306,9 +1331,13 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   </section>
 
   <section id="sol" aria-labelledby="solH">
-    <h2 id="solH">Sol <span>para foto y vídeo</span></h2>
+    <h2 id="solH">El sol de <span id="solFest"></span></h2>
+    <p class="note solsub">Dónde está, cuánta luz queda y cuándo llega la hora dorada.</p>
     <p class="note solsrc" id="solSrc"></p>
+    <div class="solcd" id="solCd"></div>
     <div class="solnow">
+      <p class="solturn" id="solTurn"></p>
+      <svg class="solstrip" id="solStrip" viewBox="0 0 320 112" role="img" aria-label="Horizonte: dónde está el sol respecto al móvil"></svg>
       <div class="soldial" id="solDial" role="img" aria-label="Dirección del sol">
         <svg viewBox="-120 -120 240 240" aria-hidden="true">
           <path class="me" d="M0-118l-8 13h16z"/>
@@ -1321,7 +1350,6 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
           <circle r="5" fill="var(--ink)"/>
         </svg>
       </div>
-      <p class="solturn" id="solTurn"></p>
       <div class="solstat">
         <div><span>Dirección</span><b id="solAz">—</b><em id="solAzT"></em></div>
         <div><span>Altura</span><b id="solAlt">—</b><em id="solAltT"></em></div>
@@ -1336,7 +1364,7 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     <p class="note solwarn"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/></svg><span>Brújula aproximada (±5–15°). Aléjate de metal, estructuras, escenarios e imanes (fundas con imán también). Para calibrarla, mueve el móvil en forma de 8.</span></p>
     <h3 id="solDayH">Hoy</h3>
     <p class="solphase" id="solPhase"></p>
-    <svg class="solchart" id="solChart" viewBox="0 0 340 180" role="img" aria-label="Recorrido del sol hoy"></svg>
+    <svg class="solchart" id="solChart" viewBox="0 0 340 176" role="img" aria-label="Recorrido del sol hoy"></svg>
     <ul class="solkey" aria-hidden="true"><li><i style="background:var(--sol-gold)"></i>Hora dorada</li><li><i style="background:var(--sol-blue)"></i>Hora azul</li><li><i style="background:var(--now)"></i>Ahora</li></ul>
     <ol class="soltimes" id="solTimes"></ol>
     <p class="note">Hora dorada: el sol entre −4° y 6°. Hora azul: entre −6° y −4°. Calculado en el móvil, sin conexión. Tu ubicación solo se usa en este móvil: no se envía a ningún sitio.</p>
@@ -2900,7 +2928,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 16:26';
+const BUILD = '03/11 18:49';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3214,6 +3242,7 @@ function solDay(t, lat, lon) {
     if (st !== null) out.push([st, b]); return out; };
   return { a, b, S, X, noon, max: alt(noon), up, dn, gold: band(-4, 6), blue: band(-6, -4), lat, lon };
 }
+document.getElementById('solFest').textContent = FEST.name;
 const SOLK = 'midnight-sol-v1';  // la ubicació: només en aquest mòbil (no és d'un festival, serveix per a tots)
 let solLoc = null;
 try { const v = JSON.parse(localStorage.getItem(SOLK) || 'null'); if (v && Math.abs(v.lat) <= 90 && Math.abs(v.lon) <= 180) solLoc = v; } catch (e) {}
@@ -3226,12 +3255,13 @@ function solWhere() {
 const SOL16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
 const solCard = az => SOL16[Math.round(az / 22.5) % 16];
 const solDeg = d => `${Math.round(d) === 0 ? 0 : Math.round(d)}°`.replace('-', '−');
-let solD = null, solKey = '', solHead = null, solRaf = 0, solWant = false, solListen = '', solRose = 0, solArw = 0, solMin = -1, solNoCmp = 0;
+let solD = null, solKey = '', solHead = null, solHeadT = null, solLoopT = 0, solRise2 = null, solRaf = 0, solWant = false, solListen = '', solRose = 0, solArw = 0, solMin = -1, solNoCmp = 0;
 const solFmtDay = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long' });
 // Ticks de la rosa dels vents (fixos; la rosa gira sencera amb la brúixola)
 document.getElementById('solTicks').innerHTML = Array.from({ length: 36 }, (_, i) => { const c = i % 9 === 0, r1 = c ? 86 : i % 3 === 0 ? 90 : 94;
   return `<line x1="0" y1="${-r1}" x2="0" y2="-100" transform="rotate(${i * 10})" stroke="var(--${c ? 'ink' : 'muted'})" stroke-width="${c ? 3 : 1.5}"/>`; }).join('')
-  + [['N', 0], ['E', 90], ['S', 180], ['O', 270]].map(([l, d]) => `<text class="${l === 'N' ? 'n' : ''}" x="${Math.sin(d * Math.PI / 180) * 70}" y="${-Math.cos(d * Math.PI / 180) * 70 + 5.5}" text-anchor="middle">${l}</text>`).join('');
+  + [['N', 0], ['E', 90], ['S', 180], ['O', 270]].map(([l, d]) => `<text class="${l === 'N' ? 'n' : ''}" x="${(Math.sin(d * Math.PI / 180) * 68).toFixed(1)}" y="${(-Math.cos(d * Math.PI / 180) * 68 + 6).toFixed(1)}" text-anchor="middle">${l}</text>`).join('');
+const solWrap = x => ((x % 360) + 540) % 360 - 180;
 // Gira sense fer la volta llarga (de 359° a 1° són 2°, no 358°)
 const solTurnTo = (cur, to) => cur + ((to - cur) % 360 + 540) % 360 - 180;
 function solDial() {
@@ -3241,6 +3271,7 @@ function solDial() {
   solRose = solTurnTo(solRose, -head); solArw = solTurnTo(solArw, rel);
   document.getElementById('solRose').style.transform = `rotate(${solRose}deg)`;
   document.getElementById('solArw').style.transform = `rotate(${solArw}deg)`;
+  for (const tx of document.querySelectorAll('#solTicks text')) tx.setAttribute('transform', `rotate(${(-solRose).toFixed(1)} ${tx.getAttribute('x')} ${(tx.getAttribute('y') - 6).toFixed(1)})`);  // lletres sempre dretes
   const sun = document.getElementById('solSun'), r = Math.PI / 180 * p.az;
   sun.setAttribute('cx', (Math.sin(r) * 100).toFixed(1)); sun.setAttribute('cy', (-Math.cos(r) * 100).toFixed(1));
   const dial = document.getElementById('solDial');
@@ -3253,13 +3284,49 @@ function solDial() {
     turn = Math.abs(d) <= 5 ? 'Lo tienes delante' : `Gira ${Math.abs(d)}° a la ${d > 0 ? 'derecha' : 'izquierda'}`;
     sub = `Sol a ${brg} · el móvil mira a ${Math.round(head) % 360}° (${solCard(head)})`;
   }
-  if (below) sub = `Bajo el horizonte. ${sub}`;
-  document.getElementById('solTurn').innerHTML = `${html(turn)}<small>${html(sub)}</small>`;
+  const look = below ? `El sol está bajo el horizonte (${solDeg(p.alt)})` : `Mira ${solDeg(ap)} por encima del horizonte`;
+  document.getElementById('solTurn').innerHTML = `${html(turn)}<span class="look">${html(look)}</span><small>${html(sub)}</small>`;
+  solStrip(p, solHead === null ? p.az : head, below);
   document.getElementById('solAz').textContent = `${Math.round(p.az) % 360}°`;
   document.getElementById('solAzT').textContent = solCard(p.az);
   document.getElementById('solAlt').textContent = solDeg(below ? p.alt : ap);
   document.getElementById('solAltT').textContent = below ? 'bajo el horizonte' : 'sobre el horizonte';
   dial.setAttribute('aria-label', `${solHead === null ? '' : turn + '. '}Sol a ${brg}, ${solDeg(below ? p.alt : ap)} ${below ? 'bajo el horizonte' : 'sobre el horizonte'}.`);
+}
+// Franja de l'horitzó: ±90° al voltant d'on mira el mòbil (sense brúixola, al voltant del sol); alçada fins a 60°
+function solStrip(p, c, below) {
+  const X = r => 160 + r * 150 / 90, Y = a => 78 - Math.max(-8, Math.min(62, a)) * 1.1, rel = az => solWrap(az - c);
+  let g = '<rect class="sky" x="0" y="0" width="320" height="78"/><rect class="gnd" x="0" y="78" width="320" height="34"/>', pts = [], prev = null;
+  for (const [ti, al] of solD.S) { if (al < -8) { prev = null; continue; } const r = rel(SUN.pos(ti, solD.lat, solD.lon).az);
+    if (Math.abs(r) > 95 || (prev !== null && Math.abs(r - prev) > 30)) { if (pts.length > 1) g += `<polyline class="path" points="${pts.join(' ')}"/>`; pts = []; }
+    if (Math.abs(r) <= 95) pts.push(`${X(r).toFixed(1)},${Y(al).toFixed(1)}`); prev = r; }
+  if (pts.length > 1) g += `<polyline class="path" points="${pts.join(' ')}"/>`;
+  for (let a = 0; a < 360; a += 15) { const r = rel(a); if (Math.abs(r) <= 92) g += `<line class="tk" x1="${X(r).toFixed(1)}" x2="${X(r).toFixed(1)}" y1="78" y2="${a % 45 ? 82 : 86}"/>`; }
+  for (let i = 0; i < 16; i += 2) { const r = rel(i * 22.5); if (Math.abs(r) <= 84) g += `<text class="${i ? '' : 'n'}" x="${X(r).toFixed(1)}" y="103" text-anchor="middle">${SOL16[i]}</text>`; }
+  g += '<line class="hz" x1="0" x2="320" y1="78" y2="78"/>';
+  if (solHead !== null) g += '<line class="me" x1="160" x2="160" y1="10" y2="78"/><path class="meh" d="M160 10l-6-9h12z"/>';
+  const r = rel(p.az), y = Y(p.alt);
+  if (Math.abs(r) <= 90) g += `<circle class="sun${below ? ' below' : ''}" cx="${X(r).toFixed(1)}" cy="${y.toFixed(1)}" r="10"/>`;
+  else { const x = r > 0 ? 306 : 14, s = r > 0 ? 1 : -1;
+    g += `<path class="sun" d="M${x + s * 8} ${y}l${-s * 14} -10v20z"/><text x="${x - s * 14}" y="${y + 4}" text-anchor="${r > 0 ? 'end' : 'start'}">Sol</text>`; }
+  document.getElementById('solStrip').innerHTML = g;
+}
+// Compte enrere: el que importa ara (posta, hora daurada, sortida…). Viu: es refà cada minut, amb now() (Modo prueba)
+function solCount(t) {
+  const D = solD, rise = D.up(SOL_RISE), set = D.dn(SOL_RISE), mb0 = D.up(-6), mb1 = D.up(-4), mg = D.up(6), g0 = D.dn(6), g1 = D.dn(-4), b1 = D.dn(-6), left = x => dur(x - t);
+  let k = 'd', l, v, at = '', sub = '';
+  if (!rise || !set) { l = 'Sol'; v = '—'; }
+  else if (t < rise) {
+    if (mb0 && mb1 && t >= mb0 && t < mb1) { k = 'b'; l = 'Hora azul: quedan'; v = left(mb1); sub = `Amanecer a las ${hm(rise)}`; }
+    else { k = mb1 && t >= mb1 ? 'g' : 'n'; l = 'Amanecer en'; v = left(rise); at = hm(rise); sub = k === 'g' && mg ? `Hora dorada hasta las ${hm(mg)}` : mb0 ? `Hora azul a las ${hm(mb0)}` : ''; }
+  } else if (mg && t < mg && t < D.noon) { k = 'g'; l = 'Hora dorada: quedan'; v = left(mg); sub = `Atardecer a las ${hm(set)}`; }
+  else if (g0 && t < g0) { l = 'Atardecer en'; v = left(set); at = hm(set); sub = `Hora dorada a las ${hm(g0)} (${inDur(g0 - t)})`; }
+  else if (g1 && t < g1) { k = 'g'; l = 'Hora dorada: quedan'; v = left(g1); sub = t < set ? `Atardecer en ${left(set)} · ${hm(set)}` : `Hora azul a las ${hm(g1)}`; }
+  else if (b1 && t < b1) { k = 'b'; l = 'Hora azul: quedan'; v = left(b1); sub = solRise2 ? `Mañana amanece a las ${hm(solRise2)}` : ''; }
+  else { k = 'n'; l = 'Mañana amanece a las'; v = solRise2 ? hm(solRise2) : '—'; sub = solRise2 ? `En ${dur(solRise2 - t)}` : ''; }
+  const el = document.getElementById('solCd');
+  el.className = `solcd ${k}`;
+  el.innerHTML = `<span class="l">${l}</span><b class="v">${v}</b>${at ? `<span class="at">${at}</span>` : ''}${sub ? `<small>${sub}</small>` : ''}`;
 }
 // Què toca ara i quin és el proper canvi de llum
 const SOL_EV = { '-6u': 'Empieza la hora azul', '-4u': 'Empieza la hora dorada', [SOL_RISE + 'u']: 'Amanecer', '6u': 'Termina la hora dorada',
@@ -3272,29 +3339,43 @@ function solPhase(t) {
   return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}`;
 }
 function solChart(t) {
-  const D = solD, W = 340, x0 = 36, x1 = 330, yT = 18, yB = 150;
+  // Dibuix amable: el cel de color segons l'hora (nit → hora blava → daurada → dia), el terra, l'arc del sol i el sol d'ara amb resplendor
+  const D = solD, x0 = 12, x1 = 328, yT = 30, yB = 150;
   const s0 = D.up(-6), s1 = D.dn(-6);
   let a = s0 ? s0 - 3600000 : D.a, b = s1 ? s1 + 3600000 : D.b;
   if (t >= D.a && t <= D.b) { a = Math.min(a, t - 1800000); b = Math.max(b, t + 1800000); }
   a = Math.max(D.a, a); b = Math.min(D.b, b);
-  const yMax = Math.max(20, Math.ceil((D.max + 6) / 10) * 10), yMin = -18;
-  const X = ti => x0 + (ti - a) / (b - a) * (x1 - x0), Y = h => yT + (yMax - Math.max(yMin, Math.min(yMax, h))) / (yMax - yMin) * (yB - yT);
-  const pts = D.S.filter(s => s[0] >= a - 2 * MIN && s[0] <= b + 2 * MIN).map(s => `${X(Math.max(a, Math.min(b, s[0]))).toFixed(1)},${Y(s[1]).toFixed(1)}`).join(' ');
-  const yh = Y(0);
-  let g = `<defs><clipPath id="solUp"><rect x="0" y="0" width="${W}" height="${yh}"/></clipPath><clipPath id="solDn"><rect x="0" y="${yh}" width="${W}" height="${180 - yh}"/></clipPath></defs>`;
-  for (const [cls, list] of [['blue', D.blue], ['gold', D.gold]]) for (const [p, q] of list) if (q > a && p < b) g += `<rect class="${cls}" x="${X(Math.max(a, p)).toFixed(1)}" y="${yT}" width="${(X(Math.min(b, q)) - X(Math.max(a, p))).toFixed(1)}" height="${yB - yT}"/>`;
-  for (let h = Math.ceil(yMin / 10) * 10; h <= yMax; h += 10) if (h) g += `<line class="grid" x1="${x0}" x2="${x1}" y1="${Y(h)}" y2="${Y(h)}"/><text x="${x0 - 5}" y="${Y(h) + 3.5}" text-anchor="end">${solDeg(h)}</text>`;
-  g += `<line class="hz" x1="${x0}" x2="${x1}" y1="${yh}" y2="${yh}"/><text x="${x0 - 5}" y="${yh + 3.5}" text-anchor="end">0°</text>`;
-  // Hores a baix (cada 2 o 3 h)
+  const yMax = Math.max(20, D.max + 8), yMin = -14;
+  const X = ti => x0 + (ti - a) / (b - a) * (x1 - x0), Y = h => yT + (yMax - Math.max(yMin, Math.min(yMax, h))) / (yMax - yMin) * (yB - yT), yh = Y(0);
+  const S = D.S.filter(s => s[0] >= a - 2 * MIN && s[0] <= b + 2 * MIN), f = n => n.toFixed(1);
+  const pts = S.map(s => `${f(X(Math.max(a, Math.min(b, s[0]))))},${f(Y(s[1]))}`).join(' ');
+  const sky = h => h >= 6 ? 'var(--sol-day)' : h >= -4 ? 'var(--sol-gold)' : h >= -6 ? 'var(--sol-blue)' : 'var(--sol-night)';
+  const stops = S.filter((_, i) => i % 5 === 0).map(s => `<stop offset="${f(Math.max(0, Math.min(100, (s[0] - a) / (b - a) * 100)))}%" style="stop-color:${sky(s[1])}"/>`).join('');
+  let g = `<defs><linearGradient id="solSky" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${x1}" y1="0" y2="0">${stops}</linearGradient>
+    <radialGradient id="solGlow"><stop offset="0" style="stop-color:var(--sol-gold);stop-opacity:.75"/><stop offset="1" style="stop-color:var(--sol-gold);stop-opacity:0"/></radialGradient>
+    <clipPath id="solUp"><rect x="0" y="0" width="340" height="${f(yh)}"/></clipPath><clipPath id="solDn"><rect x="0" y="${f(yh)}" width="340" height="${f(200 - yh)}"/></clipPath></defs>`;
+  g += `<rect class="sky" x="${x0}" y="10" width="${x1 - x0}" height="${f(yh - 10)}" rx="8" fill="url(#solSky)"/><rect class="gnd" x="${x0}" y="${f(yh)}" width="${x1 - x0}" height="${f(yB - yh)}"/>`;
+  // Etiquetes petites a les franges (hora daurada i blava)
+  // (de dalt cap avall; la blava, per la banda de fora perquè no xoqui amb la daurada)
+  for (const [lb, list] of [['azul', D.blue], ['dorada', D.gold]]) for (const [p, q] of list) if (q > a && p < b) {
+    const cx = lb === 'dorada' ? X((Math.max(a, p) + Math.min(b, q)) / 2) : p < D.noon ? X(Math.max(a, p)) - 5 : X(Math.min(b, q)) + 5;
+    g += `<text class="bl" transform="translate(${f(cx - 3)} 16) rotate(90)">${lb}</text>`;
+  }
+  g += `<line class="hz" x1="${x0}" x2="${x1}" y1="${f(yh)}" y2="${f(yh)}"/>`;
   const step = (b - a) > 14 * 3600000 ? 3 : 2;
   for (let h = Math.ceil(a / 3600000); h * 3600000 <= b; h++) { const ti = h * 3600000, hh = +hm(ti).slice(0, 2);
-    if (hh % step === 0 && X(ti) > x0 + 10 && X(ti) < x1 - 10) g += `<line class="grid" x1="${X(ti)}" x2="${X(ti)}" y1="${yB}" y2="${yB + 4}"/><text x="${X(ti)}" y="${yB + 16}" text-anchor="middle">${hm(ti)}</text>`; }
+    if (hh % step === 0 && X(ti) > x0 + 12 && X(ti) < x1 - 12) g += `<text x="${f(X(ti))}" y="${yB + 16}" text-anchor="middle">${hm(ti)}</text>`; }
   g += `<polyline class="day" clip-path="url(#solUp)" points="${pts}"/><polyline class="night" clip-path="url(#solDn)" points="${pts}"/>`;
+  // Sortida i posta: mig sol damunt l'horitzó, amb fletxa i hora
   const rise = D.up(SOL_RISE), set = D.dn(SOL_RISE);
-  if (rise) g += `<circle class="ev" cx="${X(rise)}" cy="${yh}" r="4"/><text class="k" x="${X(rise)}" y="${yh + 15}" text-anchor="middle">↑${hm(rise)}</text>`;
-  if (set) g += `<circle class="ev" cx="${X(set)}" cy="${yh}" r="4"/><text class="k" x="${X(set)}" y="${yh + 15}" text-anchor="middle">↓${hm(set)}</text>`;
-  if (D.max > 0) g += `<text class="k" x="${X(D.noon)}" y="${Y(D.max) - 7}" text-anchor="middle">${hm(D.noon)} · ${solDeg(D.max)}</text>`;
-  if (t >= a && t <= b) { const h = SUN.pos(t, D.lat, D.lon).alt; g += `<line class="nowl" x1="${X(t)}" x2="${X(t)}" y1="${yT}" y2="${yB}"/><circle class="nowd" cx="${X(t)}" cy="${Y(h)}" r="6"/>`; }
+  for (const [ti, up] of [[rise, true], [set, false]]) if (ti && ti > a && ti < b) { const x = X(ti);
+    g += `<g class="rs" transform="translate(${f(x)} ${f(yh)})"><path class="rsd" d="M-8 0a8 8 0 0 1 16 0z"/><path class="rsr" d="M0-11v-4M-8-8l-3-3M8-8l3-3M${up ? '-4 -21l4-4 4 4' : '-4 -25l4 4 4-4'}"/></g>`
+      + `<text class="k" x="${f(x)}" y="${f(yh + 15)}" text-anchor="middle">${hm(ti)}</text>`; }
+  if (D.max > 0) g += `<text class="k" x="${f(X(D.noon))}" y="${f(Y(D.max) - 9)}" text-anchor="middle">${hm(D.noon)} · ${solDeg(D.max)}</text>`;
+  // Ara: línia, etiqueta i el sol amb resplendor sobre el seu arc
+  if (t >= a && t <= b) { const h = SUN.pos(t, D.lat, D.lon).alt, x = X(t), y = Y(h);
+    g += `<line class="nowl" x1="${f(x)}" x2="${f(x)}" y1="10" y2="${yB}"/><text class="nowt" x="${f(x > x1 - 50 ? x - 5 : x + 5)}" y="${yB - 6}" text-anchor="${x > x1 - 50 ? 'end' : 'start'}">Ahora</text>`
+      + (h > SOL_RISE ? `<circle cx="${f(x)}" cy="${f(y)}" r="20" fill="url(#solGlow)"/>` : '') + `<circle class="nowd${h > SOL_RISE ? '' : ' off'}" cx="${f(x)}" cy="${f(y)}" r="8"/>`; }
   const c = document.getElementById('solChart');
   c.innerHTML = g;
   c.setAttribute('aria-label', `Recorrido del sol hoy: amanecer a las ${rise ? hm(rise) : '—'}, mediodía solar a las ${hm(D.noon)} con ${solDeg(D.max)} de altura, atardecer a las ${set ? hm(set) : '—'}.`);
@@ -3316,12 +3397,13 @@ function solTimes(t) {
 }
 function solPaint(force) {
   const t = now(), w = solWhere(), k = `${solMidnight(t)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
-  if (force || k !== solKey) { solKey = k; solD = solDay(t, w.lat, w.lon); }
+  if (force || k !== solKey) { solKey = k; solD = solDay(t, w.lat, w.lon); solRise2 = solDay(solD.b + 3600000, w.lat, w.lon).up(SOL_RISE); }
   const ac = solLoc && solLoc.acc ? ` (±${solLoc.acc < 1000 ? solLoc.acc + ' m' : Math.round(solLoc.acc / 1000) + ' km'})` : '';
   document.getElementById('solSrc').innerHTML = w.mine ? `Ubicación: <b>la tuya</b>${ac} · <button type="button" class="linkbtn" id="solForget">Usar la del festival</button>`
     : w.fest ? `Ubicación: <b>${html(FEST.name)}</b> (la del festival)` : 'Ubicación: <b>Montmeló</b> (por defecto)';
   document.getElementById('solDayH').textContent = (solMidnight(t) === solMidnight(Date.now()) ? 'Hoy · ' : '') + solFmtDay.format(t);
   document.getElementById('solPhase').innerHTML = solPhase(t);
+  solCount(t);
   solChart(t); solTimes(t); solDial();
   solMin = Math.floor(t / MIN);
 }
@@ -3331,8 +3413,21 @@ function solOrient(e) {
     : (e.absolute || e.type === 'deviceorientationabsolute') && typeof e.alpha === 'number' ? 360 - e.alpha : null;
   if (h === null) return;
   h += (screen.orientation && screen.orientation.angle) || 0;  // el mòbil de costat
-  solHead = (h % 360 + 360) % 360;
-  if (!solRaf) solRaf = requestAnimationFrame(() => { solRaf = 0; solDial(); });  // com a molt un cop per fotograma
+  h = (h % 360 + 360) % 360;
+  // Calma: es descarten els canvis de menys d'1° i el que es veu llisca cap a la lectura nova (filtre exponencial de 250 ms, igual a 30 o a 120 fps)
+  if (solHeadT !== null && Math.abs(solWrap(h - solHeadT)) < 1) return;
+  solHeadT = h;
+  if (solHead === null) solHead = h;
+  if (!solRaf) { solLoopT = performance.now(); solRaf = requestAnimationFrame(solStep); }
+}
+function solStep(ts) {
+  solRaf = 0;
+  if (solHeadT === null || solHead === null) return;
+  const dt = Math.max(0, Math.min(200, ts - solLoopT)), d = solWrap(solHeadT - solHead);
+  solLoopT = ts;
+  solHead = (solHead + d * (1 - Math.exp(-dt / 250)) + 360) % 360;
+  solDial();
+  if (Math.abs(solWrap(solHeadT - solHead)) > .1) solRaf = requestAnimationFrame(solStep);  // quiet = sense fotogrames (bateria)
 }
 function solListenOn() {
   if (solListen) return;
@@ -3352,7 +3447,7 @@ function solCompassUi() {
 }
 document.getElementById('solCompass').addEventListener('click', () => {
   const msg = document.getElementById('solMsg');
-  if (solWant) { solWant = false; solListenOff(); solHead = null; solCompassUi(); msg.textContent = ''; return solDial(); }
+  if (solWant) { solWant = false; solListenOff(); solHead = solHeadT = null; solCompassUi(); msg.textContent = ''; return solDial(); }
   const DO = window.DeviceOrientationEvent;
   if (!DO) { msg.textContent = 'Este dispositivo no da la brújula: la flecha marca el rumbo del sol desde el norte.'; return; }
   const go = () => { solWant = true; solCompassUi(); msg.textContent = 'Sujeta el móvil plano, con la pantalla hacia arriba.'; solListenOn(); };
@@ -3386,7 +3481,7 @@ const ARFK = 'midnight-sol-fov-v1';
 let AR_FOV = 63;  // camp de visió (graus) en el costat llarg de la pantalla: càmera principal de l'iPhone en vertical ≈ 63°
 try { const v = +localStorage.getItem(ARFK); if (v >= 30 && v <= 120) AR_FOV = v; } catch (e) {}
 const arEl = document.getElementById('solAr'), arC = document.getElementById('solArC'), arV = document.getElementById('solArV'), arR = document.getElementById('solArR');
-const D2R = Math.PI / 180;
+const D2R = Math.PI / 180, AR_DB = Math.cos(D2R);
 const arVec = (az, alt) => [Math.cos(alt * D2R) * Math.sin(az * D2R), Math.cos(alt * D2R) * Math.cos(az * D2R), Math.sin(alt * D2R)];  // est, nord, amunt
 const arDot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const arCross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -3402,7 +3497,9 @@ function arOrient(e) {
   if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) al = 360 - e.webkitCompassHeading;
   else if ((e.absolute || e.type === 'deviceorientationabsolute') && typeof e.alpha === 'number') al = e.alpha;
   if (al === null) return;
-  AR.raw = arFromEuler(al, e.beta, e.gamma);
+  const m = arFromEuler(al, e.beta, e.gamma);
+  if (AR.raw && arDot(m.cam, AR.raw.cam) > AR_DB && arDot(m.up, AR.raw.up) > AR_DB) return;  // zona morta: menys d'1°, no es mou
+  AR.raw = m;
   if (!AR.sensor) { AR.sensor = true; AR.cam = AR.raw.cam; AR.up = AR.raw.up; arMsg(); }
   AR.dirty = true;
 }
@@ -3501,7 +3598,9 @@ function arFrame() {
   AR.raf = 0;
   if (!AR.on) return;
   if (AR.sensor && AR.raw) {  // filtre pas-baix (els vectors, no els angles: així no salta de 359° a 0°)
-    const k = .18, c = arNorm(AR.cam.map((x, i) => x + (AR.raw.cam[i] - x) * k)), u0 = AR.up.map((x, i) => x + (AR.raw.up[i] - x) * k);
+    const ts = performance.now(), dt = Math.min(200, ts - (AR.lt || ts)), k = 1 - Math.exp(-dt / 250);  // 250 ms, independent dels fps
+    AR.lt = ts;
+    const c = arNorm(AR.cam.map((x, i) => x + (AR.raw.cam[i] - x) * k)), u0 = AR.up.map((x, i) => x + (AR.raw.up[i] - x) * k);
     const r = arNorm(arCross(c, u0)), u = arCross(r, c);
     if (Math.abs(arDot(c, AR.cam) - 1) + Math.abs(arDot(u, AR.up) - 1) > 1e-7) AR.dirty = true;
     AR.cam = c; AR.up = u;
@@ -3520,7 +3619,7 @@ function arRange() {
 function arOpen() {
   if (AR.on) return;
   solPaint(true);
-  AR.on = true; AR.sensor = false; AR.raw = null; AR.scrub = null; AR.dirty = true;
+  AR.on = true; AR.sensor = false; AR.raw = null; AR.lt = 0; AR.scrub = null; AR.dirty = true;
   const sp = SUN.pos(now(), solD.lat, solD.lon);
   AR.az = sp.az; AR.el = Math.max(0, Math.min(25, sp.alt));  // sense sensors: mirant cap al sol, una mica per sobre l'horitzó
   AR.tmw = solDay(solD.b + 3600000, solD.lat, solD.lon).S.map(s => { const p = SUN.pos(s[0], solD.lat, solD.lon); return [s[0], p.az, p.alt]; });
