@@ -10,7 +10,12 @@
 // Tasques de l'equip («Mi plan»): l'organització publica docs/tasks.json; el mòbil diu qui és (yo) i quants minuts abans vol l'avís (tb).
 // Les ✓ de les tasques es guarden aquí (POST /done) perquè l'organització les vegi a la vista global (GET /done).
 // Dades: Durable Object «Store» amb SQLite (un registre per mòbil; coherent i sense curses). Taules: subs, done, kv ('last', 'sets', 'tasks').
-// Secrets: VAPID_JWK (clau privada), SEND_KEY (per a /send). Text: VAPID_PUBLIC. Enllaços: STORE (Durable Object), SELF (el mateix worker).
+// Secrets: VAPID_JWK (clau privada), SEND_KEY (per a /send i per signar les sessions), ADMIN_PW (contrasenya de l'organització),
+// GH_TOKEN (token de GitHub de l'editor: viu NOMÉS aquí, ja no va dins la web). Text: VAPID_PUBLIC.
+//
+// Editor de l'organització (des del 03-11-2026): l'app envia la contrasenya a POST /admin/login (màxim 10 intents cada 15 min per IP)
+// i rep una sessió de 12 h. Amb la sessió pot llegir i publicar NOMÉS docs/changes.json i docs/tasks.json (POST /admin/read i /admin/commit).
+// Totes les rutes públiques tenen un límit de peticions per IP, perquè ningú pugui esgotar el pla gratuït ni omplir el servidor. Enllaços: STORE (Durable Object), SELF (el mateix worker).
 // CARTEL (l'horari del cartell) el posa instala.sh a partir de docs/cartel.json.
 
 const CARTEL = /*CARTEL*/null/*CARTEL*/;
@@ -45,6 +50,9 @@ const END = T((NDAYS > 1 ? NDAYS + '/' : '') + CARTEL.end) + 60 * MIN;   // una 
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = c => (c.fest || 'bass-in-the-park-2026') === CARTEL.fest;
 
+const REPO = 'paupuig92/midnight-webapp';
+const ADMIN_FILES = ['docs/changes.json', 'docs/tasks.json'];
+const SESSION = 12 * 3600000;
 const cors = origin => ORIGINS.includes(origin)
   ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'vary': 'origin' }
   : {};
@@ -60,6 +68,63 @@ const cleanYo = y => typeof y === 'string' && /^[a-z0-9]{1,40}$/.test(y) ? y : '
 const cleanTeam = t => ['prod', 'mkt', 'video', 'foto'].includes(t) ? t : '';
 const okTaskId = id => typeof id === 'string' && /^[\w-]{1,40}$/.test(id);
 const MAX_DONE = 5000;
+// Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
+const LIM = {
+  sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+};
+const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
+
+// Sessió de l'organització: «caducitat.signatura». Si es canvia la contrasenya, totes les sessions velles deixen de valer.
+const te = new TextEncoder();
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+async function hmacHex(key, msg) {
+  const k = await crypto.subtle.importKey('raw', te.encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return hex(await crypto.subtle.sign('HMAC', k, te.encode(msg)));
+}
+// Comparació que no depèn de quantes lletres coincideixen (es comparen els HMAC, no el text)
+const sameText = async (a, b) => (await hmacHex('cmp', String(a))) === (await hmacHex('cmp', String(b)));
+const sign = (env, exp) => hmacHex(env.SEND_KEY, `adm|${exp}|${env.ADMIN_PW}`);
+async function okSession(env, s) {
+  const m = typeof s === 'string' && s.match(/^(\d{10,16})\.([0-9a-f]{64})$/);
+  if (!m || !env.ADMIN_PW || !env.SEND_KEY) return false;
+  const exp = +m[1];
+  if (exp < Date.now() || exp > Date.now() + SESSION + MIN) return false;
+  return sameText(m[2], await sign(env, exp));
+}
+
+// GitHub (només des del servidor; el token no surt mai d'aquí)
+async function gh(env, path, opts = {}) {
+  const r = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${env.GH_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'midnight-push', ...(opts.body ? { 'content-type': 'application/json' } : {}) },
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!r.ok) { const e = new Error('github'); e.status = r.status; throw e; }
+  return r.status === 204 ? null : r.json();
+}
+async function ghRead(env, path) {
+  try {
+    const cur = await gh(env, `/contents/${path}?ref=main&t=${Date.now()}`);
+    return { data: JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(cur.content.replace(/\s/g, '')), c => c.charCodeAt(0)))) };
+  } catch (e) {
+    if (e.status === 404) return { data: null };
+    throw e;
+  }
+}
+// Un commit amb un o dos fitxers (API de dades de Git); si algú ha publicat just ara, es torna a provar
+async function ghCommit(env, files, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ref = await gh(env, '/git/ref/heads/main');
+    const head = await gh(env, `/git/commits/${ref.object.sha}`);
+    const tree = await gh(env, '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree: files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.content })) }) });
+    const commit = await gh(env, '/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }) });
+    try { await gh(env, '/git/refs/heads/main', { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) }); return { ok: true }; }
+    catch (e) { if (e.status !== 422 && e.status !== 409) throw e; }
+    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+  }
+  return { error: 'busy' };
+}
 
 // Horari: { all: { id: { n, a, b, stage } }, key, stamp, notice }
 function digest(sets, stamp, notice) {
@@ -198,6 +263,7 @@ export class Store {
     this.sql = state.storage.sql;
     this.sql.exec(`CREATE TABLE IF NOT EXISTS subs (id TEXT PRIMARY KEY, endpoint TEXT NOT NULL, favs TEXT NOT NULL, before INTEGER NOT NULL, changes INTEGER NOT NULL, at INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS rl (k TEXT PRIMARY KEY, n INTEGER NOT NULL, reset INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS done (who TEXT NOT NULL, id TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (who, id))`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
@@ -232,6 +298,19 @@ export class Store {
       ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team`,
       id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team);
   }
+  // Límit de peticions (finestra fixa): true si encara en queden
+  hit(k, max, win) {
+    const now = Date.now();
+    if (Math.random() < 0.02) this.sql.exec('DELETE FROM rl WHERE reset < ?', now);
+    const r = this.sql.exec('SELECT n, reset FROM rl WHERE k = ?', k).toArray()[0];
+    if (!r || r.reset <= now) {
+      this.sql.exec('INSERT INTO rl (k, n, reset) VALUES (?, 1, ?) ON CONFLICT(k) DO UPDATE SET n = 1, reset = excluded.reset', k, now + win);
+      return true;
+    }
+    if (r.n >= max) return false;
+    this.sql.exec('UPDATE rl SET n = n + 1 WHERE k = ?', k);
+    return true;
+  }
   row(id) {
     const r = this.sql.exec('SELECT * FROM subs WHERE id = ?', id).toArray()[0];
     return r ? { ...r, favs: JSON.parse(r.favs), changes: !!r.changes } : null;
@@ -240,6 +319,11 @@ export class Store {
     await this.ready;
     const url = new URL(req.url);
     const b = req.method === 'POST' ? await req.json() : {};
+    if (Array.isArray(b._rl)) {
+      const [k, max, win] = b._rl;
+      if (!this.hit(String(k).slice(0, 80), +max, +win)) return json({ error: 'slow' }, 429);
+      if (url.pathname === '/rl') return json({ ok: true });
+    }
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
       let { favs, before, changes, yo, tb, team } = b;
@@ -347,30 +431,39 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url), origin = req.headers.get('origin') || '';
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
+    const ip = req.headers.get('cf-connecting-ip') || 'x';
+    const lim = name => ({ _rl: [`${LIM[name][0]}:${ip}`, LIM[name][1], LIM[name][2]] });
+    // Les crides de l'app no poden ser enormes
+    const body = async () => {
+      const t = await req.text();
+      if (t.length > 600000) throw Object.assign(new Error('big'), { big: true });
+      return JSON.parse(t || '{}');
+    };
     try {
       // Lot d'enviament (només el pot cridar el mateix servidor)
       if (req.method === 'POST' && url.pathname === '/send') {
-        if (!env.SEND_KEY || req.headers.get('x-send-key') !== env.SEND_KEY) return json({ error: 'forbidden' }, 403);
+        if (!env.SEND_KEY || !(await sameText(req.headers.get('x-send-key') || '', env.SEND_KEY))) return json({ error: 'forbidden' }, 403);
         const list = (await req.json()).filter(t => t && typeof t.id === 'string' && okEndpoint(t.endpoint)).slice(0, BATCH);
         return json(await sendBatch(env, list));
       }
       // ✓ de les tasques: les marca cada mòbil i les llegeix la vista global de l'organització
       if (req.method === 'POST' && url.pathname === '/done') {
-        const r = await callStore(env, '/done', await req.json());
-        return json(r, r.error ? 400 : 200, origin);
+        const r = await callStore(env, '/done', { ...(await body()), ...lim('done') });
+        return json(r, errStatus(r), origin);
       }
-      if (req.method === 'GET' && url.pathname === '/done') return json(await callStore(env, '/doneall', {}), 200, origin);
+      if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
-        const b = await req.json();
+        const b = await body();
         if (!okEndpoint(b.endpoint) || (b.old !== undefined && b.old !== '' && !okEndpoint(b.old))) return json({ error: 'endpoint' }, 400, origin);
-        const r = await callStore(env, url.pathname, b);
-        return json(r, r.error ? 400 : 200, origin);
+        const r = await callStore(env, url.pathname, { ...b, ...lim('sub') });
+        return json(r, errStatus(r), origin);
       }
       // Notificació de prova: només s'envia el push (el text el posa el mòbil, que sap que l'ha demanada)
       if (req.method === 'POST' && url.pathname === '/test') {
-        const b = await req.json();
+        const b = await body();
         if (!okEndpoint(b.endpoint)) return json({ error: 'endpoint' }, 400, origin);
-        const r = await callStore(env, '/endpoint', { id: await idOf(b.endpoint) });
+        const r = await callStore(env, '/endpoint', { id: await idOf(b.endpoint), ...lim('test') });
+        if (r.error) return json(r, errStatus(r), origin);
         if (!r.endpoint) return json({ error: 'nosub' }, 404, origin);
         const st = await sendPush(env, r.endpoint);
         return json({ ok: st >= 200 && st < 300, status: st }, 200, origin);
@@ -378,16 +471,54 @@ export default {
       // El service worker del mòbil pregunta què ha de mostrar
       if (req.method === 'GET' && url.pathname === '/now') {
         const id = String(url.searchParams.get('id') || '').slice(0, 64);
-        return json(await callStore(env, '/now', { id, now: Date.now() }), 200, origin);
+        const r = await callStore(env, '/now', { id, now: Date.now(), ...lim('now') });
+        return json(r, errStatus(r), origin);
       }
       // Estat: quants mòbils hi ha registrats (només el número, cap dada)
       if (url.pathname === '/debug') {
-        if (!env.SEND_KEY || req.headers.get('x-send-key') !== env.SEND_KEY) return json({ error: 'forbidden' }, 403);
+        if (!env.SEND_KEY || !(await sameText(req.headers.get('x-send-key') || '', env.SEND_KEY))) return json({ error: 'forbidden' }, 403);
         return json(await callStore(env, '/debug', {}));
       }
-      if (url.pathname === '/') return json({ ok: true, service: 'midnight-push', mobiles: (await callStore(env, '/count', {})).n }, 200, origin);
+      // Editor de l'organització
+      if (req.method === 'POST' && url.pathname.startsWith('/admin/')) {
+        if (!env.ADMIN_PW || !env.GH_TOKEN) return json({ error: 'off' }, 503, origin);
+        const b = await body();
+        if (url.pathname === '/admin/login') {
+          const rl = await callStore(env, '/rl', lim('login'));
+          if (rl.error) return json(rl, 429, origin);
+          if (!(await sameText(b.pw || '', env.ADMIN_PW))) return json({ error: 'pw' }, 401, origin);
+          const exp = Date.now() + SESSION;
+          return json({ session: `${exp}.${await sign(env, exp)}`, exp }, 200, origin);
+        }
+        const rl = await callStore(env, '/rl', lim('admin'));
+        if (rl.error) return json(rl, 429, origin);
+        if (!(await okSession(env, b.s))) return json({ error: 'session' }, 401, origin);
+        try {
+          if (url.pathname === '/admin/read') {
+            if (!ADMIN_FILES.includes(b.path)) return json({ error: 'path' }, 400, origin);
+            return json(await ghRead(env, b.path), 200, origin);
+          }
+          if (url.pathname === '/admin/commit') {
+            const files = Array.isArray(b.files) ? b.files : [];
+            const ok = files.length >= 1 && files.length <= ADMIN_FILES.length && files.every(f => f && ADMIN_FILES.includes(f.path) && typeof f.content === 'string' && (() => { try { JSON.parse(f.content); return true; } catch (e) { return false; } })());
+            if (!ok) return json({ error: 'files' }, 400, origin);
+            const msg = String(b.message || 'Cambios de la organización').replace(/[\r\n]+/g, ' ').slice(0, 200);
+            const r = await ghCommit(env, files.map(f => ({ path: f.path, content: f.content })), msg);
+            return json(r, r.error ? 409 : 200, origin);
+          }
+        } catch (e) {
+          return json({ error: 'github', status: e.status || 0 }, 502, origin);
+        }
+        return json({ error: 'not found' }, 404, origin);
+      }
+      if (url.pathname === '/') {
+        const r = await callStore(env, '/count', lim('count'));
+        return json(r.error ? r : { ok: true, service: 'midnight-push', mobiles: r.n }, errStatus(r), origin);
+      }
       return json({ error: 'not found' }, 404, origin);
     } catch (e) {
+      if (e.big) return json({ error: 'big' }, 413, origin);
+      if (e instanceof SyntaxError) return json({ error: 'bad' }, 400, origin);
       return json({ error: 'server' }, 500, origin);
     }
   },
