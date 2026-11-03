@@ -320,9 +320,9 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk .t { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .blk.tiny .s { display: none; }
 /* Un sol escenari: es llegeix com una llista (nom i hora a dalt a l'esquerra, en gran) */
-.one .blk:not(.tiny) { align-items: flex-start; justify-content: flex-start; text-align: left; padding: 8px 12px 8px 16px; gap: 3px; }
-.one .blk:not(.tiny) .n { font-size: 16px; }
-.one .blk:not(.tiny) .t { font-size: var(--fs-s); }
+.one .blk:not(.tiny) { align-items: flex-start; justify-content: flex-start; text-align: left; padding: 6px 12px 4px 16px; gap: 2px; }
+.one .blk:not(.tiny) > span { flex-shrink: 0; }  /* el nom no s'encongeix ni queda tallat sota l'hora */
+.one .blk:not(.tiny) .n { font-size: 16px; line-height: 1.1; }
 .blk.tiny .t { font-size: 10px; }
 .blk.tiny .n { line-height: 1; }
 /* Importància per mida (impColors: false): concerts destacats, el que hi ha entre concerts més discret */
