@@ -668,10 +668,8 @@ PAIRS = [
     (": 'De noche';", ": 'De nit';"),
     ("`Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (",
      "`Ara: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a les ${hm(nx.t)} ("),
-    ("'Rumbo desde el norte. Activa la brújula y la flecha seguirá al móvil.'", "'Rumb des del nord. Activa la brúixola i la fletxa seguirà el mòbil.'"),
     ("'Lo tienes delante'", "'El tens davant'"),
     ("`Gira ${Math.abs(d)}° a la ${d > 0 ? 'derecha' : 'izquierda'}`", "`Gira ${Math.abs(d)}° a la ${d > 0 ? 'dreta' : 'esquerra'}`"),
-    (" · el móvil mira a ${", " · el mòbil mira a ${"),
     ("'bajo el horizonte'", "'sota l’horitzó'"),
     ("'sobre el horizonte'", "'sobre l’horitzó'"),
     ("Ubicación: <b>la tuya</b>", "Ubicació: <b>la teva</b>"),
@@ -689,7 +687,7 @@ PAIRS = [
     # Sol amb la càmera
     ("<span>Ver con la cámara</span>", "<span>Veure amb la càmera</span>"),
     ('aria-label="Camino del sol sobre la imagen de la cámara"', 'aria-label="Camí del sol sobre la imatge de la càmera"'),
-    ('id="solArX">Cerrar</button>', 'id="solArX">Tancar</button>'),
+    ('id="solArX" aria-label="Cerrar"', 'id="solArX" aria-label="Tancar"'),
     ("Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.",
      "Brúixola aproximada (±5–15°), lluny del metall. Mou el mòbil fent un 8 per calibrar-la. Si el dibuix no coincideix amb el sol, ajusta el camp de visió."),
     ('id="solArNow">Ahora</button>', 'id="solArNow">Ara</button>'),
@@ -701,8 +699,6 @@ PAIRS = [
     ("`Cámara ${Math.round(caz)", "`Càmera ${Math.round(caz)"),
     ("'Vista fija (sin brújula)'", "'Vista fixa (sense brúixola)'"),
     # Sol: compte enrere i on mirar (04-11)
-    ("`El sol está bajo el horizonte (${solDeg(p.alt)})`", "`El sol és sota l’horitzó (${solDeg(p.alt)})`"),
-    ("`Mira ${solDeg(ap)} por encima del horizonte`", "`Mira ${solDeg(ap)} per sobre de l’horitzó`"),
     ('aria-label="Horizonte: dónde está el sol respecto al móvil"', 'aria-label="Horitzó: on és el sol respecte del mòbil"'),
     ("l = 'Hora azul: quedan'; v = left(mb1); sub = `Amanecer a las ${hm(rise)}`;", "l = 'Hora blava: queden'; v = left(mb1); sub = `Sortida del sol a les ${hm(rise)}`;"),
     ("l = 'Amanecer en';", "l = 'Sortida del sol d’aquí a';"),
@@ -716,11 +712,16 @@ PAIRS = [
     ("l = 'Mañana amanece a las';", "l = 'Demà surt el sol a les';"),
     ("sub = solRise2 ? `En ${dur(solRise2 - t)}` : '';", "sub = solRise2 ? `D’aquí a ${dur(solRise2 - t)}` : '';"),
     ("Dónde está, cuánta luz queda y cuándo llega la hora dorada.", "On és, quanta llum queda i quan arriba l’hora daurada."),
-    ("[['azul', D.blue], ['dorada', D.gold]]", "[['blava', D.blue], ['daurada', D.gold]]"),
-    ("'start'}\">Ahora</text>`", "'start'}\">Ara</text>`"),
+    ('text-anchor="middle">Ahora</text>`', 'text-anchor="middle">Ara</text>`'),
     ('<label for="solArFov">Campo</label>', '<label for="solArFov">Camp</label>'),
     ('aria-label="Campo de visión"', 'aria-label="Camp de visió"'),
-    ('aria-label="Instrucciones">i</button>', 'aria-label="Instruccions">i</button>'),
+    ('aria-label="Instrucciones"', 'aria-label="Instruccions"'),
+    # Sol: redisseny (04-11): lectura gran al mig de la brúixola
+    ("k = 'Rumbo del sol';", "k = 'Rumb del sol';"),
+    ("big = 'Delante';", "big = 'Davant';"),
+    ("d > 0 ? 'a la derecha' : 'a la izquierda'", "d > 0 ? 'a la dreta' : 'a l’esquerra'"),
+    ("'Activa la brújula y la flecha seguirá al móvil.'", "'Activa la brúixola i la fletxa seguirà el mòbil.'"),
+    ("`Sol ${az}° ${card} · móvil hacia ${", "`Sol ${az}° ${card} · mòbil cap a ${"),
 ]
 
 
