@@ -1437,7 +1437,7 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
         <div class="arbox armsgbox" id="solArMsgBox"><p class="armsg" id="solArMsg" role="status"></p><p class="armsg"><small>Brújula aproximada (±5–15°), lejos de metal. Mueve el móvil en forma de 8 para calibrar. Si el dibujo no coincide con el sol, ajusta el campo de visión.</small></p></div>
         <div class="arbox arctl">
           <div class="arrow2"><label for="solArR">Hora</label><input type="range" id="solArR" step="300000"><button class="btn" type="button" id="solArNow">Ahora</button></div>
-          <div class="arrow2"><label for="solArFov">Campo</label><input type="range" id="solArFov" min="60" max="140" step="1" aria-label="Campo de visión"><output id="solArF" for="solArFov">90°</output></div>
+          <div class="arrow2"><label for="solArFov">Campo</label><input type="range" id="solArFov" min="60" max="140" step="1" aria-label="Campo de visión"><output id="solArF" for="solArFov">68°</output></div>
         </div>
       </div>
     </div>
@@ -2990,7 +2990,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 19:37';
+const BUILD = '03/11 20:34';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3549,14 +3549,14 @@ document.getElementById('solSrc').addEventListener('click', e => {
 // el camí del sol d'avui (hores, hora daurada i blava), la sortida i la posta, el sol ara (o a l'hora triada) i el de demà fluix.
 // L'orientació del mòbil (alpha/beta/gamma; iPhone: webkitCompassHeading) dona cap on mira la càmera; projecció de càmera estenopeica.
 // Només funciona amb la finestra oberta: en tancar-la, canviar de pestanya o anar-se'n l'app, s'aturen la càmera i els sensors
-const AR = { on: false, stream: null, cam: null, up: null, raw: null, sensor: false, az: 0, el: 10, scrub: null, dirty: true, raf: 0, evt: '', wait: 0, tick: 0, drag: null, tmw: null, font: '' };
-const ARFK = 'midnight-sol-fov-v1';
-// Camp de visió (graus) al llarg del costat llarg de la imatge de la càmera. A l'iPhone d'en Pau (03-11) quadrava entre 90° i 120°
-// (el Safari sembla obrir-hi la càmera gran angular): per defecte 90°. Els 63° d'abans (valor per defecte antic) passen a 90°
-let AR_FOV = 90;
-try { let v = +localStorage.getItem(ARFK); if (v === 63) v = 90; if (v >= 60 && v <= 140) AR_FOV = v; } catch (e) {}
+const AR = { on: false, stream: null, cam: null, up: null, ev: null, off: null, ot: 0, o0: 0, sensor: false, az: 0, el: 10, scrub: null, dirty: true, raf: 0, evt: '', wait: 0, tick: 0, drag: null, tmw: null, font: '' };
+const ARFK = 'midnight-sol-fov-v2';  // v2 (03-11): el 90–120° d'abans quadrava pel retard del dibuix; es torna a començar a 68°
+// Camp de visió (graus) al llarg del costat llarg de la imatge de la càmera. La càmera principal de l'iPhone (26 mm) fa uns 67–69°;
+// la gran angular (13 mm), uns 105°. Es pot ajustar amb el lliscador
+let AR_FOV = 68;
+try { const v = +localStorage.getItem(ARFK); if (v >= 60 && v <= 140) AR_FOV = v; } catch (e) {}
 const arEl = document.getElementById('solAr'), arC = document.getElementById('solArC'), arV = document.getElementById('solArV'), arR = document.getElementById('solArR');
-const D2R = Math.PI / 180, AR_DB = Math.cos(D2R);
+const D2R = Math.PI / 180;
 const arVec = (az, alt) => [Math.cos(alt * D2R) * Math.sin(az * D2R), Math.cos(alt * D2R) * Math.cos(az * D2R), Math.sin(alt * D2R)];  // est, nord, amunt
 const arDot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const arCross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -3566,16 +3566,28 @@ function arFromEuler(al, be, ga) {
   const cX = Math.cos(be * D2R), sX = Math.sin(be * D2R), cY = Math.cos(ga * D2R), sY = Math.sin(ga * D2R), cZ = Math.cos(al * D2R), sZ = Math.sin(al * D2R);
   return { cam: [-(cY * sZ * sX + cZ * sY), -(sZ * sY - cZ * cY * sX), -(cX * cY)], up: [-cX * sZ, cZ * cX, sX] };
 }
+// Món fix (03-11, el vídeo d'en Pau): el gir el dona alpha/beta/gamma tal qual (giroscopi, ràpid i sense soroll; sense filtre ni zona morta,
+// que feien que el dibuix anés amb retard i «nedés»). La brúixola (lenta i sorollosa) només diu on és el nord: AR.off = 360 − brúixola − alpha,
+// que canvia molt a poc a poc (2,5 s) i només quan la lectura és bona i el mòbil no mira gaire amunt o avall (allà la brúixola de l'iPhone falla).
+// No es fan servir mai angles separats (rumb, inclinació) per dibuixar: a prop de la vertical (β ≈ 90°) salten; la matriu sencera no.
+const arWrap = a => ((a % 360) + 540) % 360 - 180;
 function arOrient(e) {
-  if (typeof e.beta !== 'number' || typeof e.gamma !== 'number') return;
-  let al = null;
-  if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) al = 360 - e.webkitCompassHeading;
-  else if ((e.absolute || e.type === 'deviceorientationabsolute') && typeof e.alpha === 'number') al = e.alpha;
-  if (al === null) return;
-  const m = arFromEuler(al, e.beta, e.gamma);
-  if (AR.raw && arDot(m.cam, AR.raw.cam) > AR_DB && arDot(m.up, AR.raw.up) > AR_DB) return;  // zona morta: menys d'1°, no es mou
-  AR.raw = m;
-  if (!AR.sensor) { AR.sensor = true; AR.cam = AR.raw.cam; AR.up = AR.raw.up; arMsg(); }
+  if (typeof e.alpha !== 'number' || typeof e.beta !== 'number' || typeof e.gamma !== 'number') return;
+  const abs = e.absolute || e.type === 'deviceorientationabsolute', h = e.webkitCompassHeading, acc = e.webkitCompassAccuracy;
+  const t = performance.now();
+  if (typeof h === 'number' && h >= 0) {
+    const tgt = arWrap(360 - h - e.alpha), camAlt = Math.asin(Math.max(-1, Math.min(1, arFromEuler(e.alpha, e.beta, e.gamma).cam[2]))) / D2R;
+    const good = !(typeof acc === 'number') || (acc >= 0 && acc < 30);
+    // Mòbil dret (β ≈ 90°): alpha i gamma giren el mateix eix i l'iPhone els pot repartir de qualsevol manera; només si gamma és petit
+    const clear = Math.abs(e.beta) < 70 || Math.abs(e.gamma) < 25;
+    if (AR.off === null) { AR.off = tgt; AR.o0 = t; }  // la primera lectura, encara que no sigui perfecta: si no, no se sabria on és el nord
+    else if (good && clear && Math.abs(camAlt) < 45)  // el primer segon s'assenta de pressa (0,3 s); després, 2,5 s
+      AR.off = arWrap(AR.off + arWrap(tgt - AR.off) * (1 - Math.exp(-Math.min(500, t - (AR.ot || t)) / (t - AR.o0 < 1000 ? 300 : 2500))));
+  } else if (abs) AR.off = 0;  // Android: alpha ja és respecte al nord
+  else return;  // sense nord no es pot dibuixar res al seu lloc
+  AR.ot = t;
+  AR.ev = [e.alpha, e.beta, e.gamma];
+  if (!AR.sensor) { AR.sensor = true; arMsg(); }
   AR.dirty = true;
 }
 function arMsg() {
@@ -3737,13 +3749,9 @@ function arDraw() {
 function arFrame() {
   AR.raf = 0;
   if (!AR.on) return;
-  if (AR.sensor && AR.raw) {  // filtre pas-baix (els vectors, no els angles: així no salta de 359° a 0°)
-    const ts = performance.now(), dt = Math.min(200, ts - (AR.lt || ts)), k = 1 - Math.exp(-dt / 250);  // 250 ms, independent dels fps
-    AR.lt = ts;
-    const c = arNorm(AR.cam.map((x, i) => x + (AR.raw.cam[i] - x) * k)), u0 = AR.up.map((x, i) => x + (AR.raw.up[i] - x) * k);
-    const r = arNorm(arCross(c, u0)), u = arCross(r, c);
-    if (Math.abs(arDot(c, AR.cam) - 1) + Math.abs(arDot(u, AR.up) - 1) > 1e-7) AR.dirty = true;
-    AR.cam = c; AR.up = u;
+  if (AR.sensor && AR.ev) {  // l'última lectura, a cada fotograma (sense filtre: el giroscopi ja és suau)
+    const m = arFromEuler(AR.ev[0] + AR.off, AR.ev[1], AR.ev[2]);
+    AR.cam = m.cam; AR.up = m.up;
   }
   const tk = Math.floor(now() / 10000);
   if (tk !== AR.tick) { AR.tick = tk; AR.dirty = true; }
@@ -3768,7 +3776,7 @@ function arFovTrack() { const pc = ((AR_FOV - 60) / 80 * 100).toFixed(1); arFov.
 function arOpen() {
   if (AR.on) return;
   solPaint(true);
-  AR.on = true; AR.sensor = false; AR.raw = null; AR.lt = 0; AR.lastMsg = ''; AR.scrub = null; AR.dirty = true;
+  AR.on = true; AR.sensor = false; AR.ev = null; AR.off = null; AR.ot = 0; AR.lastMsg = ''; AR.scrub = null; AR.dirty = true;
   const sp = SUN.pos(now(), solD.lat, solD.lon);
   AR.az = sp.az; AR.el = Math.max(0, Math.min(25, sp.alt));  // sense sensors: mirant cap al sol, una mica per sobre l'horitzó
   AR.tmw = solDay(solD.b + 3600000, solD.lat, solD.lon).S.map(s => { const p = SUN.pos(s[0], solD.lat, solD.lon); return [s[0], p.az, p.alt]; });
