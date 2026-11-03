@@ -1,7 +1,7 @@
 /* ==== FESTIVAL ==== */
 // Tot el que canvia d'un festival a un altre és dins d'aquest bloc. Cada festival en té una còpia a
 // festivals/<id>/festival.js, i `python3 festival.py <id>` la posa aquí i copia els seus logos a img/.
-// ESBORRANY (03-11): branding del cartell de Black Hangar. Falten hores, escenaris i mapa (els ha de passar en Pau).
+// ESBORRANY (03-11): branding del cartell i horari d'en Pau. Falten importàncies, mapa i confirmar dies.
 const FEST = {
   id: 'duro-black-hangar-2026', // també separa els canvis de l'organització (changes.json) d'un festival a un altre
   key: 'duro',                  // prefix de les dades guardades al mòbil (preferits, avisos…): un de diferent per festival
@@ -19,23 +19,39 @@ const FEST = {
   nextHide: { stages: [], imp: [1] },
   impColors: true,
   impSize: true,
-  stageColors: false,
-  // Logos (opcional), pel nom exacte del cartell. Els dels dos dies del cartell:
-  logos: {
-    'Universo Makina': 'img/logo-makina.png',
-    '240 km/h': 'img/logo-240.png',
-  },
+  stageColors: true,
+  colorLogos: true,             // logos d'escenari amb el nom a sota, sense invertir
   rides: [],
-  // PENDENT: escenaris reals. De moment un de sol amb el logo de Black Hangar (img/hangar.png)
+  // Escenaris (horari d'en Pau, 03-11): el logo és img/<id>.png
   stages: [
-    { id: 'hangar', name: 'Black Hangar' },
+    { id: 'makina', name: 'Universo Makina' },
+    { id: 'km240', name: '240 km/h' },
   ],
-  // PENDENT: hores. Cartell per dies (cartel x dias): dissabte 5 = Universo Makina, diumenge 6 = 240 km/h, «y más artistas»
-  //   Sábado 5: Pastis and Buenri and Sisu [6 hours set] · Héctor Oaks aka DJ Kaos11 [Bakala set] · Cristian Varela [late 90's – early 00's set] · Carlos Perez & K-Style [Esencia del Norte 00's]
-  //   Domingo 6: Adrián Mills · Kuko · Clara Cuvé · Cloudy · Nikolina · Aerea [live]
-  //   Sense dia al cartell: Carnada · Anna Jevills · Inés Isla · H1pnos1s · Quince · Giø · Human Error · Føbia · Nhymph
+  // Horari: [inici, final, nom, importància 5 (vermell) … 1 (blau), 0 = sense color, subtítol]
+  // El final és l'inici del següent; l'últim, les 23:00. PENDENT: importàncies (de moment 0) i si és un dia o dos
   sets: {
-    hangar: [],
+    makina: [
+      ['11:00', '12:30', 'Nhymph', 0],
+      ['12:30', '13:30', 'Anna Jevills', 0],
+      ['13:30', '14:30', 'Cristian Varela', 0, 'Late 90’s – early 00’s set'],
+      ['14:30', '15:30', 'Carlos Perez & K-Style', 0, 'Esencia del Norte 00’s'],
+      ['15:30', '17:00', 'Héctor Oaks aka DJ Kaos11', 0, 'Bakala set'],
+      ['17:00', '23:00', 'Pastis & Buenri & Sisu', 0, '6 hours set'],
+    ],
+    km240: [
+      ['11:00', '12:00', 'Føbia', 0],
+      ['12:00', '13:00', 'Anna Jevills', 0],
+      ['13:00', '14:00', 'Inés Isla', 0],
+      ['14:00', '15:00', 'H1pnos1s b2b Quince', 0],
+      ['15:00', '16:00', 'Giø', 0],
+      ['16:00', '17:00', 'Human Error', 0],
+      ['17:00', '18:00', 'Carnada', 0],
+      ['18:00', '19:00', 'Adrián Mills', 0],
+      ['19:00', '20:00', 'Cloudy', 0],
+      ['20:00', '21:00', 'Aerea', 0, 'Live'],
+      ['21:00', '22:00', 'Clara Cuvé', 0],
+      ['22:00', '23:00', 'Kuko b2b Nikolina', 0],
+    ],
   },
 };
 /* ==== /FESTIVAL ==== */
