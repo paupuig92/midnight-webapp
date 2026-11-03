@@ -241,6 +241,10 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
 .upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
 .upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
+/* Un sol escenari: el seu logo a cada fila no aporta res (Black Hangar, en Pau 03-11) */
+.onestage .stlogo, .onestage .upnext .where { display: none; }
+.onestage .row:has(> .stlogo) { grid-template-columns: minmax(0, 1fr) auto; }
+.onestage .upnext li.it:has(> .stlogo) { grid-template-columns: minmax(0, 1fr) auto; }
 .upnext .where { display: block; font: 600 var(--fs-xs) var(--body); color: var(--muted); text-transform: none; letter-spacing: .02em; }
 .empty { color: var(--muted); font-size: var(--fs-s); padding: 10px 0; }
 .note { color: var(--muted); font-size: var(--fs-s); margin: 8px 0 0; }
@@ -1491,6 +1495,7 @@ if (MOVED && /github\.io$/.test(location.hostname)) {
 }
 if (FEST.colorLogos) document.documentElement.classList.add('colorlogos');
 document.getElementById('festName').textContent = FEST.name;
+document.body.classList.toggle('onestage', FEST.stages.length === 1);
 document.getElementById('banner').alt = FEST.banner;
 // Banner en vídeo (FEST.bannerVideo, opcional): un bucle curt sense so; mentre carrega (o sense vídeo) es veu img/banner.jpg
 if (FEST.bannerVideo) document.querySelectorAll('img.banner, .tvinfo > img').forEach(im => {
@@ -1905,7 +1910,7 @@ function rowHTML(s, t) {
   const list = SETS[s.id];
   const cur = list.find(x => t >= x.a && t < x.b);
   const nxt = list.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1925,7 +1930,7 @@ function rowMine(s, t) {
   const mine = SETS[s.id].filter(x => favs.has(x.id));
   const cur = mine.find(x => t >= x.a && t < x.b);
   const nxt = mine.find(x => x.a >= (cur ? cur.b : t));
-  const logo = bandImg(cur, 'logo') || `<img class="logo" src="img/${s.id}.png" alt="">`;
+  const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
@@ -1990,7 +1995,7 @@ function upHTML(t) {
   for (const x of list.slice(0, 6)) {
     if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b><span>${inDur(x.a - t)}</span></li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
-    <img class="logo" src="img/${x.s.id}.png" alt="">
+    <img class="logo stlogo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
     <span class="acts">${star(x)}</span></li>`;
   }
