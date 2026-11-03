@@ -35,8 +35,8 @@ fi
 EDTOK=$CONF/editor-token
 [[ -s $EDTOK ]] || EDTOK=$CONF/github-token
 [[ -s $CONF/admin-password && -s $EDTOK ]] || { echo "Falta la contrasenya ($CONF/admin-password) o el token de l'editor ($EDTOK)"; exit 1; }
-python3 -I -c 'import sys; sys.exit(0 if len(open(sys.argv[1], "rb").read().strip()) >= 12 else 1)' $CONF/admin-password || {
-  echo "ATURAT: la contrasenya de l'organització ha de tenir 12 caràcters o més (millor 4 paraules: cabra-llanterna-sofa-tren)."
+python3 -I -c 'import sys; sys.exit(0 if len(open(sys.argv[1], "rb").read().strip()) >= 8 else 1)' $CONF/admin-password || {
+  echo "ATURAT: la contrasenya de l'organització ha de tenir 8 caràcters o més, i que no sigui una paraula del diccionari."
   echo "Canvia-la amb:  read -rs 'p?Contrasenya nova: ' && print -rn -- \"\$p\" > $CONF/admin-password && chmod 600 $CONF/admin-password"
   exit 1; }
 

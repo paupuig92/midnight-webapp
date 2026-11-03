@@ -32,7 +32,7 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 
 ## Com funciona
 - L'app llegeix `changes.json` cada 60 s → tothom veu els canvis en 1–2 min. Si falla la connexió es queda l'últim horari bo i diu «sin conexión».
-- Editor «Organización» (des del 03-11-2026): la contrasenya s'envia al servidor d'avisos (`POST /admin/login`, 10 intents/15 min per IP) → sessió de 12 h → el servidor publica `changes.json`/`tasks.json` amb el seu token (secret `GH_TOKEN`, de `editor-token` o `github-token`). El token ja NO va dins la web. Contrasenya mínim 12 caràcters (`instala.sh` s'atura si no).
+- Editor «Organización» (des del 03-11-2026): la contrasenya s'envia al servidor d'avisos (`POST /admin/login`, 10 intents/15 min per IP) → sessió de 12 h → el servidor publica `changes.json`/`tasks.json` amb el seu token (secret `GH_TOKEN`, de `editor-token` o `github-token`). El token ja NO va dins la web. Contrasenya mínim 8 caràcters (`instala.sh` s'atura si no).
 - Seguretat: límits per IP a totes les rutes del servidor; CSP amb `<meta>` (build_web.py; si s'afegeix un domini extern cal afegir-lo a `CSP`); la llibreria d'Excel porta empremta SRI. Informe: https://claude.ai/artifact/XNtkYypUoSF1ucYDHBYUhh
 - Notificacions amb el mòbil bloquejat (iOS 16.4+, app a la pantalla d'inici): push sense contingut; el SW demana `/now`. Avisos dels meus artistes (X min abans) i dels canvis/avisos de l'organització. Provat i funcionant el 22-10.
 - Estat del servidor: `curl https://midnight-push.midnightgroup.workers.dev/` (nombre de mòbils). Detall: `/debug` amb capçalera `x-send-key` (llegir la clau des del fitxer amb un script, mai mostrar-la).
