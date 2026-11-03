@@ -81,7 +81,13 @@ _vars = {"--accent": FEST.get("accent"), "--accent-rgb": FEST.get("accentRgb"), 
 BG = _css(FEST.get("theme", {}).get("--bg", "#040704"))
 FESTCSS = "<style data-fest>/* colors i lletres del festival */\n" + "".join(
     f'@font-face{{font-family:"{_css(f["family"])}";src:url("img/{_css(f["file"])}");font-weight:{_css(f.get("weight", 400))};{"font-stretch:" + _css(f["stretch"]) + ";" if f.get("stretch") else ""}font-display:swap}}\n'
-    for f in FEST.get("fonts", [])) + ":root{" + ";".join(f"{k}:{_css(v)}" for k, v in _vars.items() if v) + "}</style>"
+    for f in FEST.get("fonts", [])) + ":root{" + ";".join(f"{k}:{_css(v)}" for k, v in _vars.items() if v) + "}" + (
+    # Mode clar (FEST.light, opcional): els seus colors ja al <head>, i un script mínim que posa el tema triat abans de pintar res
+    'html[data-theme="light"]{' + ";".join(f"{k}:{_css(v)}" for k, v in FEST["light"].items() if v) + ";color-scheme:light}" if FEST.get("light") else "") + "</style>"
+LIGHT_BG = _css(FEST["light"].get("--bg", "#ffffff")) if FEST.get("light") else ""
+TEMA_JS = ("<script>/* tema (Ajustes → Tema): Claro / Oscuro / Sistema; per defecte, fosc */ try { var t = localStorage.getItem(" + json.dumps(FEST["key"] + "-tema-v1")
+           + "), l = t === 'light' || (t === 'system' && matchMedia('(prefers-color-scheme: light)').matches); document.documentElement.dataset.theme = l ? 'light' : 'dark';"
+           + " if (l) { document.documentElement.style.colorScheme = 'light'; document.querySelector('meta[name=\"theme-color\"]').content = " + json.dumps(LIGHT_BG) + "; } } catch (e) {}</script>") if FEST.get("light") else ""
 
 page = f"""<!doctype html>
 <html lang="es">
@@ -91,6 +97,7 @@ page = f"""<!doctype html>
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="{BG}">
+{TEMA_JS}
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!-- «black» i no «black-translucent»: amb la barra translúcida, l'iOS 26 difumina sempre la franja de dalt (no hi ha manera de treure-ho des de la web) -->

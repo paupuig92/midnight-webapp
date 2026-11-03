@@ -18,6 +18,11 @@ const FEST = {
     '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
     '--title': '"Anybody", "Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
     '--mono': '"Martian Mono", ui-monospace, monospace' },
+  // Mode clar (opcional; cadascú tria a Ajustes → Tema): blanc trencat i negre, com el panell del 240 km/h del cartell.
+  // Els significats es mantenen: vermell = ara, groc = meus (més fosc perquè es vegi sobre blanc), lila = canvi
+  light: { '--bg': '#ececea', '--panel': '#fafaf8', '--ink': '#0b0c0e', '--muted': '#55585f', '--rule': '#cdced1', '--line': '#9fa1a6',
+    '--accent': '#0b0c0e', '--accent-rgb': '11, 12, 14', '--accent-dim': '#8e9095', '--accent-deep': '#dcdde0', '--accent-ink': '#fafaf8',
+    '--now': '#e0162b', '--fav': '#f2b200', '--fav-ink': '#8f6300', '--chg': '#8a6bff' },
   // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
     { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
@@ -139,5 +144,45 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
+`;
+// Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
+// el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
+FEST.lightCss = `
+html[data-theme="light"] { --plus: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%230b0c0e%27 stroke-width=%271.3%27/%3E%3C/svg%3E");
+  --plus-dim: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%230b0c0e%27 stroke-opacity=%27.5%27 stroke-width=%271.2%27/%3E%3C/svg%3E");
+  --plus-w: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%23fff%27 stroke-width=%271.3%27/%3E%3C/svg%3E");
+  --hair: rgba(11, 12, 14, .22); }
+html[data-theme="light"] body { background-image: radial-gradient(circle, rgba(11, 12, 14, .16) .8px, transparent 1.2px); }
+/* logos blancs (escenari, dies, final): en negre. El banner (vídeo negre): invertit, queda una targeta blanca amb el logo negre */
+html[data-theme="light"] img[src*="hangar.png"], html[data-theme="light"] img[src*="logo-"] { filter: invert(1); }
+html[data-theme="light"] .banner, html[data-theme="light"] .tvinfo > video, html[data-theme="light"] .tvinfo > img { filter: invert(1); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }  /* (invertida: una vora fosca fina) */
+html[data-theme="light"] .row.live { background: var(--plus-dim) left 5px top 5px / 8px no-repeat, var(--plus-dim) right 5px top 5px / 8px no-repeat,
+    radial-gradient(90% 120% at 82% -20%, rgba(11, 12, 14, .06), transparent 62%), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(11, 12, 14, .3), inset 3px 0 0 var(--sc, transparent); }
+/* «Quedan»: dissabte blau com el cartell (amb text i logo blancs); diumenge, blanc de punts com el panell del 240 km/h */
+html[data-theme="light"] .mascot { background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome-light.webp") center top / 100% auto no-repeat, var(--panel); }
+html[data-theme="light"][data-day="0"] .mascot { --ink: #f5f5f5; --muted: #c3cbff; color: var(--ink); box-shadow: none;
+  background: var(--plus-w) left 6px top 6px / 9px no-repeat, var(--plus-w) right 6px top 6px / 9px no-repeat,
+    var(--plus-w) left 6px bottom 6px / 9px no-repeat, var(--plus-w) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome.webp") center top / 100% auto no-repeat,
+    radial-gradient(130% 110% at 100% 0%, #2a3fd6 0%, #1426a0 38%, #0a1258 72%, #070b30 100%); }
+html[data-theme="light"][data-day="0"] .mascot img { filter: none; }
+html[data-theme="light"][data-day="0"] .mprog { background: rgba(255, 255, 255, .22); }
+html[data-theme="light"][data-day="0"] .mprog i { background: #fff; }
+html[data-theme="light"][data-day="1"] .mascot { box-shadow: inset 0 0 0 1px rgba(11, 12, 14, .28);
+  background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome-light.webp") center top / 100% auto no-repeat,
+    radial-gradient(circle, rgba(11, 12, 14, .2) .8px, transparent 1.2px) 0 0 / 9px 9px, linear-gradient(160deg, #ffffff, #f0f0ee 70%); }
+/* pestanyes de dia */
+html[data-theme="light"] .gdays button[aria-selected="true"]:not([data-d="0"]) { border-color: rgba(11, 12, 14, .75); background: var(--panel); }
+html[data-theme="light"] .gdays button[data-d="0"][aria-selected="true"] { color: #fff; }
+html[data-theme="light"] .gdays button[data-d="0"][aria-selected="true"] .dlogo { filter: none; }
+/* graella: el concert d'ara amb vora negra */
+html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0 0 14px rgba(11, 12, 14, .18); }
+/* terra de reixa i feix: en fosc sobre clar */
+html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/deco-floor-light.webp") center bottom / cover no-repeat; }
 `;
 /* ==== /FESTIVAL ==== */

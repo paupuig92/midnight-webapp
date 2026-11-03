@@ -632,6 +632,10 @@ PAIRS = [
     ("`Día ${dayAt(t) + 1}`", "`Dia ${dayAt(t) + 1}`"),
     ("<span id=\"tkDays\" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día.</span>",
      "<span id=\"tkDays\" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia.</span>"),
+    # Tema (Ajustes → Tema), només festivals amb FEST.light
+    ('aria-pressed="false">Claro</button>', 'aria-pressed="false">Clar</button>'),
+    ('aria-pressed="false">Oscuro</button>', 'aria-pressed="false">Fosc</button>'),
+    ('<p class="note" style="margin:0">«Sistema» sigue el modo claro u oscuro del móvil.</p>', '<p class="note" style="margin:0">«Sistema» segueix el mode clar o fosc del mòbil.</p>'),
 ]
 
 

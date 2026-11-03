@@ -84,7 +84,7 @@ button { font: inherit; color: inherit; }
 .chip[aria-pressed="true"] { background: var(--fav); border-color: var(--fav); color: #1a1400; }
 .round { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
 .star { font-size: 20px; line-height: 1; color: var(--muted); }
-.star[aria-pressed="true"] { color: var(--fav); border-color: var(--fav); }
+.star[aria-pressed="true"] { color: var(--fav-ink, var(--fav)); border-color: var(--fav-ink, var(--fav)); }
 .acts { display: flex; gap: 10px; align-items: center; }
 
 /* Capçalera */
@@ -151,7 +151,7 @@ header.hero { display: flex; flex-direction: column; gap: 6px; border-bottom: 2p
 .minibar .mclock { font: 900 22px/1 var(--title); font-stretch: 125%; color: var(--accent); font-variant-numeric: tabular-nums; }
 .minibar .mnext { flex: 1; min-width: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
 .minibar .round { width: 38px; height: 38px; }
-.minibar .mnext b { color: var(--fav); }
+.minibar .mnext b { color: var(--fav-ink, var(--fav)); }
 .minibar .sim-badge { min-height: 28px; padding: 0 9px; white-space: nowrap; }
 /* En mòbil no hi cap «PRUEBA ✕» al costat del logo: el rellotge mateix es posa a ratlles vermelles i, si el toques, surts del Modo prueba */
 @media (max-width: 439px) { .minibar .sim-badge { display: none !important; } .minibar.simon .mclock { background: repeating-linear-gradient(45deg, var(--mid-red) 0 7px, #a81627 7px 14px); color: #fff; border-radius: 99px; padding: 6px 9px; cursor: pointer; } }
@@ -214,7 +214,7 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .sheet header { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--accent);
   padding: calc(env(safe-area-inset-top, 0px) + 8px) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
 .sheet header h2 { font-size: var(--fs-l); }
-.sheet header h2 span { color: var(--fav); }
+.sheet header h2 span { color: var(--fav-ink, var(--fav)); }
 .sheet .body { flex: 1; overflow: auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 90px) max(16px, env(safe-area-inset-left, 0px)); overscroll-behavior: contain; }
 .sheet .foot { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); display: flex; justify-content: center;
   padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 14px); }
@@ -224,11 +224,11 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .pick li { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--rule); }
 .pick li .tm { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
 .pick li .nm { font: 800 var(--fs-s)/1.15 var(--display); text-transform: uppercase; overflow-wrap: break-word; min-width: 0; }
-.pick li.on .nm { color: var(--fav); }
+.pick li.on .nm { color: var(--fav-ink, var(--fav)); }
 .pick .pastnote { color: var(--muted); font-size: var(--fs-xs); margin: 12px 0 0; }
 
 /* Mode "Solo mis artistas": a la graella la resta queda apagada (es pot tocar per afegir-la) */
-.mine-mode .blk.on:not(.fav) { background: #000; border-color: var(--accent-dim); }
+.mine-mode .blk.on:not(.fav) { background: var(--cell, #000); border-color: var(--accent-dim); }
 .mine-mode .blk:not(.fav) { opacity: .45; }
 
 /* A continuación: agrupat per hora */
@@ -237,7 +237,7 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .upnext li.grp b { font-size: var(--fs-m); }
 .upnext li.grp span { font-size: var(--fs-s); color: var(--accent); }
 .upnext li.it { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
-.upnext li.fav .who { color: var(--fav); }
+.upnext li.fav .who { color: var(--fav-ink, var(--fav)); }
 .upnext img.logo { width: 52px; height: 26px; object-fit: contain; filter: invert(1) hue-rotate(180deg); }
 .upnext .who { font: 900 var(--fs-m)/1.15 var(--display); font-stretch: 104%; text-transform: uppercase; min-width: 0; }
 .upnext .who .nmc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: break-word; }
@@ -307,7 +307,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
 .gut .nowlbl { left: 2px; right: 2px; text-align: center; background: #e8253a; color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
 .col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
-.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); cursor: pointer; touch-action: manipulation;
+.blk { position: absolute; left: 3px; right: 3px; border: 1.5px solid var(--accent-dim); background: var(--cell, #000); border-radius: 4px; color: var(--ink); cursor: pointer; touch-action: manipulation;
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2px 5px 2px 9px; overflow: hidden; gap: 1px; }
 .blk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--tc, transparent); }
 .blk > span { position: relative; z-index: 1; display: block; max-width: 100%; }
@@ -320,7 +320,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 /* Importància per mida (impColors: false): concerts destacats, el que hi ha entre concerts més discret */
 .blk.main { border-width: 2px; }
 .blk.main .n { font-size: 14px; }
-.blk.main:not(.on):not(.past):not(.fav) { background: color-mix(in srgb, var(--accent) 14%, #000); }
+.blk.main:not(.on):not(.past):not(.fav) { background: color-mix(in srgb, var(--accent) 14%, var(--cell, #000)); }
 .blk.minor:not(.on):not(.fav) { background: transparent; border-style: dashed; border-color: color-mix(in srgb, var(--muted) 45%, var(--bg)); }
 .blk.minor .n { font-size: 10.5px; font-weight: 700; }
 .blk.minor.on .n { font-size: 12px; }
@@ -346,7 +346,7 @@ body.offline .status::after { content: " · sin conexión (horario guardado)"; c
 .blk .pl { position: absolute; left: 0; right: 0; height: 2px; background: var(--now); opacity: .7; z-index: 0; display: none; }
 .blk.on .pl { display: block; }
 .blk.fav { border-color: var(--fav); }
-.blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav); font-size: 12px; line-height: 1; z-index: 1; }
+.blk.fav::after { content: "★"; position: absolute; top: 1px; right: 3px; color: var(--fav-ink, var(--fav)); font-size: 12px; line-height: 1; z-index: 1; }
 .blk.on.fav::after { color: var(--accent-ink); }
 .blk.chg { border-style: dashed; border-color: var(--chg); box-shadow: inset 0 0 0 2px var(--chg); }
 .blk.chg.on { box-shadow: inset 0 0 0 2px var(--chg), 0 0 14px rgba(var(--accent-rgb), .45); }
@@ -492,7 +492,7 @@ body.locked .totop { opacity: 0; transform: translateY(12px); pointer-events: no
 @media (min-width: 760px) {
   .sheet { left: 50%; right: auto; width: 720px; transform: translateX(-50%); border-inline: 1px solid var(--rule); box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .65); }
 }
-.blk.ridesblk.lane.on { border-width: 1.5px; border-color: var(--accent-dim); box-shadow: none; background: color-mix(in srgb, var(--accent) 7%, #000); }
+.blk.ridesblk.lane.on { border-width: 1.5px; border-color: var(--accent-dim); box-shadow: none; background: color-mix(in srgb, var(--accent) 7%, var(--cell, #000)); }
 .minibar .mnext br { display: none; }
 .minibar .mnext b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sim input[type=checkbox] { flex: none; }
@@ -556,7 +556,7 @@ body { padding-top: var(--edge); }
 .upnext .where { color: var(--sc); font: 800 11.5px/1.3 var(--display); text-transform: uppercase; letter-spacing: .05em; }
 .hd, .colorlogos .hd { border-bottom: 4px solid var(--sc, var(--accent)); }
 .colorlogos .hd.color span { color: var(--sc); }
-.col .blk:not(.on):not(.fav):not(.chg):not(.past) { border-color: color-mix(in srgb, var(--sc) 55%, #000); }
+.col .blk:not(.on):not(.fav):not(.chg):not(.past) { border-color: color-mix(in srgb, var(--sc) 55%, var(--cell, #000)); }
 .pick h3 { color: var(--sc, var(--muted)); font-size: 13px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--sc, var(--rule)); padding-bottom: 4px; }
 .pick h3 img { width: 34px; height: 28px; object-fit: contain; }
 /* Mis artistas: filtrar i triar, junts */
@@ -847,12 +847,12 @@ li.tk.free .tkt { color: var(--muted); }
 .tg { display: grid; grid-template-rows: auto auto; position: relative; }
 .tgh { grid-row: 1; position: sticky; top: 0; z-index: 7; background: var(--bg); border-bottom: 1px solid var(--rule); padding: 8px 4px; font: 900 12px/1.1 var(--cond); text-transform: uppercase; text-align: center; overflow-wrap: anywhere; }
 .tgh:first-child { left: 0; z-index: 8; }
-.tgh.me { color: var(--fav); }
+.tgh.me { color: var(--fav-ink, var(--fav)); }
 .tgc { grid-row: 2; position: relative; border-left: 1px solid var(--rule); }
 .tgc > .hl { position: absolute; left: 0; right: 0; height: 1px; background: var(--rule); pointer-events: none; }
 .tgb.past { opacity: .4; }
 li.tk.past .tkn, li.tk.past .tkt { opacity: .45; }
-.tgb { position: absolute; box-sizing: border-box; border: 1.5px solid var(--accent-dim); background: #000; border-radius: 4px; color: var(--ink); padding: 3px 5px; overflow: hidden; text-align: left; font: inherit; display: flex; flex-direction: column; gap: 1px; cursor: default; }
+.tgb { position: absolute; box-sizing: border-box; border: 1.5px solid var(--accent-dim); background: var(--cell, #000); border-radius: 4px; color: var(--ink); padding: 3px 5px; overflow: hidden; text-align: left; font: inherit; display: flex; flex-direction: column; gap: 1px; cursor: default; }
 .tgb.mine { cursor: pointer; border-color: var(--fav); }
 .tgb .tt { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .tgb .tn { font: 800 12px/1.1 var(--body); overflow-wrap: anywhere; }
@@ -874,11 +874,11 @@ li.tk.past .tkn, li.tk.past .tkt { opacity: .45; }
 .tgall h3 { margin: 0 0 6px; font: 900 var(--fs-s)/1.1 var(--cond); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .tgall h3 b { color: var(--accent); font-variant-numeric: tabular-nums; }
 .tgall-l { display: grid; gap: 6px; }
-.tgai { display: grid; grid-template-columns: 22px 1fr; gap: 2px 8px; align-items: start; text-align: left; width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--accent-dim); background: #000; color: var(--ink); font: inherit; cursor: default; }
+.tgai { display: grid; grid-template-columns: 22px 1fr; gap: 2px 8px; align-items: start; text-align: left; width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--accent-dim); background: var(--cell, #000); color: var(--ink); font: inherit; cursor: default; }
 .tgai.mine { border-color: var(--fav); cursor: pointer; }
 .tgai:not(.mine) > i { visibility: hidden; }  /* les dels altres no es poden marcar */
 .tgai i { grid-row: span 2; width: 18px; height: 18px; border-radius: 5px; border: 2px solid currentColor; font-style: normal; font-size: 12px; line-height: 15px; text-align: center; color: var(--muted); }
-.tgai.mine i { color: var(--fav); }
+.tgai.mine i { color: var(--fav-ink, var(--fav)); }
 .tgai.done i { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .tgai.done .tn { text-decoration: line-through; opacity: .6; }
 .tgai .tn { font: 800 var(--fs-s)/1.2 var(--body); }
@@ -892,13 +892,13 @@ li.tk.past .tkn, li.tk.past .tkt { opacity: .45; }
 .tgnone { margin: 0 0 8px; }
 /* Importants («!» al davant de la tasca, o «important» al text): fons i vora magenta, que es vegin d'una ullada */
 /* Important: color del festival (el lila és «canvi» i l'estrella «meus artistes») i per sobre del bloc del costat */
-.tgb.tc, .tgai.tc { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 20%, #000); }
-.tgb.tc .tt { color: color-mix(in srgb, var(--tc) 60%, #fff); }
+.tgb.tc, .tgai.tc { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 20%, var(--cell, #000)); }
+.tgb.tc .tt { color: color-mix(in srgb, var(--tc) 60%, var(--cell-ink, #fff)); }
 li.tk.tc { box-shadow: inset 4px 0 0 var(--tc); }
-.tgb.tkhi, .tgai.tkhi { background: color-mix(in srgb, var(--accent) 22%, #000); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); z-index: 4; }
-.tgb.tkhi .tt { color: #fff; font-weight: 800; }
+.tgb.tkhi, .tgai.tkhi { background: color-mix(in srgb, var(--accent) 22%, var(--cell, #000)); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); z-index: 4; }
+.tgb.tkhi .tt { color: var(--cell-ink, #fff); font-weight: 800; }
 .tkx { color: var(--accent); font-weight: 900; }
-.tgsub.tkhi { color: #fff; font-weight: 900; }
+.tgsub.tkhi { color: var(--cell-ink, #fff); font-weight: 900; }
 .tgsub.tkhi::before { content: "! "; color: var(--accent); }
 .tgrail span { position: sticky; top: 44px; display: block; writing-mode: vertical-rl; white-space: nowrap; font: 800 10px/12px var(--body); padding: 6px 0; }
 .tgnow { position: absolute; grid-row: 2; left: 0; right: 0; height: 0; border-top: 3px solid var(--now); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--now) 60%, transparent); margin-top: -1.5px; z-index: 1; pointer-events: none; }  /* fila 2: si no, queda per sobre (l'alçada de la capçalera) */
@@ -1087,6 +1087,13 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 #tgTeam { margin-right: 0; max-width: 100%; }
 /* Menys taronja: temps relatius i etiquetes en gris; el color queda per a «ara», l'acció principal i els comptadors */
 .upnext li.grp span { color: var(--muted); }
+/* Mode clar (només festivals amb FEST.light: html[data-theme="light"]). Les cel·les de la graella i de Tareas, l'interruptor apagat
+   i el fons dels fulls, que per defecte són negres fixos. La resta surt dels colors de FEST.light i de FEST.lightCss */
+html[data-theme="light"] { --cell: var(--panel); --cell-ink: var(--ink); }
+html[data-theme="light"] .tools .switch:not([aria-pressed="true"])::after { background: radial-gradient(circle at 14px 50%, #fff 10px, transparent 10.5px), #c5c7cb; box-shadow: inset 0 0 0 1.5px #b3b5b9; }
+/* groc (meus artistes) sobre clar: els textos i les estrelles amb --fav-ink (més fosc); el bloc de la graella, tenyit de groc */
+html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(--fav) 16%, var(--panel)); }
+.temasel .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
 </style>
 
@@ -1304,6 +1311,11 @@ li.tk.late .tkchk::before { border-color: var(--now); }
         <div class="hint" id="wakeHint" hidden></div>
       </div>
     </div>
+    <div class="temasel cgrp" role="group" aria-labelledby="temaH" id="temaGrp" hidden>
+      <h3 id="temaH" class="ch">Tema</h3>
+      <div class="row2"><button class="btn" type="button" data-tema="light" aria-pressed="false">Claro</button><button class="btn" type="button" data-tema="dark" aria-pressed="false">Oscuro</button><button class="btn" type="button" data-tema="system" aria-pressed="false">Sistema</button></div>
+      <p class="note" style="margin:0">«Sistema» sigue el modo claro u oscuro del móvil.</p>
+    </div>
     <div class="notif cgrp" role="group" aria-labelledby="notifH">
       <h3 id="notifH" class="ch">Notificaciones</h3>
       <div class="row2">
@@ -1438,6 +1450,11 @@ const FEST = {
     '--display': '"Nimbus", "Helvetica Neue", sans-serif', '--body': '"Nimbus", "Helvetica Neue", sans-serif',
     '--title': '"Anybody", "Nimbus", "Helvetica Neue", sans-serif', '--cond': '"Nimbus Cond", "Nimbus", sans-serif',
     '--mono': '"Martian Mono", ui-monospace, monospace' },
+  // Mode clar (opcional; cadascú tria a Ajustes → Tema): blanc trencat i negre, com el panell del 240 km/h del cartell.
+  // Els significats es mantenen: vermell = ara, groc = meus (més fosc perquè es vegi sobre blanc), lila = canvi
+  light: { '--bg': '#ececea', '--panel': '#fafaf8', '--ink': '#0b0c0e', '--muted': '#55585f', '--rule': '#cdced1', '--line': '#9fa1a6',
+    '--accent': '#0b0c0e', '--accent-rgb': '11, 12, 14', '--accent-dim': '#8e9095', '--accent-deep': '#dcdde0', '--accent-ink': '#fafaf8',
+    '--now': '#e0162b', '--fav': '#f2b200', '--fav-ink': '#8f6300', '--chg': '#8a6bff' },
   // Tipografia de la marca: Nimbus Sans L (branding de Duro 5 i el full «duro-festival-tipografies»)
   fonts: [
     { family: 'Nimbus', file: 'NimbusSanL-Regu.woff2', weight: '300 500' },
@@ -1560,11 +1577,72 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
 `;
+// Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
+// el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
+FEST.lightCss = `
+html[data-theme="light"] { --plus: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%230b0c0e%27 stroke-width=%271.3%27/%3E%3C/svg%3E");
+  --plus-dim: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%230b0c0e%27 stroke-opacity=%27.5%27 stroke-width=%271.2%27/%3E%3C/svg%3E");
+  --plus-w: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2711%27 height=%2711%27%3E%3Cpath d=%27M5.5 0v11M0 5.5h11%27 stroke=%27%23fff%27 stroke-width=%271.3%27/%3E%3C/svg%3E");
+  --hair: rgba(11, 12, 14, .22); }
+html[data-theme="light"] body { background-image: radial-gradient(circle, rgba(11, 12, 14, .16) .8px, transparent 1.2px); }
+/* logos blancs (escenari, dies, final): en negre. El banner (vídeo negre): invertit, queda una targeta blanca amb el logo negre */
+html[data-theme="light"] img[src*="hangar.png"], html[data-theme="light"] img[src*="logo-"] { filter: invert(1); }
+html[data-theme="light"] .banner, html[data-theme="light"] .tvinfo > video, html[data-theme="light"] .tvinfo > img { filter: invert(1); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }  /* (invertida: una vora fosca fina) */
+html[data-theme="light"] .row.live { background: var(--plus-dim) left 5px top 5px / 8px no-repeat, var(--plus-dim) right 5px top 5px / 8px no-repeat,
+    radial-gradient(90% 120% at 82% -20%, rgba(11, 12, 14, .06), transparent 62%), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(11, 12, 14, .3), inset 3px 0 0 var(--sc, transparent); }
+/* «Quedan»: dissabte blau com el cartell (amb text i logo blancs); diumenge, blanc de punts com el panell del 240 km/h */
+html[data-theme="light"] .mascot { background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome-light.webp") center top / 100% auto no-repeat, var(--panel); }
+html[data-theme="light"][data-day="0"] .mascot { --ink: #f5f5f5; --muted: #c3cbff; color: var(--ink); box-shadow: none;
+  background: var(--plus-w) left 6px top 6px / 9px no-repeat, var(--plus-w) right 6px top 6px / 9px no-repeat,
+    var(--plus-w) left 6px bottom 6px / 9px no-repeat, var(--plus-w) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome.webp") center top / 100% auto no-repeat,
+    radial-gradient(130% 110% at 100% 0%, #2a3fd6 0%, #1426a0 38%, #0a1258 72%, #070b30 100%); }
+html[data-theme="light"][data-day="0"] .mascot img { filter: none; }
+html[data-theme="light"][data-day="0"] .mprog { background: rgba(255, 255, 255, .22); }
+html[data-theme="light"][data-day="0"] .mprog i { background: #fff; }
+html[data-theme="light"][data-day="1"] .mascot { box-shadow: inset 0 0 0 1px rgba(11, 12, 14, .28);
+  background: var(--plus) left 6px top 6px / 9px no-repeat, var(--plus) right 6px top 6px / 9px no-repeat,
+    var(--plus) left 6px bottom 6px / 9px no-repeat, var(--plus) right 6px bottom 6px / 9px no-repeat,
+    url("img/deco-dome-light.webp") center top / 100% auto no-repeat,
+    radial-gradient(circle, rgba(11, 12, 14, .2) .8px, transparent 1.2px) 0 0 / 9px 9px, linear-gradient(160deg, #ffffff, #f0f0ee 70%); }
+/* pestanyes de dia */
+html[data-theme="light"] .gdays button[aria-selected="true"]:not([data-d="0"]) { border-color: rgba(11, 12, 14, .75); background: var(--panel); }
+html[data-theme="light"] .gdays button[data-d="0"][aria-selected="true"] { color: #fff; }
+html[data-theme="light"] .gdays button[data-d="0"][aria-selected="true"] .dlogo { filter: none; }
+/* graella: el concert d'ara amb vora negra */
+html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0 0 14px rgba(11, 12, 14, .18); }
+/* terra de reixa i feix: en fosc sobre clar */
+html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/deco-floor-light.webp") center bottom / cover no-repeat; }
+`;
 /* ==== /FESTIVAL ==== */
 
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
   document.documentElement.style.setProperty(k, v);
 for (const [k, v] of Object.entries(FEST.theme || {})) document.documentElement.style.setProperty(k, v);  // colors de base propis (opcional)
+// Tema clar (FEST.light, opcional): colors per al mode clar, com «theme». Cadascú tria a Ajustes → Tema: Claro / Oscuro / Sistema
+// (per defecte Oscuro). L'html porta data-theme="light" o "dark" i el CSS del festival (FEST.lightCss) hi penja. Sense FEST.light, res no canvia
+const TEMAK = FEST.key + '-tema-v1', mqLight = matchMedia('(prefers-color-scheme: light)');
+let TEMA = 'dark';
+try { const v = localStorage.getItem(TEMAK); if (/^(light|dark|system)$/.test(v)) TEMA = v; } catch (e) {}
+function applyTheme() {
+  if (!FEST.light) return;
+  const root = document.documentElement, light = TEMA === 'light' || (TEMA === 'system' && mqLight.matches);
+  const base = { '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk, ...(FEST.theme || {}) };
+  for (const k of new Set([...Object.keys(base), ...Object.keys(FEST.light)])) {
+    const v = light && FEST.light[k] ? FEST.light[k] : base[k];
+    if (v) root.style.setProperty(k, v); else root.style.removeProperty(k);
+  }
+  root.dataset.theme = light ? 'light' : 'dark';
+  root.style.colorScheme = light ? 'light' : 'dark';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = getComputedStyle(root).getPropertyValue('--bg').trim() || m.content;
+  document.querySelectorAll('.temasel [data-tema]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tema === TEMA)));
+}
+applyTheme();
+if (FEST.light) mqLight.addEventListener('change', () => { if (TEMA === 'system') applyTheme(); });
 if (FEST.fonts && !document.querySelector('style[data-fest]')) document.head.insertAdjacentHTML('beforeend', `<style>${FEST.fonts.map(f =>
   `@font-face{font-family:"${f.family}";src:url("img/${f.file}");font-weight:${f.weight || 400};font-display:swap}`).join('')}</style>`);
 document.title = FEST.name;
@@ -1626,8 +1704,9 @@ if (DECO.sheet) { const n = document.querySelector('#sheet .body .note'); n.clas
 if (DECO.empty || DECO.done) { const re = document.getElementById('rowsEmpty'); re.classList.add('withdeco'); re.innerHTML = '<img alt="" hidden><span></span>'; }
 // Estil propi del festival (FEST.css, opcional): CSS que només fa servir aquest festival (creus, textures, etiquetes…).
 // Va al final de tot perquè mani sobre l'estil general; l'html porta la classe «fcss». Sense FEST.css, res no canvia
-if (FEST.css && !document.querySelector('style[data-fest-css]')) {
-  const st = document.createElement('style'); st.dataset.festCss = ''; st.textContent = FEST.css;
+// FEST.lightCss (opcional, amb FEST.light): les regles del mode clar, amb selectors html[data-theme="light"] …
+if ((FEST.css || (FEST.light && FEST.lightCss)) && !document.querySelector('style[data-fest-css]')) {
+  const st = document.createElement('style'); st.dataset.festCss = ''; st.textContent = (FEST.css || '') + (FEST.light && FEST.lightCss || '');
   document.body.append(st); document.documentElement.classList.add('fcss');
 }
 
@@ -2443,6 +2522,16 @@ simOn.addEventListener('change', applySim);
 simRange.addEventListener('input', applySim);
 document.getElementById('simSteps').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) setSim(+simRange.value + b.dataset.d * MIN); });
 // Moments típics per provar: abans d'obrir, obertura, meitat, canvi d'hora (si n'hi ha) i tancament
+// Tema (només festivals amb FEST.light): Claro / Oscuro / Sistema, guardat en aquest mòbil
+if (FEST.light) {
+  document.getElementById('temaGrp').hidden = false;
+  for (const b of document.querySelectorAll('.temasel [data-tema]')) b.addEventListener('click', () => {
+    TEMA = b.dataset.tema;
+    try { localStorage.setItem(TEMAK, TEMA); } catch (e) {}
+    applyTheme();
+  });
+  applyTheme();
+}
 for (const a of document.querySelectorAll('.langsel [data-lang]')) {
   if (a.dataset.lang === LANG) a.setAttribute('aria-current', 'true');
   a.addEventListener('click', () => { try { localStorage.setItem('midnight-lang', a.dataset.lang); } catch (e) {} });
