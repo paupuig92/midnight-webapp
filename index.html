@@ -636,6 +636,7 @@ body:not(.pro):not(.tvon) .imp, body:not(.pro):not(.tvon) .fx, body:not(.pro):no
 .edtabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 6px; }
 .edtabs button { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
 .edtabs button span { color: var(--muted); font-weight: 600; margin-left: 2px; }
+.gdays[hidden] { display: none; }
 .edtabs button[aria-selected="true"] { border-color: var(--sc, var(--accent)); background: color-mix(in srgb, var(--sc, var(--accent)) 22%, transparent); }
 .edhelp { margin: 4px 0 0; }
 .edrow { padding: 0; gap: 0; overflow: hidden; }
@@ -1161,6 +1162,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
 
   <section id="horario">
     <h2 style="margin-bottom:10px">Horario</h2>
+    <div class="edtabs gdays" id="gdays" role="tablist" aria-label="Día" hidden></div>
     <div class="tlbox"><div class="tl-wrap" id="tlwrap"><div class="tl" id="tl" lang="es"></div></div></div>
     <p class="legend" id="gridLegend">Línea roja = ahora. Las 2:00 salen dos veces por el cambio de hora (1ª y 2ª).</p>
     <p class="legend upd" id="updated" hidden></p>
@@ -1249,7 +1251,7 @@ li.tk.late .tkchk::before { border-color: var(--now); }
         <details class="tktx"><summary>Tareas como texto</summary>
         <label for="tkList">Tareas (una por línea: hora, tarea y @quién)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Montar cámaras @audiovisual&#10;18:30 Grabar la entrada de Catarres @Marc @Laia&#10;20:00-20:30 Cambiar baterías @Marc&#10;23:00 Foto de grupo @todos" spellcheck="false"></textarea>
-        <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.</p>
+        <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.<span id="tkDays" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día.</span></p>
         </details>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Guardar y publicar</button></div>
@@ -1576,13 +1578,15 @@ function wallOf(ms) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
 }
 const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
+// Festivals de diversos dies (FEST.days): «2/11:00» = les 11:00 del 2n dia; «11:00» sol = el 1r
+const NDAYS = Math.max(1, (FEST.days || []).length);
 function T(s) {
-  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  const m = String(s).match(/^(?:(\d)\/)?(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
-  const h = +m[1], mi = +m[2], f = m[3];
-  if (h > 23 || mi > 59) return NaN;
+  const dd = m[1] ? +m[1] - 1 : 0, h = +m[2], mi = +m[3], f = m[4];
+  if (h > 23 || mi > 59 || dd < 0 || dd >= NDAYS) return NaN;
   const [Y, M, D] = FEST.date;
-  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  const wall = Date.UTC(Y, M - 1, D + dd + (h * 60 + mi < START_M ? 1 : 0), h, mi);
   // Espanya és UTC+1 o UTC+2: es miren les dues possibilitats
   const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
   return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
@@ -1608,7 +1612,12 @@ const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =
   [id, arr.map(([a, b, n, t, sub, fx], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx) }))]));
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 
-const T0 = T(FEST.start), TEND0 = T(FEST.end);
+// Cada dia, de FEST.start a FEST.end. T0 = obertura del 1r dia, TEND0 = final de l'últim
+const dpre = d => d ? `${d + 1}/` : '';
+const DAYS = Array.from({ length: NDAYS }, (_, d) => ({ d, t0: T(dpre(d) + FEST.start), tend0: T(dpre(d) + FEST.end), name: (FEST.days || [])[d] || '' }));
+const T0 = DAYS[0].t0, TEND0 = DAYS[NDAYS - 1].tend0;
+// Dia d'una hora: el de l'última obertura que ja ha passat (abans d'obrir el 1r dia, el 1r)
+const dayAt = t => DAYS.reduce((a, x) => t >= x.t0 ? x.d : a, 0);
 // Atraccions (abans només n'hi havia una, com a objecte)
 const RIDE_LIST = [].concat(FEST.rides || []).map((r, i) => ({ ...r, i, a: T(r.from), b: T(r.to) }));
 const RIDES_NAME = FEST.ridesName || (RIDE_LIST.length === 1 ? RIDE_LIST[0].name : 'Atracciones');
@@ -1617,7 +1626,15 @@ const W0 = T('02:00a'), DUP = T('02:00b'), DST = DUP !== W0, W1 = DST ? T('03:00
 const MIN = 60000, PAD = 12;
 let PX = 1.6;  // px per minut (la pinça ho canvia)
 let TEND = TEND0, H = 0;  // si l'organització allarga una actuació més enllà de les 5:00, el festival s'allarga amb ella
-const y = t => PAD + (t - T0) / MIN * PX;
+// Graella: amb diversos dies només se'n veu un (G0–GEND). GDAY = el dia que es veu; gPick = l'ha triat la persona
+let GDAY = 0, G0 = T0, GEND = TEND0, gPick = false;
+const y = t => PAD + (t - G0) / MIN * PX;
+// Final d'un dia: el seu, o més tard si l'organització hi allarga una actuació (el del darrer dia és TEND)
+const dayEnd = d => d === NDAYS - 1 ? TEND : Math.max(DAYS[d].tend0, ...ALL.filter(x => dayAt(x.a) === d).map(x => x.b));
+function setGridDay(d) { GDAY = d; G0 = DAYS[d].t0; GEND = dayEnd(d); H = (GEND - G0) / MIN * PX; }
+// Entre dos dies: el dia que ve (o -1 si no és entre dies)
+const gapNext = t => { const d = dayAt(t); return d < NDAYS - 1 && t >= dayEnd(d) ? d + 1 : -1; };
+const autoDay = t => { const g = gapNext(t); return g >= 0 ? g : dayAt(t); };
 
 // Idioma: aquesta és la versió en castellà; build_web.py en genera la catalana (ca.html) amb i18n_ca.py
 const LANG = 'es';
@@ -1633,6 +1650,13 @@ const hm = t => fmtHM.format(t);
 // Entre les 2:00 i les 3:00 l'hora passa dues vegades: s'hi afegeix (1ª) o (2ª)
 const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
+// Amb diversos dies, davant el nom curt del dia («Domingo 14:00»)
+// (el dia de calendari: les 00:30 de la nit de dissabte ja són diumenge)
+const lblD = t => {
+  if (NDAYS < 2) return lbl(t);
+  const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
+  return `${x && x.name ? x.name.split(' ')[0] : new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(t).replace(/^./, c => c.toUpperCase())} ${lbl(t)}`;
+};
 const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
@@ -1698,7 +1722,7 @@ function load(raw) {
   GONE = raw === DEFAULT_RAW ? [] : STAGES.flatMap(s => (DEFAULT_RAW[s.id] || []).filter(r => !BYID[r.id])
     .map(r => ({ id: r.id, s, a: T(r.a), b: T(r.b), n: String(r.n), gone: true }))).sort((x, y) => x.a - y.a);
   TEND = Math.max(TEND0, ...all.map(x => x.b));
-  H = (TEND - T0) / MIN * PX;
+  setGridDay(GDAY);
 }
 load(DEFAULT_RAW);
 
@@ -1771,22 +1795,23 @@ function buildGrid() {
     : `<div class="hd rides">${RIMG ? `<img src="${esc(RIMG)}" alt="">` : RIDE_SVG}${html(RIDES_NAME)}</div>`;
   g += '<div class="hdend"></div>';
   g += `<div class="gut" style="height:${H + 2 * PAD}px">`;
-  for (let t = T0; t <= TEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
+  for (let t = G0; t <= GEND; t += 60 * MIN) g += `<span ${DST && t === W0 ? 'data-n="1ª"' : DST && t === DUP ? 'data-n="2ª"' : ''} style="top:${y(t)}px">${hm(t)}</span>`;
   g += '<span class="nowlbl" id="nowlbl" hidden></span></div>';
   STAGES.forEach((s, i) => {
     const bg = `background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;`;
     g += `<div class="col" style="--sc:${s.color};grid-column:${i + 2};height:${H + 2 * PAD}px;${bg}background-color:color-mix(in srgb, var(--sc) 6%, transparent)">`;
-    for (const x of SETS[s.id]) {
-      const top = y(Math.max(x.a, T0)), h = y(Math.min(x.b, TEND)) - top;
+    const day = SETS[s.id].filter(x => dayAt(x.a) === GDAY);
+    for (const x of day) {
+      const top = y(Math.max(x.a, G0)), h = y(Math.min(x.b, GEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
       const tc = IMPC && x.t ? `--tc:var(--t${x.t});` : '';
       const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}${x.fx.length ? `, efectos: ${x.fx.join(', ')}` : ''}`;
       g += `<button type="button" class="blk${tiny}${impc(x.t)}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
         + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
     }
-    const last = SETS[s.id][SETS[s.id].length - 1];
+    const last = day[day.length - 1];
     if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
-    else if (last.b < TEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
+    else if (last.b < GEND) g += `<div class="closedtag" style="top:${y(last.b) + 10}px">Cerrado</div>`;
     g += '</div>';
   });
   // Atraccions: no són artistes (no es poden marcar com a meus). Una columna, i dins una franja vertical per a cadascuna
@@ -1794,6 +1819,7 @@ function buildGrid() {
     const NRL = RIDE_LIST.length;
     g += `<div class="col" style="grid-column:${STAGES.length + 2};height:${H + 2 * PAD}px;background:repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px ${60 * PX}px);background-position:0 ${PAD}px;">`;
     for (const r of RIDE_LIST) {
+      if (dayAt(r.a) !== GDAY) continue;
       const rt = y(r.a), rh = y(r.b) - rt, rn = html(r.name);
       g += `<div class="blk ridesblk lane" id="ridesBlk-${r.i}" role="img" aria-label="${rn}: abierta de ${lbl(r.a)} a ${lbl(r.b)}" style="top:${rt + 1.5}px;height:${rh - 3}px;left:calc(3px + ${r.i} * (100% - 6px) / ${NRL});right:auto;width:calc((100% - 6px) / ${NRL} - 3px)"><i class="pl"></i><span class="vt"><b>${rn}</b> ${lbl(r.a)}–${lbl(r.b)}</span></div>`;
     }
@@ -1825,6 +1851,7 @@ function fitBlocks() {
   }
 }
 function edgeFade() { tlwrap.parentElement.classList.toggle('atend', tlwrap.scrollLeft + tlwrap.clientWidth >= tlwrap.scrollWidth - 4); }
+setGridDay(autoDay(now()));
 buildGrid();
 tlwrap.addEventListener('scroll', edgeFade, { passive: true });
 edgeFade();
@@ -1844,11 +1871,29 @@ function paintFavs() {
 function scrollToNow(smooth) {
   const t = now();
   const head = tl.querySelector('.hd').offsetHeight;
-  const top = t < T0 || t >= TEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
+  const top = t < G0 || t >= GEND ? 0 : Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
   tlwrap.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
 }
+// Pestanyes de dia (només amb diversos dies). Sense triar-ne cap, la graella segueix el dia d'ara (entre dies, el que ve)
+const gdays = document.getElementById('gdays');
+function paintDays() {
+  gdays.hidden = NDAYS < 2;
+  if (NDAYS > 1) gdays.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-d="${x.d}" aria-selected="${x.d === GDAY}">${html(x.name || `Día ${x.d + 1}`)}</button>`).join('');
+}
+function showDay(d) {
+  if (d === GDAY && G0 === DAYS[d].t0) return;
+  setGridDay(d); buildGrid(); paintFavs(); paintDays(); tick(true);
+}
+paintDays();
+document.getElementById('tkDays').hidden = NDAYS < 2;
+gdays.addEventListener('click', e => {
+  const b = e.target.closest('button[data-d]');
+  if (!b) return;
+  gPick = true; showDay(+b.dataset.d); scrollToNow(false);
+});
 function goNow() {
   if (typeof showTab === 'function') showTab('ahora');
+  gPick = false; if (NDAYS > 1) showDay(autoDay(now()));
   tlwrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   scrollToNow(true);
 }
@@ -2133,11 +2178,12 @@ function tick(force) {
   document.getElementById('mclock').textContent = hm(t);
   if (tvOn) tvClock(t);
   const ml = document.getElementById('mleft');
-  ml.hidden = !(t >= T0 && t < TEND) || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
-  if (!ml.hidden) ml.innerHTML = ICO.time + dur(TEND - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
+  ml.hidden = !(t >= T0 && t < TEND) || gapNext(t) >= 0 || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
+  if (!ml.hidden) ml.innerHTML = ICO.time + dur((NDAYS > 1 ? dayEnd(dayAt(t)) : TEND) - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
   if (!force && minute === lastMin) return;
   lastMin = minute;
+  if (NDAYS > 1 && !gPick && autoDay(t) !== GDAY) return showDay(autoDay(t));  // ha canviat el dia: la graella el segueix
   if (FEEDK) paintFeed();
   paintChg(t);
   if (tvOn) tvRender(t);
@@ -2147,9 +2193,12 @@ function tick(force) {
   if (t < T0) {
     const today = fmtD.format(t) === fmtD.format(T0), tomorrow = fmtD.format(t + 86400000) === fmtD.format(T0);
     st.innerHTML = `Empieza ${today ? 'hoy' : tomorrow ? 'mañana' : dayLabel} a las <strong>${lbl(T0)}</strong> · faltan <strong>${dur(T0 - t)}</strong>`;
+  } else if (gapNext(t) >= 0) {
+    const o = DAYS[gapNext(t)].t0, tomorrow = fmtD.format(t + 86400000) === fmtD.format(o);
+    st.innerHTML = `<strong>Cerrado</strong> · vuelve ${tomorrow ? 'mañana' : fmtD.format(t) === fmtD.format(o) ? 'hoy' : DAYS[gapNext(t)].name.toLowerCase()} a las <strong>${lbl(o)}</strong> · faltan <strong>${dur(o - t)}</strong>`;
   } else if (t < TEND) {
     const nextA = Math.min(...ALL.filter(x => x.a > t).map(x => x.a));
-    st.innerHTML = `<strong>En marcha</strong> · <span class="nw">${live ? `${live} sonando` : isFinite(nextA) ? `pausa hasta las ${lbl(nextA)}` : 'última recta'}</span> · <span class="endat">hasta las ${lbl(TEND)}</span>`;
+    st.innerHTML = `<strong>En marcha</strong> · <span class="nw">${live ? `${live} sonando` : isFinite(nextA) ? `pausa hasta las ${lbl(nextA)}` : 'última recta'}</span> · <span class="endat">hasta las ${lbl(NDAYS > 1 ? dayEnd(dayAt(t)) : TEND)}</span>`;
   } else {
     st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
@@ -2217,9 +2266,9 @@ function tick(force) {
   const rimg = re.querySelector('img'), rsrc = done ? '' : none ? DECO.empty : DECO.done;
   if (rimg) { rimg.hidden = !rsrc; if (rsrc && rimg.getAttribute('src') !== rsrc) rimg.src = rsrc; }
   // Targeta: abans (compte enrere), durant (frase + barra de progrés + proper concert gran) i al final (gràcies + contacte)
-  const during = t >= T0 && t < TEND;
+  const gap = gapNext(t), during = t >= T0 && t < TEND && gap < 0, dEnd = NDAYS > 1 ? dayEnd(dayAt(t)) : TEND;
   const ms = document.getElementById('mascot'), moods = DECO.moods || [],
-    msrc = t < T0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
+    msrc = t < T0 || gap >= 0 ? DECO.before : during ? (moods.length ? moods[Math.min(moods.length - 1, Math.floor((t - T0) / (TEND - T0) * moods.length))] : DECO.during || DECO.done) : DECO.end;
   ms.hidden = !re.hidden && !done;
   ms.classList.toggle('during', during);
   document.getElementById('status').closest('.statusrow').hidden = !ms.hidden;  // la targeta ja diu el mateix: no repetir-ho sota el rellotge
@@ -2227,8 +2276,10 @@ function tick(force) {
   if (!ms.hidden) {
     const pct = Math.min(100, Math.max(0, (t - T0) / (TEND - T0) * 100));
     const mh = during
-      ? `<span class="mk">Quedan</span><span class="mbig">${dur(TEND - t)} <small>de festival</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
-        + `<span class="msub">Hasta las ${lbl(TEND)}</span>`
+      ? `<span class="mk">Quedan</span><span class="mbig">${dur(dEnd - t)} <small>${dEnd < TEND ? 'hoy' : 'de festival'}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
+        + `<span class="msub">Hasta las ${lbl(dEnd)}</span>`
+      : gap >= 0
+      ? `<span class="mk">Quedan</span><span class="mbig">${dur(DAYS[gap].t0 - t)}</span><span class="msub">Vuelve a abrir a las ${lbl(DAYS[gap].t0)}${DAYS[gap].name ? ` · ${html(DAYS[gap].name)}` : ''}</span>`
       : t < T0
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
       : `<span class="mk">Fin de fiesta</span><span class="mbig">Hasta la próxima</span><span class="msub">Gracias por venir. Dudas o mejoras: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
@@ -2258,7 +2309,7 @@ function tick(force) {
     const on = t >= x.a && t < x.b;
     b.classList.toggle('on', on);
     b.classList.toggle('past', t >= x.b);
-    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, T0)) + 1.5) - 2.5}px`;
+    if (on) b.querySelector('.pl').style.top = `${y(t) - (y(Math.max(x.a, G0)) + 1.5) - 2.5}px`;
   }
   for (const r of RIDE_LIST) {
     const rb = document.getElementById('ridesBlk-' + r.i), on = t >= r.a && t < r.b;
@@ -2267,7 +2318,7 @@ function tick(force) {
     rb.classList.toggle('past', t >= r.b);
     if (on) rb.querySelector('.pl').style.top = `${y(t) - (y(r.a) + 1.5) - 2.5}px`;
   }
-  const inside = t >= T0 && t < TEND;
+  const inside = t >= G0 && t < GEND;
   nowline.hidden = !inside;
   nowlbl.hidden = !inside;
   document.getElementById('gridLegend').hidden = !inside || !DST;  // sense canvi d'hora, la pestanya vermella ja ho diu
@@ -2307,8 +2358,8 @@ function applySim() {
   sim = simOn.checked ? +simRange.value : null;
   simCtl.hidden = !simOn.checked;
   if (simOn.checked) {
-    simRange.setAttribute('aria-valuetext', lbl(+simRange.value));
-    simOut.textContent = `Simulando: ${lbl(+simRange.value)}`;
+    simRange.setAttribute('aria-valuetext', lblD(+simRange.value));
+    simOut.textContent = `Simulando: ${lblD(+simRange.value)}`;
   }
   // Els avisos del Modo prueba no compten per als de veritat
   if (!was && simOn.checked) { realTold = told; told = new Set(); }
@@ -2331,9 +2382,10 @@ for (const a of document.querySelectorAll('.langsel [data-lang]')) {
   if (a.dataset.lang === LANG) a.setAttribute('aria-current', 'true');
   a.addEventListener('click', () => { try { localStorage.setItem('midnight-lang', a.dataset.lang); } catch (e) {} });
 }
-document.getElementById('simPresets').innerHTML = [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000,
-  ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0]
-  .map(t => `<button type="button" data-t="${t}">${lbl(t)}</button>`).join('');
+document.getElementById('simPresets').innerHTML = (NDAYS > 1
+  ? DAYS.flatMap(x => [x.t0 - 10 * MIN, x.t0, Math.round((x.t0 + x.tend0) / 2 / 3600000) * 3600000, x.tend0 - 60 * MIN, x.tend0])
+  : [T0 - 10 * MIN, T0, Math.round((T0 + TEND0) / 2 / 3600000) * 3600000, ...(DST ? [W0 + 10 * MIN, DUP + 10 * MIN] : []), TEND0 - 60 * MIN, TEND0 - MIN, TEND0])
+  .map(t => `<button type="button" data-t="${t}">${lblD(t)}</button>`).join('');
 document.getElementById('simPresets').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) setSim(+b.dataset.t); });
 function exitSim() { simOn.checked = false; applySim(); }
 document.getElementById('simBadge').addEventListener('click', exitSim);
@@ -2889,6 +2941,7 @@ function applyChanges(d, quiet) {
     buildGrid();
   } catch (e) {
     ({ SETS, ALL, BYID, TEND, H } = prev);  // dades dolentes: l'app es queda amb l'horari que tenia
+    setGridDay(GDAY);
     buildGrid();
     return;
   }
@@ -2993,9 +3046,16 @@ const adminEl = document.getElementById('admin');
 adminEl.hidden = !(ONLINE && ADMIN);
 
 // Hores per triar: de 12:00 a 05:55 cada 5 min (les 2:00 surten dues vegades)
-const code = t => { const s = hm(t); return DST && s.startsWith('02:') ? s + (t < DUP ? 'a' : 'b') : s; };
+// Amb diversos dies, el codi porta el dia («2/11:00») i l'etiqueta també («Domingo 11:00»)
+const code = t => {
+  const s0 = hm(t), s = DST && s0.startsWith('02:') ? s0 + (t < DUP ? 'a' : 'b') : s0;
+  return NDAYS < 2 ? s : dpre(Math.max(0, DAYS.findIndex(x => T(dpre(x.d) + s) === t))) + s;
+};
 const TIMES = [];
-for (let t = T0; t <= TEND0 + 55 * MIN; t += 5 * MIN) TIMES.push([code(t), lbl(t)]);
+for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
+  const c = code(t);
+  if (!TIMES.some(([k]) => k === c)) TIMES.push([c, NDAYS > 1 ? `${(x.name || `Día ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]);
+}
 const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
@@ -3425,13 +3485,23 @@ function tmNorm(s) {
 // El mateix a l'inici d'una línia de text («18:30-19:00 Tasca», «18h Tasca», «6:30 PM Tasca»; «amb» no és «am»)
 const TMR = String.raw`\d{1,2}(?:[:.h]\d{2}(?::\d{2})?h?|h|(?=\s?[aApP]\.?[mM]\.?(?![A-Za-z])))(?:\s?[aApP]\.?[mM]\.?(?![A-Za-z]))?`;
 const TLINE = new RegExp(`^(${TMR})(?:\\s*[-–]\\s*(${TMR}))?\\s+(.+)$`);
-function taskTime(s) {
+// Festival de diversos dies: un títol «# Domingo» (o «# Día 2») fa que les tasques de sota siguin d'aquell dia. -1 = no és cap dia
+const fold = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function headDay(h) {
+  if (NDAYS < 2) return -1;
+  const w = fold(h.replace(/^#+/, '')).trim();
+  const n = w.match(/^d[ií]a\s*(\d)\b/);
+  if (n && +n[1] >= 1 && +n[1] <= NDAYS) return +n[1] - 1;
+  return DAYS.findIndex(x => x.name && w.startsWith(fold(x.name.split(' ')[0])));
+}
+function taskTime(s, d = 0) {
   const n = tmNorm(s);
   if (!n) return NaN;
-  let t = T(n);
+  let t = T(dpre(d) + n);
   const wm = (([h, mi]) => h * 60 + mi)(n.split(':').map(Number));
   // Abans d'obrir i a partir de les 6:00 (o d'1 h després del final) = muntatge del mateix dia, com diu l'ajuda; abans = de matinada, l'endemà
-  if (wm < START_M && wm >= Math.max(6 * 60, END_M + 60)) t -= 24 * 60 * MIN;
+  // (si el festival acaba abans de mitjanit, de 6:00 fins a obrir sempre és muntatge del mateix dia)
+  if (wm < START_M && wm >= Math.max(6 * 60, END_M > START_M ? 0 : END_M + 60)) t -= 24 * 60 * MIN;
   const sec = String(s).match(/^\s*\d{1,2}[:.]\d{2}:(\d{2})/);  // «00:01:22»: amb segons (cançons d'un setlist)
   if (sec && +sec[1] < 60) t += +sec[1] * 1000;
   return t;
@@ -3444,11 +3514,11 @@ const TK_COL = { rojo: '#ff4d4d', naranja: '#ff8a1f', amarillo: '#ffd21f', verde
 const tkCol = x => TK_COL[x && x.c] || '';
 function parseTasks(src, people) {
   const list = [], warn = [], ids = new Set(), seen = new Set();
-  let group = [], bad = 0, col = '';  // bad = línies que no es publiquen
+  let group = [], bad = 0, col = '', tday = 0;  // bad = línies que no es publiquen; tday = dia (amb diversos dies)
   const TOK = /@([^\s@,;]+)/g;
   for (let line of String(src).split('\n')) {
     line = line.trim();
-    if (line.startsWith('#')) { col = ''; continue; }
+    if (line.startsWith('#')) { col = ''; if (headDay(line) >= 0) tday = headDay(line); continue; }
     if (!line) continue;
     const cm = line.match(/^\[\s*([a-záéíóú]*)\s*\]$/i);
     if (cm) { const k = cm[1].toLowerCase(); if (k && !TK_COL[k]) warn.push(`Color desconocido: «${cm[1]}» (${Object.keys(TK_COL).join(', ')})`); col = TK_COL[k] ? k : ''; continue; }
@@ -3471,8 +3541,8 @@ function parseTasks(src, people) {
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = ta ? taskTime(ta) : null;
-    let b = ta && tb ? taskTime(tb) : 0;
+    const a = ta ? taskTime(ta, tday) : null;
+    let b = ta && tb ? taskTime(tb, tday) : 0;
     if (a !== null && !Number.isFinite(a)) { bad++; warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
     if (!text) { bad++; warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
     // Un final que no s'entén («19») o al revés («19:00-18:00») no es perd en silenci; «04:00-06:00» és de la mateixa nit
@@ -3767,7 +3837,7 @@ function pinchY(w, inner, K, get, set) {
   w.addEventListener('touchend', end); w.addEventListener('touchcancel', end);
 }
 pinchY(document.getElementById('tgWrap'), document.getElementById('tg'), 'cast-tgzoom-v1', () => TPX, (z, init) => { TPX = z; if (!init) renderTg(true); });
-pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (TEND - T0) / MIN * PX; buildGrid(); paintFavs(); tick(true); if (init) requestAnimationFrame(() => scrollToNow(false)); });  // en obrir: sense paintFavs es perdien els meus (groc)
+pinchY(tlwrap, tl, 'cast-tlzoom-v1', () => PX, (z, init) => { PX = z; H = (GEND - G0) / MIN * PX; buildGrid(); paintFavs(); tick(true); if (init) requestAnimationFrame(() => scrollToNow(false)); });  // en obrir: sense paintFavs es perdien els meus (groc)
 document.getElementById('tgTeam').addEventListener('click', () => {
   tgTeam = !tgTeam;
   try { localStorage.setItem(TGK, tgTeam ? '1' : '0'); } catch (e) {}
@@ -3980,7 +4050,9 @@ function tkRowsRender() {
   tkWhoF.innerHTML = `<option value="">Todas las tareas</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
   tkWhoF.value = ppl.some(p => p.k === f) ? f : '';
   const fk = tkWhoF.value;
-  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
+  const hd = {}; let cd = 0;
+  for (const h of new Set(tkRowsData.map(r => r.h))) { if (headDay(h) >= 0) cd = headDay(h); hd[h] = cd; }  // el dia de cada títol (com parseTasks)
+  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, hd[r.h]) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
   const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
   tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = tkRowBad(r, ppl); return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}"${r.raw && !r.a ? ' title="No se entiende: ponle hora o bórrala"' : ''}>
     <input type="time" class="tka" value="${r.a}" aria-label="Hora (vacía = durante el día)">

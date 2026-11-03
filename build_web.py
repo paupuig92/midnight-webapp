@@ -208,9 +208,10 @@ for s in (32, 180, 192, 512):
 defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in FEST["sets"].items()}
 (OUT / "cartel.json").write_text(json.dumps({
     "fest": FEST["id"], "name": FEST["name"], "date": FEST["date"], "start": FEST["start"], "end": FEST["end"],
+    "days": max(1, len(FEST.get("days") or [])),  # festivals de diversos dies: les hores «2/11:00» són del 2n dia
     "stages": [{"id": st["id"], "name": st["name"]} for st in FEST["stages"]],
     "sets": defaults}, ensure_ascii=False), encoding="utf-8")
-print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"])
+print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"], f"· {len(FEST.get('days') or [])} dies" if FEST.get("days") else "")
 
 # Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
 if (OUT / "cal").exists():

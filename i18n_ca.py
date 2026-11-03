@@ -620,6 +620,18 @@ PAIRS = [
     ("r.raw && !r.a ? '¿?' : r.a", "r.raw && !r.a ? '?' : r.a"),
     ("` ${full.inh} sin hora tienen la hora de la fila de arriba (celdas combinadas): revísalas.`", "` ${full.inh} sense hora tenen l’hora de la fila de dalt (cel·les combinades): revisa-les.`"),
     ("` Pestañas que no son de nadie del equipo: ${unk.join(', ')}. Añádelos en Equipo o pon una columna QUIÉN.`", "` Pestanyes que no són de ningú de l’equip: ${unk.join(', ')}. Afegeix-los a Equip o posa una columna QUI.`"),
+    # --- Festivals de diversos dies (03-11) ---
+    ('<span class="endat">hasta las ${lbl(NDAYS > 1 ? dayEnd(dayAt(t)) : TEND)}</span>', '<span class="endat">fins a les ${lbl(NDAYS > 1 ? dayEnd(dayAt(t)) : TEND)}</span>'),
+    ('<span class="msub">Hasta las ${lbl(dEnd)}</span>', '<span class="msub">Fins a les ${lbl(dEnd)}</span>'),
+    ("<small>${dEnd < TEND ? 'hoy' : 'de festival'}</small>", "<small>${dEnd < TEND ? 'avui' : 'de festival'}</small>"),
+    ("`<strong>Cerrado</strong> · vuelve ${tomorrow ? 'mañana' : fmtD.format(t) === fmtD.format(o) ? 'hoy' : DAYS[gapNext(t)].name.toLowerCase()} a las <strong>${lbl(o)}</strong> · faltan <strong>",
+     "`<strong>Tancat</strong> · torna ${tomorrow ? 'demà' : fmtD.format(t) === fmtD.format(o) ? 'avui' : DAYS[gapNext(t)].name.toLowerCase()} a les <strong>${lbl(o)}</strong> · falten <strong>"),
+    ('<span class="msub">Vuelve a abrir a las ${lbl(DAYS[gap].t0)}', '<span class="msub">Torna a obrir a les ${lbl(DAYS[gap].t0)}'),
+    ('role="tablist" aria-label="Día"', 'role="tablist" aria-label="Dia"'),
+    ("`Día ${x.d + 1}`", "`Dia ${x.d + 1}`"),
+    ("`Día ${dayAt(t) + 1}`", "`Dia ${dayAt(t) + 1}`"),
+    ("<span id=\"tkDays\" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día.</span>",
+     "<span id=\"tkDays\" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia.</span>"),
 ]
 
 

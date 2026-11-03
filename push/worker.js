@@ -29,17 +29,19 @@ function wallOf(ms) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
 }
 const START_M = (([h, m]) => h * 60 + m)(CARTEL.start.split(':').map(Number));
+// Festivals de diversos dies: «2/11:00» = les 11:00 del 2n dia (CARTEL.days)
+const NDAYS = Math.max(1, +CARTEL.days || 1);
 function T(s) {
-  const m = String(s).match(/^(\d{1,2}):(\d{2})([ab]?)$/);
+  const m = String(s).match(/^(?:(\d)\/)?(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
-  const h = +m[1], mi = +m[2], f = m[3];
-  if (h > 23 || mi > 59) return NaN;
+  const dd = m[1] ? +m[1] - 1 : 0, h = +m[2], mi = +m[3], f = m[4];
+  if (h > 23 || mi > 59 || dd < 0 || dd >= NDAYS) return NaN;
   const [Y, M, D] = CARTEL.date;
-  const wall = Date.UTC(Y, M - 1, h * 60 + mi < START_M ? D + 1 : D, h, mi);
+  const wall = Date.UTC(Y, M - 1, D + dd + (h * 60 + mi < START_M ? 1 : 0), h, mi);
   const ok = [wall - 2 * 3600000, wall - 3600000].filter(c => wallOf(c) === wall);
   return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
 }
-const END = T(CARTEL.end) + 60 * MIN;   // una hora després del final ja no s'envia res
+const END = T((NDAYS > 1 ? NDAYS + '/' : '') + CARTEL.end) + 60 * MIN;   // una hora després del final ja no s'envia res
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = c => (c.fest || 'bass-in-the-park-2026') === CARTEL.fest;
 
