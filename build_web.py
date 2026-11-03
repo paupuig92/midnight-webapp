@@ -42,7 +42,8 @@ print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")
 import datetime
 # La data és la de l'últim canvi dels fitxers de l'app (no l'hora del build): així, si no canvia res,
 # la versió és la mateixa i els mòbils no es tornen a baixar l'app ni surt «Hay una versión nueva»
-srcs = [ROOT / "index.html", ROOT / "build_web.py", *(ROOT / "img").iterdir(), *(ROOT / "icons").glob("icon-*.png")]
+# (les imatges del festival es compten més avall, quan ja se sap quin festival és)
+srcs = [ROOT / "index.html", ROOT / "build_web.py", *(ROOT / "icons").glob("icon-*.png")]
 stamp_t = max(f.stat().st_mtime for f in srcs if f.is_file())
 push_f2 = CONF / "push.json"
 if push_f2.is_file():
@@ -67,6 +68,11 @@ def js_to_json(block):
 fb = src[src.index("/* ==== FESTIVAL ==== */"):src.index("/* ==== /FESTIVAL ==== */")]
 fb = fb[fb.index("const FEST = ") + len("const FEST = "):fb.rindex("};") + 1]
 FEST = js_to_json(fb)
+# Logos, banner i fonts: a festivals/<id>/img/ (cada festival a la seva carpeta, des del 03-11). Si no hi és, img/ (com abans)
+IMG = ROOT / "festivals" / FEST["id"] / "img"
+if not IMG.is_dir():
+    IMG = ROOT / "img"
+print("Imatges:", IMG.relative_to(ROOT))
 
 # Colors i lletres del festival ja al <head>: si no, el primer instant es veuen els colors per defecte (els del Bass)
 def _css(v): return str(v).replace("<", "")
@@ -189,7 +195,7 @@ if _left:
 """, encoding="utf-8")
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
-shutil.copytree(ROOT / "img", OUT / "img")
+shutil.copytree(IMG, OUT / "img", ignore=shutil.ignore_patterns(".*"))
 # Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
 for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
@@ -226,10 +232,12 @@ if (OUT / "cal").exists():
 # Fonts: només les que fa servir el festival (al img/ hi poden quedar fitxers vells)
 _fontfiles = {f["file"] for f in FEST.get("fonts", [])}
 # Canviar VERSION obliga els mòbils a descarregar la versió nova
-version = hashlib.sha1((page + page_ca).encode()).hexdigest()[:8]
+# (també les imatges: si canvia el banner amb el mateix nom, els mòbils l'han de tornar a baixar)
+_imgs = sorted(f for f in IMG.iterdir() if f.is_file() and not f.name.startswith("."))
+version = hashlib.sha1((page + page_ca).encode() + b"".join(f.name.encode() + f.read_bytes() for f in _imgs)).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  {json.dumps(sorted("img/" + f.name for f in (ROOT / "img").iterdir() if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp") or f.name in _fontfiles))[1:-1]}];
+  {json.dumps(sorted("img/" + f.name for f in _imgs if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp") or f.name in _fontfiles))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{

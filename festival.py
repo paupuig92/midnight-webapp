@@ -3,18 +3,19 @@
 
 Cada festival viu a festivals/<id>/:
   festival.js  el bloc FEST (nom, dia, hores, colors, escenaris i horari)
-  img/         banner.jpg i un logo <id-escenari>.png per escenari
+  img/         banner.jpg, un logo <id-escenari>.png per escenari, fonts i il·lustracions
+Les imatges NO es copien enlloc: build_web.py les agafa directament de festivals/<id>/img/ (des del 03-11).
+Un festival nou = una carpeta nova a festivals/ (no es barreja res amb els altres).
 
 Ús:
   python3 festival.py            mostra quin festival hi ha ara i quins hi ha guardats
-  python3 festival.py <id>       posa aquest festival a l'app (index.html + img/)
+  python3 festival.py <id>       posa aquest festival a l'app (el bloc FEST d'index.html)
   python3 festival.py --desa     guarda el festival actual a festivals/<id>/ (abans de canviar-lo)
 
 Després: ./publica-web.sh per publicar-lo.
 """
 import pathlib
 import re
-import shutil
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -45,9 +46,6 @@ if args[0] == "--desa":
     d = FESTS / cur_id
     (d / "img").mkdir(parents=True, exist_ok=True)
     (d / "festival.js").write_text(cur + "\n", encoding="utf-8")
-    for f in (ROOT / "img").iterdir():
-        if f.is_file() and not f.name.startswith("."):
-            shutil.copy2(f, d / "img" / f.name)
     print("ok desat a", d.relative_to(ROOT))
     sys.exit()
 
@@ -64,13 +62,4 @@ if missing:
     print("Compte, falten imatges a", (d / "img").relative_to(ROOT), ":", ", ".join(missing))
 
 APP.write_text(app.replace(cur, new), encoding="utf-8")
-img = ROOT / "img"
-for f in img.iterdir():  # treu els logos del festival anterior
-    try:
-        f.unlink()
-    except OSError:
-        pass
-for f in (d / "img").iterdir():
-    if f.is_file() and not f.name.startswith("."):
-        shutil.copy2(f, img / f.name)
 print("ok", cur_id, "→", args[0], "· ara: ./publica-web.sh")

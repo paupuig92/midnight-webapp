@@ -21,7 +21,7 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 | `push/instala.sh` | Instal·la/actualitza el servidor via API de Cloudflare (sense wrangler). |
 | `push/claus.sh` | Claus VAPID (ja fetes). |
 | `icons/make_icon.swift` | Icona vermella «MIDNIGHT APP» (com la de Midnight Suite). |
-| `img/` | Logos dels escenaris (PNG transparents d'en Pau). |
+| `festivals/<id>/` | Un festival per carpeta: `festival.js` (bloc FEST) + `img/` (banner, logos, fonts, il·lustracions). Ja no hi ha `img/` general. |
 
 ## Dades
 - Noms i ordre: el cartell (definitiu). Hores exactes i importància: el full de Google https://docs.google.com/spreadsheets/d/1AVNK52llp2q5DbKVEEyUgZIkpxYmw-UW20bCTzUQI48
@@ -49,7 +49,8 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 
 ## Festivals (des del 26-10-2026)
 - Tot el que canvia d'un festival a un altre és al bloc `/* ==== FESTIVAL ==== */` d'`index.html` (objecte `FEST`: id, key, nom, dia, inici/final, colors, `rides` opcional, escenaris, horari).
-- Cada festival guardat a `festivals/<id>/` (`festival.js` + `img/` amb banner.jpg i un `<escenari>.png` per escenari).
+- **Cada festival a la seva carpeta `festivals/<id>/`** (`festival.js` + `img/` amb banner.jpg, un `<escenari>.png` per escenari, fonts…). Un festival nou = carpeta nova; no es barreja res (en Pau, 03-11). `build_web.py` agafa les imatges directament de `festivals/<FEST.id>/img/`.
+- Diversos dies: `days: ['Sábado 5', 'Domingo 6']` i hores `2/11:00` (2n dia). Graella amb pestanyes; tasques amb `# Domingo`. Tema: `--mono` opcional per a hores i subtítols.
 - `python3 festival.py` (llista) · `python3 festival.py <id>` (el posa a l'app) · `python3 festival.py --desa` (guarda l'actual). Després `./publica-web.sh`.
 - `changes.json` porta `fest`: l'app i el servidor ignoren els d'un altre festival (els antics sense `fest` = Bass). Claus del mòbil amb prefix `FEST.key`.
 - El servidor d'avisos llegeix dia/hores de `cartel.json`; en canviar de festival esborra els mòbils anteriors. Cal `push/instala.sh` després de publicar un festival nou.
