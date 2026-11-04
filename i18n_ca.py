@@ -722,6 +722,11 @@ PAIRS = [
     ("d > 0 ? 'a la derecha' : 'a la izquierda'", "d > 0 ? 'a la dreta' : 'a l’esquerra'"),
     ("'Activa la brújula y la flecha seguirá al móvil.'", "'Activa la brúixola i la fletxa seguirà el mòbil.'"),
     ("`Sol ${az}° ${card} · móvil hacia ${", "`Sol ${az}° ${card} · mòbil cap a ${"),
+    # --- Admin dins d'Ajustes (04-11) ---
+    ('<span class="on">Admin</span><small class="od">Horario, avisos y tareas · con contraseña</small></span><span class="ogo">Entrar ›</span>',
+     '<span class="on">Admin</span><small class="od">Horari, avisos i tasques · amb contrasenya</small></span><span class="ogo">Entrar ›</span>'),
+    ('data-back="ajustes">‹ Ajustes</button>', 'data-back="ajustes">‹ Ajustos</button>'),
+    ('<h3 class="ch">Organización</h3>', '<h3 class="ch">Organització</h3>'),
 ]
 
 

@@ -1163,6 +1163,13 @@ body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="
 .mwho.card .mwd { font-size: 12px; margin-top: 3px; }
 .mwho.card.none .mwd { display: block; }
 .mwho.card .mwt { flex: 1; }
+.orggo { display: flex; align-items: center; width: 100%; min-height: 64px; gap: 14px; padding: 10px 16px 10px 10px; border: 1.5px solid var(--line); border-radius: 20px; background: var(--panel); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.orggo .oico { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.orggo .otx { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.1; }
+.orggo .on { font-weight: 800; font-size: 18px; }
+.orggo .od { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.orggo .ogo { flex: none; font-weight: 800; font-size: var(--fs-s); color: var(--accent); }
+.orgback { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 6px -4px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: 700 var(--fs-m) var(--body); cursor: pointer; }
 .mwho.card .mgo { flex: none; font-weight: 800; font-size: var(--fs-s); color: var(--accent); }
 #yoGrp[data-off] { display: none !important; }
 .brandline .mwho.big + .firma { margin-left: 4px; }
@@ -1426,8 +1433,9 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     <p class="legend" id="tgFree"></p>
   </section>
 
-  <section class="admin" id="orgOff" hidden><h2>Organización</h2><p class="note">Solo funciona con conexión, en la app publicada.</p></section>
+  <section class="admin" id="orgOff" hidden><button class="orgback" type="button" data-back="ajustes">‹ Ajustes</button><h2>Organización</h2><p class="note">Solo funciona con conexión, en la app publicada.</p></section>
   <section class="admin" id="admin" hidden>
+    <button class="orgback" type="button" data-back="ajustes">‹ Ajustes</button>
     <h2>Organización</h2>
     <form id="pwForm" class="pwform">
       <label for="pw">Cambios de última hora (solo organización)</label>
@@ -1523,6 +1531,10 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
         <select class="yosel" id="yoSel" aria-label="Quién eres"></select>
       </div>
       <p class="note" style="margin:0">Con perfil ves también tus tareas, las prioridades y los efectos. Se elige en un solo sitio: aquí o tocando tu nombre arriba.</p>
+    </div>
+    <div class="cgrp">
+      <h3 class="ch">Organización</h3>
+      <button class="orggo" id="orgGo" type="button"><b class="oico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></b><span class="otx"><span class="on">Admin</span><small class="od">Horario, avisos y tareas · con contraseña</small></span><span class="ogo">Entrar ›</span></button>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
@@ -1631,7 +1643,6 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
   <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
   <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
-  <button type="button" data-tab="org" aria-label="Organización"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Admin</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
 </nav>
 <button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -5436,7 +5447,8 @@ function showTab(t, top = true) {
   // Primer a dalt i després canviar el contingut: a l'iPhone, si la pàgina s'encongeix amb scroll, la barra de baix es desplaça
   if (ch && top) scrollTo({ top: 0 });
   document.body.dataset.tab = t;
-  for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  const tb = t === 'org' ? 'ajustes' : t;  // Admin és dins d'Ajustes (en Pau, 04-11)
+  for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === tb) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
@@ -5457,6 +5469,8 @@ function paintTabs() {
 }
 // El logo de la barra fina porta a l'inici (Horarios, a dalt de tot)
 document.getElementById('mlogo').addEventListener('click', () => { showTab('ahora', false); scrollTo({ top: 0, behavior: 'smooth' }); });
+document.getElementById('orgGo').addEventListener('click', () => showTab('org'));
+for (const b of document.querySelectorAll('.orgback')) b.addEventListener('click', () => showTab('ajustes'));
 document.getElementById('tabbar').addEventListener('click', e => {
   const b = e.target.closest('[data-tab]');
   if (b) showTab(b.dataset.tab);
