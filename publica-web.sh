@@ -37,7 +37,8 @@ BASIC=$(print -rn -- "x-access-token:$(<$TOKEN_FILE)" | base64)
 g() { GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader GIT_CONFIG_VALUE_0="Authorization: Basic $BASIC" git "$@"; }
 # Primer baixa els canvis que l'organització hagi fet des del web (docs/changes.json)
 # (si falla, s'atura: millor no publicar que publicar a mitges)
-g pull -q --rebase https://github.com/$REPO.git main || { echo "ERROR: no s'ha pogut sincronitzar amb GitHub (conflicte o sense xarxa). No s'ha publicat res."; exit 1; }
+# --rebase=merges: amb fusions de branques (p. ex. Cámaras + Ajustes) el --rebase pla les desfeia i quedava a mitges (04-11)
+g pull -q --rebase=merges https://github.com/$REPO.git main || { echo "ERROR: no s'ha pogut sincronitzar amb GitHub (conflicte o sense xarxa). No s'ha publicat res."; exit 1; }
 echo "ok sincronitzat"
 g push -q https://github.com/$REPO.git main || { echo "ERROR: GitHub ha rebutjat la pujada (potser l'organització acaba de publicar). Torna a executar l'script."; exit 1; }
 echo "ok push"
