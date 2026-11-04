@@ -746,6 +746,7 @@ PAIRS = [
     ("'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'", "'No s’ha pogut desar. Revisa la connexió i torna a tocar.'"),
     ("' · todos los escenarios'", "' · tots els escenaris'"),
     ('alt="Plano de ${html(s.stage)} visto desde arriba"', 'alt="Plànol de ${html(s.stage)} vist des de dalt"'),
+    ("[['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']]", "[['grabando', 'REC'], ['montada', 'Muntades'], ['parada', 'Parades'], ['', 'Sense muntar']]"),
     ("Aún no hay cámaras para este escenario.", "Encara no hi ha càmeres per a aquest escenari."),
     ('<h3>Estado</h3>\n    <div class="row2" id="mcSheetSt" role="group" aria-label="Estado">', '<h3>Estat</h3>\n    <div class="row2" id="mcSheetSt" role="group" aria-label="Estat">'),
     ('placeholder="Número o nombre del SSD"', 'placeholder="Número o nom de l’SSD"'),

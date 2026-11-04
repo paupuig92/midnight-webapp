@@ -987,6 +987,11 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mcl li.ck[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); }
 #multi .mcl li.ck[aria-checked="true"] .box::after { content: "✓"; }
 #multi .mcnote { margin: 14px 0 0; }
+#multi li.mcstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 4px 0 12px; border-bottom: 1px solid var(--rule); }
+#multi li.mcstats span { display: flex; flex-direction: column; gap: 4px; font: 600 10.5px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+#multi li.mcstats span + span { padding-left: 10px; border-left: 1px solid var(--rule); }
+#multi li.mcstats b { font: 900 var(--fs-xl)/1 var(--title, var(--display)); color: var(--ink); letter-spacing: 0; }
+#multi li.mcstats .rec, #multi li.mcstats .rec b { color: var(--now); }
 /* Plànol vist des de dalt (FEST.multicam[].plan) amb un punt per càmera: vermell i bategant quan grava */
 #multi li.mcplan { position: relative; display: block; margin: 6px 0 10px; padding: 0; border: 0; }
 #multi li.mcplan img { display: block; width: 100%; height: auto; }
@@ -5599,6 +5604,7 @@ function mcRender() {
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
       ${s.plan ? `<li class="mcplan"><img src="${html(s.plan)}" alt="Plano de ${html(s.stage)} visto desde arriba">${(s.cams || []).map((c, i) => c.at ? `<button type="button" class="mcpin" data-mcid="${mcKey(c)}" style="left:${+c.at[0]}%;top:${+c.at[1]}%;--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</li>` : ''}
+      ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
       ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
         <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
         <span class="mcs"><b></b><span class="ssd"></span></span>
@@ -5633,6 +5639,11 @@ function mcPaint() {
     const rec = cams.filter(c => (mcState[mcKey(c)] || {}).st === 'grabando').length, up = cams.filter(c => ['montada', 'grabando', 'parada'].includes((mcState[mcKey(c)] || {}).st)).length;
     h.textContent = !n ? '' : rec ? `● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`;
     h.classList.toggle('rec', !!rec);
+  }
+  // Franja de números grans: quantes graven, muntades, parades i sense muntar
+  for (const el of document.querySelectorAll('[data-mcstats]')) {
+    const st = MC.find(s => s.stage === el.dataset.mcstats), cams = st && st.cams || [], cnt = k => cams.filter(c => ((mcState[mcKey(c)] || {}).st || '') === k).length;
+    el.innerHTML = [['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']].map(([k, l]) => `<span class="${k === 'grabando' && cnt(k) ? 'rec' : ''}"><b>${cnt(k)}</b>${l}</span>`).join('');
   }
   const msg = document.getElementById('mcMsg');
   msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
