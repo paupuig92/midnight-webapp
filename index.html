@@ -1165,6 +1165,34 @@ html[data-theme="light"] #sol { --sol-gold: #ec9512; --sol-blue: #3d63d6; }
 .soltimes em { grid-row: 2; font: 500 var(--fs-xs)/1.3 var(--mono); font-style: normal; color: var(--muted); }
 .soltimes b { grid-column: 2; grid-row: 1 / 3; font: 600 var(--fs-m)/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .solfoot { font-size: var(--fs-xs); line-height: 1.45; }
+/* Triar dia (avui o un dia del festival), per planificar la llum abans d'anar-hi */
+.soldays { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; }
+.soldays::-webkit-scrollbar { display: none; }
+.soldays button { flex: none; min-height: 40px; padding: 0 14px; border: 1px solid var(--line, var(--rule)); border-radius: 99px; background: var(--panel); color: var(--muted); font: 700 var(--fs-xs)/1 var(--body); cursor: pointer; }
+.soldays button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+/* Qui sona amb la llum bona, i la lluna */
+.soltimes .who { grid-column: 1 / -1; grid-row: 3; margin-top: 3px; font: 600 var(--fs-xs)/1.35 var(--body); color: var(--ink); opacity: .85; }
+.soltimes .who i { font-style: normal; color: var(--muted); }
+.soltimes li.m::before { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.soltimes li.m b { font-size: var(--fs-s); }
+.solalert { margin-top: 18px; }
+.solalmsg:empty { display: none; }
+/* Contrallum per càmera (amb les posicions de «Cámaras») */
+#sol { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
+.solcams { overflow: hidden; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
+.solcams .ori { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; font: 600 var(--fs-s)/1.35 var(--body); color: var(--muted); }
+.solcams .ori b { color: var(--ink); }
+.solcams .ori .row2 { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.solcams .ori input { width: 84px; min-height: 44px; padding: 0 10px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: 16px var(--mono); }
+.solcams .ori .btn { min-height: 44px; padding: 0 12px; font-size: var(--fs-xs); }
+.solcams .cam { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 2px 10px; padding: 10px 16px; border-top: 1px solid var(--sol-hair); }
+.solcams .cam > i { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--muted)); }
+.solcams .cam span { font: 700 var(--fs-s)/1.25 var(--body); color: var(--ink); }
+.solcams .cam em { grid-column: 2 / -1; font: 500 var(--fs-xs)/1.35 var(--mono); font-style: normal; color: var(--muted); }
+.solcams .cam b { font: 700 var(--fs-xs)/1.2 var(--mono); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.solcams .cam.hot b { color: var(--sol-gold); }
+.solcams .cam.now { background: color-mix(in srgb, var(--sol-gold) 12%, transparent); }
+.solcams .foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--sol-hair); font: 500 var(--fs-xs)/1.4 var(--body); color: var(--muted); }
 /* Sol amb la càmera (realitat augmentada): el camí del sol dibuixat sobre la imatge. Sense càmera, sobre un cel dibuixat.
    Sobre la càmera el tema no compta: vidre fosc i text blanc (com les apps de foto), així es llegeix sobre qualsevol fons */
 body.aron { overflow: hidden; }
@@ -1504,6 +1532,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
   <section id="sol" aria-labelledby="solH">
     <h2 id="solH">El sol de <span id="solFest"></span></h2>
     <p class="note solsub">Dónde está, cuánta luz queda y cuándo llega la hora dorada.</p>
+    <div class="soldays" id="solDays" role="group" aria-label="Día" hidden></div>
     <div class="solloc">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>
       <p class="note solsrc" id="solSrc"></p>
@@ -1541,6 +1570,14 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <svg class="solchart" id="solChart" viewBox="0 0 340 176" role="img" aria-label="Recorrido del sol hoy"></svg>
     <ul class="solkey" aria-hidden="true"><li><i style="background:var(--sol-gold)"></i>Hora dorada</li><li><i style="background:var(--sol-blue)"></i>Hora azul</li><li><i style="background:var(--now)"></i>Ahora</li></ul>
     <ol class="soltimes" id="solTimes"></ol>
+    <label class="cfgsel solalert" for="solAlert">Avisarme antes de la hora dorada de la tarde
+      <select id="solAlert"><option value="0">No avisar</option><option value="10">10 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option><option value="45">45 min antes</option></select>
+    </label>
+    <p class="note solalmsg" id="solAlMsg"></p>
+    <div id="solCams" hidden>
+      <h3>Cámaras y contraluz</h3>
+      <div class="solcams" id="solCamsB"></div>
+    </div>
     <p class="note solfoot">Hora dorada: el sol entre −4° y 6°. Hora azul: entre −6° y −4°. Calculado en el móvil, sin conexión. Tu ubicación solo se usa en este móvil: no se envía a ningún sitio.</p>
     <div class="solar nocam" id="solAr" role="dialog" aria-modal="true" aria-labelledby="solArT" hidden>
       <video id="solArV" playsinline muted autoplay aria-hidden="true"></video>
@@ -3211,7 +3248,7 @@ async function syncNow(keepalive) {
   try {
     const sub = await pushSubscription(false);
     if (!sub) { pushActive = false; return notifUI(); }
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb }, keepalive);
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, sol: prefs.sol || 0 }, keepalive);
   } catch (e) { syncDirty = true; }
 }
 function syncPush() {
@@ -3226,7 +3263,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) syncN
 addEventListener('pagehide', () => syncNow(true));
 async function pushOn() {
   const sub = await pushSubscription(true);
-  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, sol: prefs.sol || 0 });
   pushActive = true;
 }
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sin respuesta')), ms))]);
@@ -3304,7 +3341,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, sol: prefs.sol || 0 });
     pushActive = true;
     notifUI('Restablecidas. También llegarán con el móvil bloqueado.');
   } catch (e) {
@@ -3612,6 +3649,44 @@ const SUN = (() => {
     : a > -.575 ? (1735 + a * (-518.2 + a * (103.4 + a * (-12.79 + a * .711)))) / 3600 : -20.774 / tan(a) / 3600;
   return { pos, refr };
 })();
+// Lluna (algoritme senzill, com SunCalc; error ~1°, de sobres per saber quan surt i quanta llum fa). Graus i instants
+const MOON = (() => {
+  const R = Math.PI / 180, e = R * 23.4397, days = t => t / 86400000 - 10957.5;
+  const radec = (l, b) => ({ dec: Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l)), ra: Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l)) });
+  const moon = d => { const L = R * (218.316 + 13.176396 * d), M = R * (134.963 + 13.064993 * d), F = R * (93.272 + 13.22935 * d);
+    return { ...radec(L + R * 6.289 * Math.sin(M), R * 5.128 * Math.sin(F)), dist: 385001 - 20905 * Math.cos(M) }; };
+  const sun = d => { const M = R * (357.5291 + 0.98560028 * d), L = M + R * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + R * 102.9372 + Math.PI;
+    return { ...radec(L, 0), dist: 149598000 }; };
+  function alt(t, lat, lon) {
+    const d = days(t), m = moon(d), H = R * (280.16 + 360.9856235 * d) + R * lon - m.ra, f = R * lat;
+    return Math.asin(Math.sin(f) * Math.sin(m.dec) + Math.cos(f) * Math.cos(m.dec) * Math.cos(H)) / R;
+  }
+  // Fracció il·luminada (0–1) i fase (0 nova, 0,25 quart creixent, 0,5 plena, 0,75 quart minvant)
+  function illum(t) {
+    const d = days(t), s = sun(d), m = moon(d);
+    const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra));
+    const inc = Math.atan2(s.dist * Math.sin(phi), m.dist - s.dist * Math.cos(phi));
+    const ang = Math.atan2(Math.cos(s.dec) * Math.sin(s.ra - m.ra), Math.sin(s.dec) * Math.cos(m.dec) - Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
+    return { frac: (1 + Math.cos(inc)) / 2, phase: .5 + .5 * inc * (ang < 0 ? -1 : 1) / Math.PI };
+  }
+  // Sortida i posta entre a i b (mostres cada 10 min + bisecció). La vora de dalt toca l'horitzó a ~0,13°
+  function riseSet(a, b, lat, lon) {
+    const h0 = .133, f = t => alt(t, lat, lon) - h0, out = { rise: null, set: null };
+    let t0 = a, v0 = f(a);
+    for (let t1 = a + 600000; t1 <= b; t1 += 600000) {
+      const v1 = f(t1);
+      if (v0 * v1 < 0) { let lo = t0, hi = t1; for (let k = 0; k < 12; k++) { const m = (lo + hi) / 2; if ((f(m) > 0) === (v1 > 0)) hi = m; else lo = m; }
+        if (v1 > 0) out.rise = out.rise || hi; else out.set = out.set || hi; }
+      t0 = t1; v0 = v1;
+    }
+    out.up = f(a) > 0;
+    return out;
+  }
+  return { alt, illum, riseSet };
+})();
+const MOON_N = ['Luna nueva', 'Creciente', 'Cuarto creciente', 'Gibosa creciente', 'Luna llena', 'Gibosa menguante', 'Cuarto menguante', 'Menguante'];
+// Llargada de l'ombra (vegades l'alçada de la persona o l'objecte) amb el sol a «a» graus
+const solShadow = a => a <= 1 ? '' : a < 2.9 ? 'más de 20' : (1 / Math.tan(a * Math.PI / 180)).toFixed(1).replace('.', ',');
 const SOL_RISE = -0.833;  // sortida i posta: la vora de dalt del sol toca l'horitzó (radi + refracció)
 // 0:00 (hora de Madrid) del dia de t, com a instant
 function solMidnight(t) {
@@ -3658,6 +3733,10 @@ const solCard = az => SOL16[Math.round(az / 22.5) % 16];
 const solDeg = d => `${Math.round(d) === 0 ? 0 : Math.round(d)}°`.replace('-', '−');
 let solD = null, solKey = '', solHead = null, solHeadT = null, solLoopT = 0, solRise2 = null, solRaf = 0, solWant = false, solListen = '', solRose = 0, solMin = -1, solNoCmp = 0;
 const solFmtDay = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long' });
+const solFmtShort = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric', month: 'short' });
+// Dia triat: null = avui (segueix now(), també el Modo prueba); un número = aquell dia del festival (per planificar abans d'anar-hi)
+let solPick = null;
+const solDayName = d => DAYS[d].name || solFmtShort.format(DAYS[d].t0);
 // Rosa dels vents (fixa; gira sencera amb la brúixola): una ratlla cada 5°, més llarga cada 30°, gruixuda als punts cardinals.
 // Lletres N E S O i graus cada 30° per dins (sempre dretes)
 { const pt = (d, r) => [(Math.sin(d * Math.PI / 180) * r).toFixed(1), (-Math.cos(d * Math.PI / 180) * r).toFixed(1)];
@@ -3752,7 +3831,8 @@ function solPhase(t) {
   document.getElementById('solPhase').dataset.k = p >= 6 ? 'd' : p >= -4 ? 'g' : p >= -6 ? 'b' : 'n';
   let nx = solD.X.find(x => x.t > t);
   if (!nx) nx = solDay(solD.b + 3600000, solD.lat, solD.lon).X.find(x => x.t > t);
-  return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}`;
+  const sh = solShadow(p + SUN.refr(p));
+  return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}${sh ? ` · sombra: ${sh} veces la altura` : ''}`;
 }
 function solChart(t) {
   // El cel de color segons l'hora (nit → hora blava → daurada → dia), més fort a prop de l'horitzó; el terra, l'arc del sol i el sol d'ara amb resplendor
@@ -3800,26 +3880,145 @@ function solTimes(t) {
     ['b', 'Hora azul', 'mañana', D.up(-6), D.up(-4)],
     ['g', 'Hora dorada', 'mañana', D.up(-4), D.up(6)],
     ['', 'Amanecer', az(D.up(SOL_RISE)), D.up(SOL_RISE)],
-    ['', 'Mediodía solar', `${solDeg(D.max)} de altura`, D.noon],
+    ['', 'Mediodía solar', `${solDeg(D.max)} de altura${solShadow(D.max) ? ` · sombra ×${solShadow(D.max)}` : ''}`, D.noon],
     ['g', 'Hora dorada', 'tarde', D.dn(6), D.dn(-4)],
     ['', 'Atardecer', az(D.dn(SOL_RISE)), D.dn(SOL_RISE)],
     ['b', 'Hora azul', 'tarde', D.dn(-4), D.dn(-6)],
   ];
   document.getElementById('solTimes').innerHTML = L.map(([c, n, sub, p, q]) => {
     const end = q === undefined ? p : q, st = end && end < t ? ' past' : q !== undefined && p && p <= t && t < q ? ' cur' : '';
-    return `<li class="${c}${st}"><span>${n}</span><b>${q === undefined ? (p ? hm(p) : '—') : r(p, q)}</b><em>${sub}</em></li>`; }).join('');
+    const who = c || n === 'Atardecer' || n === 'Amanecer' ? solWho(p, q) : '';
+    return `<li class="${c}${st}"><span>${n}</span><b>${q === undefined ? (p ? hm(p) : '—') : r(p, q)}</b><em>${sub}</em>${who}</li>`; }).join('') + solMoonRow(D);
+}
+// Qui sona durant una franja de llum (o en un moment): el pla de rodatge fet sol
+function solWho(p, q) {
+  if (!p) return '';
+  const e = q || p + 1, L = ALL.filter(x => x.a < e && x.b > p);
+  if (!L.length) return '';
+  const n = L.slice(0, 3).map(x => html(x.n) + (STAGES.length > 1 ? ` <i>(${html(x.s.name)})</i>` : '')).join(' · ');
+  return `<small class="who"><i>Suena:</i> ${n}${L.length > 3 ? ` <i>+${L.length - 3}</i>` : ''}</small>`;
+}
+// La lluna del dia: quan surt i es pon, fase i quanta llum fa (per a la nit)
+function solMoonRow(D) {
+  const rs = MOON.riseSet(D.a, D.b, D.lat, D.lon), il = MOON.illum(D.noon), pc = Math.round(il.frac * 100);
+  const nm = MOON_N[Math.round(il.phase * 8) % 8];
+  const tx = [rs.rise ? `sale ${hm(rs.rise)}` : '', rs.set ? `se pone ${hm(rs.set)}` : ''].filter(Boolean).join(' · ') || (rs.up ? 'Todo el día' : 'No sale');
+  return `<li class="m"><span>Luna ${nm.replace(/^Luna /, '').toLowerCase()}</span><b>${pc}${NB}%</b><em>${tx.replace(/^./, c => c.toUpperCase())}</em></li>`;
 }
 function solPaint(force) {
-  const t = now(), w = solWhere(), k = `${solMidnight(t)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
-  if (force || k !== solKey) { solKey = k; solD = solDay(t, w.lat, w.lon); solRise2 = solDay(solD.b + 3600000, w.lat, w.lon).up(SOL_RISE); solPathAz(); }
+  const t = now(), w = solWhere();
+  if (solPick !== null && (!DAYS[solPick] || solMidnight(DAYS[solPick].t0) === solMidnight(t))) solPick = null;  // el dia triat és avui: com «Hoy»
+  const today = solPick === null, td = today ? t : DAYS[solPick].t0, k = `${solMidnight(td)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
+  if (force || k !== solKey) { solKey = k; solD = solDay(td, w.lat, w.lon); solRise2 = solDay(solD.b + 3600000, w.lat, w.lon).up(SOL_RISE); solPathAz(); }
   const ac = solLoc && solLoc.acc ? ` (±${solLoc.acc < 1000 ? solLoc.acc + ' m' : Math.round(solLoc.acc / 1000) + ' km'})` : '';
   document.getElementById('solSrc').innerHTML = w.mine ? `Ubicación: <b>la tuya</b>${ac} · <button type="button" class="linkbtn" id="solForget">Usar la del festival</button>`
     : w.fest ? `Ubicación: <b>${html(FEST.name)}</b> (la del festival)` : 'Ubicación: <b>Montmeló</b> (por defecto)';
-  document.getElementById('solDayH').textContent = (solMidnight(t) === solMidnight(Date.now()) ? 'Hoy · ' : '') + solFmtDay.format(t);
-  document.getElementById('solPhase').innerHTML = solPhase(t);
-  solCount(t);
-  solChart(t); solTimes(t); solDial();
+  document.getElementById('solDayH').textContent = (today ? 'Hoy · ' : '') + solFmtDay.format(td);
+  document.getElementById('solPhase').innerHTML = today ? solPhase(t) : solPhaseDay();
+  if (today) solCount(t); else solCountDay(td, t);
+  solChart(t); solTimes(today ? t : 0); solDial(); solDaysUi();
+  try { solCams(today ? t : 0); } catch (e) { document.getElementById('solCams').hidden = true; }
+  solAlertMsg();
   solMin = Math.floor(t / MIN);
+}
+// Botons de dia: «Hoy» i cada dia del festival (els que no són avui). Amb un sol botó, no surten
+function solDaysUi() {
+  const el = document.getElementById('solDays'), today = solMidnight(now());
+  const L = [[null, 'Hoy'], ...DAYS.filter(x => solMidnight(x.t0) !== today).map(x => [x.d, solDayName(x.d)])];
+  el.hidden = L.length < 2;
+  const h = L.map(([d, n]) => `<button type="button" data-d="${d === null ? '' : d}" aria-pressed="${solPick === d}">${html(n)}</button>`).join('');
+  if (el.innerHTML !== h) el.innerHTML = h;
+}
+document.getElementById('solDays').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  solPick = b.dataset.d === '' ? null : +b.dataset.d;
+  solPaint(true);
+});
+// Un altre dia: la targeta de dalt resumeix la tarda d'aquell dia (posta, hora daurada i blava) i quant falta
+function solCountDay(td, t) {
+  const D = solD, set = D.dn(SOL_RISE), g0 = D.dn(6), g1 = D.dn(-4), b1 = D.dn(-6), el = document.getElementById('solCd');
+  el.dataset.l = '';
+  el.className = 'solcd g';
+  el.innerHTML = `<span class="l">${html(solDayName(solPick))} · atardecer</span><b class="v">${set ? hm(set) : '—'}</b>${set ? `<span class="at">${Math.round(SUN.pos(set, D.lat, D.lon).az)}° ${solCard(SUN.pos(set, D.lat, D.lon).az)}</span>` : ''}`
+    + `<small>${g0 && g1 ? `Hora dorada ${hm(g0)}–${hm(g1)}` : ''}${b1 ? ` · azul hasta ${hm(b1)}` : ''}${td > t ? ` · faltan ${dur(td - t)}` : ''}</small>`;
+}
+function solPhaseDay() {
+  return `Planificando: <b>${html(solDayName(solPick))}</b> · las horas de abajo son de ese día`;
+}
+// --- Contrallum per càmera: amb la direcció de cada càmera (pestanya «Cámaras») i cap on mira l'escenari, les hores en què el sol
+// baix (0°–35°) entra dins del camp de visió (més 10° de marge: el reflex arriba abans). Cap on mira l'escenari no surt del 3D
+// (no sap on és el nord): algú ho mesura un cop amb la brúixola i es comparteix amb l'equip pel servidor (/mc, id «…-sol-<escenari>-pos»)
+const SOL_OK = FEST.key + '-sol-ori-v1';
+let solOri = {}, solOriEd = '';
+try { solOri = JSON.parse(localStorage.getItem(SOL_OK) || '{}') || {}; } catch (e) {}
+const solOriId = st => (FEST.key + '-sol-' + mcSlug(st)).slice(0, 72) + '-pos';
+function solOriOf(st) {
+  try { const x = mcState[solOriId(st)], v = x && x.note !== '' ? +x.note : NaN; if (Number.isFinite(v)) return ((Math.round(v) % 360) + 360) % 360; } catch (e) {}
+  return Number.isFinite(solOri[st]) ? solOri[st] : null;
+}
+function solOriSave(st, v) {
+  v = ((Math.round(v) % 360) + 360) % 360;
+  solOri[st] = v; solOriEd = '';
+  try { localStorage.setItem(SOL_OK, JSON.stringify(solOri)); } catch (e) {}
+  try { mcSet(solOriId(st), { note: String(v) }); } catch (e) {}
+  solPaint();
+}
+function solCams(t) {
+  const box = document.getElementById('solCams'), L = MC.filter(s => (s.cams || []).some(c => c.at3d));
+  box.hidden = !L.length;
+  if (!L.length) return;
+  const D = solD, SA = D.S.map(([ti, al]) => [ti, al, SUN.pos(ti, D.lat, D.lon).az]);
+  let h = '';
+  for (const s of L) {
+    const o = solOriOf(s.stage), nm = L.length > 1 ? `<b>${html(s.stage)}</b>: ` : '';
+    h += `<div class="ori" data-st="${html(s.stage)}">`;
+    if (o === null || solOriEd === s.stage) h += `<span>${nm}¿Hacia dónde mira el escenario? Ponte entre el público mirando al escenario y toca «Medir» (con la brújula activada), o escribe los grados.</span>
+      <div class="row2"><button class="btn" type="button" data-act="medir">Medir con la brújula</button><input type="number" inputmode="numeric" min="0" max="359" placeholder="°" aria-label="Grados hacia el escenario" value="${o ?? ''}"><button class="btn" type="button" data-act="ok">Guardar</button></div>`;
+    else h += `<span>${nm}Del público al escenario: <b>${o}° ${solCard(o)}</b></span><button type="button" class="linkbtn" data-act="cambiar">Cambiar</button>`;
+    h += '</div>';
+    if (o === null) continue;
+    for (const c of s.cams || []) {
+      if (!c.at3d) continue;
+      let yaw = null;
+      try { const ps = mcPosOf(c, s.scene3d); if (ps && Number.isFinite(ps.yaw)) yaw = ps.yaw; } catch (e) {}
+      if (yaw === null) yaw = c.aim ? c.aim[0] : 180;
+      // 3D: x al llarg (escenari a −x), y d'un costat a l'altre; yaw 180 = mira cap a l'escenari
+      const bc = ((o + 180 - yaw) % 360 + 360) % 360, half = mcFov(c) / 2 + 10, W = [];
+      let st = null;
+      for (const [ti, al, az] of SA) {
+        const hot = al > -.5 && al < 35 && Math.abs(solWrap(az - bc)) < half;
+        if (hot && st === null) st = ti; else if (!hot && st !== null) { W.push([st, ti]); st = null; }
+      }
+      if (st !== null) W.push([st, D.b]);
+      const on = t && W.some(([a, b]) => t >= a && t <= b);
+      h += `<div class="cam${W.length ? ' hot' : ''}${on ? ' now' : ''}" style="--c:${mcCol(c.c)}"><i></i><span>${html(c.pos || c.cam)}</span><b>${W.length ? W.map(([a, b]) => `${hm(a)}–${hm(b)}`).join('<br>') : 'Sin sol de cara'}</b>`
+        + `<em>Mira a ${Math.round(bc)}° ${solCard(bc)}${W.length ? ` · contraluz${on ? ' ahora' : ''}` : ''}</em></div>`;
+    }
+  }
+  h += '<p class="foot">Aproximado: la dirección de cada cámara sale de «Cámaras». Bajo techo solo cuenta si el sol entra por una abertura.</p>';
+  document.getElementById('solCamsB').innerHTML = h;
+}
+document.getElementById('solCamsB').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'), box = b && b.closest('.ori');
+  if (!box) return;
+  const st = box.dataset.st, act = b.dataset.act, msg = document.getElementById('solMsg');
+  if (act === 'cambiar') { solOriEd = st; return solPaint(); }
+  if (act === 'medir') {
+    if (solHead === null) { msg.textContent = 'Activa la brújula (botón de arriba), ponte entre el público y apunta el móvil hacia el escenario.'; return; }
+    msg.textContent = ''; return solOriSave(st, solHead);
+  }
+  const v = +box.querySelector('input').value;
+  if (box.querySelector('input').value === '' || !Number.isFinite(v)) return;
+  solOriSave(st, v);
+});
+// Avís abans de l'hora daurada de la tarde (dies del festival, ubicació del festival): l'envia el servidor d'avisos
+const solAl = document.getElementById('solAlert');
+solAl.value = String([10, 20, 30, 45].includes(prefs.sol) ? prefs.sol : 0);
+solAl.addEventListener('change', () => { prefs.sol = +solAl.value; savePrefs(); syncPush(); solAlertMsg(); });
+function solAlertMsg() {
+  document.getElementById('solAlMsg').textContent = !prefs.sol ? '' : !PUSH ? 'Esta versión de la app no tiene servidor de avisos.'
+    : !pushActive ? 'Para recibirlo, activa «Recibir notificaciones» en Ajustes.' : `Te avisaremos ${prefs.sol} min antes, los días del festival.`;
 }
 // Brúixola: iPhone → webkitCompassHeading (cal permís, i només es pot demanar en tocar un botó); Android → deviceorientationabsolute
 function solOrient(e) {
@@ -4186,6 +4385,8 @@ addEventListener('resize', () => { if (AR.on) AR.dirty = true; });
 function solShow(on) {
   if (!on) { arClose(); return solListenOff(); }
   solPaint(true);
+  // La direcció de l'escenari (contrallum) la pot haver mesurat algú altre: es baixa l'estat compartit de «Cámaras» si és vell
+  try { if (MC.length && mcLive() && Date.now() - mcAt > 60000) mcPull().then(() => { if (TAB === 'sol') solPaint(); }); } catch (e) {}
   if (solWant && !document.hidden) solListenOn();
 }
 document.addEventListener('visibilitychange', () => { if (TAB === 'sol') solShow(!document.hidden); });

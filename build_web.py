@@ -219,13 +219,54 @@ for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
 
+# Avís de l'hora daurada (pestanya Sol, 04-11-2026): per a cada dia del festival, l'instant en què el sol baixa de 6° a la tarda
+# (comença l'hora daurada) i la posta, a la ubicació del festival (mitjana dels punts GPS del 1r mapa; si no, Montmeló).
+# Mateixa fórmula de la NOAA que l'app. El servidor d'avisos només llegeix aquests instants (no calcula res)
+def sol_alerts(F):
+    import math
+    from zoneinfo import ZoneInfo
+    g = next((m["geo"] for m in F.get("maps") or [] if m.get("geo")), None)
+    lat, lon = (sum(p[0] for p in g) / len(g), sum(p[1] for p in g) / len(g)) if g else (41.5536, 2.2492)
+    R = math.pi / 180
+    def alt(ms):
+        T = (ms / 86400000 + 2440587.5 - 2451545) / 36525
+        L0 = (280.46646 + T * (36000.76983 + T * 0.0003032)) % 360
+        M = 357.52911 + T * (35999.05029 - 0.0001537 * T)
+        e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T)
+        C = math.sin(M * R) * (1.914602 - T * (0.004817 + 0.000014 * T)) + math.sin(2 * M * R) * (0.019993 - 0.000101 * T) + math.sin(3 * M * R) * 0.000289
+        om = 125.04 - 1934.136 * T
+        lam = L0 + C - 0.00569 - 0.00478 * math.sin(om * R)
+        eps = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60 + 0.00256 * math.cos(om * R)
+        dec = math.asin(math.sin(eps * R) * math.sin(lam * R)) / R
+        yy = math.tan(eps / 2 * R) ** 2
+        eqt = 4 / R * (yy * math.sin(2 * L0 * R) - 2 * e * math.sin(M * R) + 4 * e * yy * math.sin(M * R) * math.cos(2 * L0 * R) - .5 * yy * yy * math.sin(4 * L0 * R) - 1.25 * e * e * math.sin(2 * M * R))
+        ha = ((ms / 60000 + eqt + 4 * lon) % 1440) / 4 - 180
+        return math.asin(math.sin(lat * R) * math.sin(dec * R) + math.cos(lat * R) * math.cos(dec * R) * math.cos(ha * R)) / R
+    def down(a, b, h):  # primer minut (entre a i b) en què el sol baixa de h graus
+        t = a
+        while t < b:
+            if alt(t) >= h > alt(t + 60000): return t + 60000
+            t += 60000
+        return None
+    out, tz = [], ZoneInfo("Europe/Madrid")
+    y, mo, d = F["date"]
+    for i in range(max(1, len(F.get("days") or []))):
+        day = datetime.datetime(y, mo, d, 12, 0, tzinfo=tz) + datetime.timedelta(days=i)
+        a = int(day.timestamp() * 1000)
+        g0 = down(a, a + 10 * 3600000, 6)
+        st = down(g0 or a, a + 10 * 3600000, -0.833)
+        if g0 and st:
+            out.append({"t": g0, "set": datetime.datetime.fromtimestamp(st / 1000, tz).strftime("%H:%M")})
+    return out
+
 # Dades del festival → docs/cartel.json, per al servidor de notificacions
 defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in FEST["sets"].items()}
 (OUT / "cartel.json").write_text(json.dumps({
     "fest": FEST["id"], "name": FEST["name"], "date": FEST["date"], "start": FEST["start"], "end": FEST["end"],
     "days": max(1, len(FEST.get("days") or [])),  # festivals de diversos dies: les hores «2/11:00» són del 2n dia
     "stages": [{"id": st["id"], "name": st["name"]} for st in FEST["stages"]],
-    "sets": defaults}, ensure_ascii=False), encoding="utf-8")
+    "sets": defaults,
+    "sol": sol_alerts(FEST)}, ensure_ascii=False), encoding="utf-8")
 print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"], f"· {len(FEST.get('days') or [])} dies" if FEST.get("days") else "")
 
 # Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
