@@ -185,4 +185,68 @@ html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0
 /* terra de reixa i feix: en fosc sobre clar */
 html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/deco-floor-light.webp") center bottom / cover no-repeat; }
 `;
+// Multicámara (opcional, pestanya «Cámaras»): on va cada càmera, amb què, i què cal de corrent i àudio.
+// Dades del rider tècnic del primer Duro (Google Doc «Rider Tecnico - SideBFilms», en Pau, 04-11).
+// Per escenari: cams = { c: color, pos: posició, cam, opt: òptica, acc: [accessoris; «2x Brazo grande» = 2] }
+//               rider = { z: zona, n: quantes, what: què (es suma a «Material»), where: on, c: [colors de les càmeres], ok: qui ho ha confirmat }
+// Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
+FEST.multicam = [
+  { stage: 'Main Stage',
+    cams: [
+      { c: 'morado', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Slider', '2x Brazo grande'] },
+      { c: 'rojo', pos: 'Cabina trasera', cam: 'Pocket 4', opt: '', acc: ['Brazo mediano'] },
+      { c: 'amarillo', pos: 'FOH abierta', cam: 'Black 4K', opt: '10mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH cerrada', cam: 'Black 4K', opt: '75mm', acc: ['Brazo grande', 'Antivibración'] },
+      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P2', opt: '', acc: ['Brazo mediano'] },
+      { c: 'negro', pos: 'Cenital cruz', cam: 'DJI Action 6', opt: '', acc: [] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'] },
+      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, en el toldo de truss', c: ['rojo'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'amarillo'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'en el «delay» izquierdo, al lado del árbol', c: ['verde'], ok: 'Uri' },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'arriba del todo de la cruz, justo encima de la pantalla', c: ['negro'] },
+    ] },
+  { stage: 'Cargo Stage',
+    cams: [
+      { c: 'rojo', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
+      { c: 'azul', pos: 'FOH cerrada', cam: 'Black 4K', opt: '42.5mm', acc: ['Brazo grande'] },
+      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P', opt: '', acc: ['Brazo mediano'] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['rojo'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['azul', 'naranja'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'lateral, en una farola', c: ['verde'], ok: 'Uri' },
+    ] },
+  { stage: 'Black Hangar',
+    cams: [
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['verde'] },
+      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, encima de las pantallas', c: ['azul'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'rojo'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+    ],
+    note: 'La cenital va encima de las pantallas: hace falta arnés y casco. Habla antes con Carles o Enric y con el responsable del escenario.' },
+  { stage: 'Secret Stage',
+    cams: [
+      { c: 'naranja', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
+      { c: 'verde', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano o grande'] },
+      { c: '', pos: 'Grabadora', cam: 'Zoom H4e', opt: '', acc: [] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['naranja'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['verde'] },
+    ] },
+];
 /* ==== /FESTIVAL ==== */
