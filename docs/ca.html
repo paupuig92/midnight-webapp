@@ -1034,7 +1034,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .on3d .mcpin.nopos { display: grid; }
 #multi .on3d .mcpin { width: 24px; height: 24px; transform: translate(-50%, -50%); transition: box-shadow .2s; }
 #multi .on3d .mcpin.sel { width: 32px; height: 32px; font-size: 14px; box-shadow: 0 0 0 3px var(--ink); }
-#multi .mcediting .mcpin { pointer-events: none; }
+#multi .on3d .mcpin { pointer-events: none; }  /* al 3D els tocs els rep el llenç (pick), així una pinça que comença sobre un número no es trenca */
 #multi .on3d[data-look="plano"] .mc3dbox { background: #f5f5f2; border-radius: var(--r-card, 10px); }
 #multi .on3d[data-look="plano"] .mcpin { border-color: #f5f5f2; }
 #multi .mctools { display: none; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
@@ -3299,7 +3299,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '04/11 21:55';
+const BUILD = '04/11 22:06';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -6053,7 +6053,7 @@ function mc3dCams() {
     const fp = [];
     for (let i = 0; i < 4; i++) fp.push(top, cor[i], cor[(i + 1) % 4]);
     const fgm = new T.BufferGeometry().setFromPoints(fp);
-    camsG.add(new T.Mesh(fgm, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .26 : .14, side: T.DoubleSide, depthWrite: false })));
+    camsG.add(new T.Mesh(fgm, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .2 : .09, side: T.DoubleSide, depthWrite: false })));
   }
   mc3d.camSig = mc3dSig();
 }
@@ -6074,9 +6074,17 @@ function mc3dPinsPos() {
 const MC3D_HOME = { az: -.8, pol: .98, rad: 84, tx: 0, tz: 0 };  // com la isomètrica del plànol: escenari a dalt a la dreta
 const mc3dClamp = m => {
   const t = m.s.scene3d.tent;
-  m.rad = Math.max(10, Math.min(130, m.rad)); m.pol = Math.max(.12, Math.min(1.45, m.pol));
+  m.rad = Math.max(6, Math.min(130, m.rad)); m.pol = Math.max(.12, Math.min(1.45, m.pol));
   m.tx = Math.max(-t.len / 2, Math.min(t.len / 2, m.tx)); m.tz = Math.max(-t.wid / 2, Math.min(t.wid / 2, m.tz));
 };
+// Col·loca la càmera 3D (òrbita al voltant del punt tx, MC3D_TY, tz) i actualitza les matrius ja (els gestos la fan servir a l'acte)
+const MC3D_TY = 2;
+function mc3dPose(m) {
+  mc3dClamp(m);
+  const { cam } = m;
+  cam.position.set(m.tx + m.rad * Math.sin(m.pol) * Math.cos(m.az), MC3D_TY + m.rad * Math.cos(m.pol), m.tz + m.rad * Math.sin(m.pol) * Math.sin(m.az));
+  cam.lookAt(m.tx, MC3D_TY, m.tz); cam.updateMatrixWorld();
+}
 function mc3dDraw() {
   if (!mc3d || mc3d.raf) return;
   mc3d.raf = requestAnimationFrame(() => {
@@ -6084,10 +6092,7 @@ function mc3dDraw() {
     const { cam, ren, wrap } = m, W = wrap.clientWidth, H = wrap.clientHeight;
     if (!W || !H) return;
     if (m.w !== W || m.h !== H) { ren.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); m.w = W; m.h = H; }
-    mc3dClamp(m);
-    const ty = 2;
-    cam.position.set(m.tx + m.rad * Math.sin(m.pol) * Math.cos(m.az), ty + m.rad * Math.cos(m.pol), m.tz + m.rad * Math.sin(m.pol) * Math.sin(m.az));
-    cam.lookAt(m.tx, ty, m.tz);
+    mc3dPose(m);
     if (m.scene.fog) { m.scene.fog.near = m.rad * .9; m.scene.fog.far = m.rad * 2.6 + 40; }
     ren.render(m.scene, cam);
     mc3dPinsPos();
@@ -6142,23 +6147,28 @@ async function mc3dAttach() {
 // Gestos: 1 dit gira (amb inèrcia) · 2 dits apropen, desplacen i giren · doble toc torna a la vista inicial.
 // Ratolí: arrossegar gira, botó dret o Maj+arrossegar desplaça, roda apropa. Editant: arrossegar una càmera la mou per terra.
 function mc3dTouch(cv) {
+  // Els gestos «agafen» el terra: el punt que hi ha sota els dits es queda sota els dits (com un mapa).
+  // Així apropar va cap on tens els dits, desplaçar segueix el dit i no hi ha salts encara que siguis a dins de la carpa.
   const ptr = new Map();
-  let g = null, tap = null, lastTap = 0, lastXY = [0, 0], vel = [0, 0], velT = 0, inert = 0, drag = null, pan = false;
+  let g = null, tap = null, lastTap = 0, lastXY = [0, 0], vel = [0, 0], velT = 0, inert = 0, drag = null, pan = false, multi = false, twist = 0, twistOn = false;
   const two = () => { const [a, b] = [...ptr.values()]; return { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, ang: Math.atan2(b[1] - a[1], b[0] - a[0]), mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; };
-  const panBy = (dx, dy) => {
-    const m = mc3d, k = 2 * m.rad * Math.tan(m.cam.fov * Math.PI / 360) / (m.h || 300);
-    const rx = Math.sin(m.az), rz = -Math.cos(m.az), fx = -Math.cos(m.az), fz = -Math.sin(m.az);
-    m.tx -= (rx * dx - fx * dy / Math.max(.35, Math.cos(m.pol) + .2)) * k; m.tz -= (rz * dx - fz * dy / Math.max(.35, Math.cos(m.pol) + .2)) * k;
-  };
-  // Punt de terra sota el dit (per moure càmeres)
-  const ground = (x, y) => {
+  // Punt d'un pla horitzontal (alçada h) sota el dit, amb la càmera tal com està ara
+  const ground = (x, y, h = 0) => {
     const m = mc3d, T = m.T, r = cv.getBoundingClientRect(), rc = new T.Raycaster(), hit = new T.Vector3();
+    mc3dPose(m);
     rc.setFromCamera(new T.Vector2((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1), m.cam);
-    return rc.ray.intersectPlane(new T.Plane(new T.Vector3(0, 1, 0), 0), hit) ? [hit.x, hit.z] : null;
+    return rc.ray.intersectPlane(new T.Plane(new T.Vector3(0, 1, 0), -h), hit) ? [hit.x, hit.z] : null;
   };
+  // Per als gestos de vista: pla a l'alçada del centre de gir, i res si el punt queda massa lluny (mirant cap a l'horitzó)
+  const grabAt = (x, y) => {
+    const h = ground(x, y, MC3D_TY), m = mc3d;
+    return h && Math.hypot(h[0] - m.cam.position.x, h[1] - m.cam.position.z) < Math.max(40, m.rad * 3) ? h : null;
+  };
+  const keep = (before, x, y) => { const after = before && grabAt(x, y); if (after) { mc3d.tx += before[0] - after[0]; mc3d.tz += before[1] - after[1]; } };
   // Càmera més propera al dit (pel número o per la base), a menys de 34 px
   const pick = (x, y) => {
     const m = mc3d, T = m.T, r = cv.getBoundingClientRect(), v = new T.Vector3();
+    mc3dPose(m);
     let best = null, bd = 34;
     for (const c of m.s.cams || []) {
       const q = m.pos[c.id]; if (!q) continue;
@@ -6172,12 +6182,13 @@ function mc3dTouch(cv) {
   };
   const stopInert = () => { cancelAnimationFrame(inert); inert = 0; if (mc3d) cancelAnimationFrame(mc3d.anim); };
   cv.addEventListener('contextmenu', e => e.preventDefault());
+  cv.addEventListener('gesturestart', e => e.preventDefault());  // Safari: que no faci zoom de la pàgina
   cv.addEventListener('pointerdown', e => {
     if (!mc3d) return;
     cv.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); stopInert();
     if (ptr.size === 1) {
       tap = { t: performance.now(), x: e.clientX, y: e.clientY, moved: false };
-      pan = e.button === 2 || e.shiftKey; vel = [0, 0];
+      pan = e.button === 2 || e.shiftKey; vel = [0, 0]; multi = false;
       drag = null;
       if (mcEd) {
         const c = pick(e.clientX, e.clientY);
@@ -6188,16 +6199,17 @@ function mc3dTouch(cv) {
           mc3dCams(); mc3dDraw();
         }
       }
-    } else { g = two(); tap = null; drag = null; }
+    } else { g = two(); tap = null; drag = null; multi = true; twist = 0; twistOn = false; vel = [0, 0]; }
   });
   cv.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId);
     if (!p || !mc3d) return;
-    const dx = e.clientX - p[0], dy = e.clientY - p[1];
-    ptr.set(e.pointerId, [e.clientX, e.clientY]);
-    if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 8) tap.moved = true;
+    const px = p[0], py = p[1], dx = e.clientX - px, dy = e.clientY - py;
+    if (!dx && !dy) return;
     const m = mc3d;
     if (ptr.size === 1) {
+      ptr.set(e.pointerId, [e.clientX, e.clientY]);
+      if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 8) tap.moved = true;
       if (drag) {
         const h = ground(e.clientX, e.clientY), t = m.s.scene3d.tent;
         if (h) {
@@ -6206,14 +6218,18 @@ function mc3dTouch(cv) {
           q.p[1] = Math.round(Math.max(-t.wid / 2, Math.min(t.wid / 2, h[1] + drag.off[1])) * 10) / 10;
           mc3dCams(); mc3dEdPaint();
         }
-      } else if (pan) panBy(dx, dy);
+      } else if (multi) return;             // dit que queda d'una pinça: no fa res fins que s'aixequen tots
+      else if (pan) keep(grabAt(px, py), e.clientX, e.clientY);
       else { m.az += dx * .008; m.pol -= dy * .006; vel = [dx, dy]; velT = performance.now(); }
-    } else if (ptr.size >= 2 && g) {
+    } else if (g) {
+      const before = grabAt(g.mx, g.my);    // amb la vista d'abans d'aquest moviment
+      ptr.set(e.pointerId, [e.clientX, e.clientY]);
       const G = two();
       m.rad *= g.d / G.d;
       let da = G.ang - g.ang; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
-      m.az -= da;
-      panBy(G.mx - g.mx, G.my - g.my);
+      twist += da; if (Math.abs(twist) > .2) twistOn = true;   // girar amb dos dits només si es vol de debò
+      if (twistOn) m.az -= da;
+      keep(before, G.mx, G.my);
       g = G;
     }
     mc3dDraw();
@@ -6221,11 +6237,14 @@ function mc3dTouch(cv) {
   const up = e => {
     if (!ptr.has(e.pointerId)) return;
     ptr.delete(e.pointerId);
-    if (ptr.size === 1) { g = null; tap = null; vel = [0, 0]; return; }  // d'una pinça a un dit: no saltar
-    if (ptr.size) return;
-    const tnow = performance.now();
+    if (ptr.size) { g = ptr.size > 1 ? two() : null; return; }
+    const tnow = performance.now(), wasMulti = multi;
+    multi = false;
     if (drag) { drag = null; return; }
+    if (wasMulti) return;
     if (tap && !tap.moved && tnow - tap.t < 280) {
+      const c = !mcEd && pick(tap.x, tap.y);
+      if (c) { lastTap = 0; mcOpenSheet(mcKey(c)); return; }   // toc sobre una càmera: la seva fitxa
       if (tnow - lastTap < 350 && Math.hypot(tap.x - lastXY[0], tap.y - lastXY[1]) < 40) { lastTap = 0; mc3dGo(MC3D_HOME); }
       else { lastTap = tnow; lastXY = [tap.x, tap.y]; }
       return;
@@ -6242,7 +6261,12 @@ function mc3dTouch(cv) {
     }
   };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-  cv.addEventListener('wheel', e => { e.preventDefault(); if (!mc3d) return; stopInert(); mc3d.rad *= Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0015)); mc3dDraw(); }, { passive: false });
+  cv.addEventListener('wheel', e => {
+    e.preventDefault(); if (!mc3d) return; stopInert();
+    const before = grabAt(e.clientX, e.clientY);
+    mc3d.rad *= Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0015));
+    keep(before, e.clientX, e.clientY); mc3dDraw();
+  }, { passive: false });
 }
 addEventListener('resize', () => { if (TAB === 'multi') mc3dDraw(); });
 // --- Editor de posicions («Moure càmeres») ---
