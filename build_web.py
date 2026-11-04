@@ -30,12 +30,14 @@ push = json.loads(push_f.read_text()) if push_f.is_file() else None
 src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "public": push["public"]}) if push else "null")
 src = src.replace("/*ADMIN*/null/*ADMIN*/", "true" if push else "null")
 # Content-Security-Policy: segona capa per si mai s'hi colés codi estrany. La pàgina només pot parlar amb ella mateixa
-# i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts i la llibreria d'Excel de jsDelivr.
+# i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts (la llibreria d'Excel ara és a vendor/, a la mateixa web).
+# Pestanya Tiempo (04-11): previsió d'Open-Meteo, radar de RainViewer, mapa de fons de CARTO i el widget de Windy (iframe).
 import re
 PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
-CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
-       "img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' " + PUSH_ORIGIN + "; "
+       "img-src 'self' data: blob: https://tilecache.rainviewer.com https://*.basemaps.cartocdn.com " + PUSH_ORIGIN + "; media-src 'self' data: blob:; "
+       "connect-src 'self' https://api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
@@ -73,6 +75,15 @@ IMG = ROOT / "festivals" / FEST["id"] / "img"
 if not IMG.is_dir():
     IMG = ROOT / "img"
 print("Imatges:", IMG.relative_to(ROOT))
+
+# Archivo (Google Fonts) és la lletra per defecte: si el festival en porta de pròpies (theme --display i --body), no es baixa.
+# Una connexió externa menys abans de la primera pintada (rendiment, 04-11-2026)
+_first = lambda v: (v or "").split(",")[0].strip().strip('"\'').lower()
+_th = FEST.get("theme", {})
+if _th.get("--display") and _th.get("--body") and "archivo" not in (_first(_th.get("--display")), _first(_th.get("--body")), _first(_th.get("--title")), _first(_th.get("--cond")), _first(_th.get("--mono"))):
+    head = "\n".join(l for l in head.splitlines() if "fonts.googleapis.com" not in l and "fonts.gstatic.com" not in l)
+    CSP = CSP.replace(" https://fonts.googleapis.com", "").replace(" https://fonts.gstatic.com", "")
+    print("Lletres: només les del festival (sense Google Fonts)")
 
 # Colors i lletres del festival ja al <head>: si no, el primer instant es veuen els colors per defecte (els del Bass)
 def _css(v): return str(v).replace("<", "")
@@ -208,16 +219,55 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))
-# Llibreries de vendor/ (three.js per a la vista 3D de «Cámaras»): només si el festival en fa servir (FEST.multicam[].scene3d)
+# Llibreries de vendor/: la d'Excel (editor de l'organització) sempre; three.js (vista 3D de «Cámaras») només si el festival en fa servir (FEST.multicam[].scene3d)
 USES3D = "scene3d:" in src
 if (OUT / "vendor").exists():
     shutil.rmtree(OUT / "vendor")
-if USES3D:
-    shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*"))
+shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*", *(() if USES3D else ("three-*",))))
 # Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
 for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
 (OUT / ".nojekyll").touch()
+
+# Avís de l'hora daurada (pestanya Sol, 04-11-2026): per a cada dia del festival, l'instant en què el sol baixa de 6° a la tarda
+# (comença l'hora daurada) i la posta, a la ubicació del festival (mitjana dels punts GPS del 1r mapa; si no, Montmeló).
+# Mateixa fórmula de la NOAA que l'app. El servidor d'avisos només llegeix aquests instants (no calcula res)
+def sol_alerts(F):
+    import math
+    from zoneinfo import ZoneInfo
+    g = next((m["geo"] for m in F.get("maps") or [] if m.get("geo")), None)
+    lat, lon = (sum(p[0] for p in g) / len(g), sum(p[1] for p in g) / len(g)) if g else (41.5536, 2.2492)
+    R = math.pi / 180
+    def alt(ms):
+        T = (ms / 86400000 + 2440587.5 - 2451545) / 36525
+        L0 = (280.46646 + T * (36000.76983 + T * 0.0003032)) % 360
+        M = 357.52911 + T * (35999.05029 - 0.0001537 * T)
+        e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T)
+        C = math.sin(M * R) * (1.914602 - T * (0.004817 + 0.000014 * T)) + math.sin(2 * M * R) * (0.019993 - 0.000101 * T) + math.sin(3 * M * R) * 0.000289
+        om = 125.04 - 1934.136 * T
+        lam = L0 + C - 0.00569 - 0.00478 * math.sin(om * R)
+        eps = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60 + 0.00256 * math.cos(om * R)
+        dec = math.asin(math.sin(eps * R) * math.sin(lam * R)) / R
+        yy = math.tan(eps / 2 * R) ** 2
+        eqt = 4 / R * (yy * math.sin(2 * L0 * R) - 2 * e * math.sin(M * R) + 4 * e * yy * math.sin(M * R) * math.cos(2 * L0 * R) - .5 * yy * yy * math.sin(4 * L0 * R) - 1.25 * e * e * math.sin(2 * M * R))
+        ha = ((ms / 60000 + eqt + 4 * lon) % 1440) / 4 - 180
+        return math.asin(math.sin(lat * R) * math.sin(dec * R) + math.cos(lat * R) * math.cos(dec * R) * math.cos(ha * R)) / R
+    def down(a, b, h):  # primer minut (entre a i b) en què el sol baixa de h graus
+        t = a
+        while t < b:
+            if alt(t) >= h > alt(t + 60000): return t + 60000
+            t += 60000
+        return None
+    out, tz = [], ZoneInfo("Europe/Madrid")
+    y, mo, d = F["date"]
+    for i in range(max(1, len(F.get("days") or []))):
+        day = datetime.datetime(y, mo, d, 12, 0, tzinfo=tz) + datetime.timedelta(days=i)
+        a = int(day.timestamp() * 1000)
+        g0 = down(a, a + 10 * 3600000, 6)
+        st = down(g0 or a, a + 10 * 3600000, -0.833)
+        if g0 and st:
+            out.append({"t": g0, "set": datetime.datetime.fromtimestamp(st / 1000, tz).strftime("%H:%M")})
+    return out
 
 # Dades del festival → docs/cartel.json, per al servidor de notificacions
 defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, *_r) in enumerate(arr)] for sid, arr in FEST["sets"].items()}
@@ -225,7 +275,8 @@ defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, 
     "fest": FEST["id"], "name": FEST["name"], "date": FEST["date"], "start": FEST["start"], "end": FEST["end"],
     "days": max(1, len(FEST.get("days") or [])),  # festivals de diversos dies: les hores «2/11:00» són del 2n dia
     "stages": [{"id": st["id"], "name": st["name"]} for st in FEST["stages"]],
-    "sets": defaults}, ensure_ascii=False), encoding="utf-8")
+    "sets": defaults,
+    "sol": sol_alerts(FEST)}, ensure_ascii=False), encoding="utf-8")
 print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"], f"· {len(FEST.get('days') or [])} dies" if FEST.get("days") else "")
 
 # Els calendaris (.ics) es van treure el 22-10: a l'iPhone no funcionaven bé
@@ -341,7 +392,9 @@ self.addEventListener('fetch', e => {{
   if (url.searchParams.has('t')) return;
   // Vídeos (el banner): directe de la xarxa. L'iPhone els demana a trossos (Range) i una còpia sencera de la cache no la reprodueix; sense xarxa es veu el pòster
   if (url.pathname.endsWith('.mp4')) return;
-  // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
+  // La pàgina: la còpia guardada a l'acte (s'obre a l'instant, amb o sense cobertura) i es refresca en segon pla.
+  // Les versions noves arriben pel sw.js nou (es mira cada vegada que s'obre l'app): es posa al dia sola o surt «Actualizar» (04-11-2026)
+  // Sense còpia (primera vegada): la xarxa
   if (e.request.mode === 'navigate') {{
     // Cada idioma, la seva còpia. Adreces sense «.html» (Cloudflare Pages redirigeix ca.html → ca; GitHub serveix totes dues)
     const page = /[/]ca([.]html)?$/.test(url.pathname) ? 'ca' : './';
@@ -353,9 +406,9 @@ self.addEventListener('fetch', e => {{
         else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       }});
-      const slow = new Promise(r => setTimeout(() => r(hit), 1500));
-      try {{ return (await Promise.race([net, hit ? slow : net])) || await net; }}
-      catch (err) {{ return hit || Response.error(); }}
+      if (hit) {{ e.waitUntil(net.catch(() => {{}})); return hit; }}
+      try {{ return await net; }}
+      catch (err) {{ return Response.error(); }}
     }}));
     return;
   }}
