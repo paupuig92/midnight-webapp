@@ -187,6 +187,10 @@ i.imp { color: #0b0b0b; }
 @keyframes pulse { 50% { opacity: .25; } }
 .row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
 .row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+.cuenote { display: flex; gap: 5px; align-items: flex-start; margin-top: 4px; font: 600 var(--fs-xs)/1.3 var(--body); color: var(--ink); background: rgba(var(--accent-rgb), .14); border-radius: 8px; padding: 4px 7px; width: fit-content; max-width: 100%; }
+.cuenote .ico { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+.blk .gnote { display: flex; gap: 3px; align-items: center; }
+.blk .gnote .ico { flex: none; width: 11px; height: 11px; }
 /* si alguna fila porta logo de banda, totes fan la columna igual d'ampla perquè els textos quedin alineats */
 body:has(.row > img.band) .row { grid-template-columns: 76px minmax(0, 1fr) auto; }
 body:has(.row > img.band) .row > .logo { justify-self: center; }
@@ -308,7 +312,8 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .gut span { font-family: var(--mono); position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
   font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
 .gut span[data-n] { color: var(--now); }
-body.offline .status::after { content: " · sin conexión (horario guardado)"; color: var(--muted); }
+.status .sync { white-space: nowrap; }
+.status .sync.old { color: var(--now); font-weight: 700; }
 .gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
 .gut .nowlbl { left: 2px; right: 2px; text-align: center; background: #e8253a; color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
 .col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
@@ -950,7 +955,7 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #inc, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
 /* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
 body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
@@ -964,10 +969,22 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .upnext .cm { display: block; margin-top: 3px; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--ink); }
 #multi .upnext .acc { display: block; font: 500 var(--fs-xs)/1.3 var(--body); color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
 #multi .mcs { text-align: right; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
-#multi .mcs b { display: block; font-weight: 700; color: var(--ink); }
-#multi .mcs b::after { content: " ›"; color: var(--muted); }
-#multi li.it[data-st="grabando"] .mcs b { color: var(--now); }
-#multi li.it[data-st="grabando"] .mcs b::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; }
+#multi .mcs { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+#multi .mcnext { min-height: 34px; min-width: 76px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); font: 700 11px/1 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+#multi .mcnext::after { content: ""; }
+#multi li.it[data-st="montada"] .mcnext { border-color: var(--ink); }
+#multi li.it[data-st="grabando"] .mcnext { background: var(--now); border-color: var(--now); color: #fff; }
+#multi li.it[data-st="parada"] .mcnext { border-style: dashed; }
+#multi .mcs .rt { font-variant-numeric: tabular-nums; }
+#multi li.it[data-lim="warn"] .mcs .rt { color: #f5c518; font-weight: 800; }
+#multi li.it[data-lim="over"] .mcs .rt { color: var(--now); font-weight: 800; }
+#multi li.it[data-lim="over"] .mcs .rt::before { content: "⚠ "; }
+#multi li.mcsame { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+#multi li.mcsame[hidden] { display: none; }
+#multi li.mcsame .note { margin: 0; }
+#multi .mclog li { grid-template-columns: 4em minmax(0, 1fr) auto; gap: 10px; }
+#multi .mclog .who { color: var(--muted); font-size: var(--fs-xs); }
+#multi .mcplan.mcfold .mc3dbox, #multi .mcplan.mcfold .mchint, #multi .mcplan.mcfold .mced, #multi .mcfold .mctools .btn:not([data-mc3d="fold"]) { display: none; }
 #multi li.it[data-st="recogida"] { opacity: .55; }
 #multi .mcsum { color: var(--muted); }
 #multi .mcsum.rec { color: var(--now); }
@@ -1013,7 +1030,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .on3d[data-look="plano"] .mcpin { border-color: #f5f5f2; }
 #multi .mctools { display: none; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 #multi .on3d .mctools { display: flex; }
-#multi .mctools .btn, #multi .mced .btn { min-height: 38px; padding: 0 14px; font-size: var(--fs-s); }
+#multi .mctools .btn, #multi .mced .btn { min-height: 44px; padding: 0 14px; font-size: var(--fs-s); }
 #multi .mced { margin-top: 10px; padding: 12px 0 4px; border-top: 1px solid var(--rule); }
 #multi .mced .mcsel { margin: 0 0 8px; }
 #multi .mced .mcsel button { display: inline-flex; align-items: center; }
@@ -1033,7 +1050,30 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
-#mcSheet { z-index: 20; }  /* per sobre de la barra de baix */
+#mcSheet, #incSheet { z-index: 20; }
+/* Incidències */
+#inc .shead { align-items: center; }
+#inc .incgo { min-height: 40px; padding: 0 14px; font-size: var(--fs-s); }
+.inclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.inclist li { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); display: grid; gap: 6px; }
+.inclist li.urg { border-color: var(--now); }
+.inclist .ih { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; font-size: var(--fs-xs); color: var(--muted); }
+.inclist .ih b { color: var(--ink); }
+.inclist .ut { background: var(--now); color: #fff; border-radius: 6px; padding: 1px 6px; font-weight: 800; letter-spacing: .04em; }
+.inclist .it { font: 600 var(--fs-s)/1.35 var(--body); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.inclist .ia { display: flex; gap: 8px; flex-wrap: wrap; }
+.inclist .ia .btn { min-height: 38px; padding: 0 12px; font-size: var(--fs-xs); }
+.inclist .ok { color: var(--muted); font-size: var(--fs-xs); }
+.inclist img { max-width: 100%; border-radius: 8px; }
+.incold { margin-top: 10px; }
+.incold summary { cursor: pointer; color: var(--muted); font-weight: 700; font-size: var(--fs-s); min-height: 40px; display: flex; align-items: center; }
+#incSheet .body h3 { margin: 18px 0 8px; font: 800 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#incSheet textarea { width: 100%; box-sizing: border-box; font: 16px/1.4 var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+#incSheet .incopts { margin-top: 12px; }
+#incSheet .incopts .btn { flex: 1 1 40%; }
+#incSheet #incUrg[aria-pressed="true"] { background: var(--now); border-color: var(--now); color: #fff; }
+#incSheet .incprev { display: block; max-width: 100%; max-height: 40vh; margin-top: 12px; border-radius: 8px; }
+#incSheet .incprev[hidden] { display: none; }  /* per sobre de la barra de baix */
 #mcSheet .body h3 { margin: 20px 0 8px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 #mcSheet .row2 .btn { flex: 1 1 40%; }
 #mcSheet .row2 .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
@@ -1153,6 +1193,34 @@ html[data-theme="light"] #sol { --sol-gold: #ec9512; --sol-blue: #3d63d6; }
 .soltimes em { grid-row: 2; font: 500 var(--fs-xs)/1.3 var(--mono); font-style: normal; color: var(--muted); }
 .soltimes b { grid-column: 2; grid-row: 1 / 3; font: 600 var(--fs-m)/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .solfoot { font-size: var(--fs-xs); line-height: 1.45; }
+/* Triar dia (avui o un dia del festival), per planificar la llum abans d'anar-hi */
+.soldays { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; }
+.soldays::-webkit-scrollbar { display: none; }
+.soldays button { flex: none; min-height: 40px; padding: 0 14px; border: 1px solid var(--line, var(--rule)); border-radius: 99px; background: var(--panel); color: var(--muted); font: 700 var(--fs-xs)/1 var(--body); cursor: pointer; }
+.soldays button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+/* Qui sona amb la llum bona, i la lluna */
+.soltimes .who { grid-column: 1 / -1; grid-row: 3; margin-top: 3px; font: 600 var(--fs-xs)/1.35 var(--body); color: var(--ink); opacity: .85; }
+.soltimes .who i { font-style: normal; color: var(--muted); }
+.soltimes li.m::before { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.soltimes li.m b { font-size: var(--fs-s); }
+.solalert { margin-top: 18px; }
+.solalmsg:empty { display: none; }
+/* Contrallum per càmera (amb les posicions de «Cámaras») */
+#sol { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
+.solcams { overflow: hidden; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
+.solcams .ori { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; font: 600 var(--fs-s)/1.35 var(--body); color: var(--muted); }
+.solcams .ori b { color: var(--ink); }
+.solcams .ori .row2 { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.solcams .ori input { width: 84px; min-height: 44px; padding: 0 10px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: 16px var(--mono); }
+.solcams .ori .btn { min-height: 44px; padding: 0 12px; font-size: var(--fs-xs); }
+.solcams .cam { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 2px 10px; padding: 10px 16px; border-top: 1px solid var(--sol-hair); }
+.solcams .cam > i { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--muted)); }
+.solcams .cam span { font: 700 var(--fs-s)/1.25 var(--body); color: var(--ink); }
+.solcams .cam em { grid-column: 2 / -1; font: 500 var(--fs-xs)/1.35 var(--mono); font-style: normal; color: var(--muted); }
+.solcams .cam b { font: 700 var(--fs-xs)/1.2 var(--mono); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.solcams .cam.hot b { color: var(--sol-gold); }
+.solcams .cam.now { background: color-mix(in srgb, var(--sol-gold) 12%, transparent); }
+.solcams .foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--sol-hair); font: 500 var(--fs-xs)/1.4 var(--body); color: var(--muted); }
 /* Sol amb la càmera (realitat augmentada): el camí del sol dibuixat sobre la imatge. Sense càmera, sobre un cel dibuixat.
    Sobre la càmera el tema no compta: vidre fosc i text blanc (com les apps de foto), així es llegeix sobre qualsevol fons */
 body.aron { overflow: hidden; }
@@ -1199,7 +1267,7 @@ body.aron .tabbar, body.aron .totop { display: none !important; }
 .mapaddr p { margin: 0; color: var(--muted); }
 .mapaddr .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
 .mapaddr svg { width: 18px; height: 18px; }
-body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar) { display: none !important; }
+body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar):not(#inc) { display: none !important; }
 body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !important; }
 .whobar { margin-bottom: -14px; }
 .faces { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -1398,6 +1466,211 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
 .ptr.go svg { animation: ptrspin .8s linear infinite; }
 @keyframes ptrspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
+/* ==== MOMENTOS (04-11-2026): botó «Momento» a Horarios i Cámaras, marques per a l'edició ==== */
+.mkfab { position: fixed; z-index: 12; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--accent-ink); font: 800 var(--fs-m)/1 var(--body); letter-spacing: .01em; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.mkfab svg { width: 20px; height: 20px; flex: none; }
+.mkfab:active { transform: scale(.94); }
+.mkfab .mkn { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font: 800 11px/20px var(--mono, var(--body)); text-align: center; }
+.mkfab .mkn:empty { display: none; }
+body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkfab, body.tvon .mkfab, body.aron .mkfab, body.locked .mkfab { display: none !important; }
+.mkpop { position: fixed; z-index: 13; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 136px);
+  max-width: 520px; margin: 0 auto; padding: 14px 14px 12px; border-radius: var(--r-card, 14px); background: var(--panel); color: var(--ink);
+  border: 1.5px solid var(--accent); box-shadow: 0 14px 40px rgba(0, 0, 0, .55); }
+.mkpop[hidden] { display: none !important; }
+body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkpop, body.locked .mkpop { display: none !important; }
+.mkpop .mkh { display: flex; align-items: baseline; gap: 10px; margin: 0 34px 2px 0; font: 800 var(--fs-l)/1.2 var(--body); }
+.mkpop .mkh b { font: 700 var(--fs-l)/1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+.mkpop .mkwho { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-s); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkpop .mkx { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+.mktags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.mktags button { min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.mktags button i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--mkc); vertical-align: 0; }
+.mktags button[aria-pressed="true"] { border-color: var(--mkc); background: color-mix(in srgb, var(--mkc) 26%, transparent); }
+.mkpop input, #mkList select, #mkList input { box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 12px; }
+.mkpop input { width: 100%; margin: 2px 0 6px; }
+#mkList { z-index: 20; }  /* per sobre de la barra de baix */
+.mkpop .mkrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.mkpop .mkrow .linkbtn { margin: 0; padding: 8px 0; }
+.mkstages { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.mkstages button { min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); font: 700 var(--fs-xs) var(--body); cursor: pointer; }
+.mkstages button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+#mkList .mkl { list-style: none; margin: 0; padding: 0; }
+#mkList .mkl li { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+#mkList .mkl .tm { font: 700 var(--fs-m)/1.1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+#mkList .mkl .tx { min-width: 0; }
+#mkList .mkl .tx b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mkList .mkl .tx small { display: block; color: var(--muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mkList .mkl .tg { display: inline-block; padding: 1px 7px; margin-right: 6px; border-radius: 999px; font: 800 10px/16px var(--body); text-transform: uppercase; letter-spacing: .04em; background: color-mix(in srgb, var(--mkc) 30%, transparent); color: var(--ink); }
+#mkList .mkl .del { width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+#mkList .mkl .ns { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; margin-left: 6px; vertical-align: 1px; }
+#mkList h3 { margin: 22px 0 8px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+#mkList .mkexp { display: grid; gap: 8px; }
+#mkList .mkopts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 4px 0 12px; font-size: var(--fs-s); }
+#mkList .mkopts select, #mkList .mkopts input { min-height: 40px; }
+#mkList .mkopts input { width: 76px; }
+#mkList .mkempty { color: var(--muted); padding: 16px 0; }
+
+/* ==== TIEMPO (04-11-2026, estil Windy): mapa a tota l'amplada amb capes, partícules de vent i barra de temps ==== */
+body:not([data-tab="tiempo"]) #tiempo { display: none !important; }
+body[data-tab="tiempo"] .wrap > :not(#tiempo) { display: none !important; }
+body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+#tiempo h2 { margin: 18px 0 4px; }
+#tiempo h3 { margin: 28px 0 10px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+#tiempo .tqsrc { margin: 0 0 14px; }
+.tqhero { width: 100vw; margin-left: calc(50% - 50vw); }
+@media (min-width: 720px) { .tqhero { width: auto; margin-left: 0; } .tqhero .tqmap { border-radius: 18px; } }
+.tqmap { position: relative; height: min(62vh, 560px); min-height: 380px; overflow: hidden; background: #0b0d12; touch-action: pan-y; color: #fff; }
+.tqmap .ly { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tqmap #tqBase img, .tqmap #tqRad img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap #tqBase { filter: saturate(.6); }
+.tqmap .tqheat { opacity: .72; mix-blend-mode: normal; }
+.tqmap .rd { opacity: 0; transition: opacity .25s; }
+.tqmap .rd.on { opacity: .85; }
+.tqmap #tqPc { pointer-events: none; }
+.tqmap .tqwin { border: 0; background: #0b0d12; z-index: 3; }
+.tqmap .tqwin iframe { width: 100%; height: 100%; border: 0; display: block; }
+.tqmap svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tqmap svg.rings circle.r { fill: none; stroke: rgba(255,255,255,.4); stroke-width: 1; stroke-dasharray: 3 4; }
+.tqmap svg.rings text { fill: rgba(255,255,255,.8); font: 700 10px var(--mono, monospace); paint-order: stroke; stroke: rgba(0,0,0,.65); stroke-width: 3px; }
+.tqmap svg.rings circle.pin { fill: var(--now, #e0162b); stroke: #fff; stroke-width: 2.5; }
+.tqmap svg.rings circle.pulse { fill: none; stroke: var(--now, #e0162b); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: tqPulse 2.4s ease-out infinite; }
+@keyframes tqPulse { from { transform: scale(1); opacity: .9; } to { transform: scale(4); opacity: 0; } }
+.tqglass { background: rgba(14, 16, 22, .62); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); border: 1px solid rgba(255,255,255,.12); }
+.tqtop { position: absolute; z-index: 4; left: 12px; top: 12px; right: 84px; }
+.tqpill { display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 999px; font-size: var(--fs-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqpill b { font: 800 var(--fs-l) var(--display); }
+.tqpill span { color: rgba(255,255,255,.75); overflow: hidden; text-overflow: ellipsis; }
+.tqlayers { position: absolute; z-index: 5; right: 10px; top: 10px; display: grid; gap: 6px; }
+.tqlayers button { display: grid; justify-items: center; gap: 2px; width: 62px; padding: 8px 0 6px; border-radius: 14px; color: rgba(255,255,255,.85); cursor: pointer; font: 700 10px var(--body);
+  background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqlayers button svg { width: 22px; height: 22px; }
+.tqlayers button[aria-selected="true"] { background: #fff; color: #0b0d12; border-color: #fff; }
+.tqzoom { position: absolute; z-index: 4; left: 12px; top: 58px; display: grid; border-radius: 12px; overflow: hidden; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqzoom button { width: 40px; height: 40px; border: 0; background: none; color: #fff; font: 600 22px/1 var(--body); cursor: pointer; }
+.tqzoom button + button { border-top: 1px solid rgba(255,255,255,.12); }
+.tqzoom button:disabled { opacity: .35; }
+.tqleg { position: absolute; z-index: 4; left: 12px; right: 12px; bottom: 74px; display: flex; align-items: center; justify-content: flex-start; }
+.tqleg .bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; font: 700 9px/18px var(--mono, monospace); color: rgba(0,0,0,.75); box-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.tqleg .bar span { padding: 0 5px; min-width: 18px; text-align: center; }
+.tqleg .u { margin-left: 6px; font: 700 10px var(--mono, monospace); color: #fff; text-shadow: 0 1px 3px #000; }
+.tqbar { position: absolute; z-index: 5; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 16px;
+  background: rgba(14,16,22,.7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.12); }
+.tqbar[hidden] { display: none; }
+.tqbar button { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #fff; color: #0b0d12; display: grid; place-items: center; cursor: pointer; }
+.tqbar button svg { width: 18px; height: 18px; }
+.tqtl { flex: 1; min-width: 0; position: relative; }
+.tqtl input { width: 100%; margin: 0; accent-color: #fff; }
+.tqticks { position: relative; height: 12px; font: 700 9px/12px var(--mono, monospace); color: rgba(255,255,255,.6); }
+.tqticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.tqts { flex: none; min-width: 64px; text-align: right; font: 700 var(--fs-s)/1.15 var(--mono, monospace); }
+.tqts small { display: block; font-size: 10px; color: rgba(255,255,255,.65); }
+.tqmap .msg { position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 80%; margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(14,16,22,.8); text-align: center; font-size: var(--fs-s); }
+.tqmap .msg[hidden] { display: none; }
+.tqmap.windy .tqtop, .tqmap.windy .tqzoom, .tqmap.windy .tqleg, .tqmap.windy .tqbar, .tqmap.windy svg.rings { display: none; }
+.tqnow { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; padding: 18px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
+.tqnow .ic { grid-row: span 2; font-size: 52px; line-height: 1; }
+.tqnow .tp { font: 800 52px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.tqnow .tp.rain { font-size: clamp(26px, 8vw, 40px); line-height: 1.05; white-space: normal; }
+.tqnow .tp small { font-size: var(--fs-m); font-weight: 600; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+.tqnow .ds { color: var(--muted); font-size: var(--fs-m); }
+.tqnow .kv { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: var(--fs-s); }
+.tqnow .kv span { color: var(--muted); }
+.tqnow .kv b { color: var(--ink); }
+.arw { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+.tqal { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.tqal li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fill, rgba(255,255,255,.06)); font-size: var(--fs-s); line-height: 1.35; }
+.tqal li.warn { background: color-mix(in srgb, var(--fav) 18%, transparent); }
+.tqal li.bad { background: color-mix(in srgb, var(--now) 22%, transparent); }
+.tqal li .e { font-size: 18px; line-height: 1.1; flex: none; }
+/* Taula per hores, com la de Windy: una columna per hora, files fixes a l'esquerra */
+.tqtab { display: grid; grid-template-columns: 58px 1fr; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: var(--panel); }
+.tqtab .lab { display: grid; grid-auto-rows: var(--rh, 30px); border-right: 1px solid var(--rule); font: 700 9px/1.1 var(--mono, monospace); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.tqtab .lab span { display: flex; align-items: center; padding: 0 8px; }
+.tqtab .sc { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.tqtab .sc::-webkit-scrollbar { display: none; }
+.tqtab .cols { display: grid; grid-auto-flow: column; grid-auto-columns: 46px; }
+.tqtab .col { display: grid; grid-auto-rows: var(--rh, 30px); text-align: center; font-size: var(--fs-xs); }
+.tqtab .col > * { display: grid; place-items: center; }
+.tqtab .col.dn { border-left: 1.5px solid var(--line); }
+.tqtab .col.fest .hh { color: var(--ink); background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.tqtab .col.nowc .hh { background: var(--now); color: #fff; }
+.tqtab .dd { font: 800 10px var(--mono, monospace); color: var(--ink); justify-items: start !important; padding-left: 4px; white-space: nowrap; overflow: visible; text-transform: uppercase; }
+.tqtab .hh { font: 700 11px var(--mono, monospace); color: var(--muted); }
+.tqtab .e { font-size: 18px; }
+.tqtab .mm { margin: 3px 4px; border-radius: 5px; font-weight: 800; color: #111; }
+.tqtab .pp { color: #7fb2ff; font-weight: 700; }
+.tqtab .pp.z { color: var(--muted); font-weight: 400; opacity: .55; }
+.tqtab .cc { margin: 3px 4px; border-radius: 5px; background: rgba(200, 205, 215, calc(var(--cc) * .55)); color: var(--ink); }
+.tqtab .tp2 { color: var(--muted); }
+.tqfest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tqfest li { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); }
+.tqfest li .e { grid-row: span 2; font-size: 34px; }
+.tqfest li b { font-size: var(--fs-m); }
+.tqfest li span { color: var(--muted); font-size: var(--fs-s); }
+.tqwindy { margin-top: 18px; }
+#tiempo .tqattr { margin-top: 14px; font-size: var(--fs-xs); }
+@media (prefers-reduced-motion: reduce) { .tqmap svg.rings circle.pulse { animation: none; opacity: 0; } }
+
+/* ==== APPS (04-11-2026): hub amb Sol, Tiempo, Cámaras, Mapa, Momentos i Claqueta; a baix només Horarios · Tareas · Apps · Ajustes ==== */
+body:not([data-tab="apps"]) #apps { display: none !important; }
+body[data-tab="apps"] .wrap > :not(#apps) { display: none !important; }
+body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+.aphead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.aphead .apsub { color: var(--muted); font: 700 var(--fs-s) var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+.appgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.apptile { --ac: var(--accent); position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ai go" "b b" "big big" "sm sm"; align-content: start; gap: 2px 10px;
+  min-height: 168px; padding: 14px 14px 16px; text-align: left; overflow: hidden; isolation: isolate; border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--ac) 22%, var(--rule)); color: var(--ink); cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--ac) 16%, transparent), transparent 60%), var(--panel);
+  transition: transform .18s cubic-bezier(.3,1.3,.5,1), border-color .2s; }
+.apptile.w { grid-column: span 2; min-height: 150px; grid-template-columns: auto 1fr auto; grid-template-areas: "ai b go" "big big big" "sm sm sm" "dots dots dots"; }
+.apptile[hidden] { display: none; }
+.apptile:active { transform: scale(.965); }
+.apptile .ai { grid-area: ai; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: color-mix(in srgb, var(--ac) 18%, transparent); color: var(--ac); }
+.apptile .ai svg { width: 22px; height: 22px; }
+.apptile .go { grid-area: go; justify-self: end; align-self: start; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--fill, rgba(255,255,255,.07)); color: var(--muted); }
+.apptile .go svg { width: 14px; height: 14px; }
+.apptile > b { grid-area: b; align-self: center; margin-top: 10px; font: 700 var(--fs-s)/1.1 var(--mono, var(--body)); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.apptile.w > b { margin-top: 0; }
+.apptile .big { grid-area: big; margin-top: 6px; font: 800 34px/1 var(--display); letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.apptile .big.mono { font: 700 clamp(26px, 9vw, 44px)/1 var(--mono, ui-monospace, monospace); letter-spacing: -.02em; }
+.apptile .big small { font-size: .55em; color: var(--muted); margin-left: 2px; }
+.apptile > small { grid-area: sm; margin-top: 6px; color: var(--muted); font-size: var(--fs-s); line-height: 1.3; }
+.apptile .dots { grid-area: dots; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.apptile .dots:empty { display: none; }
+.apptile .dots i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line); }
+.apptile .dots i.montada { background: #3ddc97; border-color: #3ddc97; }
+.apptile .dots i.grabando { background: var(--now, #e0162b); border-color: var(--now, #e0162b); box-shadow: 0 0 0 3px color-mix(in srgb, var(--now, #e0162b) 30%, transparent); animation: apRec 1.6s ease-in-out infinite; }
+.apptile .dots i.parada { background: #f2a93b; border-color: #f2a93b; }
+.apptile .dots i.recogida { background: var(--muted); border-color: var(--muted); }
+@keyframes apRec { 50% { box-shadow: 0 0 0 6px transparent; } }
+.apptile.tc { background: linear-gradient(135deg, #000, #111 60%, #1b1b1b); border-color: #2c2c2c; color: #fff; }
+.apptile.tc .ai { background: rgba(255,255,255,.12); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .apptile .dots i.grabando { animation: none; } }
+.appback { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 6px -4px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: 700 var(--fs-m) var(--body); cursor: pointer; }
+.tqwindy { margin-top: 14px; }
+/* Claqueta: pantalla negra amb el timecode en gran; el destell la posa blanca 2 fotogrames */
+.tcs { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(16px, env(safe-area-inset-left, 0px));
+  background: #000; color: #fff; text-align: center; }
+.tcs[hidden] { display: none !important; }
+.tcs.flash { background: #fff; color: #000; }
+.tcs .tcx { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: 48px; height: 48px; border: 0; background: none; color: inherit; font-size: 22px; cursor: pointer; }
+.tcs .tch { margin: 0; font: 700 var(--fs-m)/1.2 var(--mono, monospace); letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.tcs .tcv { font: 700 clamp(36px, 12.5vw, 170px)/1 var(--mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; letter-spacing: -.02em; white-space: nowrap; }
+.tcs .tcv small { font-size: .5em; opacity: .7; }
+.tcs .tcc { margin: 0; min-height: 1.2em; font: 800 clamp(22px, 7vw, 60px)/1.1 var(--body); }
+.tcs .tcr { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; align-items: center; }
+.tcs .tcr button, .tcs .tcr input { min-height: 44px; border-radius: 999px; border: 1.5px solid #555; background: transparent; color: inherit; font: 700 var(--fs-s) var(--body); padding: 0 14px; }
+.tcs .tcr button[aria-pressed="true"] { background: #fff; color: #000; border-color: #fff; }
+.tcs .tcr input { width: min(260px, 70vw); font-size: 16px; border-radius: 10px; }
+.tcs .tcgo { min-height: 52px; padding: 0 26px; border-radius: 999px; border: 0; background: var(--now, #e0162b); color: #fff; font: 800 var(--fs-m) var(--body); cursor: pointer; }
+.tcs .tcn { max-width: 560px; margin: 0; font-size: var(--fs-s); line-height: 1.4; opacity: .65; }
+.tcs.flash .tcr, .tcs.flash .tcn, .tcs.flash .tcgo { visibility: hidden; }
+@media (orientation: landscape) and (max-height: 500px) { .tcs { gap: 6px; } .tcs .tcn { display: none; } }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -1450,6 +1723,11 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <div class="shead"><h2 id="planH">Mis <span>tareas</span></h2><span class="plwho" id="planWho"></span></div>
     <div id="planBody"></div>
   </section>
+  <section id="inc" hidden aria-labelledby="incH">
+    <div class="shead"><h2 id="incH">Incidencias <span id="incN"></span></h2><button class="btn primary incgo" id="incGo" type="button">Avisar a producción</button></div>
+    <ul class="inclist" id="incList"></ul>
+    <details class="incold" id="incOld" hidden><summary>Resueltas <span id="incOldN"></span></summary><ul class="inclist" id="incOldList"></ul></details>
+  </section>
 
   <!-- Avisos a dalt de tot; «Quedan» després dels escenaris (que «Ahora suena» es vegi sense fer scroll) -->
   <div class="feed" id="feed" hidden role="status"><div class="fpin" id="feedPin" hidden></div><div class="fh" id="feedHead"><b>Últimos avisos</b><button type="button" class="fclose" id="feedX" aria-label="Cerrar avisos">✕</button></div><ul id="feedList"></ul><button type="button" class="linkbtn fmore" id="feedMore" hidden></button></div>
@@ -1492,6 +1770,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
   <section id="sol" aria-labelledby="solH">
     <h2 id="solH">El sol de <span id="solFest"></span></h2>
     <p class="note solsub">Dónde está, cuánta luz queda y cuándo llega la hora dorada.</p>
+    <div class="soldays" id="solDays" role="group" aria-label="Día" hidden></div>
     <div class="solloc">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>
       <p class="note solsrc" id="solSrc"></p>
@@ -1529,6 +1808,14 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <svg class="solchart" id="solChart" viewBox="0 0 340 176" role="img" aria-label="Recorrido del sol hoy"></svg>
     <ul class="solkey" aria-hidden="true"><li><i style="background:var(--sol-gold)"></i>Hora dorada</li><li><i style="background:var(--sol-blue)"></i>Hora azul</li><li><i style="background:var(--now)"></i>Ahora</li></ul>
     <ol class="soltimes" id="solTimes"></ol>
+    <label class="cfgsel solalert" for="solAlert">Avisarme antes de la hora dorada de la tarde
+      <select id="solAlert"><option value="0">No avisar</option><option value="10">10 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option><option value="45">45 min antes</option></select>
+    </label>
+    <p class="note solalmsg" id="solAlMsg"></p>
+    <div id="solCams" hidden>
+      <h3>Cámaras y contraluz</h3>
+      <div class="solcams" id="solCamsB"></div>
+    </div>
     <p class="note solfoot">Hora dorada: el sol entre −4° y 6°. Hora azul: entre −6° y −4°. Calculado en el móvil, sin conexión. Tu ubicación solo se usa en este móvil: no se envía a ningún sitio.</p>
     <div class="solar nocam" id="solAr" role="dialog" aria-modal="true" aria-labelledby="solArT" hidden>
       <video id="solArV" playsinline muted autoplay aria-hidden="true"></video>
@@ -1548,6 +1835,53 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     </div>
   </section>
 
+  <section id="apps" aria-labelledby="appsH">
+    <div class="aphead"><h2 id="appsH">Apps</h2><span class="apsub" id="apSub"></span></div>
+    <div class="appgrid">
+      <button type="button" class="apptile w" data-tab="multi" id="tabMulti" hidden style="--ac:#ff3b3b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Multicams</b><span class="big" id="ap-multi-big">—</span><small id="ap-multi">Dónde va cada cámara y quién graba</small><span class="dots" id="ap-multi-dots" aria-hidden="true"></span><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="tiempo" id="tabTiempo" style="--ac:#4b9bff"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Tiempo</b><span class="big" id="ap-tiempo-big">—</span><small id="ap-tiempo">Lluvia: radar y previsión</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="sol" id="tabSol" style="--ac:#f2a93b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>Sol</b><span class="big" id="ap-sol-big">—</span><small id="ap-sol">Luz, hora dorada y brújula</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real con fotogramas, destello y pitido para sincronizar cámaras</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-app="mk" style="--ac:#ffd23b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Momentos</b><span class="big" id="ap-mk-big">0</span><small id="ap-mk">Marcas para la edición</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="mapa" id="tabMapa" hidden style="--ac:#3ddc97"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Mapa</b><span class="big" id="ap-mapa-big">GPS</span><small>El recinto y dónde estás</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+    </div>
+  </section>
+  <section id="tiempo" aria-labelledby="tqH">
+    <div class="tqhero">
+      <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de lluvia y nubes alrededor del festival">
+        <div class="ly" id="tqBase"></div>
+        <canvas class="ly tqheat" id="tqHeat" aria-hidden="true"></canvas>
+        <div class="ly" id="tqRad"></div>
+        <canvas class="ly" id="tqPc" aria-hidden="true"></canvas>
+        <svg class="rings" id="tqRings" aria-hidden="true"></svg>
+        <div class="ly tqwin" id="tqWin" hidden></div>
+        <div class="tqtop"><span class="tqpill"><b id="tqPillT">—</b><span id="tqPillN"></span></span></div>
+        <div class="tqlayers" id="tqLayers" role="tablist" aria-label="Capa">
+          <button type="button" role="tab" data-ly="radar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 9a3.8 3.8 0 00.6 7.5zM9 19l-1 2M13 19l-1 2M17 19l-1 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Lluvia</span></button>
+          <button type="button" role="tab" data-ly="clouds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 18h11a3.8 3.8 0 00.5-7.6A5.5 5.5 0 007.4 9.8 4.1 4.1 0 006.5 18z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.2A4 4 0 0121 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Nubes</span></button>
+          <button type="button" role="tab" data-ly="windy"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Windy</span></button>
+        </div>
+        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Acercar">+</button><button type="button" id="tqZout" aria-label="Alejar">−</button></div>
+        <div class="tqleg" id="tqLeg" aria-hidden="true"></div>
+        <div class="tqbar" id="tqBar">
+          <button type="button" id="tqPlay" aria-label="Reproducir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+          <div class="tqtl"><input type="range" id="tqSlide" min="0" max="0" value="0" aria-label="Hora"><div class="tqticks" id="tqTicks" aria-hidden="true"></div></div>
+          <span class="tqts" id="tqTs"></span>
+        </div>
+        <p class="msg" id="tqMsg" hidden></p>
+      </div>
+    </div>
+    <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
+    <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
+    <div class="tqnow" id="tqNow" hidden></div>
+    <ul class="tqal" id="tqAl"></ul>
+    <h3>Previsión por horas</h3>
+    <div class="tqtab" id="tqTab"></div>
+    <h3>Días del festival</h3>
+    <ul class="tqfest" id="tqFest"></ul>
+    <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ECMWF, ICON, AROME) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+  </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
     <p class="note">Toca una cámara para marcar si está montada o grabando y qué SSD lleva. Lo ve todo el equipo.</p>
@@ -1555,6 +1889,10 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenario" hidden></div>
     <p class="note mcmsg" id="mcMsg" role="status" hidden></p>
     <div id="mcBody"></div>
+    <h2 class="mch2">Historial</h2>
+    <p class="note">Quién ha cambiado qué (estado y SSD), lo último arriba.</p>
+    <ul class="mcl mclog" id="mcLog"></ul>
+    <button type="button" class="btn" id="mcLogBtn">Ver historial</button>
     <h2 class="mch2">Material</h2>
     <p class="note">Todo sumado<span id="mcMatFor"></span>. Marca lo que ya está cargado (solo en este móvil).</p>
     <ul class="mcl" id="mcMat"></ul>
@@ -1715,6 +2053,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
         </select>
       </label>
       <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisarme de cambios de horario y avisos de la organización</label>
+      <label class="cfgchk" id="prefIncL" hidden><input type="checkbox" id="prefInc"> Avisarme de incidencias del equipo («Avisar a producción»)</label>
       <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div class="langsel cgrp" role="group" aria-label="Idioma / Idioma">
@@ -1800,16 +2139,34 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <h3><label for="mcNote">Nota</label></h3>
     <input type="text" id="mcNote" maxlength="140" placeholder="Batería, tarjeta, encuadre…" autocomplete="off" enterkeyhint="done">
     <p class="note mcby" id="mcSheetBy"></p>
+    <button type="button" class="linkbtn" id="mcSheetClr" hidden>Quitar estado (vuelve a «Sin montar»)</button>
   </div>
   <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
+</div>
+
+<div class="sheet" id="incSheet" role="dialog" aria-modal="true" aria-labelledby="incSheetH" hidden>
+  <header>
+    <h2 id="incSheetH">Avisar a producción</h2>
+    <button class="btn" id="incX" type="button">Cancelar</button>
+  </header>
+  <div class="body">
+    <p class="note">Llega a todo el equipo en la pestaña Tareas y, con notificación, a quien tenga «Avisarme de incidencias».</p>
+    <h3><label for="incTxt">¿Qué pasa y dónde?</label></h3>
+    <textarea id="incTxt" maxlength="300" rows="4" placeholder="Ej.: se ha caído la pantalla LED de la izquierda del escenario"></textarea>
+    <div class="row2 incopts">
+      <button type="button" class="btn" id="incUrg" aria-pressed="false">Urgente</button>
+      <label class="btn" id="incPhotoL"><input type="file" id="incPhoto" accept="image/*" capture="environment" hidden>Añadir foto</label>
+    </div>
+    <img id="incPrev" class="incprev" alt="Foto de la incidencia" hidden>
+    <p class="hint" id="incMsg" hidden></p>
+  </div>
+  <div class="foot"><button class="btn primary" id="incSend" type="button">Enviar</button></div>
 </div>
 
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
-  <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
-  <button type="button" data-tab="multi" id="tabMulti" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Cámaras</span></button>
-  <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
+  <button type="button" data-tab="apps" id="tabApps"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Apps</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
 </nav>
 <button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1823,6 +2180,51 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <button class="btn" type="button" id="instOvX">Entendido</button>
   </div>
   <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
+<button class="mkfab" id="mkFab" type="button" aria-label="Marcar momento para la edición"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg><span>Momento</span><span class="mkn" id="mkN"></span></button>
+<div class="mkpop" id="mkPop" role="dialog" aria-labelledby="mkPopH" hidden>
+  <button type="button" class="mkx" id="mkPopX" aria-label="Cerrar">✕</button>
+  <p class="mkh" id="mkPopH"></p>
+  <p class="mkwho" id="mkPopWho"></p>
+  <div class="mkstages" id="mkPopSt" role="group" aria-label="Escenario" hidden></div>
+  <div class="mktags" id="mkPopTags" role="group" aria-label="Tipo"></div>
+  <input type="text" id="mkPopNote" maxlength="140" placeholder="Nota (opcional): «drop brutal», «cámara 2»…" autocomplete="off" enterkeyhint="done">
+  <div class="mkrow"><button type="button" class="linkbtn" id="mkPopDel">Borrar</button><button type="button" class="linkbtn" id="mkPopAll">Ver todos</button></div>
+</div>
+<div class="sheet" id="mkList" role="dialog" aria-modal="true" aria-labelledby="mkListH" hidden>
+  <header>
+    <h2 id="mkListH">Momentos</h2>
+    <button class="btn" id="mkListX2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note" id="mkListInfo"></p>
+    <div class="edtabs" id="mkDays" role="tablist" aria-label="Día" hidden></div>
+    <div class="edtabs" id="mkWhoF" role="tablist" aria-label="De quién"></div>
+    <ul class="mkl" id="mkL"></ul>
+    <h3>Exportar para la edición</h3>
+    <div class="mkopts">
+      <label>Fotogramas <select id="mkFps"><option>25</option><option>24</option><option>30</option><option>50</option></select></label>
+      <label>Ajuste <input type="number" id="mkOff" value="0" step="1" min="-600" max="600" inputmode="numeric"> s</label>
+    </div>
+    <div class="mkexp">
+      <button type="button" class="btn primary" data-mkexp="edl">DaVinci Resolve (.edl)</button>
+      <button type="button" class="btn" data-mkexp="fcpxml">Final Cut Pro (.fcpxml)</button>
+      <button type="button" class="btn" data-mkexp="csv">Lista (.csv para Excel)</button>
+    </div>
+    <p class="note" style="margin-top:14px">Las marcas van a la <b>hora real</b> (timecode de hora del día). Solo encajan si las cámaras graban con el timecode en hora del día y bien sincronizado. «Ajuste» corrige un reloj adelantado o retrasado (o el tiempo que tardas en tocar: −5 s pone la marca 5 s antes).</p>
+    <p class="note"><b>DaVinci:</b> en la línea de tiempo, clic derecho › <i>Timelines › Import › Timeline Markers from EDL</i>. La línea de tiempo debe empezar en la hora real de los clips.<br><b>Final Cut:</b> Archivo › Importar › XML. Crea un proyecto «Momentos» con las marcas en su hora: pon encima el multicam o los clips sincronizados.</p>
+  </div>
+  <div class="foot"><button class="btn primary" id="mkListX" type="button">Listo</button></div>
+</div>
+<div class="tcs" id="tcS" role="dialog" aria-modal="true" aria-label="Timecode" hidden>
+  <button type="button" class="tcx" id="tcX" aria-label="Cerrar timecode">✕</button>
+  <p class="tch" id="tcH"></p>
+  <div class="tcv" id="tcV" aria-live="off">00:00:00:00</div>
+  <p class="tcc" id="tcC"></p>
+  <div class="tcr" role="group" aria-label="Fotogramas por segundo" id="tcFps"></div>
+  <div class="tcr"><input type="text" id="tcCam" maxlength="30" placeholder="Cámara / tarjeta (ej. CAM 2 · SSD 4)" autocomplete="off" enterkeyhint="done"></div>
+  <button type="button" class="tcgo" id="tcGo">Destello + pitido</button>
+  <p class="tcn">Graba 3–4 s de esta pantalla al empezar cada tarjeta. En la edición, compara el número del clip con su timecode: la diferencia es el desfase de esa cámara (ponlo en «Ajuste» de Momentos). El destello y el pitido caen justo en el segundo exacto, para sincronizar imagen y sonido.</p>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="isl" id="isl" role="status" aria-live="polite" hidden><div class="ib"><span class="dot"></span><span class="it">Aviso</span><span class="is"></span><span class="in"></span></div><div class="ix"><ul></ul><button type="button" class="ic">Entendido</button></div></div>
@@ -1927,7 +2329,6 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .sn, .mascot .mk, .upnext li.grp, .upnext .where, .blk .t, .legend { font-family: var(--mono); }
 .row .sn { font-size: 10px; font-weight: 500; letter-spacing: .06em; }
 .mascot .mk { font-size: 10px; font-weight: 500; letter-spacing: .08em; color: var(--ink); }
-.mascot .mk::after { content: " ↓"; color: var(--muted); }
 .upnext li.grp b { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .upnext li.grp span { color: var(--muted); font-size: 11px; }
 /* «Ahora suena»: targeta quadrada amb vora blanca fina, creus i una mica de llum des de dalt (el feix del cartell) */
@@ -1977,6 +2378,8 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
+/* (04-11, UI, punt entremig d'en Pau) creus i fletxes només a les seccions; les targetes (artista d'ara i «Quedan») van netes. Per tornar-les-hi, treure aquesta regla */
+.row.live, .mascot { --plus: none; --plus-dim: none; --plus-w: none; }
 `;
 // Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
 // el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
@@ -2032,11 +2435,12 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 FEST.multicam = [
   { stage: 'Black Hangar', plan: 'img/carpa-3d.webp',
     cams: [
-      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
-      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
-      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
+      { uid: 'black-hangar-cabina', c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { uid: 'black-hangar-cabina-cenital', c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts de targeta/bateria (avís al 80 %; el de la DJI és provisional).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
@@ -2119,13 +2523,17 @@ if (FEST.bannerAnim) document.querySelectorAll('img.banner, .tvinfo > img').forE
 });
 // Les animacions només corren quan es veuen i amb l'app oberta (bateria)
 if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
-  document.querySelectorAll('.banim, #mecanic, #mascot').forEach(el => io.observe(el));
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    e.target.classList.toggle('off', !e.isIntersecting);
+    // El vídeo del banner també: fora de la vista (avall o en una altra pestanya) no es descodifica (rendiment, 04-11-2026)
+    if (e.target.tagName === 'VIDEO' && e.target.autoplay) e.isIntersecting && !document.hidden ? e.target.play().catch(() => {}) : e.target.pause();
+  }));
+  document.querySelectorAll('.banim, #mecanic, #mascot, video.banner, .tvinfo > video').forEach(el => io.observe(el));
 }
 document.addEventListener('visibilitychange', () => {
   document.documentElement.classList.toggle('off', document.hidden);
   // el vídeo del banner: aturat en segon pla (bateria) i en marxa en tornar
-  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay ? v.pause() : v.play().catch(() => {}));
+  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay || v.classList.contains('off') ? v.pause() : v.play().catch(() => {}));
 });
 // Il·lustracions (FEST.deco): les que no hi són, simplement no surten
 const DECO = FEST.deco || {};
@@ -2147,7 +2555,14 @@ if ((FEST.css || (FEST.light && FEST.lightCss)) && !document.querySelector('styl
 // Hora local (Europe/Madrid) → instant. Si aquella nit es canvia l'hora, les 2:xx passen dues vegades:
 // "02:30a" és la primera, "02:30b" (o sense lletra) la segona.
 const fmtWall = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+// Les dues funcions es criden milers de cops (horari, editor, tasques) i Intl és lent: es guarden els resultats (rendiment, 04-11-2026)
+const wallMemo = new Map(), tMemo = new Map();
 function wallOf(ms) {
+  let w = wallMemo.get(ms);
+  if (w === undefined) { w = wallRaw(ms); if (wallMemo.size > 5000) wallMemo.clear(); wallMemo.set(ms, w); }
+  return w;
+}
+function wallRaw(ms) {
   const p = Object.fromEntries(fmtWall.formatToParts(ms).map(x => [x.type, +x.value]));
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
 }
@@ -2155,6 +2570,12 @@ const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
 // Festivals de diversos dies (FEST.days): «2/11:00» = les 11:00 del 2n dia; «11:00» sol = el 1r
 const NDAYS = Math.max(1, (FEST.days || []).length);
 function T(s) {
+  const k = String(s);
+  let v = tMemo.get(k);
+  if (v === undefined) { v = tRaw(k); if (tMemo.size > 5000) tMemo.clear(); tMemo.set(k, v); }
+  return v;
+}
+function tRaw(s) {
   const m = String(s).match(/^(?:(\d)\/)?(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
   const dd = m[1] ? +m[1] - 1 : 0, h = +m[2], mi = +m[3], f = m[4];
@@ -2183,7 +2604,7 @@ function normFx(v) {
 }
 // Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
 const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
-  [id, arr.map(([a, b, n, t, sub, fx], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx) }))]));
+  [id, arr.map(([a, b, n, t, sub, fx, note], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx), ...(note ? { note } : {}) }))]));
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 
 // Cada dia, de FEST.start a FEST.end. T0 = obertura del 1r dia, TEND0 = final de l'últim
@@ -2231,6 +2652,8 @@ const lblD = t => {
   const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
   return `${x && x.name ? x.name.split(' ')[0] : new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(t).replace(/^./, c => c.toUpperCase())} ${lbl(t)}`;
 };
+// «a las 11:00» o, si és un altre dia de calendari que «ref» (festivals de diversos dies), «el domingo a las 11:00»
+const lblW = (a, ref) => NDAYS > 1 && fmtD.format(a) !== fmtD.format(ref) ? `el ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(a)} a las ${lbl(a)}` : `a las ${lbl(a)}`;
 const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
@@ -2260,11 +2683,14 @@ const ICO = Object.fromEntries(Object.entries({
   time: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M10 3h4"/>',
   user: '<circle cx="12" cy="9" r="3.6"/><path d="M5.5 19.5c1-3.6 3.6-5.3 6.5-5.3s5.5 1.7 6.5 5.3"/>',
   alert: '<path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/>',
+  note: '<path d="M5 4h10l4 4v12H5zM14 4v5h5M8.5 13h7M8.5 16.5h5"/>',
   loc: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
 }).map(([k, d]) => [k, `<svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`]));
 const FXI = {};  // abans emojis: ara l'etiqueta sola (es llegeix millor i no fa «app genèrica»)
 const fxPill = f => `<span class="fx">${html(f)}</span>`;
 const fxTags = x => x.fx && x.fx.length ? `<span class="fxs" aria-label="Efectos">${x.fx.map(fxPill).join('')}</span>` : '';
+// Nota de l'organització per a l'equip (cue: «LED: visual X», «gravar l'entrada»…). Surt a la fila, a la graella i a l'avís
+const noteTag = x => x.note ? `<div class="cuenote">${ICO.note}<span>${html(x.note)}</span></div>` : '';
 const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nuevo' : `Cambio · antes ${esc(x.was)}`}</span>`;
 
 // Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
@@ -2284,7 +2710,7 @@ function load(raw) {
         const timeChg = d && (T(d.a) !== a || T(d.b) !== b), nameChg = d && String(d.n) !== n;
         const chg = !d ? 'new' : timeChg ? 'time' : nameChg ? 'name' : '';
         const was = !d ? '' : [timeChg ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : '', nameChg ? d.n : ''].filter(Boolean).join(' · ');
-        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), fx: normFx(r.fx), chg, was };
+        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), fx: normFx(r.fx), note: String(r.note || '').trim().slice(0, 120), chg, was };
       })
       .filter(x => x.n && x.b > x.a)
       .sort((x, y) => x.a - y.a);
@@ -2379,9 +2805,9 @@ function buildGrid() {
       const top = y(Math.max(x.a, G0)), h = y(Math.min(x.b, GEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
       const tc = IMPC && x.t ? `--tc:var(--t${x.t});` : '';
-      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}${x.fx.length ? `, efectos: ${x.fx.join(', ')}` : ''}`;
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}${x.fx.length ? `, efectos: ${x.fx.join(', ')}` : ''}${x.note ? `, nota: ${x.note}` : ''}`;
       g += `<button type="button" class="blk${tiny}${impc(x.t)}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
-        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}${x.note ? `<span class="s gnote">${ICO.note}${html(x.note)}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
     }
     const last = day[day.length - 1];
     if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
@@ -2612,13 +3038,13 @@ function rowHTML(s, t) {
   const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
-      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Después: cierra el escenario'}</div></div>
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${noteTag(cur)}${chgTag(cur)}
+      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">${lblW(nxt.a, t)}</span>` : 'Después: cierra el escenario'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">Abre a las ${lbl(nxt.a)}</div>
+      <div class="dj">Abre ${lblW(nxt.a, t)}</div>
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
     ${document.getElementById('mascot').hidden ? `<div class="right"><div class="left"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>` : ''}`, null];  // amb la targeta «Quedan» a la vista, el compte enrere ja hi és
   return ['closed', '', null];
@@ -2632,13 +3058,13 @@ function rowMine(s, t) {
   const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
-      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Es tu último aquí'}</div></div>
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${noteTag(cur)}${chgTag(cur)}
+      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">${lblW(nxt.a, t)}</span>` : 'Es tu último aquí'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle mine', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${fxTags(nxt)}${chgTag(nxt)}
+      <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${fxTags(nxt)}${noteTag(nxt)}${chgTag(nxt)}
       <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
     <div class="right"><div class="left"><span>empieza en</span><b>${dur(nxt.a - t)}</b></div>${star(nxt)}</div>`, null, nxt];
   return ['hide', '', null];
@@ -2692,7 +3118,7 @@ function upHTML(t) {
   }
   let out = '', last = null;
   for (const x of list.slice(0, 6)) {
-    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b>${x.a - t < 1440 * MIN ? `<span>${inDur(x.a - t)}</span>` : ''}</li>`; last = x.a; }
+    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b>${x.a - t < 180 * MIN ? `<span>${inDur(x.a - t)}</span>` : ''}</li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
     <img class="logo stlogo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
@@ -2776,6 +3202,9 @@ try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; }
 prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
 prefs.changes = prefs.changes !== false;
 prefs.tb = [0, 5, 10, 15, 20, 30].includes(+prefs.tb) ? +prefs.tb : 10;
+// Incidències: per defecte les rep Producció (es canvia a Ajustes). null = encara no triat
+prefs.inc = typeof prefs.inc === 'boolean' ? prefs.inc : null;
+const incOn = () => prefs.inc === null ? PROF === 'prod' : prefs.inc;
 // Qui sóc (per a «Mi plan»): la clau del nom a l'equip; '-' = no sóc de l'equip
 const YOK = FEST.key + '-yo-v1';
 let YO = '';
@@ -2816,12 +3245,12 @@ function checkAlerts(t) {
     if (left > 0 && left <= prefs.before * MIN && !told.has(k + ':pre')) {
       remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
-      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
+      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}${x.note ? ' · ' + x.note : ''}`, k + ':pre');
     }
     if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
       remember(k + ':go'); remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
-      sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
+      sysNotify(`${x.n} empieza ahora`, x.note ? `${x.s.name} · ${x.note}` : x.s.name, k + ':go');
     }
   }
 }
@@ -2920,6 +3349,7 @@ function tick(force) {
   } else {
     st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
+  st.insertAdjacentHTML('beforeend', syncTxt());
   const dn = document.getElementById('dstnote');
   const p = pass(t);
   dn.hidden = !p && !(DST && t >= W0 - 30 * MIN && t < W0);
@@ -2999,8 +3429,7 @@ function tick(force) {
   if (!ms.hidden) {
     const pct = Math.min(100, Math.max(0, (t - T0) / (TEND - T0) * 100));
     const mh = during
-      ? `<span class="mk">Quedan</span><span class="mbig">${dur(dEnd - t)} <small>${dEnd < TEND ? 'hoy' : 'de festival'}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
-        + `<span class="msub">Hasta las ${lbl(dEnd)}</span>`
+      ? `<span class="mk">${dEnd < TEND ? 'Fin del día' : 'Fin del festival'}</span><span class="mbig">${lbl(dEnd)} <small>en ${dur(dEnd - t)}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
       : gap >= 0
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(DAYS[gap].t0 - t)}</span><span class="msub">Vuelve a abrir a las ${lbl(DAYS[gap].t0)}${DAYS[gap].name ? ` · ${html(DAYS[gap].name)}` : ''}</span>`
       : t < T0
@@ -3193,7 +3622,7 @@ async function syncNow(keepalive) {
   try {
     const sub = await pushSubscription(false);
     if (!sub) { pushActive = false; return notifUI(); }
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb }, keepalive);
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn(), sol: prefs.sol || 0 }, keepalive);
   } catch (e) { syncDirty = true; }
 }
 function syncPush() {
@@ -3208,7 +3637,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) syncN
 addEventListener('pagehide', () => syncNow(true));
 async function pushOn() {
   const sub = await pushSubscription(true);
-  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn(), sol: prefs.sol || 0 });
   pushActive = true;
 }
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sin respuesta')), ms))]);
@@ -3286,7 +3715,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn(), sol: prefs.sol || 0 });
     pushActive = true;
     notifUI('Restablecidas. También llegarán con el móvil bloqueado.');
   } catch (e) {
@@ -3309,6 +3738,11 @@ prefBefore.value = String(prefs.before);
 prefChanges.checked = prefs.changes;
 prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); syncPush(); });
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
+const prefInc = document.getElementById('prefInc');
+prefInc.checked = incOn();
+prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePrefs(); syncPush(); });
+// En canviar de perfil (sense haver-ho triat a mà), Producció passa a rebre-les
+document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
 const BUILD = '';
@@ -3423,9 +3857,9 @@ function tvRender(t) {
     const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
     const head = `${bandImg(cur, 'tlogo') || `<img src="img/${s.id}.png" alt="">`}<div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
     if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
-      ${fxTags(cur)}<div class="taf">${nxt ? `Después: <b>${deco(nxt.n)}</b> a las ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
+      ${fxTags(cur)}<div class="taf">${nxt ? `Después: <b>${deco(nxt.n)}</b> ${lblW(nxt.a, t)}` : 'Después: cierra el escenario'}</div></div>
       <div class="tleft"><span>quedan</span><b>${dur(cur.b - t)}</b></div><div class="tbar"><i style="width:${((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1)}%"></i></div></div>`;
-    if (nxt) return `<div class="tvcard idle"${stc(s)}>${head}<div class="tdj">Abre a las ${lbl(nxt.a)}</div><div class="taf">Primero: <b>${deco(nxt.n)}</b></div></div>
+    if (nxt) return `<div class="tvcard idle"${stc(s)}>${head}<div class="tdj">Abre ${lblW(nxt.a, t)}</div><div class="taf">Primero: <b>${deco(nxt.n)}</b></div></div>
       <div class="tleft"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>`;
     return `<div class="tvcard closed"${stc(s)}>${head}<div class="tdj">Cerrado</div></div></div>`;
   }).join('');
@@ -3594,6 +4028,44 @@ const SUN = (() => {
     : a > -.575 ? (1735 + a * (-518.2 + a * (103.4 + a * (-12.79 + a * .711)))) / 3600 : -20.774 / tan(a) / 3600;
   return { pos, refr };
 })();
+// Lluna (algoritme senzill, com SunCalc; error ~1°, de sobres per saber quan surt i quanta llum fa). Graus i instants
+const MOON = (() => {
+  const R = Math.PI / 180, e = R * 23.4397, days = t => t / 86400000 - 10957.5;
+  const radec = (l, b) => ({ dec: Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l)), ra: Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l)) });
+  const moon = d => { const L = R * (218.316 + 13.176396 * d), M = R * (134.963 + 13.064993 * d), F = R * (93.272 + 13.22935 * d);
+    return { ...radec(L + R * 6.289 * Math.sin(M), R * 5.128 * Math.sin(F)), dist: 385001 - 20905 * Math.cos(M) }; };
+  const sun = d => { const M = R * (357.5291 + 0.98560028 * d), L = M + R * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + R * 102.9372 + Math.PI;
+    return { ...radec(L, 0), dist: 149598000 }; };
+  function alt(t, lat, lon) {
+    const d = days(t), m = moon(d), H = R * (280.16 + 360.9856235 * d) + R * lon - m.ra, f = R * lat;
+    return Math.asin(Math.sin(f) * Math.sin(m.dec) + Math.cos(f) * Math.cos(m.dec) * Math.cos(H)) / R;
+  }
+  // Fracció il·luminada (0–1) i fase (0 nova, 0,25 quart creixent, 0,5 plena, 0,75 quart minvant)
+  function illum(t) {
+    const d = days(t), s = sun(d), m = moon(d);
+    const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra));
+    const inc = Math.atan2(s.dist * Math.sin(phi), m.dist - s.dist * Math.cos(phi));
+    const ang = Math.atan2(Math.cos(s.dec) * Math.sin(s.ra - m.ra), Math.sin(s.dec) * Math.cos(m.dec) - Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
+    return { frac: (1 + Math.cos(inc)) / 2, phase: .5 + .5 * inc * (ang < 0 ? -1 : 1) / Math.PI };
+  }
+  // Sortida i posta entre a i b (mostres cada 10 min + bisecció). La vora de dalt toca l'horitzó a ~0,13°
+  function riseSet(a, b, lat, lon) {
+    const h0 = .133, f = t => alt(t, lat, lon) - h0, out = { rise: null, set: null };
+    let t0 = a, v0 = f(a);
+    for (let t1 = a + 600000; t1 <= b; t1 += 600000) {
+      const v1 = f(t1);
+      if (v0 * v1 < 0) { let lo = t0, hi = t1; for (let k = 0; k < 12; k++) { const m = (lo + hi) / 2; if ((f(m) > 0) === (v1 > 0)) hi = m; else lo = m; }
+        if (v1 > 0) out.rise = out.rise || hi; else out.set = out.set || hi; }
+      t0 = t1; v0 = v1;
+    }
+    out.up = f(a) > 0;
+    return out;
+  }
+  return { alt, illum, riseSet };
+})();
+const MOON_N = ['Luna nueva', 'Creciente', 'Cuarto creciente', 'Gibosa creciente', 'Luna llena', 'Gibosa menguante', 'Cuarto menguante', 'Menguante'];
+// Llargada de l'ombra (vegades l'alçada de la persona o l'objecte) amb el sol a «a» graus
+const solShadow = a => a <= 1 ? '' : a < 2.9 ? 'más de 20' : (1 / Math.tan(a * Math.PI / 180)).toFixed(1).replace('.', ',');
 const SOL_RISE = -0.833;  // sortida i posta: la vora de dalt del sol toca l'horitzó (radi + refracció)
 // 0:00 (hora de Madrid) del dia de t, com a instant
 function solMidnight(t) {
@@ -3640,6 +4112,10 @@ const solCard = az => SOL16[Math.round(az / 22.5) % 16];
 const solDeg = d => `${Math.round(d) === 0 ? 0 : Math.round(d)}°`.replace('-', '−');
 let solD = null, solKey = '', solHead = null, solHeadT = null, solLoopT = 0, solRise2 = null, solRaf = 0, solWant = false, solListen = '', solRose = 0, solMin = -1, solNoCmp = 0;
 const solFmtDay = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long' });
+const solFmtShort = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric', month: 'short' });
+// Dia triat: null = avui (segueix now(), també el Modo prueba); un número = aquell dia del festival (per planificar abans d'anar-hi)
+let solPick = null;
+const solDayName = d => DAYS[d].name || solFmtShort.format(DAYS[d].t0);
 // Rosa dels vents (fixa; gira sencera amb la brúixola): una ratlla cada 5°, més llarga cada 30°, gruixuda als punts cardinals.
 // Lletres N E S O i graus cada 30° per dins (sempre dretes)
 { const pt = (d, r) => [(Math.sin(d * Math.PI / 180) * r).toFixed(1), (-Math.cos(d * Math.PI / 180) * r).toFixed(1)];
@@ -3734,7 +4210,8 @@ function solPhase(t) {
   document.getElementById('solPhase').dataset.k = p >= 6 ? 'd' : p >= -4 ? 'g' : p >= -6 ? 'b' : 'n';
   let nx = solD.X.find(x => x.t > t);
   if (!nx) nx = solDay(solD.b + 3600000, solD.lat, solD.lon).X.find(x => x.t > t);
-  return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}`;
+  const sh = solShadow(p + SUN.refr(p));
+  return `Ahora: <b>${ph}</b>${nx ? ` · ${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} a las ${hm(nx.t)} (${inDur(nx.t - t)})` : ''}${sh ? ` · sombra: ${sh} veces la altura` : ''}`;
 }
 function solChart(t) {
   // El cel de color segons l'hora (nit → hora blava → daurada → dia), més fort a prop de l'horitzó; el terra, l'arc del sol i el sol d'ara amb resplendor
@@ -3782,26 +4259,145 @@ function solTimes(t) {
     ['b', 'Hora azul', 'mañana', D.up(-6), D.up(-4)],
     ['g', 'Hora dorada', 'mañana', D.up(-4), D.up(6)],
     ['', 'Amanecer', az(D.up(SOL_RISE)), D.up(SOL_RISE)],
-    ['', 'Mediodía solar', `${solDeg(D.max)} de altura`, D.noon],
+    ['', 'Mediodía solar', `${solDeg(D.max)} de altura${solShadow(D.max) ? ` · sombra ×${solShadow(D.max)}` : ''}`, D.noon],
     ['g', 'Hora dorada', 'tarde', D.dn(6), D.dn(-4)],
     ['', 'Atardecer', az(D.dn(SOL_RISE)), D.dn(SOL_RISE)],
     ['b', 'Hora azul', 'tarde', D.dn(-4), D.dn(-6)],
   ];
   document.getElementById('solTimes').innerHTML = L.map(([c, n, sub, p, q]) => {
     const end = q === undefined ? p : q, st = end && end < t ? ' past' : q !== undefined && p && p <= t && t < q ? ' cur' : '';
-    return `<li class="${c}${st}"><span>${n}</span><b>${q === undefined ? (p ? hm(p) : '—') : r(p, q)}</b><em>${sub}</em></li>`; }).join('');
+    const who = c || n === 'Atardecer' || n === 'Amanecer' ? solWho(p, q) : '';
+    return `<li class="${c}${st}"><span>${n}</span><b>${q === undefined ? (p ? hm(p) : '—') : r(p, q)}</b><em>${sub}</em>${who}</li>`; }).join('') + solMoonRow(D);
+}
+// Qui sona durant una franja de llum (o en un moment): el pla de rodatge fet sol
+function solWho(p, q) {
+  if (!p) return '';
+  const e = q || p + 1, L = ALL.filter(x => x.a < e && x.b > p);
+  if (!L.length) return '';
+  const n = L.slice(0, 3).map(x => html(x.n) + (STAGES.length > 1 ? ` <i>(${html(x.s.name)})</i>` : '')).join(' · ');
+  return `<small class="who"><i>Suena:</i> ${n}${L.length > 3 ? ` <i>+${L.length - 3}</i>` : ''}</small>`;
+}
+// La lluna del dia: quan surt i es pon, fase i quanta llum fa (per a la nit)
+function solMoonRow(D) {
+  const rs = MOON.riseSet(D.a, D.b, D.lat, D.lon), il = MOON.illum(D.noon), pc = Math.round(il.frac * 100);
+  const nm = MOON_N[Math.round(il.phase * 8) % 8];
+  const tx = [rs.rise ? `sale ${hm(rs.rise)}` : '', rs.set ? `se pone ${hm(rs.set)}` : ''].filter(Boolean).join(' · ') || (rs.up ? 'Todo el día' : 'No sale');
+  return `<li class="m"><span>Luna ${nm.replace(/^Luna /, '').toLowerCase()}</span><b>${pc}${NB}%</b><em>${tx.replace(/^./, c => c.toUpperCase())}</em></li>`;
 }
 function solPaint(force) {
-  const t = now(), w = solWhere(), k = `${solMidnight(t)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
-  if (force || k !== solKey) { solKey = k; solD = solDay(t, w.lat, w.lon); solRise2 = solDay(solD.b + 3600000, w.lat, w.lon).up(SOL_RISE); solPathAz(); }
+  const t = now(), w = solWhere();
+  if (solPick !== null && (!DAYS[solPick] || solMidnight(DAYS[solPick].t0) === solMidnight(t))) solPick = null;  // el dia triat és avui: com «Hoy»
+  const today = solPick === null, td = today ? t : DAYS[solPick].t0, k = `${solMidnight(td)}|${w.lat.toFixed(4)}|${w.lon.toFixed(4)}`;
+  if (force || k !== solKey) { solKey = k; solD = solDay(td, w.lat, w.lon); solRise2 = solDay(solD.b + 3600000, w.lat, w.lon).up(SOL_RISE); solPathAz(); }
   const ac = solLoc && solLoc.acc ? ` (±${solLoc.acc < 1000 ? solLoc.acc + ' m' : Math.round(solLoc.acc / 1000) + ' km'})` : '';
   document.getElementById('solSrc').innerHTML = w.mine ? `Ubicación: <b>la tuya</b>${ac} · <button type="button" class="linkbtn" id="solForget">Usar la del festival</button>`
     : w.fest ? `Ubicación: <b>${html(FEST.name)}</b> (la del festival)` : 'Ubicación: <b>Montmeló</b> (por defecto)';
-  document.getElementById('solDayH').textContent = (solMidnight(t) === solMidnight(Date.now()) ? 'Hoy · ' : '') + solFmtDay.format(t);
-  document.getElementById('solPhase').innerHTML = solPhase(t);
-  solCount(t);
-  solChart(t); solTimes(t); solDial();
+  document.getElementById('solDayH').textContent = (today ? 'Hoy · ' : '') + solFmtDay.format(td);
+  document.getElementById('solPhase').innerHTML = today ? solPhase(t) : solPhaseDay();
+  if (today) solCount(t); else solCountDay(td, t);
+  solChart(t); solTimes(today ? t : 0); solDial(); solDaysUi();
+  try { solCams(today ? t : 0); } catch (e) { document.getElementById('solCams').hidden = true; }
+  solAlertMsg();
   solMin = Math.floor(t / MIN);
+}
+// Botons de dia: «Hoy» i cada dia del festival (els que no són avui). Amb un sol botó, no surten
+function solDaysUi() {
+  const el = document.getElementById('solDays'), today = solMidnight(now());
+  const L = [[null, 'Hoy'], ...DAYS.filter(x => solMidnight(x.t0) !== today).map(x => [x.d, solDayName(x.d)])];
+  el.hidden = L.length < 2;
+  const h = L.map(([d, n]) => `<button type="button" data-d="${d === null ? '' : d}" aria-pressed="${solPick === d}">${html(n)}</button>`).join('');
+  if (el.innerHTML !== h) el.innerHTML = h;
+}
+document.getElementById('solDays').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  solPick = b.dataset.d === '' ? null : +b.dataset.d;
+  solPaint(true);
+});
+// Un altre dia: la targeta de dalt resumeix la tarda d'aquell dia (posta, hora daurada i blava) i quant falta
+function solCountDay(td, t) {
+  const D = solD, set = D.dn(SOL_RISE), g0 = D.dn(6), g1 = D.dn(-4), b1 = D.dn(-6), el = document.getElementById('solCd');
+  el.dataset.l = '';
+  el.className = 'solcd g';
+  el.innerHTML = `<span class="l">${html(solDayName(solPick))} · atardecer</span><b class="v">${set ? hm(set) : '—'}</b>${set ? `<span class="at">${Math.round(SUN.pos(set, D.lat, D.lon).az)}° ${solCard(SUN.pos(set, D.lat, D.lon).az)}</span>` : ''}`
+    + `<small>${g0 && g1 ? `Hora dorada ${hm(g0)}–${hm(g1)}` : ''}${b1 ? ` · azul hasta ${hm(b1)}` : ''}${td > t ? ` · faltan ${dur(td - t)}` : ''}</small>`;
+}
+function solPhaseDay() {
+  return `Planificando: <b>${html(solDayName(solPick))}</b> · las horas de abajo son de ese día`;
+}
+// --- Contrallum per càmera: amb la direcció de cada càmera (pestanya «Cámaras») i cap on mira l'escenari, les hores en què el sol
+// baix (0°–35°) entra dins del camp de visió (més 10° de marge: el reflex arriba abans). Cap on mira l'escenari no surt del 3D
+// (no sap on és el nord): algú ho mesura un cop amb la brúixola i es comparteix amb l'equip pel servidor (/mc, id «…-sol-<escenari>-pos»)
+const SOL_OK = FEST.key + '-sol-ori-v1';
+let solOri = {}, solOriEd = '';
+try { solOri = JSON.parse(localStorage.getItem(SOL_OK) || '{}') || {}; } catch (e) {}
+const solOriId = st => (FEST.key + '-sol-' + mcSlug(st)).slice(0, 72) + '-pos';
+function solOriOf(st) {
+  try { const x = mcState[solOriId(st)], v = x && x.note !== '' ? +x.note : NaN; if (Number.isFinite(v)) return ((Math.round(v) % 360) + 360) % 360; } catch (e) {}
+  return Number.isFinite(solOri[st]) ? solOri[st] : null;
+}
+function solOriSave(st, v) {
+  v = ((Math.round(v) % 360) + 360) % 360;
+  solOri[st] = v; solOriEd = '';
+  try { localStorage.setItem(SOL_OK, JSON.stringify(solOri)); } catch (e) {}
+  try { mcSet(solOriId(st), { note: String(v) }); } catch (e) {}
+  solPaint();
+}
+function solCams(t) {
+  const box = document.getElementById('solCams'), L = MC.filter(s => (s.cams || []).some(c => c.at3d));
+  box.hidden = !L.length;
+  if (!L.length) return;
+  const D = solD, SA = D.S.map(([ti, al]) => [ti, al, SUN.pos(ti, D.lat, D.lon).az]);
+  let h = '';
+  for (const s of L) {
+    const o = solOriOf(s.stage), nm = L.length > 1 ? `<b>${html(s.stage)}</b>: ` : '';
+    h += `<div class="ori" data-st="${html(s.stage)}">`;
+    if (o === null || solOriEd === s.stage) h += `<span>${nm}¿Hacia dónde mira el escenario? Ponte entre el público mirando al escenario y toca «Medir» (con la brújula activada), o escribe los grados.</span>
+      <div class="row2"><button class="btn" type="button" data-act="medir">Medir con la brújula</button><input type="number" inputmode="numeric" min="0" max="359" placeholder="°" aria-label="Grados hacia el escenario" value="${o ?? ''}"><button class="btn" type="button" data-act="ok">Guardar</button></div>`;
+    else h += `<span>${nm}Del público al escenario: <b>${o}° ${solCard(o)}</b></span><button type="button" class="linkbtn" data-act="cambiar">Cambiar</button>`;
+    h += '</div>';
+    if (o === null) continue;
+    for (const c of s.cams || []) {
+      if (!c.at3d) continue;
+      let yaw = null;
+      try { const ps = mcPosOf(c, s.scene3d); if (ps && Number.isFinite(ps.yaw)) yaw = ps.yaw; } catch (e) {}
+      if (yaw === null) yaw = c.aim ? c.aim[0] : 180;
+      // 3D: x al llarg (escenari a −x), y d'un costat a l'altre; yaw 180 = mira cap a l'escenari
+      const bc = ((o + 180 - yaw) % 360 + 360) % 360, half = mcFov(c) / 2 + 10, W = [];
+      let st = null;
+      for (const [ti, al, az] of SA) {
+        const hot = al > -.5 && al < 35 && Math.abs(solWrap(az - bc)) < half;
+        if (hot && st === null) st = ti; else if (!hot && st !== null) { W.push([st, ti]); st = null; }
+      }
+      if (st !== null) W.push([st, D.b]);
+      const on = t && W.some(([a, b]) => t >= a && t <= b);
+      h += `<div class="cam${W.length ? ' hot' : ''}${on ? ' now' : ''}" style="--c:${mcCol(c.c)}"><i></i><span>${html(c.pos || c.cam)}</span><b>${W.length ? W.map(([a, b]) => `${hm(a)}–${hm(b)}`).join('<br>') : 'Sin sol de cara'}</b>`
+        + `<em>Mira a ${Math.round(bc)}° ${solCard(bc)}${W.length ? ` · contraluz${on ? ' ahora' : ''}` : ''}</em></div>`;
+    }
+  }
+  h += '<p class="foot">Aproximado: la dirección de cada cámara sale de «Cámaras». Bajo techo solo cuenta si el sol entra por una abertura.</p>';
+  document.getElementById('solCamsB').innerHTML = h;
+}
+document.getElementById('solCamsB').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'), box = b && b.closest('.ori');
+  if (!box) return;
+  const st = box.dataset.st, act = b.dataset.act, msg = document.getElementById('solMsg');
+  if (act === 'cambiar') { solOriEd = st; return solPaint(); }
+  if (act === 'medir') {
+    if (solHead === null) { msg.textContent = 'Activa la brújula (botón de arriba), ponte entre el público y apunta el móvil hacia el escenario.'; return; }
+    msg.textContent = ''; return solOriSave(st, solHead);
+  }
+  const v = +box.querySelector('input').value;
+  if (box.querySelector('input').value === '' || !Number.isFinite(v)) return;
+  solOriSave(st, v);
+});
+// Avís abans de l'hora daurada de la tarde (dies del festival, ubicació del festival): l'envia el servidor d'avisos
+const solAl = document.getElementById('solAlert');
+solAl.value = String([10, 20, 30, 45].includes(prefs.sol) ? prefs.sol : 0);
+solAl.addEventListener('change', () => { prefs.sol = +solAl.value; savePrefs(); syncPush(); solAlertMsg(); });
+function solAlertMsg() {
+  document.getElementById('solAlMsg').textContent = !prefs.sol ? '' : !PUSH ? 'Esta versión de la app no tiene servidor de avisos.'
+    : !pushActive ? 'Para recibirlo, activa «Recibir notificaciones» en Ajustes.' : `Te avisaremos ${prefs.sol} min antes, los días del festival.`;
 }
 // Brúixola: iPhone → webkitCompassHeading (cal permís, i només es pot demanar en tocar un botó); Android → deviceorientationabsolute
 function solOrient(e) {
@@ -4168,6 +4764,8 @@ addEventListener('resize', () => { if (AR.on) AR.dirty = true; });
 function solShow(on) {
   if (!on) { arClose(); return solListenOff(); }
   solPaint(true);
+  // La direcció de l'escenari (contrallum) la pot haver mesurat algú altre: es baixa l'estat compartit de «Cámaras» si és vell
+  try { if (MC.length && mcLive() && Date.now() - mcAt > 60000) mcPull().then(() => { if (TAB === 'sol') solPaint(); }); } catch (e) {}
   if (solWant && !document.hidden) solListenOn();
 }
 document.addEventListener('visibilitychange', () => { if (TAB === 'sol') solShow(!document.hidden); });
@@ -4221,7 +4819,7 @@ const noticeMine = () => notice && (!noticeTeam || noticeTeam === PROF) ? notice
 const noticeHead = () => `${html(noticeBy || 'Organización')}${noticeTeam ? ` <i class="nteam">· para ${html(WHO_L[noticeTeam])}</i>` : ''}`;
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
-const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}`).join('~');
+const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}|${x.note}`).join('~');
 // Avisos: l'aviso actiu de l'organització fixat dalt (no es pot tancar) i l'historial del dia (els 3 darrers; «Ver todos» per a la resta)
 var FEEDK = FEST.key + '-feed-v1';  // «var»: tick() hi mira abans que s'arribi aquí
 var feed = [], feedSeen = 0;
@@ -4341,12 +4939,24 @@ function fetchT(url, opts = {}, ms = 10000) {
 // Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
 let pubStamp = '', pubUntil = 0;
 let pulling = false, pullFails = 0;
+// Quan s'ha llegit changes.json per últim cop (hora real, no la del Modo prueba): surt a la línia d'estat
+// perquè ningú es refiï d'un horari vell sense saber-ho. Es guarda per si l'app s'obre sense cobertura.
+const SYNCK = FEST.key + '-sync';
+let lastSync = 0;
+try { lastSync = +localStorage.getItem(SYNCK) || 0; } catch (e) {}
+function syncTxt() {
+  if (!ONLINE || !lastSync) return '';
+  const m = Math.max(0, Math.floor((Date.now() - lastSync) / MIN)), off = document.body.classList.contains('offline');
+  const ago = m < 1 ? 'ahora' : m < 60 ? `hace ${m}${NB}min` : `hace ${dur(m * MIN)}`;
+  return ` · <span class="sync${off || m >= 10 ? ' old' : ''}">${off ? `sin conexión · horario de ${ago}` : `actualizado ${ago}`}</span>`;
+}
 async function pullChanges() {
   if (!ONLINE || pulling) return;
   pulling = true;
   try {
     const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
     pullFails = r.ok || r.status === 404 ? 0 : pullFails + 1;
+    if (r.ok || r.status === 404) { lastSync = Date.now(); try { localStorage.setItem(SYNCK, String(lastSync)); } catch (e) {} }
     if (r.ok) {
       const d = await r.json();
       const st = d && String(d.updated || '');
@@ -4360,7 +4970,8 @@ async function pullChanges() {
   } catch (e) { pullFails++; }
   pulling = false;
   const off = pullFails >= 2;
-  if (off !== document.body.classList.contains('offline')) { document.body.classList.toggle('offline', off); tick(true); }
+  document.body.classList.toggle('offline', off);
+  tick(true);  // refresca «actualizado hace…»
 }
 
 // Organització: editor protegit amb contrasenya.
@@ -4396,22 +5007,28 @@ const code = t => {
   const s0 = hm(t), s = DST && s0.startsWith('02:') ? s0 + (t < DUP ? 'a' : 'b') : s0;
   return NDAYS < 2 ? s : dpre(Math.max(0, DAYS.findIndex(x => T(dpre(x.d) + s) === t))) + s;
 };
-const TIMES = [];
-for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
-  const c = code(t);
-  if (!TIMES.some(([k]) => k === c)) TIMES.push([c, NDAYS > 1 ? `${(x.name || `Día ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]);
+// Només fa falta a l'editor: es prepara el primer cop que s'obre (rendiment, 04-11-2026)
+let TIMES0 = null;
+function times() {
+  if (TIMES0) return TIMES0;
+  const L = [], seen = new Set();
+  for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
+    const c = code(t);
+    if (!seen.has(c)) { seen.add(c); L.push([c, NDAYS > 1 ? `${(x.name || `Día ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]); }
+  }
+  return TIMES0 = L;
 }
-const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${times().map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
   const raw = {};
-  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub, fx: [...x.fx] }));
+  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub, fx: [...x.fx], ...(x.note ? { note: x.note } : {}) }));
   return raw;
 }
 // Editor: una llista curta per escenari; en tocar una actuació s'obre amb tots els camps (hores, nom, importància, subtítol, efectes)
 let edOpen = -1;
 const edBase = r => { const l = baseRaw && baseRaw[edStage]; const o = Array.isArray(l) ? l.find(x => x.id === r.id) : null; return o ? norm(o) !== norm(r) : true; };
-const lblOf = c => (TIMES.find(([k]) => k === c) || [c, c])[1];
+const lblOf = c => (times().find(([k]) => k === c) || [c, c])[1];
 function edHead(r, i) {
   const fx = normFx(r.fx);
   return `<span class="edt">${lblOf(r.a)}–${lblOf(r.b)}</span><span class="edn">${r.n ? html(r.n) : '<i>Sin nombre</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sin publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
@@ -4439,6 +5056,8 @@ function renderEditor(badIdx) {
         <div><label class="edl">Importancia</label><select class="t" aria-label="Importancia: ${esc(r.n || 'actuación nueva')}">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select></div>
         <div><label class="edl">Subtítulo</label><input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo: ${esc(r.n || 'actuación nueva')}" placeholder="Opcional" maxlength="80" autocorrect="off" spellcheck="false" enterkeyhint="done"></div>
       </div>
+      <label class="edl">Nota para el equipo</label>
+      <input class="note" type="text" value="${html(r.note || '')}" aria-label="Nota para el equipo: ${esc(r.n || 'actuación nueva')}" placeholder="Ej.: LED visual 3 · grabar la entrada (opcional)" maxlength="120" autocorrect="off" enterkeyhint="done">
       <div class="edacts"><button type="button" class="btn quiet del">Quitar actuación</button><button type="button" class="btn edok">Hecho</button></div>
     </div>`}</div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
   edCountUI();
@@ -4466,7 +5085,7 @@ function markDirty() {
 }
 // Combina tres versions de l'horari: de la qual partia (base), la meva i la publicada per una altra persona.
 // Cada actuació (per id): si només l'ha canviada un, guanya aquell canvi; si l'han canviada tots dos, guanya la meva.
-const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || ''), normFx(r.fx).join()]) : '';
+const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || ''), normFx(r.fx).join(), String(r.note || '').trim()]) : '';
 function merge3(base, mine, theirs, bn, mn, tn) {
   const sets = {}, clash = [];
   for (const s of STAGES) {
@@ -4569,6 +5188,7 @@ document.getElementById('edRows').addEventListener('input', e => {
   const r = draft.sets[edStage][+row.dataset.i];
   if (e.target.classList.contains('n')) r.n = e.target.value;
   if (e.target.classList.contains('sub')) r.sub = e.target.value;
+  if (e.target.classList.contains('note')) { if (e.target.value.trim()) r.note = e.target.value; else delete r.note; }
   markDirty();
   row.querySelector('.edhead').innerHTML = edHead(r, +row.dataset.i);
 });
@@ -4599,8 +5219,8 @@ document.getElementById('edAdd').addEventListener('click', () => {
   const list = draft.sets[edStage];
   const last = list[list.length - 1];
   const a = last ? last.b : FEST.start;
-  const ia = TIMES.findIndex(([c]) => c === a);
-  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '', fx: [] });
+  const ia = times().findIndex(([c]) => c === a);
+  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (times()[Math.min(ia + 12, times().length - 1)] || times()[12])[0], n: '', t: 0, sub: '', fx: [] });
   markDirty();
   renderEditor(list.length - 1);
   const rows = document.querySelectorAll('#edRows .n');
@@ -5202,7 +5822,13 @@ async function pullDone() {
   try {
     const r = await fetchT(PUSH.url + '/done?t=' + Date.now(), { cache: 'no-store' }, 8000);
     if (!r.ok) return null;
-    doneAll = (await r.json()).done || {};
+    return doneApply((await r.json()).done || {});
+  } catch (e) { return null; }
+}
+// Les ✓ de tothom (de GET /done o de la pregunta periòdica /live)
+function doneApply(all) {
+  try {
+    doneAll = all;
     if (YO && YO !== '-') {
       DONE = new Set(Object.keys(doneAll[YO] || {}));
       for (const q of DQ) if (q.v) DONE.add(q.id); else DONE.delete(q.id);
@@ -5245,8 +5871,7 @@ async function pullTasks() {
       }
     }
   } catch (e) {}
-  await flushDone();
-  if (taskOn() && (YO && YO !== '-' || tgTeam)) await pullDone();
+  await flushDone();   // les ✓ de tothom arriben amb la pregunta periòdica (/live)
 }
 let tkMin = -1;
 setInterval(() => {
@@ -5608,10 +6233,8 @@ function xlRows(X, ws) {
 let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
   const sc = document.createElement('script');
-  sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-  // Empremta del fitxer: si algú el canviés a jsDelivr, el navegador no l'executaria
-  sc.integrity = 'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw';
-  sc.crossOrigin = 'anonymous';
+  // SheetJS servida des de la mateixa web (vendor/): la de jsDelivr (0.18.5) era vella i amb errors de seguretat coneguts
+  sc.src = 'vendor/xlsx-0.20.3.full.min.js';
   sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; no(new Error('xlsx')); };
   document.head.appendChild(sc);
 }));
@@ -5700,7 +6323,7 @@ document.getElementById('pGlobal').addEventListener('click', e => {
   if (b) { gvWho = gvWho === b.dataset.gv ? '' : b.dataset.gv; renderGlobal(); }
   if (e.target.closest('#gvRefresh')) pullDone().then(renderGlobal);
 });
-setInterval(() => { if (!document.hidden && !document.getElementById('pGlobal').hidden) pullDone().then(renderGlobal); }, 30000);
+// (la vista global s'actualitza amb la pregunta periòdica /live)
 // --- «¿Quién eres?»: surt dins la pestanya Tareas mentre no hagis triat qui ets (triar el nom posa l'equip) ---
 var holaEl = document.getElementById('hola'), holaBody = document.getElementById('holaBody'), holaPick = '';
 var holaForce = false, holaDept = '';
@@ -5724,7 +6347,7 @@ function holaPaint() {
   if (k === holaKey) return;
   holaKey = k;
   if (!ppl.length) {
-    if (!taskOn()) return holaTeams('¿De qué equipo eres?', 'Aún no hay equipo cargado. Cuando lo carguen, aquí podrás elegir tu nombre.');
+    if (!taskOn()) return holaTeams('¿De qué equipo eres?', 'Elígelo y, cuando la organización publique las tareas, aquí podrás elegir tu nombre.');
     document.getElementById('holaT').textContent = 'Aún no hay tareas';
     document.getElementById('holaSub').textContent = navigator.onLine ? 'Cuando la organización las publique, saldrán aquí.' : 'Sin conexión: se cargarán al volver la red.';
     holaBody.innerHTML = '';
@@ -5804,10 +6427,11 @@ const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Par
 const MC_CK = FEST.key + '-mc-carga-v1', MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
 const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
-// Un id per càmera: festival + escenari + posició (si es repeteix, amb número)
+// Un id per càmera: festival + `uid` fix de les dades (així canviar el nom de la posició no perd l'estat ni el lloc).
+// Sense `uid`: escenari + posició (si es repeteix, amb número)
 for (const s of MC) {
   const seen = {};
-  for (const c of s.cams || []) { let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
+  for (const c of s.cams || []) { if (c.uid) { c.id = (FEST.key + '-' + mcSlug(c.uid)).slice(0, 76); continue; } let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
 }
 let mcState = {}, mcFilter = '', mcTimer = 0, mcErr = '', mcAt = 0;
 // Diversos dies: l'estat (grabando, SSD…) va per dia. Per defecte, el dia del festival d'avui (abans, el 1r; després, l'últim)
@@ -6038,7 +6662,7 @@ function mc3dCams() {
   const { T, camsG, P, s } = mc3d;
   for (const o of [...camsG.children]) { camsG.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }
   const UP = new T.Vector3(0, 1, 0), tube = new T.CylinderGeometry(1, 1, 1, 6, 1, true);
-  mc3d.pos = {}; mc3d.recMats = [];
+  mc3d.pos = {};
   for (const c of s.cams || []) {
     const q = mcPosOf(c, s.scene3d);
     if (!q) continue;
@@ -6067,28 +6691,13 @@ function mc3dCams() {
     const fp = [];
     for (let i = 0; i < 4; i++) fp.push(top, cor[i], cor[(i + 1) % 4]);
     const fgm = new T.BufferGeometry().setFromPoints(fp);
-    const fm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .22 : rec ? .18 : .09, side: T.DoubleSide, depthWrite: false });
+    const fm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .22 : rec ? .2 : .09, side: T.DoubleSide, depthWrite: false });
     camsG.add(new T.Mesh(fgm, fm));
-    if (rec) mc3d.recMats.push([fm, lm]);
   }
   mc3d.camSig = mc3dSig();
-  mc3dPulse();
 }
 const mc3dSig = () => mc3d ? JSON.stringify([(mc3d.s.cams || []).map(c => [mcPosOf(c, mc3d.s.scene3d), (mcState[mcKey(c)] || {}).st === 'grabando']), mcEd && mcEd.sel, mc3d.focus]) : '';
-// Les que graven: el con batega en vermell (20 fps, només amb la pestanya a la vista; quiet amb «Reducir movimiento»)
-function mc3dPulse() {
-  const m = mc3d;
-  if (!m || m.pulsing || !m.recMats.length || RM.matches) return;
-  m.pulsing = true;
-  const tick = () => {
-    if (!mc3d || mc3d !== m || !m.recMats.length) { m.pulsing = false; return; }
-    if (document.hidden || TAB !== 'multi') { setTimeout(tick, 1000); return; }
-    const k = .5 + .5 * Math.sin(performance.now() / 260);
-    for (const [fm, lm] of m.recMats) { fm.opacity = .1 + .28 * k; lm.opacity = .55 + .45 * k; }
-    mc3dDraw(); setTimeout(tick, 50);
-  };
-  tick();
-}
+// Les que graven: con vermell quiet al 3D (el que batega és el número, amb CSS: no gasta bateria redibuixant el 3D)
 // Toca una càmera: la vista hi vola i el seu con s'encén
 function mc3dFocus(c) {
   if (!mc3d || mcEd) return;
@@ -6166,6 +6775,9 @@ async function mc3dAttach() {
       ren.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
       mc3d = { T, ren, cam: new T.PerspectiveCamera(32, 1.5, .3, 900), ...MC3D_HOME, pts: [] };
       mc3dTouch(ren.domElement);
+      // iOS pot treure la targeta gràfica a l'app (a fons, poca memòria): es torna a muntar sola quan torna
+      ren.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); document.querySelector('#multi .on3d')?.classList.remove('on3d'); });
+      ren.domElement.addEventListener('webglcontextrestored', () => { try { mc3d.ren.dispose(); } catch (er) {} mc3d = null; if (TAB === 'multi') mc3dAttach(); });
     }
     if (mc3d.stage !== s.stage || mc3d.look !== look) {
       if (mc3d.scene) mc3d.scene.traverse(o => { o.geometry && o.geometry.dispose(); const mt = o.material; if (mt) { mt.map && mt.map.dispose(); mt.dispose(); } });
@@ -6181,7 +6793,7 @@ async function mc3dAttach() {
   wrap.classList.add('on3d'); wrap.dataset.look = look;
   wrap.classList.toggle('mcediting', !!mcEd);
   const lb = wrap.querySelector('[data-mc3d="look"]'); if (lb) lb.textContent = look === 'plano' ? 'Vista noche' : 'Vista plano';
-  mc3dCams(); mc3dEdPaint();
+  mc3dCams(); mc3dEdPaint(); mc3dFoldPaint();
   if (!mc3dShown && !RM.matches) mc3dReveal(); else mc3dDraw();
   mc3dShown = true;
 }
@@ -6351,6 +6963,32 @@ function mc3dEdPaint() {
   box.querySelector('[data-mced="orig"]').hidden = !c || !(mcEd.draft[c.id] || (mcState[mcPosKey(c)] || {}).note);
   box.querySelector('.mcedn').textContent = n ? `${n} sin guardar` : '';
 }
+// «Ocultar 3D»: durant el show, la llista de càmeres queda a dalt (es recorda en aquest mòbil)
+const MC_FOLD = FEST.key + '-mc-fold-v1';
+let mcFold = false;
+try { mcFold = !!localStorage.getItem(MC_FOLD); } catch (e) {}
+function mc3dFoldPaint() {
+  const w = document.querySelector('#multi .mcplan'); if (!w) return;
+  w.classList.toggle('mcfold', mcFold);
+  const b = w.querySelector('[data-mc3d="fold"]'); if (b) b.textContent = mcFold ? 'Ver 3D' : 'Ocultar 3D';
+  if (mcFold && mcEd) mc3dEdit(false);
+}
+// Historial: qui ha canviat què (els últims 80 canvis d'estat o SSD, del servidor)
+async function mcLog() {
+  const box = document.getElementById('mcLog'), btn = document.getElementById('mcLogBtn');
+  if (!mcLive()) { box.innerHTML = '<li class="note">Sin servidor no hay historial.</li>'; return; }
+  btn.disabled = true;
+  try {
+    const r = await fetchT(PUSH.url + '/mclog', { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const names = {};
+    for (const [, c] of mcAll()) { names[c.id] = c.pos || c.cam; for (let d = 0; d < NDAYS; d++) names[c.id + '-d' + (d + 1)] = (c.pos || c.cam) + (NDAYS > 1 ? ' · ' + (DAYS[d].name || `Día ${d + 1}`) : ''); }
+    const log = ((await r.json()).log || []).filter(x => names[x.id]);
+    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sin montar')}</b>${x.ssd ? ` <small>· SSD ${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Alguien')}</span></li>`).join('') : '<li class="note">Aún no hay cambios.</li>';
+    btn.textContent = 'Actualizar historial';
+  } catch (e) { box.innerHTML = '<li class="note">Sin conexión: no se ha podido cargar.</li>'; }
+  btn.disabled = false;
+}
 function mc3dEdit(on) {
   mcEd = on ? { sel: '', draft: {} } : null;
   const w = document.querySelector('#multi .mcplan'); if (w) w.classList.toggle('mcediting', !!mcEd);
@@ -6361,7 +6999,8 @@ document.getElementById('multi').addEventListener('click', e => {
   if (!t || !mc3d) return;
   e.stopPropagation();
   const a = t.dataset.mc3d, b = t.dataset.mced;
-  if (a === 'home') mc3dGo(MC3D_HOME);
+  if (a === 'fold') { mcFold = !mcFold; try { localStorage.setItem(MC_FOLD, mcFold ? '1' : ''); } catch (er) {} mc3dFoldPaint(); if (!mcFold) mc3dDraw(); }
+  else if (a === 'home') mc3dGo(MC3D_HOME);
   else if (a === 'look') { mcLook = mc3dLook() === 'plano' ? 'noche' : 'plano'; try { localStorage.setItem(MC3D_LK, mcLook); } catch (er) {} mc3dAttach(); }
   else if (a === 'edit') mc3dEdit(true);
   else if (t.dataset.mcsel) { const c = mc3d.byKey[t.dataset.mcsel]; if (c) { mcEd.sel = c.id; mc3dCams(); mc3dEdPaint(); mc3dDraw(); } }
@@ -6399,6 +7038,10 @@ document.getElementById('multi').addEventListener('input', e => {
 });
 const mcSq = cs => (cs || []).filter(Boolean).map(c => `<i style="--sc:${mcCol(c)}"></i>`).join('');
 const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
+// Toc a la pastilla de la fila: el següent estat lògic (Recogida només des de la fitxa)
+const MC_NEXT = { '': 'montada', montada: 'grabando', grabando: 'parada', parada: 'grabando', recogida: 'montada' };
+const mcByKey = {};
+const mcPrevSt = c => { if (NDAYS < 2 || mcDay < 1) return ''; const p = mcState[c.id + '-d' + mcDay] || {}; return p.st && p.st !== 'recogida' ? p : ''; };
 const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
 let mcOpen = null;
 function mcRender() {
@@ -6408,13 +7051,14 @@ function mcRender() {
   chips.hidden = MC.length < 2;
   chips.innerHTML = MC.length < 2 ? '' : [['', 'Todos'], ...MC.map(s => [s.stage, s.stage])].map(([v, t]) => `<button type="button" role="tab" data-mcfilt="${html(v)}" aria-selected="${v === mcFilter}">${html(t)}</button>`).join('');
   const list = MC.filter(s => !mcFilter || s.stage === mcFilter);
+  for (const [, c] of mcAll()) mcByKey[mcKey(c)] = c;
   document.getElementById('mcBody').innerHTML = list.map(s => {
     const zones = [];
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
       ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Toca una cámara para ir a ella (otra vez: su ficha) · un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
-        <div class="mctools"><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
+        <div class="mctools"><button type="button" class="btn" data-mc3d="fold">Ocultar 3D</button><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
         <div class="mced" hidden>
           <div class="edtabs mcsel" role="tablist" aria-label="Cámara">${(s.cams || []).map((c, i) => `<button type="button" role="tab" data-mcsel="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}"><i class="mcn">${i + 1}</i>${html(c.pos || c.cam)}</button>`).join('')}</div>
           <p class="note mcedw"></p>
@@ -6428,8 +7072,9 @@ function mcRender() {
       ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
       ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
         <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
-        <span class="mcs"><b></b><span class="ssd"></span></span>
+        <span class="mcs"><button type="button" class="mcnext" data-mcnext="${mcKey(c)}"></button><span class="ssd"></span><span class="rt"></span></span>
       </li>`).join('')}
+      ${NDAYS > 1 && mcDay > 0 && (s.cams || []).length ? `<li class="mcsame" data-mcsame="${html(s.stage)}" hidden><button type="button" class="btn">Igual que el ${html(DAYS[mcDay - 1].name || 'día anterior')}</button><span class="note">Las que seguían montadas pasan a «Montada», con su SSD.</span></li>` : ''}
     </ul>
     ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario.</p>'}
     ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
@@ -6453,8 +7098,15 @@ function mcPaint() {
   for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
     const s = mcState[el.dataset.mcid] || {};
     el.dataset.st = s.st || '';
-    el.querySelector('.mcs b').textContent = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    const nx = el.querySelector('.mcnext'), lab = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    nx.textContent = lab; nx.setAttribute('aria-label', `${lab}. Tocar: ${mcStName(MC_NEXT[s.st || '']) || 'REC'}`);
     el.querySelector('.mcs .ssd').textContent = s.ssd || '';
+    // Temps en l'estat: «REC 1 h 52» (amb límit de targeta/bateria a les dades: groc al 80 %, vermell en passar-lo)
+    const c = mcByKey[el.dataset.mcid], rt = el.querySelector('.mcs .rt'), since = s.since || 0;
+    const min = since && (s.st === 'grabando' || s.st === 'parada') ? Math.max(0, Math.floor((Date.now() - since) / 60000)) : -1;
+    rt.textContent = min < 0 ? '' : (s.st === 'grabando' ? 'REC ' : 'parada ') + (min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`);
+    const lim = c && +c.lim, frac = s.st === 'grabando' && lim && min >= 0 ? min / lim : 0;
+    el.dataset.lim = frac >= 1 ? 'over' : frac >= .8 ? 'warn' : '';
   }
   for (const h of document.querySelectorAll('[data-mcsum]')) {
     const st = MC.find(s => s.stage === h.dataset.mcsum), cams = st && st.cams || [], n = cams.length;
@@ -6467,15 +7119,21 @@ function mcPaint() {
     const st = MC.find(s => s.stage === el.dataset.mcstats), cams = st && st.cams || [], cnt = k => cams.filter(c => ((mcState[mcKey(c)] || {}).st || '') === k).length;
     el.innerHTML = [['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']].map(([k, l]) => `<span class="${k === 'grabando' && cnt(k) ? 'rec' : ''}"><b>${cnt(k)}</b>${l}</span>`).join('');
   }
+  for (const el of document.querySelectorAll('[data-mcsame]')) {
+    const st = MC.find(s => s.stage === el.dataset.mcsame), cams = st && st.cams || [];
+    el.hidden = !(cams.some(c => mcPrevSt(c)) && !cams.some(c => (mcState[mcKey(c)] || {}).st));
+  }
   if (mc3d && mc3d.wrap && document.body.contains(mc3d.wrap) && mc3dSig() !== mc3d.camSig) { mc3dCams(); mc3dEdPaint(); mc3dDraw(); }
   const msg = document.getElementById('mcMsg');
-  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
+  const nOut = Object.keys(mcOut).length;
+  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : nOut ? `${nOut} ${nOut === 1 ? 'cambio' : 'cambios'} sin enviar: se enviarán solos cuando haya conexión.` : mcErr;
   msg.hidden = !msg.textContent;
   if (mcOpen) {
     const s = mcState[mcOpen] || {};
     for (const b of document.querySelectorAll('#mcSheetSt [data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
     for (const [i, f] of [['mcSsd', 'ssd'], ['mcNote', 'note']]) { const el = document.getElementById(i); if (el !== document.activeElement) el.value = s[f] || ''; }
-    document.getElementById('mcSheetBy').textContent = s.at ? 'Último cambio: ' + mcAgo(s) : '';
+    document.getElementById('mcSheetBy').textContent = (s.at ? 'Último cambio: ' + mcAgo(s) : '') + (mcWho() ? '' : (s.at ? ' · ' : '') + 'Elige «Soy…» en Ajustes para que se vea tu nombre.');
+    document.getElementById('mcSheetClr').hidden = !s.st;
   }
 }
 // Fitxa d'una càmera (a sobre de tot, com «Mis artistas»)
@@ -6497,7 +7155,10 @@ function mcOpenSheet(id) {
 function mcSaveFields() {
   if (!mcOpen) return;
   const s = mcState[mcOpen] || {}, ssd = document.getElementById('mcSsd').value.trim(), note = document.getElementById('mcNote').value.trim();
-  if (ssd !== (s.ssd || '') || note !== (s.note || '')) mcSet(mcOpen, { ssd, note });
+  const p = {};
+  if (ssd !== (s.ssd || '')) p.ssd = ssd;
+  if (note !== (s.note || '')) p.note = note;
+  if (Object.keys(p).length) mcSet(mcOpen, p);
 }
 function mcCloseSheet() {
   const id = mcOpen;
@@ -6513,36 +7174,73 @@ document.getElementById('mcDone2').addEventListener('click', mcCloseSheet);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !mcSheet.hidden) mcCloseSheet(); });
 mcSheet.addEventListener('click', e => {
   const b = e.target.closest('[data-mcst]');
-  if (b && mcOpen) { const cur = (mcState[mcOpen] || {}).st; mcSet(mcOpen, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); }
+  if (b && mcOpen) { if ((mcState[mcOpen] || {}).st !== b.dataset.mcst) mcSet(mcOpen, { st: b.dataset.mcst }); return; }  // tornar a tocar el mateix no l'esborra
+  if (e.target.id === 'mcSheetClr' && mcOpen) mcSet(mcOpen, { st: '' });
 });
 mcSheet.addEventListener('change', e => { if (e.target.matches('input')) mcSaveFields(); });
+// Es desa també mentre s'escriu (0,6 s quiet) i si el mòbil es bloqueja o l'app va a fons
+let mcType = 0;
+mcSheet.addEventListener('input', e => { if (e.target.matches('input')) { clearTimeout(mcType); mcType = setTimeout(mcSaveFields, 600); } });
+addEventListener('pagehide', () => mcSaveFields());
+document.addEventListener('visibilitychange', () => { if (document.hidden) mcSaveFields(); else mcFlush(); });
+addEventListener('online', () => mcFlush());
 mcSheet.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
 function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
+// Canvis que encara no han arribat al servidor (sense cobertura): es guarden al mòbil i es tornen a enviar sols
+// (cada 15 s amb la pestanya oberta, en tornar la connexió i en tornar a l'app). Mentrestant es veu el valor d'aquest mòbil.
+const MC_OB = FEST.key + '-mc-out-v1';
+let mcOut = {}, mcTouched = {}, mcFlushing = null;
+try { mcOut = JSON.parse(localStorage.getItem(MC_OB) || '{}') || {}; } catch (e) {}
+const mcSaveOut = () => { try { localStorage.setItem(MC_OB, JSON.stringify(mcOut)); } catch (e) {} };
+const mcWho = () => (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
+function mcFlush() {
+  if (!mcLive() || mcFlushing || !Object.keys(mcOut).length) return mcFlushing || Promise.resolve();
+  mcFlushing = (async () => {
+    for (const id of Object.keys(mcOut)) {
+      const patch = mcOut[id];
+      try {
+        const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, ...patch }) }, 8000);
+        if (!r.ok && r.status !== 400) throw new Error(r.status);
+        const j = await r.json().catch(() => ({}));
+        if (mcOut[id] === patch) { delete mcOut[id]; if (j.mc && mcState[id]) mcState[id] = { ...mcState[id], ...j.mc }; }
+        mcErr = '';
+      } catch (e) { mcErr = 'Sin conexión: los cambios se enviarán solos.'; break; }
+    }
+    mcSaveOut(); mcSaveLocal(); mcFlushing = null; mcPaint();
+  })();
+  return mcFlushing;
+}
 async function mcPull() {
   if (!mcLive()) return;
+  await mcFlush();
+  const t0 = Date.now();
   try {
     const r = await fetchT(PUSH.url + '/mc', { cache: 'no-store' }, 8000);
     if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    // El que s'acaba de canviar en aquest mòbil i encara no ha arribat al servidor es manté
-    const keep = Object.fromEntries(Object.entries(mcState).filter(([, s]) => s.pending));
-    mcState = { ...(j.mc || {}), ...keep };
-    mcErr = ''; mcAt = Date.now(); mcSaveLocal();
+    mcApply((await r.json()).mc, t0);
   } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
   mcPaint();
 }
-async function mcSet(id, patch) {
-  const who = (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
-  const s = { ...(mcState[id] || {}), ...patch, who, at: Date.now(), pending: true };
-  mcState[id] = s; mcSaveLocal(); mcPaint();
-  if (!mcLive()) { delete s.pending; mcSaveLocal(); return; }
-  try {
-    const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, st: s.st || '', ssd: s.ssd || '', note: s.note || '', who }) }, 8000);
-    if (!r.ok) throw new Error(r.status);
-    if (mcState[id] === s) delete s.pending;
-    mcErr = '';
-  } catch (e) { mcErr = 'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'; if (mcState[id] === s) delete s.pending; }
-  mcSaveLocal(); mcPaint();
+// Estat de les càmeres (de GET /mc o de /live); t0 = quan es va fer la pregunta
+function mcApply(mc, t0) {
+  {
+    // Es manté el que aquest mòbil encara no ha enviat i el que s'ha tocat mentre arribava la resposta
+    const keep = Object.fromEntries(Object.entries(mcState).filter(([id]) => mcOut[id] || (mcTouched[id] || 0) >= t0));
+    mcState = { ...(mc || {}), ...keep };
+    if (!Object.keys(mcOut).length) mcErr = '';
+    mcAt = Date.now(); mcSaveLocal();
+  }
+  mcPaint();
+}
+// Només s'envien els camps que canvien (així dos mòbils que toquen la mateixa càmera no es trepitgen)
+function mcSet(id, patch) {
+  const who = mcWho(), now = Date.now(), cur = mcState[id] || {};
+  const s = { ...cur, ...patch, who, at: now };
+  if ('st' in patch && patch.st !== cur.st) s.since = now;
+  mcState[id] = s; mcTouched[id] = now; mcSaveLocal();
+  if (mcLive()) { mcOut[id] = { ...(mcOut[id] || {}), ...patch, who }; mcSaveOut(); }
+  mcPaint();
+  return mcFlush();
 }
 function mcShow(on) {
   clearInterval(mcTimer); mcTimer = 0;
@@ -6551,10 +7249,23 @@ function mcShow(on) {
   if (!document.getElementById('mcBody').childElementCount || (d !== mcDay && !mcDayPicked)) { if (!mcDayPicked) mcDay = d; mcRender(); } else mcPaint();
   if (Date.now() - mcAt > 5000) mcPull();
   mc3dAttach();
-  mcTimer = setInterval(() => { if (!document.hidden) mcPull(); }, 15000);
+  // (després, les càmeres arriben amb la pregunta periòdica /live: cada 30 s mentre toques, cada 60 s si no)
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
 document.getElementById('multi').addEventListener('click', e => {
+  const nx = e.target.closest('[data-mcnext]');
+  if (nx) {
+    const id = nx.dataset.mcnext, c = mcByKey[id], prev = (mcState[id] || {}).st || '', next = MC_NEXT[prev];
+    mcSet(id, { st: next });
+    toast(`<b>${html(c ? c.pos || c.cam : '')}</b>: ${next === 'grabando' ? 'REC' : mcStName(next)}`, 'info', { label: 'Deshacer', fn: () => mcSet(id, { st: prev }) }, 4000);
+    return;
+  }
+  const sm = e.target.closest('[data-mcsame] button');
+  if (sm) {
+    const st = MC.find(s => s.stage === sm.parentNode.dataset.mcsame);
+    for (const c of st ? st.cams || [] : []) { const p = mcPrevSt(c); if (p && !(mcState[mcKey(c)] || {}).st) mcSet(mcKey(c), { st: 'montada', ...(p.ssd ? { ssd: p.ssd } : {}) }); }
+    return;
+  }
+  if (e.target.id === 'mcLogBtn') { mcLog(); return; }
   const dy = e.target.closest('[data-mcday]');
   if (dy) { mcDay = +dy.dataset.mcday; mcDayPicked = true; mcRender(); return; }
   const f = e.target.closest('[data-mcfilt]');
@@ -6568,6 +7279,647 @@ document.getElementById('multi').addEventListener('click', e => {
 document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid], li[data-mcck]')) { e.preventDefault(); e.target.click(); } });
 // ==== /MULTICÁMARA ====
 
+// ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
+// Botó «Momento» a Horarios i Cámaras: guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
+// Es comparteixen per al servidor d'avisos (POST/GET /mk) i s'exporten amb timecode d'hora del dia per a DaVinci (EDL),
+// Final Cut (FCPXML) o Excel (CSV). Sense servidor (artifact) o sense cobertura: queden al mòbil i s'envien després.
+const MKK = FEST.key + '-mk-v1';
+const MK_TAGS = [['drop', 'Drop', '#ff3b3b', 'Red'], ['publico', 'Público', '#3b8bff', 'Blue'], ['artista', 'Artista', '#ffd23b', 'Yellow'],
+  ['backstage', 'Backstage', '#b06bff', 'Purple'], ['error', 'Fallo', '#ff5fd2', 'Fuchsia']];
+const mkTag = k => MK_TAGS.find(x => x[0] === k);
+let mkUid = '';
+try { mkUid = localStorage.getItem('midnight-mk-uid') || ''; } catch (e) {}
+if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + Math.random().toString(36).slice(2, 12); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+let mkMine = [], mkDel = [], mkSrv = null, mkCur = null, mkPopT = 0, mkDayF = -1, mkWho = 'all', mkPulling = false;
+try { const v = JSON.parse(localStorage.getItem(MKK) || 'null'); if (v && Array.isArray(v.m)) { mkMine = v.m.filter(m => m && typeof m.id === 'string' && Number.isFinite(m.t)); mkDel = Array.isArray(v.del) ? v.del : []; } } catch (e) {}
+const mkSave = () => { try { localStorage.setItem(MKK, JSON.stringify({ m: mkMine, del: mkDel })); } catch (e) {} };
+const mkFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+const mkHMS = t => mkFmt.format(t);
+// Què sona ara a cada escenari (pot ser més d'un)
+const mkLive = t => STAGES.map(s => ({ s, x: (SETS[s.id] || []).find(x => t >= x.a && t < x.b) })).filter(o => o.x);
+const mkStageName = id => { const s = STAGES.find(s => s.id === id); return s ? s.name : ''; };
+// Tots: els del servidor + els meus (els meus manen: poden tenir canvis que encara no han arribat)
+function mkList() {
+  const by = new Map();
+  for (const m of mkSrv || []) if (!mkDel.includes(m.id)) by.set(m.id, m);
+  for (const m of mkMine) by.set(m.id, { ...m, uid: mkUid });
+  return [...by.values()].sort((a, b) => a.t - b.t);
+}
+async function mkSend(m) {
+  if (!PUSH || !PUSH.url) return false;
+  try {
+    const r = await fetchT(PUSH.url + '/mk', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(m.del ? { id: m.id, uid: mkUid, del: 1 } : { id: m.id, uid: mkUid, t: m.t, s: m.s, n: m.n, k: m.k, note: m.note, who: m.who }) }, 8000);
+    return r.ok;
+  } catch (e) { return false; }
+}
+// Envia el que falta (nous, canviats i esborrats). Es crida en marcar, en tornar a l'app i cada minut
+async function mkFlush() {
+  if (!PUSH || !PUSH.url || !navigator.onLine) return;
+  for (const m of mkMine.filter(m => !m.sent)) { const v = m.v; if (await mkSend(m)) { if (m.v === v) m.sent = true; } else break; }
+  for (const id of mkDel.slice()) if (await mkSend({ id, del: 1 })) mkDel = mkDel.filter(x => x !== id); else break;
+  mkSave(); mkPaint();
+}
+async function mkPull() {
+  if (!PUSH || !PUSH.url || mkPulling) return;
+  mkPulling = true;
+  try {
+    const r = await fetchT(PUSH.url + '/mk', { cache: 'no-store' }, 8000);
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j.mk)) mkSrv = j.mk; }
+  } catch (e) {}
+  mkPulling = false;
+  if (!document.getElementById('mkList').hidden) mkRenderList();
+}
+function mkApply(list) { if (Array.isArray(list)) { mkSrv = list; if (!document.getElementById('mkList').hidden) mkRenderList(); } }
+function mkPaint() {
+  const n = mkMine.length;
+  document.getElementById('mkN').textContent = n ? String(n) : '';
+}
+function mkTap() {
+  const t = now(), live = mkLive(t), pick = live[0];
+  const m = { id: mkUid + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
+    who: typeof mcWho === 'function' ? mcWho() : '', v: 1, sent: false };
+  mkMine.push(m); mkSave(); mkPaint();
+  try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+  anim(document.getElementById('mkFab'), [{ transform: 'scale(.86)' }, { transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 320 });
+  mkOpen(m, live);
+  mkFlush();
+}
+function mkOpen(m, live) {
+  mkCur = m;
+  const pop = document.getElementById('mkPop');
+  document.getElementById('mkPopH').innerHTML = `Momento <b>${mkHMS(m.t)}</b>`;
+  const who = () => document.getElementById('mkPopWho').textContent = m.n ? `${m.n}${STAGES.length > 1 && m.s ? ' · ' + mkStageName(m.s) : ''}` : (m.s ? mkStageName(m.s) + ' · sin artista ahora' : 'No suena nadie ahora');
+  who();
+  // Diversos escenaris sonant: es pot triar de quin és el moment (per defecte el primer)
+  const st = document.getElementById('mkPopSt');
+  st.hidden = live.length < 2;
+  st.innerHTML = live.length < 2 ? '' : live.map(o => `<button type="button" data-mks="${esc(o.s.id)}" aria-pressed="${o.s.id === m.s}">${esc(o.s.name)}</button>`).join('');
+  st.onclick = e => { const b = e.target.closest('[data-mks]'); if (!b) return; const o = live.find(o => o.s.id === b.dataset.mks); m.s = o.s.id; m.n = o.x.n; mkChanged(m);
+    for (const x of st.children) x.setAttribute('aria-pressed', x === b); who(); };
+  const tg = document.getElementById('mkPopTags');
+  tg.innerHTML = MK_TAGS.map(([k, l, c]) => `<button type="button" data-mkt="${k}" style="--mkc:${c}" aria-pressed="${m.k === k}"><i></i>${l}</button>`).join('');
+  const note = document.getElementById('mkPopNote');
+  note.value = m.note || '';
+  pop.hidden = false;
+  anim(pop, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 220 });
+  mkArm();
+}
+// El quadre marxa sol als 8 s sense tocar-lo (per poder seguir gravant); mentre s'escriu la nota no
+function mkArm() { clearTimeout(mkPopT); mkPopT = setTimeout(() => { if (document.activeElement !== document.getElementById('mkPopNote')) mkClose(); else mkArm(); }, 8000); }
+function mkClose() { clearTimeout(mkPopT); document.getElementById('mkPop').hidden = true; mkCur = null; }
+function mkChanged(m) { m.v = (m.v || 0) + 1; m.sent = false; mkSave(); clearTimeout(mkChanged.t); mkChanged.t = setTimeout(mkFlush, 600); }
+document.getElementById('mkFab').addEventListener('click', mkTap);
+document.getElementById('mkPopX').addEventListener('click', mkClose);
+document.getElementById('mkPop').addEventListener('pointerdown', mkArm);
+document.getElementById('mkPopTags').addEventListener('click', e => {
+  const b = e.target.closest('[data-mkt]'); if (!b || !mkCur) return;
+  mkCur.k = mkCur.k === b.dataset.mkt ? '' : b.dataset.mkt;
+  for (const x of b.parentElement.children) x.setAttribute('aria-pressed', x.dataset.mkt === mkCur.k);
+  mkChanged(mkCur);
+});
+document.getElementById('mkPopNote').addEventListener('input', e => { if (!mkCur) return; mkCur.note = e.target.value.slice(0, 140); mkChanged(mkCur); mkArm(); });
+document.getElementById('mkPopNote').addEventListener('keydown', e => { if (e.key === 'Enter') { e.target.blur(); mkClose(); } });
+function mkRemove(id) {
+  const m = mkMine.find(x => x.id === id);
+  if (!m) return;
+  mkMine = mkMine.filter(x => x.id !== id);
+  if (m.sent || m.v > 1) mkDel.push(id);
+  if (mkSrv) mkSrv = mkSrv.filter(x => x.id !== id);
+  mkSave(); mkPaint(); mkFlush();
+}
+document.getElementById('mkPopDel').addEventListener('click', () => { if (mkCur) mkRemove(mkCur.id); mkClose(); toast('Momento borrado.', 'info', null, 3000); });
+document.getElementById('mkPopAll').addEventListener('click', () => { mkClose(); mkOpenList(); });
+
+// Llista i exportació
+function mkFiltered() {
+  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || m.uid === mkUid));
+}
+function mkRenderList() {
+  const all = mkList();
+  const days = document.getElementById('mkDays');
+  days.hidden = NDAYS < 2;
+  if (NDAYS > 1) days.innerHTML = [`<button type="button" role="tab" data-mkd="-1" aria-selected="${mkDayF < 0}">Todos</button>`]
+    .concat(DAYS.map(d => `<button type="button" role="tab" data-mkd="${d.d}" aria-selected="${mkDayF === d.d}">${esc(d.name || 'Día ' + (d.d + 1))} <span>${all.filter(m => dayAt(m.t) === d.d).length}</span></button>`)).join('');
+  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(m => m.uid === mkUid).length]]
+    .map(([k, l, n]) => `<button type="button" role="tab" data-mkw="${k}" aria-selected="${mkWho === k}">${l} <span>${n}</span></button>`).join('');
+  const L = mkFiltered();
+  const pend = mkMine.filter(m => !m.sent).length + mkDel.length;
+  document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Solo en este móvil (esta versión no tiene servidor).'
+    : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
+  document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
+    const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
+    return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
+  }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Momento» en Horarios o Cámaras mientras graba.</li>';
+  for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
+}
+function mkOpenList() {
+  const sh = document.getElementById('mkList');
+  if (mkDayF < 0 && NDAYS > 1) mkDayF = dayAt(now());
+  sh.hidden = false; document.body.classList.add('locked');
+  anim(sh, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  mkRenderList(); mkPull(); mkFlush();
+}
+function mkCloseList() { document.getElementById('mkList').hidden = true; document.body.classList.remove('locked'); }
+document.getElementById('mkListX').addEventListener('click', mkCloseList);
+document.getElementById('mkListX2').addEventListener('click', mkCloseList);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('mkList').hidden) mkCloseList(); });
+document.getElementById('mkList').addEventListener('click', e => {
+  const d = e.target.closest('[data-mkd]'), w = e.target.closest('[data-mkw]'), x = e.target.closest('[data-mkdel]'), ex = e.target.closest('[data-mkexp]');
+  if (d) { mkDayF = +d.dataset.mkd; mkRenderList(); }
+  else if (w) { mkWho = w.dataset.mkw; mkRenderList(); }
+  else if (x) { mkRemove(x.dataset.mkdel); mkRenderList(); }
+  else if (ex) mkExport(ex.dataset.mkexp);
+});
+// Timecode d'hora del dia (hora de Madrid). sod = segons des de les 00:00 del primer dia de la llista
+// (el que passa de mitjanit continua: 24:30 a Final Cut; a l'EDL torna a 00:30, com a la càmera)
+function mkSod(t, base) {
+  const [h, mi, s] = mkHMS(t).split(':').map(Number);
+  const day = Math.round((new Date(t).setHours(12, 0, 0, 0) - new Date(base).setHours(12, 0, 0, 0)) / 86400000);
+  return day * 86400 + h * 3600 + mi * 60 + s + (t % 1000) / 1000;
+}
+const mkTC = (sec, fps) => { const f = Math.floor(sec * fps + 1e-6), F = f % fps, S = Math.floor(f / fps); const p = n => String(n).padStart(2, '0');
+  return `${p(Math.floor(S / 3600) % 24)}:${p(Math.floor(S / 60) % 60)}:${p(S % 60)}:${p(F)}`; };
+const mkLabel = m => { const tg = mkTag(m.k); return [tg ? tg[1] : '', m.n || (STAGES.length > 1 ? '' : 'Sin artista'), STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who].filter(Boolean).join(' · '); };
+const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function mkExport(kind) {
+  const L = mkFiltered();
+  if (!L.length) return;
+  const fps = +document.getElementById('mkFps').value || 25, off = Math.max(-600, Math.min(600, +document.getElementById('mkOff').value || 0));
+  const base = L[0].t, sod = m => Math.max(0, mkSod(m.t, base) + off);
+  const dayName = NDAYS > 1 && mkDayF >= 0 ? ' ' + (DAYS[mkDayF].name || 'Día ' + (mkDayF + 1)) : '';
+  const title = `Momentos ${FEST.name}${dayName}`, fname = title.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
+  let text, ext, type;
+  if (kind === 'edl') {
+    const w = L.length > 999 ? 4 : 3;
+    text = `TITLE: ${title}\r\nFCM: NON-DROP FRAME\r\n\r\n` + L.map((m, i) => {
+      const a = mkTC(sod(m), fps), b = mkTC(sod(m) + 1 / fps, fps), tg = mkTag(m.k);
+      return `${String(i + 1).padStart(w, '0')}  001      V     C        ${a} ${b} ${a} ${b}  \r\n |C:ResolveColor${tg ? tg[3] : 'Green'} |M:${mkLabel(m).replace(/\|/g, '/')} |D:1\r\n`;
+    }).join('\r\n');
+    ext = 'edl'; type = 'text/plain';
+  } else if (kind === 'fcpxml') {
+    const fr = s => `${Math.round(s * fps)}/${fps}s`, first = Math.max(0, Math.floor(sod(L[0]) - 60)), last = Math.ceil(sod(L[L.length - 1]) + 60);
+    text = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE fcpxml>\n<fcpxml version="1.10">\n  <resources>\n    <format id="r1" name="FFVideoFormat1080p${fps}" frameDuration="1/${fps}s" width="1920" height="1080"/>\n  </resources>\n`
+      + `  <library>\n    <event name="${xml(title)}">\n      <project name="${xml(title)}">\n        <sequence format="r1" tcStart="${fr(first)}" tcFormat="NDF" duration="${fr(last - first)}">\n          <spine>\n`
+      + `            <gap name="Momentos" offset="${fr(first)}" start="${fr(first)}" duration="${fr(last - first)}">\n`
+      + L.map(m => `              <marker start="${fr(sod(m))}" duration="1/${fps}s" value="${xml(mkLabel(m))}"${m.k === 'error' ? ' completed="0"' : ''}/>\n`).join('')
+      + `            </gap>\n          </spine>\n        </sequence>\n      </project>\n    </event>\n  </library>\n</fcpxml>\n`;
+    ext = 'fcpxml'; type = 'application/xml';
+  } else {
+    const q = s => `"${String(s ?? '').replace(/"/g, '""')}"`, fd = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', year: 'numeric' });
+    text = '﻿' + ['Fecha;Hora;Timecode;Escenario;Artista;Tipo;Nota;Quién'].concat(L.map(m => [fd.format(m.t), mkHMS(m.t), mkTC(sod(m), fps), mkStageName(m.s), m.n, (mkTag(m.k) || ['', ''])[1], m.note, m.who].map(q).join(';'))).join('\r\n');
+    ext = 'csv'; type = 'text/csv';
+  }
+  mkDownload(`${fname}.${ext}`, text, type);
+}
+async function mkDownload(name, text, type) {
+  const f = new File([text], name, { type });
+  try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: name }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(f), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
+mkPaint();
+mkFlush();
+setInterval(() => { if (!document.hidden) mkFlush(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) mkFlush(); });
+addEventListener('online', mkFlush);
+// ==== /MOMENTOS ====
+
+// ==== TIEMPO ==== (des del 04-11-2026; estil Windy des de les 22:00, i NOMÉS PLUJA I NÚVOLS: és el que interessa a en Pau per als festivals)
+// Dades: Open-Meteo (models ECMWF, ICON, AROME: els mateixos que Windy) per al punt i per a una graella de 7×7 punts del mapa (pluja i núvols, 48 h);
+// radar de RainViewer (pluja real de les últimes 2 h, fins al zoom 7); capa «Windy» = el widget oficial gratuït (embed.windy.com) dins l'app.
+// Barra de temps de la capa Lluvia: primer el radar (passat) i després la previsió (futur), seguits.
+// Ubicació: la de la pestanya Sol (solWhere). Sense cobertura es veu l'última previsió desada.
+const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN;
+let tq = null, tqBusy = false, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+let tqLy = 'radar', tqGrid = null, tqGridBusy = false, tqH = 0, tqView = null, tqField = null, tqPos = 0;
+try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
+try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts) tqGrid = v; } catch (e) {}
+try { const v = localStorage.getItem(TQLK); if (['radar', 'clouds', 'windy'].includes(v)) tqLy = v; } catch (e) {}
+document.getElementById('tqFestN').textContent = FEST.name;
+const tqFmtW = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short' });
+const tqWhere = () => typeof solWhere === 'function' ? solWhere() : { lat: 41.5536, lon: 2.2492 };
+const tqKey = w => `${w.lat.toFixed(3)},${w.lon.toFixed(3)}`;
+function tqCode(c, day = 1) {
+  if (c === 0) return [day ? '☀️' : '🌙', 'Despejado'];
+  if (c === 1) return [day ? '🌤️' : '🌙', 'Casi despejado'];
+  if (c === 2) return [day ? '⛅' : '☁️', 'Nubes y claros'];
+  if (c === 3) return ['☁️', 'Nublado'];
+  if (c === 45 || c === 48) return ['🌫️', 'Niebla'];
+  if (c >= 51 && c <= 57) return ['🌦️', 'Llovizna'];
+  if (c === 61 || c === 80) return ['🌦️', c === 80 ? 'Chubascos débiles' : 'Lluvia débil'];
+  if (c === 63 || c === 81) return ['🌧️', c === 81 ? 'Chubascos' : 'Lluvia'];
+  if (c === 65 || c === 82) return ['🌧️', 'Lluvia fuerte'];
+  if (c === 66 || c === 67) return ['🌧️', 'Lluvia helada'];
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return ['🌨️', 'Nieve'];
+  if (c >= 95) return ['⛈️', c > 95 ? 'Tormenta con granizo' : 'Tormenta'];
+  return ['☁️', ''];
+}
+const TQ16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const tqDir = d => TQ16[Math.round(d / 22.5) % 16];
+const tqArw = d => `<svg class="arw" viewBox="0 0 14 14" style="transform:rotate(${(d + 180) % 360}deg)" aria-hidden="true"><path d="M7 1.5v11M3 5.5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const tqDeg = v => `${Math.round(v) === 0 ? 0 : Math.round(v)}°`.replace('-', '−');
+// Escala de pluja (mm/h), com la del radar
+const TQ_RAIN = [[0.1, [136, 221, 238]], [0.5, [0, 153, 204]], [1, [0, 85, 170]], [2, [255, 238, 0]], [4, [255, 136, 0]], [8, [221, 0, 0]], [15, [255, 120, 255]]];
+function tqColor(sc, v) {
+  if (v <= sc[0][0]) return sc[0][1];
+  for (let i = 1; i < sc.length; i++) if (v <= sc[i][0]) { const [a, ca] = sc[i - 1], [b, cb] = sc[i], k = (v - a) / (b - a); return ca.map((x, j) => Math.round(x + (cb[j] - x) * k)); }
+  return sc[sc.length - 1][1];
+}
+const tqRgb = c => `rgb(${c.join(',')})`;
+
+// --- Previsió del punt (ara, avisos, taula per hores, dies del festival)
+async function tqFetch(force) {
+  const w = tqWhere(), k = tqKey(w);
+  if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
+  tqBusy = true;
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`
+    + '&current=temperature_2m,precipitation,weather_code,cloud_cover,is_day'
+    + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover,is_day'
+    + '&minutely_15=precipitation&forecast_minutely_15=12&timezone=Europe%2FMadrid&timeformat=unixtime&forecast_days=16&wind_speed_unit=kmh';
+  try {
+    const r = await fetchT(u, { cache: 'no-store' }, 12000);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if (!d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
+    tq = { k, at: Date.now(), d };
+    try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (e) {}
+    tq.err = '';
+  } catch (e) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
+  tqBusy = false;
+  tqPaint();
+  if (TAB === 'apps' && typeof appsPaint === 'function') appsPaint();
+}
+function tqHours() {
+  const h = tq && tq.d && tq.d.hourly;
+  if (!h) return [];
+  return h.time.map((s, i) => ({ t: s * 1000, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i],
+    cc: h.cloud_cover[i] ?? 0, day: h.is_day[i] }));
+}
+const tqFestEnd = d => NDAYS > 1 ? d.tend0 : TEND;
+const tqInFest = t => DAYS.some(d => t >= d.t0 && t < tqFestEnd(d));
+function tqPaint() {
+  const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
+  const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
+  document.getElementById('tqPillN').textContent = where === 'tu ubicación' ? 'Tu ubicación' : FEST.name;
+  if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
+  const ago = Math.round((Date.now() - tq.at) / MIN);
+  src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
+  const c = tq.d.current || {}, H = tqHours(), t = Date.now();
+  const [ic, ds] = tqCode(c.weather_code, c.is_day);
+  document.getElementById('tqPillT').textContent = `${ic} ${tqDeg(c.temperature_2m)}`;
+  nowEl.hidden = false;
+  // El resum és la pluja: si plou, quan para; si no, quan comença
+  const m15 = tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
+  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50, raining = (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
+  let big, sub;
+  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
+  else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
+    if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
+    else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
+    else { big = 'Sin lluvia'; sub = 'en las próximas 48 h'; } }
+  nowEl.innerHTML = `<span class="ic" aria-hidden="true">${raining ? '🌧️' : ic}</span><span class="tp rain">${big}</span><span class="ds">${sub}</span>`
+    + `<div class="kv"><span>Ahora <b>${ds}</b></span><span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
+  const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1);
+  if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}. Ten a mano fundas y bolsas.`]); }
+  if (raining || soon) al.push(['bad', '🎥', 'Protege cámaras, brazos y material: fundas, bolsas y toallas.']);
+  const tot = next.reduce((s2, h) => s2 + h.mm, 0); if (tot >= 5) al.push(['bad', '🌧️', `${tot.toFixed(0)} mm previstos en 12 h: lluvia fuerte.`]);
+  document.getElementById('tqAl').innerHTML = al.map(([k, e, x]) => `<li class="${k}"><span class="e" aria-hidden="true">${e}</span><span>${x}</span></li>`).join('');
+  tqTable(H, t);
+  // Dies del festival (la previsió arriba fins a 16 dies)
+  const last = H.length ? H[H.length - 1].t : 0, fd = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'long' });
+  document.getElementById('tqFest').innerHTML = DAYS.map(d => {
+    const a = d.t0, b = tqFestEnd(d), name = d.name || fd.format(a);
+    if (b < t) return '';
+    const L = H.filter(h => h.t >= a && h.t < b);
+    if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
+    const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds2] = tqCode(worst.c, 1);
+    const pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), cc = Math.round(L.reduce((s, h) => s + h.cc, 0) / L.length), W = L.filter(h => h.mm >= 0.1 || h.pp >= 50);
+    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sin lluvia prevista';
+    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
+  }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
+}
+// Taula per hores (com la de Windy): 48 h, files fixes a l'esquerra, colors de temperatura i vent
+function tqTable(H, t) {
+  const L = H.filter(h => h.t > t - 3600000).slice(0, 48), fdw = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric' });
+  if (!L.length) { document.getElementById('tqTab').innerHTML = ''; return; }
+  let prevDay = '';
+  const cols = L.map((h, i) => {
+    const day = fdw.format(h.t), dn = day !== prevDay; prevDay = day;
+    const [e] = tqCode(h.c, h.day), now = h.t <= t && t < h.t + 3600000;
+    return `<div class="col${dn && i ? ' dn' : ''}${tqInFest(h.t) ? ' fest' : ''}${now ? ' nowc' : ''}"><span class="dd">${dn ? esc(day) : ''}</span><span class="hh">${hm(h.t).slice(0, 2)}</span><span class="e">${e}</span>`
+      + `<span class="mm"${h.mm >= 0.1 ? ` style="background:${tqRgb(tqColor(TQ_RAIN, h.mm))}"` : ''}>${h.mm >= 0.1 ? h.mm.toFixed(1) : ''}</span><span class="pp${h.pp < 20 ? ' z' : ''}">${h.pp}%</span>`
+      + `<span class="cc" style="--cc:${h.cc / 100}">${Math.round(h.cc)}</span><span class="tp2">${tqDeg(h.tp)}</span></div>`;
+  }).join('');
+  const box = document.getElementById('tqTab'), sc = box.querySelector('.sc'), x = sc ? sc.scrollLeft : 0;
+  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
+  box.querySelector('.sc').scrollLeft = x;
+}
+
+// --- Mapa: geometria (Web Mercator), fons de CARTO
+const TQ_TILE = 256;
+function tqWorld(lat, lon, z) { const n = 2 ** z * TQ_TILE, s = Math.sin(lat * Math.PI / 180); return [(lon + 180) / 360 * n, (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n]; }
+function tqLatLon(x, y, z) { const n = 2 ** z * TQ_TILE; return [Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI, x / n * 360 - 180]; }
+function tqTiles(z, size, left, top, W, H) {
+  const out = [], n = 2 ** z;
+  for (let y = Math.floor(top / size); y * size < top + H; y++) for (let x = Math.floor(left / size); x * size < left + W; x++)
+    if (y >= 0 && y < n) out.push({ x: ((x % n) + n) % n, y, l: x * size - left, t: y * size - top });
+  return out;
+}
+function tqLayout() {
+  const map = document.getElementById('tqMap'), W = map.clientWidth, H = map.clientHeight;
+  if (!W) return null;
+  const w = tqWhere(), [px, py] = tqWorld(w.lat, w.lon, tqZ);
+  // El punt del festival una mica per sobre del centre (a baix hi ha la barra de temps)
+  tqView = { W, H, w, z: tqZ, left: Math.round(px - W / 2), top: Math.round(py - H * .44) };
+  const light = document.documentElement.dataset.theme === 'light' ? 'light_all' : 'dark_all';
+  document.getElementById('tqBase').innerHTML = tqTiles(tqZ, TQ_TILE, tqView.left, tqView.top, W, H).map((p, i) =>
+    `<img alt="" src="https://${'abcd'[i % 4]}.basemaps.cartocdn.com/${light}/${tqZ}/${p.x}/${p.y}@2x.png" style="left:${p.l}px;top:${p.t}px;width:${TQ_TILE}px;height:${TQ_TILE}px">`).join('');
+  const mpp = 156543.034 * Math.cos(w.lat * Math.PI / 180) / 2 ** tqZ, cx = px - tqView.left, cy = py - tqView.top;
+  document.getElementById('tqRings').innerHTML = [10, 25, 50, 100, 200].map(km => { const r = km * 1000 / mpp;
+    return r < 30 || r > Math.max(W, H) * .8 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx + r * .707 + 3).toFixed(1)}" y="${(cy - r * .707 - 3).toFixed(1)}">${km} km</text>`; }).join('')
+    + `<circle class="pulse" cx="${cx}" cy="${cy}" r="6"/><circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
+  for (const id of ['tqHeat', 'tqPc']) { const c = document.getElementById(id), dpr = Math.min(2, devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
+  document.getElementById('tqZin').disabled = tqZ >= 10; document.getElementById('tqZout').disabled = tqZ <= 6;
+  return tqView;
+}
+
+// --- Capa Lluvia: radar de RainViewer (passat, cada 10 min)
+async function tqRadar(force) {
+  const msg = document.getElementById('tqMsg'), g = tqView;
+  if (!g) return;
+  if (force || !tqRad || Date.now() - tqRadAt > 10 * MIN) {
+    try {
+      const r = await fetchT('https://api.rainviewer.com/public/weather-maps.json', { cache: 'no-store' }, 10000);
+      const j = await r.json();
+      if (!j.host || !j.radar || !Array.isArray(j.radar.past) || !j.radar.past.length) throw new Error('mal');
+      tqRad = j; tqRadAt = Date.now(); tqI = j.radar.past.length - 1;
+    } catch (e) { if (!tqRad) { if (tqLy === 'radar') { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; } return; } }
+  }
+  if (tqLy === 'radar') msg.hidden = true;
+  // RainViewer només fins al zoom 7: a zoom més alt es fan servir les rajoles de 512 px, ampliades
+  const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = size > 256 ? 512 : 256;
+  const T = tqTiles(zr, size, g.left, g.top, g.W, g.H), F = tqRad.radar.past;
+  document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
+    `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
+  if (tqLy === 'radar') tqBarSetup();
+}
+
+// --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
+const TQ_N = 7;
+async function tqGridFetch(force) {
+  const g = tqView; if (!g) return;
+  const k = `${g.z}|${g.left}|${g.top}|${g.W}|${g.H}`;
+  if (tqGridBusy || (!force && tqGrid && tqGrid.k === k && Date.now() - tqGrid.at < 30 * MIN)) return;
+  tqGridBusy = true;
+  const pts = [];
+  for (let j = 0; j < TQ_N; j++) for (let i = 0; i < TQ_N; i++) { const x = -0.1 * g.W + i * 1.2 * g.W / (TQ_N - 1), y = -0.1 * g.H + j * 1.2 * g.H / (TQ_N - 1); pts.push([x, y, ...tqLatLon(g.left + x, g.top + y, g.z)]); }
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${pts.map(p => p[2].toFixed(3)).join(',')}&longitude=${pts.map(p => p[3].toFixed(3)).join(',')}`
+    + '&hourly=precipitation,cloud_cover&forecast_hours=48&past_hours=1&timeformat=unixtime&wind_speed_unit=kmh&timezone=Europe%2FMadrid';
+  try {
+    const r = await fetchT(u, { cache: 'no-store' }, 15000);
+    if (!r.ok) throw new Error(r.status);
+    let d = await r.json(); if (!Array.isArray(d)) d = [d];
+    if (d.length !== pts.length || !d[0].hourly) throw new Error('mal');
+    tqGrid = { k, at: Date.now(), time: d[0].hourly.time.map(s => s * 1000), pts: pts.map(p => [p[0], p[1]]),
+      P: d.map(x => x.hourly.precipitation), C: d.map(x => x.hourly.cloud_cover) };
+    try { localStorage.setItem(TQGK, JSON.stringify(tqGrid)); } catch (e) {}
+    const now0 = Date.now(); tqH = Math.max(0, tqGrid.time.findIndex(x => x + 3600000 > now0));
+  } catch (e) { if (!tqGrid && tqLy === 'clouds') { const msg = document.getElementById('tqMsg'); msg.hidden = false; msg.textContent = 'Sin conexión: la previsión del mapa necesita internet.'; } }
+  tqGridBusy = false;
+  if (tqGrid && tqLy !== 'windy') { if (tqLy === 'clouds') document.getElementById('tqMsg').hidden = true; tqBarSetup(); }
+}
+// Camp a l'hora tqH (pluja en mm/h i núvols en %), interpolat entre els punts de la graella
+function tqFieldBuild() {
+  if (!tqGrid || !tqView) { tqField = null; tqHeat(); return; }
+  const h = Math.min(tqH, tqGrid.time.length - 1), g = tqView, sx = 1.2 * g.W / (TQ_N - 1), sy = 1.2 * g.H / (TQ_N - 1);
+  const P = tqGrid.P.map(a => a[h] || 0), C = tqGrid.C.map(a => a[h] || 0);
+  const at = (A, x, y) => { const fx = Math.max(0, Math.min(TQ_N - 1.001, (x + 0.1 * g.W) / sx)), fy = Math.max(0, Math.min(TQ_N - 1.001, (y + 0.1 * g.H) / sy)), i = Math.floor(fx), j = Math.floor(fy), a = fx - i, b = fy - j, k = j * TQ_N + i;
+    return A[k] * (1 - a) * (1 - b) + A[k + 1] * a * (1 - b) + A[k + TQ_N] * (1 - a) * b + A[k + TQ_N + 1] * a * b; };
+  tqField = { p: (x, y) => at(P, x, y), c: (x, y) => at(C, x, y) };
+  tqHeat();
+}
+// Previsió pintada sobre el mapa: es calcula petit (1 píxel cada 8) i el navegador l'amplia suau
+function tqHeat() {
+  const c = document.getElementById('tqHeat'), ctx = c.getContext('2d'), g = tqView;
+  if (!g) return;
+  ctx.clearRect(0, 0, g.W, g.H);
+  const fc = tqLy === 'radar' && tqPos >= tqRadN();
+  if (!tqField || (tqLy !== 'clouds' && !fc)) return;
+  const st = 8, w = Math.ceil(g.W / st) + 1, h = Math.ceil(g.H / st) + 1, off = document.createElement('canvas'); off.width = w; off.height = h;
+  const oc = off.getContext('2d'), img = oc.createImageData(w, h), light = document.documentElement.dataset.theme === 'light';
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = (y * w + x) * 4;
+    if (tqLy === 'clouds') { const v = tqField.c(x * st, y * st) / 100, k = light ? 120 : 235; img.data[o] = img.data[o + 1] = img.data[o + 2] = k; img.data[o + 3] = Math.round(Math.pow(v, 1.3) * 200); }
+    else { const v = tqField.p(x * st, y * st); if (v < 0.05) continue; const col = tqColor(TQ_RAIN, v); img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = Math.round(Math.min(1, v / 0.4) * 215); }
+  }
+  oc.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(off, 0, 0, w * st, h * st);
+}
+// --- Barra de temps (com la de Windy): Lluvia = últimes 2 h; Viento/Temp. = properes 48 h
+const tqRadN = () => tqRad ? tqRad.radar.past.length : 0;
+// Futur de la previsió a partir de l'hora següent a l'últim radar
+const tqFut = () => { if (!tqGrid) return []; const last = tqRad ? tqRad.radar.past[tqRad.radar.past.length - 1].time * 1000 : Date.now(); return tqGrid.time.map((x, i) => [x, i]).filter(([x]) => x > last).slice(0, 24); };
+const tqSteps = () => tqLy === 'radar' ? [...(tqRad ? tqRad.radar.past.map((f, i) => ({ t: f.time * 1000, r: i })) : []), ...tqFut().map(([x, i]) => ({ t: x, h: i }))]
+  : tqGrid ? tqGrid.time.map((x, i) => ({ t: x, h: i })) : [];
+function tqBarSetup() {
+  const sl = document.getElementById('tqSlide'), ticks = document.getElementById('tqTicks'), S = tqSteps();
+  if (!S.length) return;
+  sl.max = S.length - 1;
+  if (tqLy === 'radar') { if (!tqBarSetup.done && tqRad) { tqPos = Math.max(0, tqRadN() - 1); tqBarSetup.done = true; } }
+  else if (!tqBarSetup.cl) { const n0 = Date.now(); tqPos = Math.max(0, S.findIndex(x => x.t + 3600000 > n0)); tqBarSetup.cl = true; }
+  tqPos = Math.min(tqPos, S.length - 1);
+  const nr = tqLy === 'radar' ? tqRadN() : 0, pc = i => i / (S.length - 1) * 100;
+  ticks.innerHTML = tqLy === 'radar'
+    ? (nr ? `<span style="left:0%;transform:none">−2 h</span><span style="left:${pc(nr - 1)}%">ahora</span>` : '') + (S.length > nr + 6 ? `<span style="left:${pc(S.length - 1)}%;transform:translateX(-100%)">+${Math.round((S[S.length - 1].t - Date.now()) / 3600000)} h</span>` : '')
+    : (() => { let lastP = -99; return S.map((x, i) => { if (!(i === 0 || hm(x.t).startsWith('00')) || pc(i) - lastP < 14) return ''; lastP = pc(i);
+        return `<span style="left:${pc(i)}%${i === 0 ? ';transform:none' : ''}">${i === 0 ? 'ahora' : tqFmtW.format(x.t)}</span>`; }).join(''); })();
+  tqGo(tqPos);
+}
+// Un pas de la barra: un fotograma del radar o una hora de la previsió
+function tqGo(i) {
+  const S = tqSteps(); if (!S.length) return;
+  tqPos = Math.max(0, Math.min(S.length - 1, i));
+  const x = S[tqPos];
+  document.getElementById('tqSlide').value = tqPos;
+  if (x.r !== undefined) tqI = x.r;
+  for (const d of document.querySelectorAll('#tqRad .rd')) d.classList.toggle('on', tqLy === 'radar' && x.r !== undefined && +d.dataset.i === x.r);
+  if (x.h !== undefined) { tqH = x.h; tqFieldBuild(); } else tqHeat();
+  const d = Math.round((x.t - Date.now()) / MIN);
+  document.getElementById('tqTs').innerHTML = `${hm(x.t)}<small>${x.r !== undefined ? (d >= -10 ? 'radar · ahora' : `radar · hace ${-d} min`) : `previsión · ${d < 60 ? 'ahora' : '+' + Math.round(d / 60) + ' h'}`}</small>`;
+}
+function tqStop() { clearInterval(tqPlayT); tqPlayT = 0; const b = document.getElementById('tqPlay'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>'; b.setAttribute('aria-label', 'Reproducir'); }
+function tqPlay() {
+  if (tqPlayT) return tqStop();
+  const S = tqSteps(); if (!S.length) return;
+  if (tqPos >= S.length - 1) tqGo(0);
+  const b = document.getElementById('tqPlay'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>'; b.setAttribute('aria-label', 'Pausa');
+  let wait = 0;
+  tqPlayT = setInterval(() => { if (wait-- > 0) return; const n = tqSteps().length - 1; if (tqPos >= n) { tqGo(0); return; } tqGo(tqPos + 1); if (tqPos === n) wait = 3; }, 500);
+}
+document.getElementById('tqPlay').addEventListener('click', tqPlay);
+document.getElementById('tqSlide').addEventListener('input', e => { tqStop(); tqGo(+e.target.value); });
+
+// --- Llegenda i canvi de capa
+function tqLegend() {
+  const el = document.getElementById('tqLeg');
+  el.innerHTML = tqLy === 'clouds'
+    ? `<div class="bar">${[0, 25, 50, 75, 100].map(v => `<span style="background:rgba(235,235,235,${Math.pow(v / 100, 1.3) * .8 + .1});color:#111">${v}</span>`).join('')}</div><span class="u">% nubes</span>`
+    : `<div class="bar">${[0.1, 0.5, 1, 2, 4, 8, 15].map(v => `<span style="background:${tqRgb(tqColor(TQ_RAIN, v))}">${v}</span>`).join('')}</div><span class="u">mm/h</span>`;
+}
+function tqWindy(on) {
+  const box = document.getElementById('tqWin'), w = tqWhere();
+  box.hidden = !on;
+  document.getElementById('tqMap').classList.toggle('windy', on);
+  if (!on) return;
+  if (!navigator.onLine) { box.innerHTML = '<p class="msg">Sin conexión: la capa de Windy necesita internet.</p>'; return; }
+  const src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=${tqZ}&overlay=radar&product=ecmwf&level=surface&lat=${w.lat.toFixed(3)}&lon=${w.lon.toFixed(3)}&detailLat=${w.lat.toFixed(3)}&detailLon=${w.lon.toFixed(3)}&marker=true&message=true`;
+  if (box.dataset.src !== src) { box.dataset.src = src; box.innerHTML = `<iframe title="Windy" src="${src}" loading="lazy" allow="fullscreen"></iframe>`; }
+}
+function tqSetLayer(ly) {
+  const ch = ly !== tqLy;
+  tqLy = ly; try { localStorage.setItem(TQLK, ly); } catch (e) {}
+  tqStop();
+  for (const b of document.querySelectorAll('#tqLayers [data-ly]')) b.setAttribute('aria-selected', b.dataset.ly === ly);
+  document.getElementById('tqMsg').hidden = true;
+  tqWindy(ly === 'windy');
+  if (ly === 'windy') return;
+  if (ch) { tqBarSetup.done = tqBarSetup.cl = false; }
+  tqLegend();
+  if (ly === 'radar') tqRadar();
+  tqGridFetch();
+  tqBarSetup();
+}
+document.getElementById('tqLayers').addEventListener('click', e => { const b = e.target.closest('[data-ly]'); if (b && b.dataset.ly !== tqLy) tqSetLayer(b.dataset.ly); });
+function tqZoom(dz) { const z = Math.max(6, Math.min(10, tqZ + dz)); if (z === tqZ) return; tqZ = z; tqRedraw(); }
+document.getElementById('tqZin').addEventListener('click', () => tqZoom(1));
+document.getElementById('tqZout').addEventListener('click', () => tqZoom(-1));
+function tqRedraw() {
+  if (!tqLayout()) return;
+  if (tqGrid && tqGrid.k !== `${tqView.z}|${tqView.left}|${tqView.top}|${tqView.W}|${tqView.H}`) { tqField = null; tqHeat(); tqGridFetch(true); } else tqFieldBuild();
+  tqRadar();
+  tqSetLayer(tqLy);
+}
+function tqShow(on) {
+  tqOn = on;
+  clearInterval(tqTimer); tqTimer = 0; tqStop();
+  if (!on) return;
+  const ww = tqWhere(); document.getElementById('tqWindy').href = `https://www.windy.com/?${ww.lat.toFixed(3)},${ww.lon.toFixed(3)},9`;
+  tqPaint(); tqFetch();
+  requestAnimationFrame(tqRedraw);
+  tqTimer = setInterval(() => { if (document.hidden) return; tqFetch(); tqRadar(); tqGridFetch(); }, 5 * MIN);
+}
+document.addEventListener('visibilitychange', () => { if (tqOn && !document.hidden) { tqFetch(); tqRadar(); tqGridFetch(); } });
+addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(tqRedraw, 300); } });
+// ==== /TIEMPO ====
+
+// ==== APPS ==== (hub, des del 04-11-2026: a baix només Horarios · Tareas · Apps · Ajustes)
+const APP_TABS = ['sol', 'tiempo', 'multi', 'mapa'];
+for (const id of APP_TABS) { const sec = document.getElementById(id); if (sec) sec.insertAdjacentHTML('afterbegin', '<button class="appback" type="button">‹ Apps</button>'); }
+document.addEventListener('click', e => { if (e.target.closest('.appback')) showTab('apps'); });
+document.getElementById('apps').addEventListener('click', e => {
+  const b = e.target.closest('.apptile'); if (!b) return;
+  if (b.dataset.tab) showTab(b.dataset.tab);
+  else if (b.dataset.app === 'mk') mkOpenList();
+  else if (b.dataset.app === 'tc') tcOpen();
+});
+let apRaf = 0;
+function apTick() {
+  if (TAB !== 'apps' || document.hidden) { apRaf = 0; return; }
+  const t = Date.now(), f = Math.floor((t % 1000) / 1000 * (tcFps || 25));
+  const el = document.getElementById('ap-tc-big'); if (el) el.innerHTML = `${mkHMS(t)}<small>:${String(f).padStart(2, '0')}</small>`;
+  apRaf = requestAnimationFrame(apTick);
+}
+let apSolK = '', apSolD = null;
+function appsPaint() {
+  const t = now();
+  document.getElementById('apSub').textContent = `${FEST.name} · ${hm(t)}`;
+  // Sense mapa, Momentos ocupa tota la fila (no queda una fitxa sola a mitja amplada)
+  document.querySelector('#apps [data-app="mk"]').classList.toggle('w', document.getElementById('tabMapa').hidden);
+  // Momentos
+  const L = mkList(), n = L.length, last = L[L.length - 1];
+  document.getElementById('ap-mk-big').textContent = String(n);
+  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Toca «Momento» en Horarios o Multicams';
+  // Multicams: quantes graven i un punt per càmera
+  const cams = MC.flatMap(sx => sx.cams || []);
+  if (cams.length) {
+    const st = c => (mcState[mcKey(c)] || {}).st || '', rec = cams.filter(c => st(c) === 'grabando').length, up = cams.filter(c => st(c) === 'montada').length;
+    document.getElementById('ap-multi-big').innerHTML = rec ? `● ${rec} REC` : `${up}<small>/${cams.length} montadas</small>`;
+    if (rec) document.getElementById('ap-multi-big').style.color = 'var(--now)'; else document.getElementById('ap-multi-big').style.color = '';
+    document.getElementById('ap-multi').textContent = rec ? `${rec} grabando · ${up} montadas · ${cams.length} cámaras` : `${cams.length} cámaras · toca para ver dónde va cada una`;
+    document.getElementById('ap-multi-dots').innerHTML = cams.map(c => `<i class="${st(c)}" title="${esc(c.pos || c.cam || '')}"></i>`).join('');
+  }
+  // Tiempo
+  if (tq && tq.d && tq.d.current) { const c = tq.d.current, [e, ds] = tqCode(c.weather_code, c.is_day);
+    document.getElementById('ap-tiempo-big').textContent = `${(c.precipitation || 0) >= 0.1 ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
+    const nx = tqHours().find(h => h.t > Date.now() && h.t < Date.now() + 6 * 3600000 && h.pp >= 50);
+    document.getElementById('ap-tiempo').textContent = nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
+  else if (!tqBusy) tqFetch();
+  // Sol: el proper canvi de llum
+  if (typeof solDay === 'function' && typeof SOL_EV === 'object') {
+    const w = tqWhere(), k = tqKey(w) + Math.floor(t / 86400000);
+    if (k !== apSolK) { apSolK = k; apSolD = solDay(t, w.lat, w.lon); }
+    let nx = apSolD.X.find(x => x.t > t);
+    if (!nx) nx = solDay(apSolD.b + 3600000, w.lat, w.lon).X.find(x => x.t > t);
+    if (nx) { document.getElementById('ap-sol-big').textContent = hm(nx.t); document.getElementById('ap-sol').textContent = `${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} · ${inDur(nx.t - t)}`; }
+  }
+  if (!apRaf) apTick();
+}
+setInterval(() => { if (TAB === 'apps' && !document.hidden) appsPaint(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'apps') appsPaint(); });
+
+// ==== CLAQUETA ==== (timecode d'hora del dia en gran, per sincronitzar les càmeres amb els Momentos)
+// Hora del mòbil (iOS la sincronitza per xarxa: error típic < 0,1 s). Destell blanc + pitet de 1 kHz just al canvi de segon, 3 vegades
+let tcFps = 25, tcRaf = 0, tcLock = null, tcAc = null, tcBusy = false;
+try { tcFps = +localStorage.getItem('midnight-tc-fps') || 25; } catch (e) {}
+const tcOnS = () => !document.getElementById('tcS').hidden;
+function tcDraw() {
+  const t = Date.now(), f = Math.floor((t % 1000) / 1000 * tcFps);
+  document.getElementById('tcV').innerHTML = `${mkHMS(t)}<small>:${String(f).padStart(2, '0')}</small>`;
+  tcRaf = requestAnimationFrame(tcDraw);
+}
+function tcFpsPaint() { document.getElementById('tcFps').innerHTML = [25, 24, 30, 50].map(f => `<button type="button" data-fps="${f}" aria-pressed="${f === tcFps}">${f} fps</button>`).join(''); }
+async function tcOpen() {
+  const S = document.getElementById('tcS');
+  document.getElementById('tcH').textContent = `${FEST.name}${NDAYS > 1 ? ' · ' + (DAYS[dayAt(Date.now())].name || '') : ''} · ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short' }).format(Date.now())}`;
+  try { document.getElementById('tcCam').value = localStorage.getItem('midnight-tc-cam') || ''; } catch (e) {}
+  document.getElementById('tcC').textContent = document.getElementById('tcCam').value;
+  tcFpsPaint();
+  S.hidden = false; document.body.classList.add('locked');
+  cancelAnimationFrame(tcRaf); tcDraw();
+  try { if ('wakeLock' in navigator) tcLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+function tcClose() {
+  document.getElementById('tcS').hidden = true; document.body.classList.remove('locked');
+  cancelAnimationFrame(tcRaf); tcRaf = 0;
+  try { if (tcLock) tcLock.release(); } catch (e) {} tcLock = null;
+}
+document.getElementById('tcX').addEventListener('click', tcClose);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && tcOnS()) tcClose(); });
+document.addEventListener('visibilitychange', async () => { if (!document.hidden && tcOnS() && 'wakeLock' in navigator) try { tcLock = await navigator.wakeLock.request('screen'); } catch (e) {} });
+document.getElementById('tcFps').addEventListener('click', e => { const b = e.target.closest('[data-fps]'); if (!b) return; tcFps = +b.dataset.fps; try { localStorage.setItem('midnight-tc-fps', tcFps); } catch (e) {} tcFpsPaint(); });
+document.getElementById('tcCam').addEventListener('input', e => { document.getElementById('tcC').textContent = e.target.value; try { localStorage.setItem('midnight-tc-cam', e.target.value); } catch (x) {} });
+document.getElementById('tcCam').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
+document.getElementById('tcGo').addEventListener('click', () => {
+  if (tcBusy) return; tcBusy = true;
+  const S = document.getElementById('tcS'), frame = 1000 / tcFps;
+  try { tcAc = tcAc || new (window.AudioContext || window.webkitAudioContext)(); tcAc.resume(); } catch (e) { tcAc = null; }
+  const t0 = Date.now(), first = Math.ceil((t0 + 300) / 1000) * 1000;
+  for (let k = 0; k < 3; k++) {
+    const at = first + k * 1000, wait = at - t0;
+    // Pitet programat amb el rellotge d'àudio (més precís que un setTimeout)
+    if (tcAc) { const o = tcAc.createOscillator(), g = tcAc.createGain(), s0 = Math.max(tcAc.currentTime, tcAc.currentTime + wait / 1000 - (tcAc.outputLatency || tcAc.baseLatency || 0));
+      o.frequency.value = 1000; g.gain.setValueAtTime(0, s0); g.gain.linearRampToValueAtTime(.9, s0 + .002); g.gain.setValueAtTime(.9, s0 + .08); g.gain.linearRampToValueAtTime(0, s0 + .085);
+      o.connect(g).connect(tcAc.destination); o.start(s0); o.stop(s0 + .1); }
+    setTimeout(() => { S.classList.add('flash'); setTimeout(() => S.classList.remove('flash'), Math.max(70, frame * 2)); }, wait);
+  }
+  setTimeout(() => { tcBusy = false; }, first + 2300 - t0);
+  try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+});
+// ==== /CLAQUETA ====
+
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
 var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
@@ -6576,7 +7928,7 @@ function showTab(t, top = true) {
   // Primer a dalt i després canviar el contingut: a l'iPhone, si la pàgina s'encongeix amb scroll, la barra de baix es desplaça
   if (ch && top) scrollTo({ top: 0 });
   document.body.dataset.tab = t;
-  const tb = t === 'org' ? 'ajustes' : t;  // Admin és dins d'Ajustes (en Pau, 04-11)
+  const tb = t === 'org' ? 'ajustes' : APP_TABS.includes(t) ? 'apps' : t;  // Sol, Tiempo, Cámaras i Mapa són dins d'Apps (en Pau, 04-11)  // Admin és dins d'Ajustes (en Pau, 04-11)
   for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === tb) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
@@ -6584,6 +7936,9 @@ function showTab(t, top = true) {
   if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
+  if (typeof tqShow === 'function' && (ch || t === 'tiempo')) tqShow(t === 'tiempo');  // el temps: es baixa i es refresca només amb la pestanya a la vista
+  if (t !== 'ahora' && t !== 'multi' && typeof mkClose === 'function') mkClose();
+  if (t === 'apps' && typeof appsPaint === 'function') { appsPaint(); if (ch) [...document.querySelectorAll('#apps .apptile:not([hidden])')].forEach((el, i) => anim(el, [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: i * 45 })); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
@@ -6612,6 +7967,189 @@ setInterval(() => { if (!document.hidden) paintTabs(); }, 30000);
 document.addEventListener('change', e => { if (e.target.name === 'prof' || e.target.classList.contains('yosel')) setTimeout(paintTabs, 0); });
 holaBody.addEventListener('click', () => setTimeout(paintTabs, 0));
 // ==== /MI PLAN ====
+
+// ==== INCIDENCIAS ====
+// «Avisar a producción» (04-11-2026): qualsevol de l'equip envia una incidència (text, urgent, foto opcional) al servidor d'avisos.
+// Tothom la veu a Tareas i la pot donar per resolta; els mòbils amb «Avisarme de incidencias» reben un push (≤ 1 min).
+// Sense contrasenya, com les ✓ i les càmeres (decisió d'en Pau: és una eina d'equip). Sense servidor (artifact), no surt.
+const INC_LIVE = () => !!(PUSH && PUSH.url && ONLINE);
+const incSec = document.getElementById('inc'), incSheet = document.getElementById('incSheet');
+const INC_SEEN = FEST.key + '-inc-seen-v1';
+let INC = [], incImg = '', incBusy = false, incSeen = 0, incFirst = true;
+try { incSeen = +localStorage.getItem(INC_SEEN) || 0; } catch (e) {}
+const incWho = () => (typeof mcWho === 'function' && mcWho()) || (PROF ? WHO_L[PROF] : '') || '';
+const incAgo = at => { const m = Math.max(0, Math.round((Date.now() - at) / MIN)); return m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m}${NB}min` : new Date(at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' }); };
+function incLi(x) {
+  return `<li class="${x.urg && !x.st ? 'urg' : ''}" data-n="${x.n}">
+    <div class="ih"><span>${x.urg && !x.st ? '<span class="ut">URGENTE</span> ' : ''}<b>${html(x.who || 'Alguien')}</b> · ${incAgo(x.at)}</span></div>
+    <div class="it">${html(x.txt)}</div>
+    ${x.st ? `<div class="ok">✓ Resuelta${x.sby ? ' por ' + html(x.sby) : ''} · ${incAgo(x.sat)}</div>` : ''}
+    <div class="ia">${x.img ? '<button type="button" class="btn quiet" data-incimg>Ver foto</button>' : ''}<button type="button" class="btn${x.st ? ' quiet' : ''}" data-incst="${x.st ? '' : 'ok'}">${x.st ? 'Reabrir' : 'Resuelta'}</button></div>
+  </li>`;
+}
+function incPaint() {
+  incSec.hidden = !INC_LIVE();
+  if (incSec.hidden) return;
+  const day = Date.now() - 24 * 3600000;
+  const open = INC.filter(x => !x.st), done = INC.filter(x => x.st && x.at > day);
+  document.getElementById('incN').textContent = open.length ? `· ${open.length}` : '';
+  document.getElementById('incList').innerHTML = open.map(incLi).join('') || '<li class="ok">Sin incidencias abiertas.</li>';
+  document.getElementById('incOld').hidden = !done.length;
+  document.getElementById('incOldN').textContent = done.length;
+  document.getElementById('incOldList').innerHTML = done.map(incLi).join('');
+}
+async function incPull() {
+  if (!INC_LIVE()) return;
+  try {
+    const r = await fetchT(PUSH.url + '/inc', { cache: 'no-store' }, 8000);
+    if (!r.ok) return;
+    incApply((await r.json()).inc);
+  } catch (e) {}
+}
+function incApply(list) {
+  if (!Array.isArray(list)) return;
+  {
+    INC = list;
+    // Amb l'app oberta: les noves (no meves) surten a la píndola; a la primera càrrega, no
+    const fresh = INC.filter(x => x.at > incSeen && !x.st);
+    if (!incFirst && incOn() && fresh.length) for (const x of fresh.slice(0, 3)) toast(`<b>${x.urg ? 'Incidencia URGENTE' : 'Incidencia'}</b> · ${html(x.who || 'Alguien')}<br>${html(x.txt)}`, 'org', null, 30000);
+    incFirst = false;
+    const mx = Math.max(incSeen, ...INC.map(x => x.at));
+    if (mx !== incSeen) { incSeen = mx; try { localStorage.setItem(INC_SEEN, String(mx)); } catch (e) {} }
+    incPaint();
+  }
+}
+// Foto: es redueix al mòbil (JPEG, costat llarg 1024 px, < 250 KB) abans d'enviar-la
+async function incShrink(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    for (const [side, q] of [[1024, .6], [800, .5], [640, .45]]) {
+      const k = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const d = c.toDataURL('image/jpeg', q);
+      if (d.length <= 250000) return d;
+    }
+    return '';
+  } finally { URL.revokeObjectURL(url); }
+}
+function incMsg(t, bad) { const m = document.getElementById('incMsg'); m.hidden = !t; m.textContent = t || ''; m.classList.toggle('bad', !!bad); }
+function incOpen() {
+  incImg = '';
+  document.getElementById('incTxt').value = '';
+  document.getElementById('incUrg').setAttribute('aria-pressed', 'false');
+  document.getElementById('incPrev').hidden = true;
+  incMsg(incWho() ? '' : 'Elige «Soy…» en Ajustes para que se vea quién avisa.');
+  incSheet.hidden = false;
+  anim(incSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  document.body.classList.add('locked');
+  document.getElementById('incTxt').focus();
+}
+function incClose() { incSheet.hidden = true; document.body.classList.remove('locked'); document.getElementById('incGo').focus({ preventScroll: true }); }
+document.getElementById('incGo').addEventListener('click', incOpen);
+document.getElementById('incX').addEventListener('click', incClose);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !incSheet.hidden) incClose(); });
+document.getElementById('incUrg').addEventListener('click', e => e.currentTarget.setAttribute('aria-pressed', e.currentTarget.getAttribute('aria-pressed') !== 'true'));
+document.getElementById('incPhoto').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  incMsg('Preparando la foto…');
+  try { incImg = await incShrink(f); } catch (err) { incImg = ''; }
+  const p = document.getElementById('incPrev');
+  p.hidden = !incImg; if (incImg) p.src = incImg;
+  incMsg(incImg ? '' : 'No se ha podido usar esta foto. Puedes enviar el aviso sin foto.', !incImg);
+});
+document.getElementById('incSend').addEventListener('click', async () => {
+  const txt = document.getElementById('incTxt').value.trim();
+  if (!txt) { incMsg('Escribe qué pasa.', true); document.getElementById('incTxt').focus(); return; }
+  if (incBusy) return;
+  incBusy = true; incMsg('Enviando…');
+  try {
+    const d = await pushPost('/inc', { txt, who: incWho(), urg: document.getElementById('incUrg').getAttribute('aria-pressed') === 'true', img: incImg });
+    if (d.at) { incSeen = Math.max(incSeen, d.at); try { localStorage.setItem(INC_SEEN, String(incSeen)); } catch (e) {} }
+    incClose();
+    toast('<b>Aviso enviado a producción.</b> Lo ve todo el equipo en Tareas.', 'info', null, 6000);
+    incPull();
+  } catch (err) {
+    incMsg(/429/.test(err.message) ? 'Demasiados avisos seguidos: espera unos minutos.' : 'No se ha podido enviar. Mira la conexión y vuelve a probar (el texto no se borra).', true);
+  }
+  incBusy = false;
+});
+incSec.addEventListener('click', async e => {
+  const li = e.target.closest('li[data-n]');
+  if (!li) return;
+  const n = +li.dataset.n, x = INC.find(i => i.n === n);
+  if (!x) return;
+  const st = e.target.closest('[data-incst]');
+  if (st) {
+    const v = st.dataset.incst;
+    Object.assign(x, { st: v, sby: v ? incWho() : '', sat: Date.now() });  // es veu al moment; el servidor ho confirma al pròxim refresc
+    incPaint();
+    try { await pushPost('/incst', { n, st: v, who: incWho() }); } catch (err) { toast('No se ha podido guardar: mira la conexión.', 'info', null, 6000); }
+    incPull();
+    return;
+  }
+  const b = e.target.closest('[data-incimg]');
+  if (b) {
+    b.disabled = true; b.textContent = 'Cargando…';
+    // JPEG directe del servidor: el mòbil el guarda i, si es torna a obrir, no es torna a baixar
+    const img = document.createElement('img'); img.alt = 'Foto de la incidencia';
+    img.onload = () => { b.closest('.ia').before(img); b.remove(); };
+    img.onerror = () => { b.disabled = false; b.textContent = 'Ver foto'; };
+    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}`;
+  }
+});
+document.getElementById('prefIncL').hidden = !INC_LIVE();
+incPaint();
+// ==== /INCIDENCIAS ====
+
+// ==== LIVE ==== (pla gratuït de Cloudflare, 04-11-2026: 100.000 peticions al dia per a tot el compte)
+// UNA sola pregunta periòdica al servidor (GET /live) amb tot el que cal: incidències, càmeres, ✓ i momentos.
+// Només amb l'app a la vista. Cada 60 s; a Cámaras, cada 30 s mentre toques (2 min); 5 min sense tocar, cada 3 min. Si res no ha canviat, el
+// servidor respon gairebé buit. Si el dia va molt carregat (fre d'emergència), el servidor diu «slow» i es pregunta cada 5 min.
+let liveV = '', liveP = '', liveSlow = false, liveBusy = false, liveAt = 0, liveTouch = Date.now();
+function liveParts() {
+  const p = [];
+  if (INC_LIVE()) p.push('inc');
+  if (MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
+  if ((taskOn() && YO && YO !== '-') || tgTeam || !document.getElementById('pGlobal').hidden) p.push('done');
+  if (!document.getElementById('mkList').hidden) p.push('mk');
+  return p.join(',');
+}
+async function livePull(force) {
+  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden) return;
+  const p = liveParts();
+  if (!p) return;
+  liveBusy = true; liveAt = Date.now();
+  try {
+    if (p.includes('mc')) await mcFlush();
+    await flushDone();
+    const t0 = Date.now(), v = !force && p === liveP && liveV ? '&v=' + encodeURIComponent(liveV) : '';
+    const r = await fetchT(`${PUSH.url}/live?p=${p}${v}`, { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    liveSlow = !!d.slow; liveV = d.v || ''; liveP = p;
+    if (d.inc) incApply(d.inc);
+    if (d.mc) mcApply(d.mc, t0);
+    else if (p.includes('mc')) { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } }
+    if (d.done) { doneApply(d.done); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
+    if (d.mk) mkApply(d.mk);
+  } catch (e) {
+    liveV = '';
+    if (p.includes('mc')) { mcErr = 'Sin conexión: puede que no sea lo último.'; mcPaint(); }
+  }
+  liveBusy = false;
+}
+// Mòbil oblidat amb l'app oberta (5 min sense tocar-lo): cada 3 min. En tornar a tocar, pregunta al moment
+const liveEvery = () => { const idle = Date.now() - liveTouch; return liveSlow ? 5 * MIN : TAB === 'multi' && idle < 2 * MIN ? 30000 : idle > 5 * MIN ? 3 * MIN : 60000; };
+addEventListener('pointerdown', () => { const was = Date.now() - liveTouch; liveTouch = Date.now(); if (was > 5 * MIN && Date.now() - liveAt > 10000) livePull(); }, { capture: true, passive: true });
+setInterval(() => { if (!document.hidden && Date.now() - liveAt >= liveEvery() - 1000) livePull(); }, 5000);
+document.addEventListener('visibilitychange', () => { if (document.hidden) return; liveTouch = Date.now(); if (Date.now() - liveAt > 10000) livePull(); });
+livePull();
+// ==== /LIVE ====
 
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
@@ -6697,7 +8235,7 @@ document.addEventListener('touchend', async () => {
   ptr.classList.add('go');
   try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
   const t0 = Date.now();
-  await Promise.allSettled([pullChanges(), pullTasks(), typeof mcPull === 'function' && TAB === 'multi' ? mcPull() : null]);
+  await Promise.allSettled([pullChanges(), pullTasks(), livePull(true)]);
   tick(true);
   await new Promise(r => setTimeout(r, Math.max(0, 600 - (Date.now() - t0))));  // que es vegi girar, encara que vagi molt de pressa
   ptr.classList.remove('go');
