@@ -747,7 +747,7 @@ PAIRS = [
     ("' · todos los escenarios'", "' · tots els escenaris'"),
     ('alt="${html(s.stage)}: dónde va cada cámara"', 'alt="${html(s.stage)}: on va cada càmera"'),
     ("[['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']]", "[['grabando', 'REC'], ['montada', 'Muntades'], ['parada', 'Parades'], ['', 'Sense muntar']]"),
-    ("Un dedo gira · dos dedos acercan y mueven · doble toque para volver.", "Un dit gira · dos dits apropen i mouen · doble toc per tornar."),
+    ("Toca una cámara para ir a ella (otra vez: su ficha) · un dedo gira · dos dedos acercan y mueven · doble toque para volver.", "Toca una càmera per anar-hi (un altre cop: la seva fitxa) · un dit gira · dos dits apropen i mouen · doble toc per tornar."),
     ('Mover cámaras', 'Moure càmeres'),
     ('data-mced="save">Guardar</button>', 'data-mced="save">Desar</button>'),
     ('data-mced="cancel">Cancelar</button>', 'data-mced="cancel">Cancel·lar</button>'),
