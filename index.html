@@ -987,6 +987,15 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mcl li.ck[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); }
 #multi .mcl li.ck[aria-checked="true"] .box::after { content: "✓"; }
 #multi .mcnote { margin: 14px 0 0; }
+/* Plànol vist des de dalt (FEST.multicam[].plan) amb un punt per càmera: vermell i bategant quan grava */
+#multi li.mcplan { position: relative; display: block; margin: 6px 0 10px; padding: 0; border: 0; }
+#multi li.mcplan img { display: block; width: 100%; height: auto; }
+#multi .mcpin { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid var(--bg); background: var(--sc); color: #0b0b0b; font: 800 12px/1 var(--body); display: grid; place-items: center; cursor: pointer; }
+#multi .mcpin[data-st=""] { opacity: .5; }
+#multi .mcpin[data-st="grabando"] { box-shadow: 0 0 0 3px var(--now); animation: mcrec 1.6s ease-in-out infinite; }
+@keyframes mcrec { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--now) 25%, transparent); } }
+@media (prefers-reduced-motion: reduce) { #multi .mcpin[data-st="grabando"] { animation: none; } }
+#multi .mcn { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 7px; border-radius: 50%; background: var(--sc); color: #0b0b0b; font: 800 11px/1 var(--body); font-style: normal; vertical-align: .12em; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
@@ -1935,9 +1944,17 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 //          { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'], ok: 'Uri' }
 // Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Amb diversos dies, l'estat (grabando, SSD…) va per dia.
 // Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
-// PENDENT (04-11): en Pau ha de passar les càmeres i el rider del Black Hangar.
+// plan (opcional) = plànol vist des de dalt (img/…) i a cada càmera at: [x %, y %] = on va al plànol.
+// PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
 FEST.multicam = [
-  { stage: 'Black Hangar', cams: [], rider: [] },
+  { stage: 'Black Hangar', plan: 'img/plano-hangar.svg',
+    cams: [
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [24.5, 45.5] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [18.1, 49.9] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [94.3, 42.7] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [94.3, 57.9] },
+    ],
+    rider: [] },
 ];
 /* ==== /FESTIVAL ==== */
 
@@ -5581,8 +5598,9 @@ function mcRender() {
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
-      ${(s.cams || []).map(c => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
-        <span class="who"><span class="nmc">${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
+      ${s.plan ? `<li class="mcplan"><img src="${html(s.plan)}" alt="Plano de ${html(s.stage)} visto desde arriba">${(s.cams || []).map((c, i) => c.at ? `<button type="button" class="mcpin" data-mcid="${mcKey(c)}" style="left:${+c.at[0]}%;top:${+c.at[1]}%;--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</li>` : ''}
+      ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
+        <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
         <span class="mcs"><b></b><span class="ssd"></span></span>
       </li>`).join('')}
     </ul>
@@ -5603,6 +5621,7 @@ function mcAgo(s) {
 }
 // Pinta l'estat (també el de la fitxa oberta, sense trepitjar el que s'hi escriu)
 function mcPaint() {
+  for (const el of document.querySelectorAll('#mcBody .mcpin')) { const s = mcState[el.dataset.mcid] || {}; el.dataset.st = s.st || ''; }
   for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
     const s = mcState[el.dataset.mcid] || {};
     el.dataset.st = s.st || '';
@@ -5704,7 +5723,7 @@ document.getElementById('multi').addEventListener('click', e => {
   if (dy) { mcDay = +dy.dataset.mcday; mcDayPicked = true; mcRender(); return; }
   const f = e.target.closest('[data-mcfilt]');
   if (f) { mcFilter = f.dataset.mcfilt; try { localStorage.setItem(MC_FK, mcFilter); } catch (er) {} mcRender(); return; }
-  const c = e.target.closest('li[data-mcid]');
+  const c = e.target.closest('[data-mcid]');
   if (c) { mcOpenSheet(c.dataset.mcid); return; }
   const k = e.target.closest('[data-mcck]');
   if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-checked', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }

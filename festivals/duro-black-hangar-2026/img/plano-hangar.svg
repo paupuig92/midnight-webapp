@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 1020 527" font-family="Helvetica, Arial, sans-serif">
+  <!-- Plànol de la carpa del Black Hangar vist des de dalt (simplificat del «Stage Plot - Universo Makina x Black Hangar», J. Reverte, V.1 03-11-2026). Per a la pestanya «Cámaras» -->
+  <g fill="none" stroke="#8d9097" stroke-linejoin="round">
+    <!-- carpa -->
+    <path d="M249 4 L751 4 C908 4 1000 131 1000 253 C1000 376 908 503 751 503 L249 503 C92 503 0 376 0 253 C0 131 92 4 249 4 Z" stroke-width="3"/>
+    <!-- costelles de la carpa -->
+    <g stroke-width="1" opacity=".35">
+      <path d="M321 4V503M384 4V503M446 4V503M509 4V503M571 4V503M634 4V503M696 4V503"/>
+      <path d="M751 4C860 60 900 160 900 253C900 346 860 446 751 503M249 4C140 60 100 160 100 253C100 346 140 446 249 503"/>
+    </g>
+    <!-- truss central -->
+    <path d="M266 253H930" stroke-width="4" opacity=".6"/>
+    <!-- triangles penjats -->
+    <g stroke-width="5" stroke-linecap="round" opacity=".55">
+      <path d="M314 70V161M437 70V161M563 70V161M687 70V161"/>
+      <path d="M314 345V436M437 345V436M563 345V436M687 345V436"/>
+      <path d="M375 158V354M500 158V354M626 158V354M751 158V354"/>
+    </g>
+    <!-- escenari i pantalles -->
+    <rect x="92" y="83" width="161" height="341" stroke-width="2.5"/>
+    <path d="M92 140H253M92 197H253M92 253H253M92 310H253M92 367H253M145 83V424M199 83V424" stroke-width="1" opacity=".4"/>
+    <!-- cabina -->
+    <rect x="220" y="215" width="34" height="76" stroke-width="3" fill="#8d9097" fill-opacity=".25"/>
+    <!-- tanca -->
+    <rect x="278" y="31" width="12" height="448" stroke-width="2"/>
+    <!-- plataforma central -->
+    <rect x="474" y="227" width="54" height="53" stroke-width="2" stroke-dasharray="6 5"/>
+    <!-- FOH -->
+    <rect x="921" y="194" width="62" height="121" stroke-width="2.5"/>
+  </g>
+  <g fill="#8d9097" font-size="20" font-weight="700" letter-spacing="2" text-anchor="middle">
+    <text x="150" y="70">ESCENARIO</text>
+    <text x="510" y="490" opacity=".8">PISTA</text>
+    <text x="952" y="182">FOH</text>
+    <text x="237" y="312" font-size="13">CABINA</text>
+  </g>
+</svg>
