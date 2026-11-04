@@ -1,4 +1,4 @@
-const VERSION = 'bitp-7bf38a8b';
+const VERSION = 'bitp-7c4990c2';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/duro-black-hangar-2026/Anybody.woff2", "img/duro-black-hangar-2026/MartianMono.woff2", "img/duro-black-hangar-2026/NimbusSanL-Bold.woff2", "img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2", "img/duro-black-hangar-2026/NimbusSanL-Regu.woff2", "img/duro-black-hangar-2026/banner.jpg", "img/duro-black-hangar-2026/carpa-3d.webp", "img/duro-black-hangar-2026/deco-dome-light.webp", "img/duro-black-hangar-2026/deco-dome.webp", "img/duro-black-hangar-2026/deco-floor-light.webp", "img/duro-black-hangar-2026/deco-floor.webp", "img/duro-black-hangar-2026/hangar.png", "img/duro-black-hangar-2026/logo-240.png", "img/duro-black-hangar-2026/logo-blackhangar.png", "img/duro-black-hangar-2026/logo-duro.png", "img/duro-black-hangar-2026/logo-makina.png", "vendor/three-0.170.0.module.min.js"];
 
@@ -86,7 +86,9 @@ self.addEventListener('fetch', e => {
   if (url.searchParams.has('t')) return;
   // Vídeos (el banner): directe de la xarxa. L'iPhone els demana a trossos (Range) i una còpia sencera de la cache no la reprodueix; sense xarxa es veu el pòster
   if (url.pathname.endsWith('.mp4')) return;
-  // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
+  // La pàgina: la còpia guardada a l'acte (s'obre a l'instant, amb o sense cobertura) i es refresca en segon pla.
+  // Les versions noves arriben pel sw.js nou (es mira cada vegada que s'obre l'app): es posa al dia sola o surt «Actualizar» (04-11-2026)
+  // Sense còpia (primera vegada): la xarxa
   if (e.request.mode === 'navigate') {
     // Cada idioma, la seva còpia. Adreces sense «.html» (Cloudflare Pages redirigeix ca.html → ca; GitHub serveix totes dues)
     const page = /[/]ca([.]html)?$/.test(url.pathname) ? 'ca' : './';
@@ -98,9 +100,9 @@ self.addEventListener('fetch', e => {
         else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       });
-      const slow = new Promise(r => setTimeout(() => r(hit), 1500));
-      try { return (await Promise.race([net, hit ? slow : net])) || await net; }
-      catch (err) { return hit || Response.error(); }
+      if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+      try { return await net; }
+      catch (err) { return Response.error(); }
     }));
     return;
   }
