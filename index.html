@@ -8085,9 +8085,9 @@ incPaint();
 
 // ==== LIVE ==== (pla gratuït de Cloudflare, 04-11-2026: 100.000 peticions al dia per a tot el compte)
 // UNA sola pregunta periòdica al servidor (GET /live) amb tot el que cal: incidències, càmeres, ✓ i momentos.
-// Només amb l'app a la vista. Cada 60 s; a Cámaras, cada 30 s mentre toques (2 min). Si res no ha canviat, el
+// Només amb l'app a la vista. Cada 60 s; a Cámaras, cada 30 s mentre toques (2 min); 5 min sense tocar, cada 3 min. Si res no ha canviat, el
 // servidor respon gairebé buit. Si el dia va molt carregat (fre d'emergència), el servidor diu «slow» i es pregunta cada 5 min.
-let liveV = '', liveP = '', liveSlow = false, liveBusy = false, liveAt = 0, liveTouch = 0;
+let liveV = '', liveP = '', liveSlow = false, liveBusy = false, liveAt = 0, liveTouch = Date.now();
 function liveParts() {
   const p = [];
   if (INC_LIVE()) p.push('inc');
@@ -8120,10 +8120,11 @@ async function livePull(force) {
   }
   liveBusy = false;
 }
-const liveEvery = () => liveSlow ? 5 * MIN : TAB === 'multi' && Date.now() - liveTouch < 2 * MIN ? 30000 : 60000;
-addEventListener('pointerdown', () => { liveTouch = Date.now(); }, { capture: true, passive: true });
+// Mòbil oblidat amb l'app oberta (5 min sense tocar-lo): cada 3 min. En tornar a tocar, pregunta al moment
+const liveEvery = () => { const idle = Date.now() - liveTouch; return liveSlow ? 5 * MIN : TAB === 'multi' && idle < 2 * MIN ? 30000 : idle > 5 * MIN ? 3 * MIN : 60000; };
+addEventListener('pointerdown', () => { const was = Date.now() - liveTouch; liveTouch = Date.now(); if (was > 5 * MIN && Date.now() - liveAt > 10000) livePull(); }, { capture: true, passive: true });
 setInterval(() => { if (!document.hidden && Date.now() - liveAt >= liveEvery() - 1000) livePull(); }, 5000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - liveAt > 10000) livePull(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) return; liveTouch = Date.now(); if (Date.now() - liveAt > 10000) livePull(); });
 livePull();
 // ==== /LIVE ====
 
