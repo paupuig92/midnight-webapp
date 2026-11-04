@@ -976,8 +976,74 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
+/* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
+body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
+body[data-tab="multi"] #multi { display: block !important; }
+#multi { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
+#multi .edtabs { margin-top: 14px; }
+#multi .mcmsg { margin: 8px 0 0; }
+/* Les càmeres: com «A continuación» (vora del color de la càmera, nom gran en majúscules) */
+#multi .upnext li.grp b { text-transform: uppercase; }
+#multi .upnext li.it { --sc: var(--muted); grid-template-columns: minmax(0, 1fr) auto; cursor: pointer; padding-top: 10px; padding-bottom: 10px; }
+#multi .upnext .cm { display: block; margin-top: 3px; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--ink); }
+#multi .upnext .acc { display: block; font: 500 var(--fs-xs)/1.3 var(--body); color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+#multi .mcs { text-align: right; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
+#multi .mcs b { display: block; font-weight: 700; color: var(--ink); }
+#multi .mcs b::after { content: " ›"; color: var(--muted); }
+#multi li.it[data-st="grabando"] .mcs b { color: var(--now); }
+#multi li.it[data-st="grabando"] .mcs b::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; }
+#multi li.it[data-st="recogida"] { opacity: .55; }
+#multi .mcsum { color: var(--muted); }
+#multi .mcsum.rec { color: var(--now); }
+/* Rider i material: llistes de línies, sense caixes */
+#multi .mcl { list-style: none; margin: 0; padding: 0; }
+#multi .mcl li { display: grid; grid-template-columns: 2.6em minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: var(--fs-s); }
+#multi .mcl li.grp { display: block; border: 0; padding: 14px 0 2px; font: 600 12px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+#multi .mcl .n { font: 700 var(--fs-s)/1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+#multi .mcl small { color: var(--muted); }
+#multi .mcl .sq { display: inline-flex; gap: 3px; }
+#multi .mcl .sq i { width: 10px; height: 10px; border-radius: 2px; background: var(--sc); }
+#multi .mcl .ok { color: var(--accent); font: 600 11px var(--mono, var(--body)); text-transform: uppercase; }
+#multi .mcl button.mcck { all: unset; display: contents; cursor: pointer; }
+#multi .mcl li.ck { cursor: pointer; }
+#multi .mcl li.ck .box { width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 4px; display: grid; place-items: center; align-self: center; font: 800 14px/1 var(--body); color: var(--accent-ink); }
+#multi .mcl li.ck[aria-checked="true"] { color: var(--muted); }
+#multi .mcl li.ck[aria-checked="true"] .t { text-decoration: line-through; }
+#multi .mcl li.ck[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); }
+#multi .mcl li.ck[aria-checked="true"] .box::after { content: "✓"; }
+#multi .mcnote { margin: 14px 0 0; }
+#multi li.mcstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 4px 0 12px; border-bottom: 1px solid var(--rule); }
+#multi li.mcstats span { display: flex; flex-direction: column; gap: 4px; font: 600 10.5px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+#multi li.mcstats span + span { padding-left: 10px; border-left: 1px solid var(--rule); }
+#multi li.mcstats b { font: 900 var(--fs-xl)/1 var(--title, var(--display)); color: var(--ink); letter-spacing: 0; }
+#multi li.mcstats .rec, #multi li.mcstats .rec b { color: var(--now); }
+/* Plànol vist des de dalt (FEST.multicam[].plan) amb un punt per càmera: vermell i bategant quan grava */
+#multi li.mcplan { position: relative; display: block; margin: 6px 0 10px; padding: 0; border: 0; }
+#multi .mc3dbox { position: relative; }
+#multi .on3d .mc3dbox { aspect-ratio: 1.35; overflow: hidden; touch-action: none; }
+#multi .on3d .mc3dbox canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+#multi .on3d .mc3dbox img { display: none; }
+#multi .mcplan .mchint { margin: 6px 0 0; font-size: var(--fs-xs); display: none; }
+#multi .on3d .mchint { display: block; }
+#multi li.mcplan img { display: block; width: 100%; height: auto; border-radius: var(--r-card, 10px); -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 62%, transparent 100%); }  /* la il·lustració es fon amb el fons */
+#multi .mcpin { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid var(--bg); background: var(--sc); color: #0b0b0b; font: 800 12px/1 var(--body); display: grid; place-items: center; cursor: pointer; }
+#multi .mcpin[data-st=""] { opacity: .5; }
+#multi .mcpin[data-st="grabando"] { box-shadow: 0 0 0 3px var(--now); animation: mcrec 1.6s ease-in-out infinite; }
+@keyframes mcrec { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--now) 25%, transparent); } }
+@media (prefers-reduced-motion: reduce) { #multi .mcpin[data-st="grabando"] { animation: none; } }
+#multi .mcn { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 7px; border-radius: 50%; background: var(--sc); color: #0b0b0b; font: 800 11px/1 var(--body); font-style: normal; vertical-align: .12em; }
+#multi .mch2 { margin-top: 40px; }
+#multi .mcempty { margin: 6px 0 0; }
+/* Fitxa d'una càmera (a sobre, com «Mis artistas») */
+#mcSheet { z-index: 20; }  /* per sobre de la barra de baix */
+#mcSheet .body h3 { margin: 20px 0 8px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#mcSheet .row2 .btn { flex: 1 1 40%; }
+#mcSheet .row2 .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+#mcSheet .row2 .btn[data-mcst="grabando"][aria-pressed="true"] { background: var(--now); border-color: var(--now); color: #fff; }
+#mcSheet input { width: 100%; box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 46px; padding: 0 12px; }
+#mcSheet .mcby { margin-top: 18px; }
 /* Sol (per a foto i vídeo): on és el sol ara, brúixola, recorregut del dia i hores clau. Colors del festival (vars) */
 body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
 #sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; --sol-day: #7cc0ff; --sol-night: #15214a; --sol-hair: color-mix(in srgb, var(--ink) 12%, transparent); }
@@ -1159,7 +1225,7 @@ body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !impo
 .yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 body[data-tab="ajustes"] .wrap > :not(#config) { display: none !important; }
 body[data-tab="org"] .wrap > :not(#admin):not(#orgOff) { display: none !important; }
-body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"], [data-tab="sol"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"], [data-tab="sol"], [data-tab="multi"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
 .terows { display: flex; flex-direction: column; gap: 8px; }
 .terow { display: grid; grid-template-columns: 1fr auto 44px; gap: 6px; align-items: center; padding: 8px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--panel); }
 .terow .teg { grid-column: 1 / 3; }
@@ -1190,6 +1256,13 @@ body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="
 .mwho.card .mwd { font-size: 12px; margin-top: 3px; }
 .mwho.card.none .mwd { display: block; }
 .mwho.card .mwt { flex: 1; }
+.orggo { display: flex; align-items: center; width: 100%; min-height: 64px; gap: 14px; padding: 10px 16px 10px 10px; border: 1.5px solid var(--line); border-radius: 20px; background: var(--panel); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.orggo .oico { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.orggo .otx { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.1; }
+.orggo .on { font-weight: 800; font-size: 18px; }
+.orggo .od { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.orggo .ogo { flex: none; font-weight: 800; font-size: var(--fs-s); color: var(--accent); }
+.orgback { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 6px -4px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: 700 var(--fs-m) var(--body); cursor: pointer; }
 .mwho.card .mgo { flex: none; font-weight: 800; font-size: var(--fs-s); color: var(--accent); }
 #yoGrp[data-off] { display: none !important; }
 .brandline .mwho.big + .firma { margin-left: 4px; }
@@ -1443,6 +1516,19 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     </div>
   </section>
 
+  <section id="multi" hidden aria-labelledby="mcH">
+    <h2 id="mcH">Multi<span>cámara</span></h2>
+    <p class="note">Toca una cámara para marcar si está montada o grabando y qué SSD lleva. Lo ve todo el equipo.</p>
+    <div class="edtabs gdays" id="mcDays" role="tablist" aria-label="Día" hidden></div>
+    <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenario" hidden></div>
+    <p class="note mcmsg" id="mcMsg" role="status" hidden></p>
+    <div id="mcBody"></div>
+    <h2 class="mch2">Material</h2>
+    <p class="note">Todo sumado<span id="mcMatFor"></span>. Marca lo que ya está cargado (solo en este móvil).</p>
+    <ul class="mcl" id="mcMat"></ul>
+    <button type="button" class="linkbtn" id="mcClear" hidden>Quitar todas las marcas</button>
+  </section>
+
   <section id="mapa" hidden>
     <div id="mapList"></div>
     <p class="legend">Toca un mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
@@ -1463,8 +1549,9 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     <p class="legend" id="tgFree"></p>
   </section>
 
-  <section class="admin" id="orgOff" hidden><h2>Organización</h2><p class="note">Solo funciona con conexión, en la app publicada.</p></section>
+  <section class="admin" id="orgOff" hidden><button class="orgback" type="button" data-back="ajustes">‹ Ajustes</button><h2>Organización</h2><p class="note">Solo funciona con conexión, en la app publicada.</p></section>
   <section class="admin" id="admin" hidden>
+    <button class="orgback" type="button" data-back="ajustes">‹ Ajustes</button>
     <h2>Organización</h2>
     <form id="pwForm" class="pwform">
       <label for="pw">Cambios de última hora (solo organización)</label>
@@ -1560,6 +1647,10 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
         <select class="yosel" id="yoSel" aria-label="Quién eres"></select>
       </div>
       <p class="note" style="margin:0">Con perfil ves también tus tareas, las prioridades y los efectos. Se elige en un solo sitio: aquí o tocando tu nombre arriba.</p>
+    </div>
+    <div class="cgrp">
+      <h3 class="ch">Organización</h3>
+      <button class="orggo" id="orgGo" type="button"><b class="oico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></b><span class="otx"><span class="on">Admin</span><small class="od">Horario, avisos y tareas · con contraseña</small></span><span class="ogo">Entrar ›</span></button>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pantalla</h3>
@@ -1663,12 +1754,30 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <div class="foot"><button class="btn primary" id="sheetDone" type="button">Listo</button></div>
 </div>
 
+<div class="sheet" id="mcSheet" role="dialog" aria-modal="true" aria-labelledby="mcSheetH" hidden>
+  <header>
+    <h2 id="mcSheetH"></h2>
+    <button class="btn" id="mcDone2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note" id="mcSheetInfo"></p>
+    <h3>Estado</h3>
+    <div class="row2" id="mcSheetSt" role="group" aria-label="Estado"></div>
+    <h3><label for="mcSsd">SSD</label></h3>
+    <input type="text" id="mcSsd" maxlength="24" placeholder="Número o nombre del SSD" autocomplete="off" enterkeyhint="done">
+    <h3><label for="mcNote">Nota</label></h3>
+    <input type="text" id="mcNote" maxlength="140" placeholder="Batería, tarjeta, encuadre…" autocomplete="off" enterkeyhint="done">
+    <p class="note mcby" id="mcSheetBy"></p>
+  </div>
+  <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
+</div>
+
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
   <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
+  <button type="button" data-tab="multi" id="tabMulti" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Cámaras</span></button>
   <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
-  <button type="button" data-tab="org" aria-label="Organización"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Admin</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
 </nav>
 <button class="totop" id="toTop" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1875,6 +1984,39 @@ html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0
 /* terra de reixa i feix: en fosc sobre clar */
 html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/duro-black-hangar-2026/deco-floor-light.webp") center bottom / cover no-repeat; }
 `;
+// Multicámara (opcional, pestanya «Cámaras»): on va cada càmera, amb què, i què cal de corrent i àudio.
+// Per escenari: cams = { c: color, pos: posició, cam, opt: òptica, acc: [accessoris; «2x Brazo grande» = 2] }
+//               rider = { z: zona, n: quantes, what: què (es suma a «Material»), where: on, c: [colors de les càmeres], ok: qui ho ha confirmat }
+//               note = avís (p. ex. arnès i casc)
+// Exemple: { c: 'morado', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Slider', '2x Brazo grande'] }
+//          { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'], ok: 'Uri' }
+// Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Amb diversos dies, l'estat (grabando, SSD…) va per dia.
+// Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
+// plan (opcional) = imatge de l'escenari (img/duro-black-hangar-2026/…, p. ex. la il·lustració isomètrica) i a cada càmera at: [x %, y %] = on va a la imatge.
+// carpa-3d.webp: il·lustració feta amb Nano Banana 2.1 (Higgsfield) a partir de la vista isomètrica del stage plot (04-11).
+// PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
+FEST.multicam = [
+  { stage: 'Black Hangar', plan: 'img/duro-black-hangar-2026/carpa-3d.webp',
+    cams: [
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
+    ],
+    // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
+    // Mides del stage plot (vista de dalt): carpa 64×32 m. Cada càmera: at3d: [x, y, z]
+    scene3d: {
+      tent: { len: 64, wid: 32, h: 14, wall: 4 },
+      stage: { x0: -26, x1: -16, wid: 21.6, h: 1.4 },
+      screen: { x: -24.5, wid: 19, h: 8.5 },
+      booth: { x: -18.6, l: 3.4, w: 1.3, h: 1.1 },
+      barrier: { x: -13.8, wid: 28 },
+      triangles: [[-15.8, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8.1, 'ambar'], [16.1, 'ambar']],
+      platform: { x: 0, s: 3.5, h: 0.7 },
+      foh: { x0: 26.4, x1: 31, wid: 8 },
+    },
+    rider: [] },
+];
 /* ==== /FESTIVAL ==== */
 
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
@@ -2990,7 +3132,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '03/11 21:45';
+const BUILD = '04/11 18:19';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -5465,6 +5607,389 @@ document.getElementById('faces').addEventListener('click', e => {
 holaPaint();
 whoReady = true; paintWho();
 
+// ==== MULTICÁMARA ==== (pestanya «Cámaras», des del 04-11-2026)
+// Les posicions i el material són a FEST.multicam (al bloc del festival). L'estat de cada càmera (montada, grabando…, SSD i nota)
+// el comparteix tot l'equip a través del servidor d'avisos (POST/GET /mc), sense contrasenya. Les marques de «Material» són només d'aquest mòbil.
+const MC = Array.isArray(FEST.multicam) ? FEST.multicam : [];
+const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Parada'], ['recogida', 'Recogida']];
+const MC_CK = FEST.key + '-mc-carga-v1', MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
+const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
+// Un id per càmera: festival + escenari + posició (si es repeteix, amb número)
+for (const s of MC) {
+  const seen = {};
+  for (const c of s.cams || []) { let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
+}
+let mcState = {}, mcFilter = '', mcTimer = 0, mcErr = '', mcAt = 0;
+// Diversos dies: l'estat (grabando, SSD…) va per dia. Per defecte, el dia del festival d'avui (abans, el 1r; després, l'últim)
+let mcDay = 0, mcDayPicked = false;
+const mcToday = () => { const t = now(); let d = 0; for (const x of DAYS) if (t >= x.t0 - 6 * 3600000) d = x.d; return d; };
+const mcKey = c => NDAYS > 1 ? c.id + '-d' + (mcDay + 1) : c.id;
+try { mcState = JSON.parse(localStorage.getItem(MC_SK) || '{}') || {}; } catch (e) {}
+try { mcFilter = localStorage.getItem(MC_FK) || ''; } catch (e) {}
+if (mcFilter && !MC.some(s => s.stage === mcFilter)) mcFilter = '';
+let mcCk = {};
+try { mcCk = JSON.parse(localStorage.getItem(MC_CK) || '{}') || {}; } catch (e) {}
+const mcLive = () => ONLINE && PUSH && PUSH.url;
+document.getElementById('tabMulti').hidden = !MC.length;
+
+// «2x Brazo grande» → [2, 'Brazo grande']
+const mcCount = a => { const m = /^\s*(\d+)\s*[x×]\s*(.+)$/i.exec(a) || /^(.+?)\s*[x×]\s*(\d+)\s*$/i.exec(a); return m ? (/^\d+$/.test(m[1]) ? [+m[1], m[2].trim()] : [+m[2], m[1].trim()]) : [1, a.trim()]; };
+function mcMaterial(list) {
+  const g = { cam: new Map(), opt: new Map(), acc: new Map(), pow: new Map() }, add = (m, k, n) => { if (k) m.set(k, (m.get(k) || 0) + n); };
+  for (const s of list) {
+    for (const c of s.cams || []) { add(g.cam, c.cam, 1); add(g.opt, c.opt, 1); for (const a of c.acc || []) { const [n, k] = mcCount(a); add(g.acc, k, n); } }
+    for (const r of s.rider || []) add(g.pow, r.what, +r.n || 1);
+  }
+  return [['cam', 'Cámaras'], ['opt', 'Ópticas'], ['acc', 'Accesorios'], ['pow', 'Corriente y audio']].map(([k, t]) => [k, t, [...g[k]].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]).filter(x => x[2].length);
+}
+// --- Vista 3D (FEST.multicam[].scene3d): la carpa modelada amb three.js a partir de les mides del stage plot ---
+// Es carrega només quan s'obre la pestanya (vendor/three…, ~170 kB comprimit). Mentre carrega, o si el mòbil no pot fer WebGL,
+// es veu la il·lustració (plan) amb els punts. Es dibuixa només quan cal (en girar o en canviar la mida): no gasta bateria parat.
+const MC3D_LIB = 'vendor/three-0.170.0.module.min.js';
+const MC3D_COL = { ambar: '#ffae5e', blanco: '#eef2ff' };
+let mc3dLib = null, mc3d = null;
+function mc3dLoad() {
+  if (!mc3dLib) mc3dLib = import(new URL(MC3D_LIB, location.href).href).catch(() => null);
+  return mc3dLib;
+}
+function mc3dBuild(T, sc) {
+  const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const bg = new T.Color(cssv('--bg') || '#050608'), light = document.documentElement.dataset.theme === 'light';
+  const scene = new T.Scene();
+  scene.fog = new T.Fog(bg, 70, 150);
+  const P = (x, y, z) => new T.Vector3(x, z, y);  // dades: z amunt → three: y amunt
+  const tube = new T.CylinderGeometry(1, 1, 1, 5, 1, true), unitBox = new T.BoxGeometry(1, 1, 1);
+  // Barres (costelles de la carpa, truss): un cilindre per segment, tots en un sol InstancedMesh
+  const bars = (segs, r, color) => {
+    const m = new T.InstancedMesh(tube, new T.MeshBasicMaterial({ color, fog: true }), segs.length), o = new T.Object3D(), up = new T.Vector3(0, 1, 0);
+    segs.forEach(([a, b], i) => {
+      const d = b.clone().sub(a), len = d.length();
+      o.position.copy(a).addScaledVector(d, .5); o.scale.set(r, len, r);
+      o.quaternion.setFromUnitVectors(up, d.normalize()); o.updateMatrix(); m.setMatrixAt(i, o.matrix);
+    });
+    scene.add(m); return m;
+  };
+  const box = (x0, x1, y0, y1, z0, z1, color, opts = {}) => {
+    const m = new T.Mesh(unitBox, new T.MeshBasicMaterial({ color, ...opts }));
+    m.position.copy(P((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)); m.scale.set(x1 - x0, z1 - z0, y1 - y0); scene.add(m); return m;
+  };
+  // Línia de llum: tub fi + halo additiu (fa de «bloom» sense postprocessat)
+  const glow = (a, b, color) => {
+    bars([[a, b]], .13, color);
+    const h = bars([[a, b]], .55, color);
+    Object.assign(h.material, { transparent: true, opacity: .16, blending: T.AdditiveBlending, depthWrite: false });
+  };
+  // Carpa: contorn d'estadi (rectangle amb dos semicercles), perfil paret + cúpula
+  const t = sc.tent, L = t.len, W = t.wid, R = W / 2, half = L / 2 - R;
+  const NP = 72, prof = [[1, 0], [1, t.wall], [.96, t.wall + 3], [.84, t.wall + 6], [.64, t.h - 2], [.34, t.h - .5], [0, t.h]];
+  const outline = [];
+  const per = 2 * (2 * half) + 2 * Math.PI * R;
+  for (let i = 0; i < NP; i++) {
+    let s = i / NP * per, x, y;
+    if (s < 2 * half) { x = -half + s; y = -R; }
+    else if ((s -= 2 * half) < Math.PI * R) { const a = -Math.PI / 2 + s / R; x = half + R * Math.cos(a); y = R * Math.sin(a); }
+    else if ((s -= Math.PI * R) < 2 * half) { x = half - s; y = R; }
+    else { s -= 2 * half; const a = Math.PI / 2 + s / R; x = -half + R * Math.cos(a); y = R * Math.sin(a); }
+    outline.push([x, y, Math.max(-half, Math.min(half, x))]);
+  }
+  // Terra: la forma de la carpa, fosc, amb la llum de la pantalla escampada des de l'escenari
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+  const g = cv.getContext('2d'), gr = g.createRadialGradient(20, 64, 4, 20, 64, 230);
+  gr.addColorStop(0, light ? '#ffffff' : '#3b3e49'); gr.addColorStop(.45, light ? '#d9dadd' : '#17181d'); gr.addColorStop(1, light ? '#cfd0d3' : '#0d0e11');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 128);
+  const shp = new T.Shape(outline.map(([x, y]) => new T.Vector2(x, -y)));
+  const fg = new T.ShapeGeometry(shp, 1), uv = fg.attributes.uv, pos = fg.attributes.position;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + L / 2) / L, (pos.getY(i) + R) / W);
+  const ftx = new T.CanvasTexture(cv); ftx.colorSpace = T.SRGBColorSpace;
+  const floor = new T.Mesh(fg, new T.MeshBasicMaterial({ map: ftx }));
+  floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const at = (i, k) => { const [x, y, cx] = outline[i % NP], [r, z] = prof[k]; return P(cx + (x - cx) * r, y * r, z); };
+  const segs = [];
+  for (let i = 0; i < NP; i++) for (let k = 0; k < prof.length - 1; k++) {
+    if (i % 2 === 0 || k < 2) segs.push([at(i, k), at(i, k + 1)]);    // costelles
+    if (k > 0) segs.push([at(i, k), at(i + 1, k)]);                    // anelles
+  }
+  bars(segs, .07, light ? '#6d7078' : '#3b3f47');
+  // Escenari, pantalla (brilla), cabina, tanca, plataforma i FOH
+  const st = sc.stage, s2 = st.wid / 2, sh = st.h;
+  box(st.x0, st.x1, -s2, s2, 0, sh, light ? '#55585f' : '#1d1f24');
+  const sw = sc.screen.wid / 2;
+  box(sc.screen.x - .3, sc.screen.x, -sw, sw, sh, sh + sc.screen.h, '#e9eeff');
+  const halo = box(sc.screen.x - .1, sc.screen.x + .6, -sw - .8, sw + .8, sh - .5, sh + sc.screen.h + .8, '#9fb4ff', { transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false });
+  const sx = sc.screen.x;  // bastida als costats de la pantalla
+  for (const y0 of [-sw - 2.5, sw + .5]) {
+    const tw = [];
+    for (const [a, b] of [[0, 0], [2, 0], [0, 2], [2, 2]]) tw.push([P(sx - 1 + a, y0 + b, sh), P(sx - 1 + a, y0 + b, sh + sc.screen.h + 1)]);
+    for (let z = sh; z <= sh + sc.screen.h + 1; z += 2.4) for (const [a, b, c, d] of [[0, 0, 2, 0], [0, 2, 2, 2], [0, 0, 0, 2], [2, 0, 2, 2]]) tw.push([P(sx - 1 + a, y0 + b, z), P(sx - 1 + c, y0 + d, z)]);
+    bars(tw, .05, light ? '#6d7078' : '#5a5e68');
+  }
+  const bo = sc.booth;
+  box(bo.x - bo.w / 2, bo.x + bo.w / 2, -bo.l / 2, bo.l / 2, sh, sh + bo.h, light ? '#2c2e33' : '#2a2c32');
+  const fence = (x0, x1, y0, y1) => {
+    const f = [], h = 1.1, rail = (a, b) => { f.push([P(a[0], a[1], h), P(b[0], b[1], h)], [P(a[0], a[1], .1), P(b[0], b[1], .1)]); };
+    rail([x0, y0], [x1, y0]); rail([x1, y0], [x1, y1]); rail([x0, y1], [x1, y1]);
+    for (let x = x0; x <= x1 + .01; x += 1) f.push([P(x, y0, 0), P(x, y0, h)], [P(x, y1, 0), P(x, y1, h)]);
+    for (let y = y0; y <= y1 + .01; y += 1) f.push([P(x1, y, 0), P(x1, y, h)]);
+    bars(f, .035, light ? '#2c2e33' : '#555a63');
+  };
+  const bw = sc.barrier.wid / 2, bx = sc.barrier.x, bf = [];
+  bf.push([P(bx, -bw, 1.1), P(bx, bw, 1.1)], [P(bx, -bw, .1), P(bx, bw, .1)]);
+  for (let y = -bw; y <= bw + .01; y += 1) bf.push([P(bx, y, 0), P(bx, y, 1.1)]);
+  bars(bf, .035, light ? '#2c2e33' : '#555a63');
+  const pf = sc.platform;
+  box(pf.x - pf.s / 2, pf.x + pf.s / 2, -pf.s / 2, pf.s / 2, 0, pf.h, light ? '#55585f' : '#22242a');
+  const fo = sc.foh, fw = fo.wid / 2;
+  box(fo.x0 + 1, fo.x0 + 2.2, -2.6, 2.6, 0, 1.05, light ? '#2c2e33' : '#2a2c32');
+  box(fo.x0 + 1.4, fo.x0 + 1.5, -2, 2, 1.05, 1.6, '#7fd0ff', { transparent: true, opacity: .55 });  // pantalles de la taula
+  fence(fo.x0, fo.x1, -fw, fw);
+  // Triangles penjats (cap per avall) amb llum, i les bigues fosques que els aguanten
+  const truss = [];
+  for (const [x, col] of sc.triangles) {
+    const top = t.h - 3.6, s = 4.4, c = MC3D_COL[col] || col;
+    const A = P(x, -s, top), B = P(x, s, top), C = P(x, 0, top - 2 * s * .866);
+    glow(A, B, c); glow(B, C, c); glow(C, A, c);
+    truss.push([P(x, -R + 1.5, t.wall + 4), P(x, -3, t.h - 1.2)], [P(x, R - 1.5, t.wall + 4), P(x, 3, t.h - 1.2)]);
+  }
+  bars(truss, .1, light ? '#3a3d44' : '#24262c');
+  glow(P(-half, -R + 6, t.h - 3.5), P(half, -R + 6, t.h - 3.5), MC3D_COL.ambar);
+  return { scene, halo };
+}
+function mc3dPinsPos() {
+  if (!mc3d) return;
+  const { T, cam, wrap, pts } = mc3d, W = wrap.clientWidth, H = wrap.clientHeight, v = new T.Vector3();
+  for (const [el, p] of pts) {
+    v.copy(p).project(cam);
+    const off = v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1;
+    el.style.visibility = off ? 'hidden' : '';
+    el.style.left = (v.x + 1) / 2 * W + 'px'; el.style.top = (1 - v.y) / 2 * H + 'px';
+  }
+}
+function mc3dDraw() {
+  if (!mc3d || mc3d.raf) return;
+  mc3d.raf = requestAnimationFrame(() => {
+    const m = mc3d; m.raf = 0;
+    const { cam, ren, wrap } = m, W = wrap.clientWidth, H = wrap.clientHeight;
+    if (!W || !H) return;
+    if (m.w !== W || m.h !== H) { ren.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); m.w = W; m.h = H; }
+    cam.position.set(m.tg.x + m.rad * Math.sin(m.pol) * Math.cos(m.az), m.tg.y + m.rad * Math.cos(m.pol), m.tg.z + m.rad * Math.sin(m.pol) * Math.sin(m.az));
+    cam.lookAt(m.tg);
+    ren.render(m.scene, cam);
+    mc3dPinsPos();
+  });
+}
+const MC3D_HOME = { az: 2.35, pol: .95, rad: 92 };
+async function mc3dAttach() {
+  const wrap = document.querySelector('#multi .mcplan[data-scene]');
+  if (!wrap) return;
+  const s = MC.find(x => x.stage === wrap.dataset.scene);
+  if (!s || !s.scene3d || !ONLINE) return;
+  const T = await mc3dLoad();
+  if (!T || !document.body.contains(wrap)) return;
+  try {
+    if (!mc3d || mc3d.stage !== s.stage || mc3d.theme !== document.documentElement.dataset.theme) {
+      if (mc3d) mc3d.ren.dispose();
+      const ren = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+      ren.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+      ren.setClearColor(0, 0);
+      const { scene } = mc3dBuild(T, s.scene3d);
+      mc3d = { T, ren, scene, stage: s.stage, theme: document.documentElement.dataset.theme, cam: new T.PerspectiveCamera(30, 1.5, 1, 400), tg: new T.Vector3(0, 3, 0), ...MC3D_HOME, pts: [] };
+      mc3dTouch(ren.domElement);
+    }
+  } catch (e) { mc3d = null; return; }  // sense WebGL: es queda la il·lustració
+  const box3 = wrap.querySelector('.mc3dbox');
+  box3.prepend(mc3d.ren.domElement);
+  mc3d.wrap = box3; mc3d.w = 0;
+  mc3d.pts = [...box3.querySelectorAll('.mcpin')].map(el => { const c = (s.cams || []).find(c => mcKey(c) === el.dataset.mcid); return c && c.at3d ? [el, new T.Vector3(c.at3d[0], c.at3d[2], c.at3d[1])] : null; }).filter(Boolean);
+  wrap.classList.add('on3d');
+  mc3dDraw();
+}
+function mc3dTouch(cv) {
+  const ptr = new Map();
+  let pinch = 0, last = 0;
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    const t = Date.now();
+    if (t - last < 300 && ptr.size === 1) { Object.assign(mc3d, MC3D_HOME); mc3dDraw(); }  // doble toc: vista inicial
+    last = t;
+  });
+  cv.addEventListener('pointermove', e => {
+    const p = ptr.get(e.pointerId);
+    if (!p || !mc3d) return;
+    const dx = e.clientX - p[0], dy = e.clientY - p[1];
+    ptr.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptr.size === 1) { mc3d.az += dx * .009; mc3d.pol = Math.max(.25, Math.min(1.4, mc3d.pol - dy * .006)); }
+    else if (ptr.size === 2) {
+      const [a, b] = [...ptr.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (pinch) mc3d.rad = Math.max(35, Math.min(140, mc3d.rad * pinch / d));
+      pinch = d;
+    }
+    mc3dDraw();
+  });
+  const up = e => { ptr.delete(e.pointerId); if (ptr.size < 2) pinch = 0; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); mc3d.rad = Math.max(35, Math.min(140, mc3d.rad * (1 + e.deltaY * .001))); mc3dDraw(); }, { passive: false });
+}
+addEventListener('resize', () => { if (TAB === 'multi') mc3dDraw(); });
+const mcSq = cs => (cs || []).filter(Boolean).map(c => `<i style="--sc:${mcCol(c)}"></i>`).join('');
+const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
+const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
+let mcOpen = null;
+function mcRender() {
+  const days = document.getElementById('mcDays'), chips = document.getElementById('mcChips');
+  days.hidden = NDAYS < 2;
+  if (NDAYS > 1) days.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-mcday="${x.d}" aria-selected="${x.d === mcDay}">${(DECO.days || [])[x.d] ? `<img class="dlogo" src="${DECO.days[x.d]}" alt="">` : ''}${html(x.name || `Día ${x.d + 1}`)}</button>`).join('');
+  chips.hidden = MC.length < 2;
+  chips.innerHTML = MC.length < 2 ? '' : [['', 'Todos'], ...MC.map(s => [s.stage, s.stage])].map(([v, t]) => `<button type="button" role="tab" data-mcfilt="${html(v)}" aria-selected="${v === mcFilter}">${html(t)}</button>`).join('');
+  const list = MC.filter(s => !mcFilter || s.stage === mcFilter);
+  document.getElementById('mcBody').innerHTML = list.map(s => {
+    const zones = [];
+    for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
+    return `<ul class="upnext mccams">
+      <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
+      ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at ? `<button type="button" class="mcpin" data-mcid="${mcKey(c)}" style="left:${+c.at[0]}%;top:${+c.at[1]}%;--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? '<p class="note mchint">Arrastra para girarlo · pellizca para acercar · doble toque para volver.</p>' : ''}</li>` : ''}
+      ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
+      ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
+        <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
+        <span class="mcs"><b></b><span class="ssd"></span></span>
+      </li>`).join('')}
+    </ul>
+    ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario.</p>'}
+    ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
+    ${s.note ? `<p class="note mcnote">⚠️ ${html(s.note)}</p>` : ''}`;
+  }).join('');
+  document.getElementById('mcMatFor').textContent = mcFilter ? ' · ' + mcFilter : (MC.length > 1 ? ' · todos los escenarios' : '');
+  const mat = mcMaterial(list), pre = mcSlug(mcFilter || 'todo');
+  document.getElementById('mcMat').innerHTML = mat.map(([k, t, rows]) => `<li class="grp">${t}</li>${rows.map(([name, n]) => { const id = pre + ':' + k + ':' + mcSlug(name); return `<li class="ck" role="checkbox" tabindex="0" data-mcck="${html(id)}" aria-checked="${!!mcCk[id]}"><span class="n">${n}×</span><span class="t">${html(name)}</span><span class="box"></span></li>`; }).join('')}`).join('');
+  document.getElementById('mcClear').hidden = !Object.keys(mcCk).length;
+  mcPaint();
+  if (TAB === 'multi') mc3dAttach();
+}
+function mcAgo(s) {
+  if (!s.at) return '';
+  const m = Math.max(0, Math.round((Date.now() - s.at) / 60000));
+  return `${s.who || 'Alguien'} · ${m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m} min` : new Date(s.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}`;
+}
+// Pinta l'estat (també el de la fitxa oberta, sense trepitjar el que s'hi escriu)
+function mcPaint() {
+  for (const el of document.querySelectorAll('#mcBody .mcpin')) { const s = mcState[el.dataset.mcid] || {}; el.dataset.st = s.st || ''; }
+  for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
+    const s = mcState[el.dataset.mcid] || {};
+    el.dataset.st = s.st || '';
+    el.querySelector('.mcs b').textContent = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    el.querySelector('.mcs .ssd').textContent = s.ssd || '';
+  }
+  for (const h of document.querySelectorAll('[data-mcsum]')) {
+    const st = MC.find(s => s.stage === h.dataset.mcsum), cams = st && st.cams || [], n = cams.length;
+    const rec = cams.filter(c => (mcState[mcKey(c)] || {}).st === 'grabando').length, up = cams.filter(c => ['montada', 'grabando', 'parada'].includes((mcState[mcKey(c)] || {}).st)).length;
+    h.textContent = !n ? '' : rec ? `● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`;
+    h.classList.toggle('rec', !!rec);
+  }
+  // Franja de números grans: quantes graven, muntades, parades i sense muntar
+  for (const el of document.querySelectorAll('[data-mcstats]')) {
+    const st = MC.find(s => s.stage === el.dataset.mcstats), cams = st && st.cams || [], cnt = k => cams.filter(c => ((mcState[mcKey(c)] || {}).st || '') === k).length;
+    el.innerHTML = [['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']].map(([k, l]) => `<span class="${k === 'grabando' && cnt(k) ? 'rec' : ''}"><b>${cnt(k)}</b>${l}</span>`).join('');
+  }
+  const msg = document.getElementById('mcMsg');
+  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
+  msg.hidden = !msg.textContent;
+  if (mcOpen) {
+    const s = mcState[mcOpen] || {};
+    for (const b of document.querySelectorAll('#mcSheetSt [data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
+    for (const [i, f] of [['mcSsd', 'ssd'], ['mcNote', 'note']]) { const el = document.getElementById(i); if (el !== document.activeElement) el.value = s[f] || ''; }
+    document.getElementById('mcSheetBy').textContent = s.at ? 'Último cambio: ' + mcAgo(s) : '';
+  }
+}
+// Fitxa d'una càmera (a sobre de tot, com «Mis artistas»)
+const mcSheet = document.getElementById('mcSheet');
+function mcOpenSheet(id) {
+  const [s, c] = mcAll().find(([, c]) => mcKey(c) === id) || [];
+  if (!c) return;
+  mcOpen = id;
+  document.getElementById('mcSheetH').textContent = c.pos || c.cam;
+  document.getElementById('mcSheetInfo').textContent = [s.stage, NDAYS > 1 ? DAYS[mcDay].name : '', [c.cam, c.opt].filter(Boolean).join(' '), (c.acc || []).join(', ')].filter(Boolean).join(' · ');
+  document.getElementById('mcSheetSt').innerHTML = MC_ST.map(([v, t]) => `<button type="button" class="btn" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('');
+  mcSheet.hidden = false;
+  anim(mcSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  document.body.classList.add('locked');
+  mcPaint();
+  document.getElementById('mcDone2').focus();
+}
+function mcSaveFields() {
+  if (!mcOpen) return;
+  const s = mcState[mcOpen] || {}, ssd = document.getElementById('mcSsd').value.trim(), note = document.getElementById('mcNote').value.trim();
+  if (ssd !== (s.ssd || '') || note !== (s.note || '')) mcSet(mcOpen, { ssd, note });
+}
+function mcCloseSheet() {
+  const id = mcOpen;
+  if (!id) return;
+  mcSaveFields();
+  mcOpen = null; mcSheet.hidden = true;
+  document.body.classList.remove('locked');
+  const li = document.querySelector(`#mcBody li[data-mcid="${id}"]`);
+  if (li) li.focus({ preventScroll: true });
+}
+document.getElementById('mcDone').addEventListener('click', mcCloseSheet);
+document.getElementById('mcDone2').addEventListener('click', mcCloseSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !mcSheet.hidden) mcCloseSheet(); });
+mcSheet.addEventListener('click', e => {
+  const b = e.target.closest('[data-mcst]');
+  if (b && mcOpen) { const cur = (mcState[mcOpen] || {}).st; mcSet(mcOpen, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); }
+});
+mcSheet.addEventListener('change', e => { if (e.target.matches('input')) mcSaveFields(); });
+mcSheet.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
+async function mcPull() {
+  if (!mcLive()) return;
+  try {
+    const r = await fetchT(PUSH.url + '/mc', { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    // El que s'acaba de canviar en aquest mòbil i encara no ha arribat al servidor es manté
+    const keep = Object.fromEntries(Object.entries(mcState).filter(([, s]) => s.pending));
+    mcState = { ...(j.mc || {}), ...keep };
+    mcErr = ''; mcAt = Date.now(); mcSaveLocal();
+  } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
+  mcPaint();
+}
+async function mcSet(id, patch) {
+  const who = (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
+  const s = { ...(mcState[id] || {}), ...patch, who, at: Date.now(), pending: true };
+  mcState[id] = s; mcSaveLocal(); mcPaint();
+  if (!mcLive()) { delete s.pending; mcSaveLocal(); return; }
+  try {
+    const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, st: s.st || '', ssd: s.ssd || '', note: s.note || '', who }) }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    if (mcState[id] === s) delete s.pending;
+    mcErr = '';
+  } catch (e) { mcErr = 'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'; if (mcState[id] === s) delete s.pending; }
+  mcSaveLocal(); mcPaint();
+}
+function mcShow(on) {
+  clearInterval(mcTimer); mcTimer = 0;
+  if (!on || !MC.length) return;
+  const d = NDAYS > 1 ? mcToday() : 0;
+  if (!document.getElementById('mcBody').childElementCount || (d !== mcDay && !mcDayPicked)) { if (!mcDayPicked) mcDay = d; mcRender(); } else mcPaint();
+  if (Date.now() - mcAt > 5000) mcPull();
+  mc3dAttach();
+  mcTimer = setInterval(() => { if (!document.hidden) mcPull(); }, 15000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
+document.getElementById('multi').addEventListener('click', e => {
+  const dy = e.target.closest('[data-mcday]');
+  if (dy) { mcDay = +dy.dataset.mcday; mcDayPicked = true; mcRender(); return; }
+  const f = e.target.closest('[data-mcfilt]');
+  if (f) { mcFilter = f.dataset.mcfilt; try { localStorage.setItem(MC_FK, mcFilter); } catch (er) {} mcRender(); return; }
+  const c = e.target.closest('[data-mcid]');
+  if (c) { mcOpenSheet(c.dataset.mcid); return; }
+  const k = e.target.closest('[data-mcck]');
+  if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-checked', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }
+  if (e.target.id === 'mcClear') { mcCk = {}; try { localStorage.removeItem(MC_CK); } catch (er) {} mcRender(); }
+});
+document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid], li[data-mcck]')) { e.preventDefault(); e.target.click(); } });
+// ==== /MULTICÁMARA ====
+
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
 var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
@@ -5473,12 +5998,14 @@ function showTab(t, top = true) {
   // Primer a dalt i després canviar el contingut: a l'iPhone, si la pàgina s'encongeix amb scroll, la barra de baix es desplaça
   if (ch && top) scrollTo({ top: 0 });
   document.body.dataset.tab = t;
-  for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  const tb = t === 'org' ? 'ajustes' : t;  // Admin és dins d'Ajustes (en Pau, 04-11)
+  for (const b of document.querySelectorAll('#tabbar [data-tab]')) if (b.dataset.tab === tb) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
   if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
+  if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
@@ -5494,6 +6021,8 @@ function paintTabs() {
 }
 // El logo de la barra fina porta a l'inici (Horarios, a dalt de tot)
 document.getElementById('mlogo').addEventListener('click', () => { showTab('ahora', false); scrollTo({ top: 0, behavior: 'smooth' }); });
+document.getElementById('orgGo').addEventListener('click', () => showTab('org'));
+for (const b of document.querySelectorAll('.orgback')) b.addEventListener('click', () => showTab('ajustes'));
 document.getElementById('tabbar').addEventListener('click', e => {
   const b = e.target.closest('[data-tab]');
   if (b) showTab(b.dataset.tab);
