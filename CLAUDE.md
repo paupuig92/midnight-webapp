@@ -61,6 +61,13 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - `festivals/bass-in-the-park-2026/original/` = còpia exacta de tota l'app tal com va funcionar al Bass.
 - Comptador «⏳ quedan X h» fins al final (status + barra fina de dalt).
 
+## Millores d'equip (04-11-2026, fil «Proposar i implementar millores»)
+- **Tasques de menys de 5 min** (cues): l'app ja no en feia avís (`tkCue`); ara tampoc el servidor (`dueTasks` salta `b - a < 5 min`).
+- **Nota per a l'equip** a cada actuació (camp `note` del set a `changes.json`, màx. 120): s'escriu a l'editor («Nota para el equipo»), surt a la fila d'«Ahora suena», a la graella i al text de l'avís (app i servidor).
+- **«Actualizado hace X min»** a la línia d'estat (hora real de l'últim `changes.json` bo, `<key>-sync` a localStorage); en vermell si fa ≥ 10 min o sense connexió.
+- **Incidències** («Avisar a producción», pestanya Tareas): text + urgent + foto opcional (JPEG reduït al mòbil, < 250 KB). Servidor: taula `inc`, `POST /inc`, `POST /incst` (resolta/reobrir), `GET /inc` (últimes 60, sense foto), `GET /incimg?n=`. Push (≤ 1 min) als mòbils amb «Avisarme de incidencias» (columna `subs.inc`; per defecte Producció). Sense contrasenya, com les ✓. Cal `push/instala.sh`.
+- Català: repàs de textos que quedaven en castellà (i18n_ca.py).
+
 ## Cámaras · multicàmera (des del 04-11-2026)
 - Pestanya pròpia. Dades a `FEST.multicam` (fora de l'objecte FEST, dins el bloc del festival): escenaris, càmeres (`c` color, `pos`, `cam`, `opt`, `acc`, `at` = % sobre la il·lustració, `at3d` = [x, y, z] en metres, `aim` opcional = [direcció°, inclinació°]), `rider`.
 - Estat compartit (Montada/Grabando…, SSD, nota) per dia via servidor (`POST/GET /mc`).

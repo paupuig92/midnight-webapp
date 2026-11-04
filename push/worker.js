@@ -73,10 +73,20 @@ const MC_ST = ['', 'montada', 'grabando', 'parada', 'recogida'];
 const okMcId = id => typeof id === 'string' && /^[\w-]{1,80}$/.test(id);
 const mcText = (s, n) => typeof s === 'string' ? s.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n) : '';
 const MAX_MC = 400;
+// Incidències («Avisar a producción», des del 04-11-2026): qualsevol de l'equip n'envia una (text + foto opcional);
+// tothom les veu a la pestanya Tareas i les poden donar per resoltes. Avís push als mòbils amb «Avisarme de incidencias».
+const MAX_INC = 300, INC_IMG = 260000;
+const okIncImg = s => typeof s === 'string' && s.length <= INC_IMG && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s);
+function dueInc(sub, list, from, to) {
+  if (!sub.inc || !list) return [];
+  return list.filter(x => x.at > from && x.at <= to && !x.st).map(x => ({
+    title: x.urg ? 'Incidència URGENT' : 'Incidència', body: `${x.who || 'Algú'}: ${x.txt}`.slice(0, 180), tag: `inc-${x.n}`,
+  }));
+}
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
@@ -140,10 +150,10 @@ function digest(sets, stamp, notice) {
     for (const x of list) {
       if (!x || typeof x.id !== 'string' || !x.n) continue;
       const a = T(x.a), b = T(x.b);
-      if (Number.isFinite(a)) all[x.id] = { n: String(x.n).trim().slice(0, 80), a, b, stage: names[sid] || sid };
+      if (Number.isFinite(a)) all[x.id] = { n: String(x.n).trim().slice(0, 80), a, b, stage: names[sid] || sid, note: String(x.note || '').trim().slice(0, 120) };
     }
   }
-  const key = Object.keys(all).sort().map(id => `${id}|${all[id].a}|${all[id].b}|${all[id].n}`).join('~');
+  const key = Object.keys(all).sort().map(id => `${id}|${all[id].a}|${all[id].b}|${all[id].n}|${all[id].note}`).join('~');
   return { all, key, stamp, notice: typeof notice === 'string' ? notice : '' };
 }
 // Llegeix changes.json. Si GitHub no respon bé, torna null (s'usarà l'últim horari bo i no s'avisarà de cap canvi)
@@ -167,7 +177,7 @@ async function fetchTasks() {
     const c = await r.json();
     if (!c || typeof c !== 'object' || c.fest !== CARTEL.fest || !Array.isArray(c.list)) return { list: [], stamp: 'none' };
     const list = c.list.filter(x => x && okTaskId(x.id) && Number.isFinite(x.a) && typeof x.t === 'string' && Array.isArray(x.p))
-      .slice(0, 2000).map(x => ({ id: x.id, a: x.a, t: x.t.slice(0, 120), p: x.p.filter(k => cleanYo(k)) }));
+      .slice(0, 2000).map(x => ({ id: x.id, a: x.a, b: Number.isFinite(x.b) ? x.b : 0, t: x.t.slice(0, 120), p: x.p.filter(k => cleanYo(k)) }));
     return { list, stamp: String(c.updated || '') };
   } catch (e) { return null; }
 }
@@ -176,6 +186,8 @@ function dueTasks(sub, list, from, to) {
   if (!sub.yo || !(sub.tb > 0) || !list) return items;
   for (const x of list) {
     if (!x.p.includes(sub.yo)) continue;
+    // Cues (tasques de menys de 5 min, com tkCue() de l'app): surten a la llista però no s'avisen (recuperat el 04-11)
+    if (x.b > x.a && x.b - x.a < 5 * MIN) continue;
     const pre = x.a - sub.tb * MIN;
     if (pre > from && pre <= to) items.push({ title: `Tasca · d’aquí a ${sub.tb} min`, body: x.t, tag: `tk-${x.id}@${x.a}:pre` });
     if (x.a > from && x.a <= to) items.push({ title: 'Tasca · ara', body: x.t, tag: `tk-${x.id}@${x.a}:go` });
@@ -191,8 +203,8 @@ function dueFor(sub, all, from, to) {
     const x = all[id];
     if (!x) continue;
     const pre = x.a - sub.before * MIN;
-    if (pre > from && pre <= to) items.push({ title: `${x.n} · d’aquí a ${sub.before} min`, body: x.stage, tag: `${id}@${x.a}:pre` });
-    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · comença ara`, body: x.stage, tag: `${id}@${x.a}:go` });
+    if (pre > from && pre <= to) items.push({ title: `${x.n} · d’aquí a ${sub.before} min`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:pre` });
+    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · comença ara`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:go` });
   }
   return items;
 }
@@ -273,6 +285,7 @@ export class Store {
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mc (id TEXT PRIMARY KEY, st TEXT NOT NULL, ssd TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Multicámara: «since» = quan va canviar l'estat (per al «REC hace 1 h 52») i historial de canvis (els últims 500)
     if (!this.sql.exec('PRAGMA table_info(mc)').toArray().some(c => c.name === 'since')) this.sql.exec('ALTER TABLE mc ADD COLUMN since INTEGER NOT NULL DEFAULT 0');
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS inc (n INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, who TEXT NOT NULL, txt TEXT NOT NULL, urg INTEGER NOT NULL, img TEXT NOT NULL, st TEXT NOT NULL, sby TEXT NOT NULL, sat INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mclog (n INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL, st TEXT NOT NULL, ssd TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
@@ -280,12 +293,15 @@ export class Store {
     if (!cols.includes('tb')) this.sql.exec('ALTER TABLE subs ADD COLUMN tb INTEGER NOT NULL DEFAULT 10');
     // Equip del mòbil (prod / mkt / video / foto): els avisos de l'organització poden anar només a un equip
     if (!cols.includes('team')) this.sql.exec("ALTER TABLE subs ADD COLUMN team TEXT NOT NULL DEFAULT ''");
+    // Vol rebre les incidències (per defecte, Producció)
+    if (!cols.includes('inc')) this.sql.exec('ALTER TABLE subs ADD COLUMN inc INTEGER NOT NULL DEFAULT 0');
     // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
       this.sql.exec('DELETE FROM done');
       this.sql.exec('DELETE FROM mc');
       this.sql.exec('DELETE FROM mclog');
+      this.sql.exec('DELETE FROM inc');
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
@@ -304,10 +320,10 @@ export class Store {
     } catch (e) {}
     this.put('imported', true);
   }
-  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10, team = '') {
-    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb, team) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team`,
-      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team);
+  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10, team = '', inc = 0) {
+    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb, team, inc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team, inc = excluded.inc`,
+      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team, inc ? 1 : 0);
   }
   // Límit de peticions (finestra fixa): true si encara en queden
   hit(k, max, win) {
@@ -322,6 +338,7 @@ export class Store {
     this.sql.exec('UPDATE rl SET n = n + 1 WHERE k = ?', k);
     return true;
   }
+  incSince(t) { return this.sql.exec('SELECT n, at, who, txt, urg, st FROM inc WHERE at > ?', t).toArray(); }
   row(id) {
     const r = this.sql.exec('SELECT * FROM subs WHERE id = ?', id).toArray()[0];
     return r ? { ...r, favs: JSON.parse(r.favs), changes: !!r.changes } : null;
@@ -337,11 +354,11 @@ export class Store {
     }
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
-      let { favs, before, changes, yo, tb, team } = b;
+      let { favs, before, changes, yo, tb, team, inc } = b;
       if (b.old && b.old !== b.endpoint) {
         const oldId = await idOf(b.old), prev = this.row(oldId);
         // Renovació de la subscripció (pushsubscriptionchange): conserva les preferències del registre vell
-        if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team } = prev);
+        if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team, inc } = prev);
         this.sql.exec('DELETE FROM subs WHERE id = ?', oldId);
       }
       const cur = this.row(id);
@@ -349,9 +366,11 @@ export class Store {
       // Un mòbil antic (sense «yo») conserva el que ja hi havia
       const ny = yo === undefined ? (cur ? cur.yo : '') : cleanYo(yo), nt = tb === undefined ? (cur ? cur.tb : 10) : cleanBefore(tb);
       const ne = team === undefined ? (cur ? cur.team || '' : '') : cleanTeam(team);
-      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne) return json({ ok: true, id, same: true });
+      // Un mòbil sense la versió nova (no envia «inc»): Producció rep les incidències
+      const ni = inc === undefined ? (cur ? cur.inc || 0 : ne === 'prod' ? 1 : 0) : inc ? 1 : 0;
+      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne && (cur.inc || 0) === ni) return json({ ok: true, id, same: true });
       if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) return json({ error: 'full' }, 429);
-      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne);
+      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne, ni);
       return json({ ok: true, id });
     }
     if (url.pathname === '/unsub') { this.sql.exec('DELETE FROM subs WHERE id = ?', await idOf(b.endpoint)); return json({ ok: true }); }
@@ -397,6 +416,33 @@ export class Store {
     if (url.pathname === '/mclogall') {
       return json({ log: this.sql.exec('SELECT id, st, ssd, who, at FROM mclog ORDER BY n DESC LIMIT 80').toArray() });
     }
+    // Incidències: una de nova (text obligatori; foto JPEG petita opcional)
+    if (url.pathname === '/inc') {
+      const txt = mcText(b.txt, 300), who = mcText(b.who, 30), img = okIncImg(b.img) ? b.img : '';
+      if (!txt) return json({ error: 'bad' }, 400);
+      const now = Date.now();
+      this.sql.exec('INSERT INTO inc (at, who, txt, urg, img, st, sby, sat) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', now, who, txt, b.urg ? 1 : 0, img, '', '', 0);
+      this.sql.exec('DELETE FROM inc WHERE n <= (SELECT MAX(n) - ? FROM inc)', MAX_INC);
+      return json({ ok: true, n: this.sql.exec('SELECT MAX(n) AS n FROM inc').one().n, at: now });
+    }
+    // Resolta (st = 'ok') o tornar-la a obrir (st = '')
+    if (url.pathname === '/incst') {
+      const n = Math.floor(+b.n);
+      if (!(n > 0)) return json({ error: 'bad' }, 400);
+      const st = b.st === 'ok' ? 'ok' : '';
+      this.sql.exec('UPDATE inc SET st = ?, sby = ?, sat = ? WHERE n = ?', st, st ? mcText(b.who, 30) : '', st ? Date.now() : 0, n);
+      return json({ ok: true });
+    }
+    // Les últimes 60 (sense la foto: va a part, només si algú l'obre)
+    if (url.pathname === '/incall') {
+      const list = this.sql.exec("SELECT n, at, who, txt, urg, img <> '' AS img, st, sby, sat FROM inc ORDER BY n DESC LIMIT 60").toArray()
+        .map(r => ({ ...r, urg: !!r.urg, img: !!r.img }));
+      return json({ inc: list });
+    }
+    if (url.pathname === '/incimg') {
+      const r = this.sql.exec('SELECT img FROM inc WHERE n = ?', Math.floor(+b.n) || 0).toArray()[0];
+      return json({ img: r ? r.img : '' });
+    }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
     if (url.pathname === '/doneall') {
       const out = {};
@@ -422,9 +468,10 @@ export class Store {
         if (!s || s.stamp !== fresh.stamp) this.put('sets', { sets: fresh.sets, stamp: fresh.stamp, notice: fresh.notice, noticeTeam: fresh.noticeTeam || '' });
       }
       const targets = new Map();
+      const incs = this.incSince(now - MIN);
       for (const sub of this.sql.exec('SELECT * FROM subs').toArray()) {
         const s = { ...sub, favs: JSON.parse(sub.favs), changes: !!sub.changes };
-        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length) targets.set(s.id, s.endpoint);
+        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length || dueInc(s, incs, now - MIN, now).length) targets.set(s.id, s.endpoint);
       }
       // Canvi de l'organització: només si l'horari publicat és més nou que el que ja s'havia vist
       if (fresh) {
@@ -452,7 +499,7 @@ export class Store {
       if (!sub) return json({ items: [] });
       const sch = current(null);
       // 15 min: el mateix temps que Apple guarda el push si el mòbil no té cobertura (TTL 900 s); el mòbil no repeteix el que ja ha mostrat
-      const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now)];
+      const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now), ...dueInc(sub, this.incSince(b.now - 15 * MIN), b.now - 15 * MIN, b.now)];
       const last = this.get('last');
       if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) {
         if (!last.team || sub.team === last.team) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
@@ -495,6 +542,13 @@ export default {
       }
       if (req.method === 'GET' && url.pathname === '/mc') { const r = await callStore(env, '/mcall', lim('mcall')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/mclog') { const r = await callStore(env, '/mclogall', lim('mclog')); return json(r, errStatus(r), origin); }
+      // Incidències («Avisar a producción»)
+      if (req.method === 'POST' && (url.pathname === '/inc' || url.pathname === '/incst')) {
+        const r = await callStore(env, url.pathname, { ...(await body()), ...lim(url.pathname.slice(1)) });
+        return json(r, errStatus(r), origin);
+      }
+      if (req.method === 'GET' && url.pathname === '/inc') { const r = await callStore(env, '/incall', lim('incall')); return json(r, errStatus(r), origin); }
+      if (req.method === 'GET' && url.pathname === '/incimg') { const r = await callStore(env, '/incimg', { n: url.searchParams.get('n'), ...lim('incimg') }); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await body();

@@ -187,6 +187,10 @@ i.imp { color: #0b0b0b; }
 @keyframes pulse { 50% { opacity: .25; } }
 .row .dj { font: 900 var(--fs-l)/1.1 var(--display); font-stretch: 108%; text-transform: uppercase; overflow-wrap: break-word; }
 .row .dj .sub { font: 600 var(--fs-xs) var(--body); color: var(--muted); letter-spacing: .03em; }
+.cuenote { display: flex; gap: 5px; align-items: flex-start; margin-top: 4px; font: 600 var(--fs-xs)/1.3 var(--body); color: var(--ink); background: rgba(var(--accent-rgb), .14); border-radius: 8px; padding: 4px 7px; width: fit-content; max-width: 100%; }
+.cuenote .ico { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+.blk .gnote { display: flex; gap: 3px; align-items: center; }
+.blk .gnote .ico { flex: none; width: 11px; height: 11px; }
 /* si alguna fila porta logo de banda, totes fan la columna igual d'ampla perquè els textos quedin alineats */
 body:has(.row > img.band) .row { grid-template-columns: 76px minmax(0, 1fr) auto; }
 body:has(.row > img.band) .row > .logo { justify-self: center; }
@@ -308,7 +312,8 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .gut span { font-family: var(--mono); position: absolute; left: 0; right: 5px; transform: translateY(-50%); text-align: right;
   font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.05; }
 .gut span[data-n] { color: var(--now); }
-body.offline .status::after { content: " · sin conexión (horario guardado)"; color: var(--muted); }
+.status .sync { white-space: nowrap; }
+.status .sync.old { color: var(--now); font-weight: 700; }
 .gut span[data-n]::after { content: attr(data-n); display: block; font-size: 10px; }
 .gut .nowlbl { left: 2px; right: 2px; text-align: center; background: #e8253a; color: #fff; border-radius: 3px; padding: 2px 0; font-size: 12px; font-weight: 800; z-index: 1; }
 .col { grid-row: 2; position: relative; border-left: 2px solid var(--bg); }
@@ -950,7 +955,7 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #inc, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
 /* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
 body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
@@ -1045,7 +1050,30 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
-#mcSheet { z-index: 20; }  /* per sobre de la barra de baix */
+#mcSheet, #incSheet { z-index: 20; }
+/* Incidències */
+#inc .shead { align-items: center; }
+#inc .incgo { min-height: 40px; padding: 0 14px; font-size: var(--fs-s); }
+.inclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.inclist li { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); display: grid; gap: 6px; }
+.inclist li.urg { border-color: var(--now); }
+.inclist .ih { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; font-size: var(--fs-xs); color: var(--muted); }
+.inclist .ih b { color: var(--ink); }
+.inclist .ut { background: var(--now); color: #fff; border-radius: 6px; padding: 1px 6px; font-weight: 800; letter-spacing: .04em; }
+.inclist .it { font: 600 var(--fs-s)/1.35 var(--body); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.inclist .ia { display: flex; gap: 8px; flex-wrap: wrap; }
+.inclist .ia .btn { min-height: 38px; padding: 0 12px; font-size: var(--fs-xs); }
+.inclist .ok { color: var(--muted); font-size: var(--fs-xs); }
+.inclist img { max-width: 100%; border-radius: 8px; }
+.incold { margin-top: 10px; }
+.incold summary { cursor: pointer; color: var(--muted); font-weight: 700; font-size: var(--fs-s); min-height: 40px; display: flex; align-items: center; }
+#incSheet .body h3 { margin: 18px 0 8px; font: 800 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#incSheet textarea { width: 100%; box-sizing: border-box; font: 16px/1.4 var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+#incSheet .incopts { margin-top: 12px; }
+#incSheet .incopts .btn { flex: 1 1 40%; }
+#incSheet #incUrg[aria-pressed="true"] { background: var(--now); border-color: var(--now); color: #fff; }
+#incSheet .incprev { display: block; max-width: 100%; max-height: 40vh; margin-top: 12px; border-radius: 8px; }
+#incSheet .incprev[hidden] { display: none; }  /* per sobre de la barra de baix */
 #mcSheet .body h3 { margin: 20px 0 8px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 #mcSheet .row2 .btn { flex: 1 1 40%; }
 #mcSheet .row2 .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
@@ -1211,7 +1239,7 @@ body.aron .tabbar, body.aron .totop { display: none !important; }
 .mapaddr p { margin: 0; color: var(--muted); }
 .mapaddr .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
 .mapaddr svg { width: 18px; height: 18px; }
-body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar) { display: none !important; }
+body[data-tab="equipo"] .wrap > :not(#plan):not(#tkgrid):not(#hola):not(#whoBar):not(#inc) { display: none !important; }
 body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !important; }
 .whobar { margin-bottom: -14px; }
 .faces { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -1461,6 +1489,11 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
   <section id="plan" hidden>
     <div class="shead"><h2 id="planH">Mis <span>tareas</span></h2><span class="plwho" id="planWho"></span></div>
     <div id="planBody"></div>
+  </section>
+  <section id="inc" hidden aria-labelledby="incH">
+    <div class="shead"><h2 id="incH">Incidencias <span id="incN"></span></h2><button class="btn primary incgo" id="incGo" type="button">Avisar a producción</button></div>
+    <ul class="inclist" id="incList"></ul>
+    <details class="incold" id="incOld" hidden><summary>Resueltas <span id="incOldN"></span></summary><ul class="inclist" id="incOldList"></ul></details>
   </section>
 
   <!-- Avisos a dalt de tot; «Quedan» després dels escenaris (que «Ahora suena» es vegi sense fer scroll) -->
@@ -1731,6 +1764,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
         </select>
       </label>
       <label class="cfgchk"><input type="checkbox" id="prefChanges"> Avisarme de cambios de horario y avisos de la organización</label>
+      <label class="cfgchk" id="prefIncL" hidden><input type="checkbox" id="prefInc"> Avisarme de incidencias del equipo («Avisar a producción»)</label>
       <p class="note" style="margin:0" id="notifNote"><b>Con el móvil bloqueado no llegan:</b> solo con la app abierta en pantalla (para eso, «Mantener la pantalla encendida»). En iPhone, las notificaciones necesitan la app añadida a la pantalla de inicio (iOS 16.4 o más nuevo).</p>
     </div>
     <div class="langsel cgrp" role="group" aria-label="Idioma / Idioma">
@@ -1819,6 +1853,25 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <button type="button" class="linkbtn" id="mcSheetClr" hidden>Quitar estado (vuelve a «Sin montar»)</button>
   </div>
   <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
+</div>
+
+<div class="sheet" id="incSheet" role="dialog" aria-modal="true" aria-labelledby="incSheetH" hidden>
+  <header>
+    <h2 id="incSheetH">Avisar a producción</h2>
+    <button class="btn" id="incX" type="button">Cancelar</button>
+  </header>
+  <div class="body">
+    <p class="note">Llega a todo el equipo en la pestaña Tareas y, con notificación, a quien tenga «Avisarme de incidencias».</p>
+    <h3><label for="incTxt">¿Qué pasa y dónde?</label></h3>
+    <textarea id="incTxt" maxlength="300" rows="4" placeholder="Ej.: se ha caído la pantalla LED de la izquierda del escenario"></textarea>
+    <div class="row2 incopts">
+      <button type="button" class="btn" id="incUrg" aria-pressed="false">Urgente</button>
+      <label class="btn" id="incPhotoL"><input type="file" id="incPhoto" accept="image/*" capture="environment" hidden>Añadir foto</label>
+    </div>
+    <img id="incPrev" class="incprev" alt="Foto de la incidencia" hidden>
+    <p class="hint" id="incMsg" hidden></p>
+  </div>
+  <div class="foot"><button class="btn primary" id="incSend" type="button">Enviar</button></div>
 </div>
 
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
@@ -2201,7 +2254,7 @@ function normFx(v) {
 }
 // Format "cru" (el de changes.json): { ner: [{ id, a: "21:00", b: "22:00", n, t, sub }], … }
 const DEFAULT_RAW = Object.fromEntries(Object.entries(DEFAULT).map(([id, arr]) =>
-  [id, arr.map(([a, b, n, t, sub, fx], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx) }))]));
+  [id, arr.map(([a, b, n, t, sub, fx, note], j) => ({ id: `${id}-${j}`, a, b, n, t, sub: sub || '', fx: normFx(fx), ...(note ? { note } : {}) }))]));
 const DEFMAP = Object.fromEntries(Object.values(DEFAULT_RAW).flat().map(r => [r.id, r]));
 
 // Cada dia, de FEST.start a FEST.end. T0 = obertura del 1r dia, TEND0 = final de l'últim
@@ -2278,11 +2331,14 @@ const ICO = Object.fromEntries(Object.entries({
   time: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M10 3h4"/>',
   user: '<circle cx="12" cy="9" r="3.6"/><path d="M5.5 19.5c1-3.6 3.6-5.3 6.5-5.3s5.5 1.7 6.5 5.3"/>',
   alert: '<path d="M12 4l9 16H3zM12 10v4.5M12 17.4v.1"/>',
+  note: '<path d="M5 4h10l4 4v12H5zM14 4v5h5M8.5 13h7M8.5 16.5h5"/>',
   loc: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
 }).map(([k, d]) => [k, `<svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`]));
 const FXI = {};  // abans emojis: ara l'etiqueta sola (es llegeix millor i no fa «app genèrica»)
 const fxPill = f => `<span class="fx">${html(f)}</span>`;
 const fxTags = x => x.fx && x.fx.length ? `<span class="fxs" aria-label="Efectos">${x.fx.map(fxPill).join('')}</span>` : '';
+// Nota de l'organització per a l'equip (cue: «LED: visual X», «gravar l'entrada»…). Surt a la fila, a la graella i a l'avís
+const noteTag = x => x.note ? `<div class="cuenote">${ICO.note}<span>${html(x.note)}</span></div>` : '';
 const chgTag = x => !x.chg ? '' : `<span class="chgtag">${x.chg === 'new' ? 'Nuevo' : `Cambio · antes ${esc(x.was)}`}</span>`;
 
 // Llegeix un horari "cru" (cartell o changes.json). Valida cada entrada: el que no és correcte es descarta
@@ -2302,7 +2358,7 @@ function load(raw) {
         const timeChg = d && (T(d.a) !== a || T(d.b) !== b), nameChg = d && String(d.n) !== n;
         const chg = !d ? 'new' : timeChg ? 'time' : nameChg ? 'name' : '';
         const was = !d ? '' : [timeChg ? `${lbl(T(d.a))}–${lbl(T(d.b))}` : '', nameChg ? d.n : ''].filter(Boolean).join(' · ');
-        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), fx: normFx(r.fx), chg, was };
+        return { id: r.id, s, a, b, n, t: Math.min(5, Math.max(0, Math.round(+r.t) || 0)), sub: String(r.sub || '').trim().slice(0, 80), fx: normFx(r.fx), note: String(r.note || '').trim().slice(0, 120), chg, was };
       })
       .filter(x => x.n && x.b > x.a)
       .sort((x, y) => x.a - y.a);
@@ -2397,9 +2453,9 @@ function buildGrid() {
       const top = y(Math.max(x.a, G0)), h = y(Math.min(x.b, GEND)) - top;
       const tiny = (x.b - x.a) / MIN <= 25 ? ' tiny' : '';
       const tc = IMPC && x.t ? `--tc:var(--t${x.t});` : '';
-      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}${x.fx.length ? `, efectos: ${x.fx.join(', ')}` : ''}`;
+      const label = `${x.n}${x.sub ? ` (${x.sub})` : ''}, ${s.name}, de ${lbl(x.a)} a ${lbl(x.b)}${IMPC && x.t ? `, importancia ${x.t} de 5` : ''}${x.chg === 'new' ? ', añadido por la organización' : x.chg ? `, cambiado (antes ${x.was})` : ''}${x.fx.length ? `, efectos: ${x.fx.join(', ')}` : ''}${x.note ? `, nota: ${x.note}` : ''}`;
       g += `<button type="button" class="blk${tiny}${impc(x.t)}${x.chg ? ' chg' : ''}" data-fav="${esc(x.id)}" aria-pressed="false" aria-label="${esc(label)}" style="${tc}top:${top + 1.5}px;height:${h - 3}px">`
-        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
+        + `<i class="pl"></i><span class="n">${deco(x.n)}</span>${x.sub ? `<span class="s">${html(x.sub)}</span>` : ''}${x.fx.length ? `<span class="fxg">${x.fx.map(f => `<span class="fx">${html(f)}</span>`).join('')}</span>` : ''}${x.note ? `<span class="s gnote">${ICO.note}${html(x.note)}</span>` : ''}<span class="t">${x.chg ? `<b class="chgw">${x.chg === 'new' ? 'NUEVO' : 'CAMBIO'}</b> ` : ''}${lbl(x.a)}–${lbl(x.b)}</span></button>`;
     }
     const last = day[day.length - 1];
     if (!last) g += `<div class="closedtag" style="top:${PAD + 10}px">Sin actuaciones</div>`;
@@ -2630,7 +2686,7 @@ function rowHTML(s, t) {
   const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${noteTag(cur)}${chgTag(cur)}
       <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Después: cierra el escenario'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
@@ -2650,13 +2706,13 @@ function rowMine(s, t) {
   const logo = bandImg(cur, 'logo') || `<img class="logo stlogo" src="img/${s.id}.png" alt="">`;
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
+      <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${noteTag(cur)}${chgTag(cur)}
       <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Es tu último aquí'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle mine', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${fxTags(nxt)}${chgTag(nxt)}
+      <div class="dj${impc(nxt.t)}">${imp(nxt.t)}${deco(nxt.n)}</div>${fxTags(nxt)}${noteTag(nxt)}${chgTag(nxt)}
       <div class="after">Empieza a las <b>${lbl(nxt.a)}</b></div></div>
     <div class="right"><div class="left"><span>empieza en</span><b>${dur(nxt.a - t)}</b></div>${star(nxt)}</div>`, null, nxt];
   return ['hide', '', null];
@@ -2794,6 +2850,9 @@ try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(PKEY) || '{}') }; }
 prefs.before = [0, 5, 10, 15, 20, 30].includes(+prefs.before) ? +prefs.before : 10;
 prefs.changes = prefs.changes !== false;
 prefs.tb = [0, 5, 10, 15, 20, 30].includes(+prefs.tb) ? +prefs.tb : 10;
+// Incidències: per defecte les rep Producció (es canvia a Ajustes). null = encara no triat
+prefs.inc = typeof prefs.inc === 'boolean' ? prefs.inc : null;
+const incOn = () => prefs.inc === null ? PROF === 'prod' : prefs.inc;
 // Qui sóc (per a «Mi plan»): la clau del nom a l'equip; '-' = no sóc de l'equip
 const YOK = FEST.key + '-yo-v1';
 let YO = '';
@@ -2834,12 +2893,12 @@ function checkAlerts(t) {
     if (left > 0 && left <= prefs.before * MIN && !told.has(k + ':pre')) {
       remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ${inDur(left)} en ${x.s.name} (${lbl(x.a)})`);
-      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}`, k + ':pre');
+      sysNotify(`${x.n} empieza ${inDur(left)}`, `${x.s.name} · ${lbl(x.a)}${x.note ? ' · ' + x.note : ''}`, k + ':pre');
     }
     if (t >= x.a && t < x.a + 2 * MIN && !told.has(k + ':go')) {
       remember(k + ':go'); remember(k + ':pre');
       toast(`★ <b>${deco(x.n)}</b> empieza ahora en ${x.s.name}`);
-      sysNotify(`${x.n} empieza ahora`, x.s.name, k + ':go');
+      sysNotify(`${x.n} empieza ahora`, x.note ? `${x.s.name} · ${x.note}` : x.s.name, k + ':go');
     }
   }
 }
@@ -2938,6 +2997,7 @@ function tick(force) {
   } else {
     st.innerHTML = '<strong>Se ha acabado.</strong> ¡Hasta la próxima!';
   }
+  st.insertAdjacentHTML('beforeend', syncTxt());
   const dn = document.getElementById('dstnote');
   const p = pass(t);
   dn.hidden = !p && !(DST && t >= W0 - 30 * MIN && t < W0);
@@ -3211,7 +3271,7 @@ async function syncNow(keepalive) {
   try {
     const sub = await pushSubscription(false);
     if (!sub) { pushActive = false; return notifUI(); }
-    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb }, keepalive);
+    await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn() }, keepalive);
   } catch (e) { syncDirty = true; }
 }
 function syncPush() {
@@ -3226,7 +3286,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) syncN
 addEventListener('pagehide', () => syncNow(true));
 async function pushOn() {
   const sub = await pushSubscription(true);
-  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+  await pushPost('/sub', { endpoint: sub.endpoint, favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn() });
   pushActive = true;
 }
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('sin respuesta')), ms))]);
@@ -3304,7 +3364,7 @@ document.getElementById('notifReset').addEventListener('click', async () => {
     old = await reg.pushManager.getSubscription();
     if (old) await old.unsubscribe();
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uDec(PUSH.public) });
-    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb });
+    await pushPost('/sub', { endpoint: sub.endpoint, old: old && old.endpoint !== sub.endpoint ? old.endpoint : '', favs: [...favs], before: prefs.before, changes: prefs.changes, yo: yoPush(), team: PROF, tb: prefs.tb, inc: incOn() });
     pushActive = true;
     notifUI('Restablecidas. También llegarán con el móvil bloqueado.');
   } catch (e) {
@@ -3327,6 +3387,11 @@ prefBefore.value = String(prefs.before);
 prefChanges.checked = prefs.changes;
 prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; savePrefs(); told = new Set(); syncPush(); });
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
+const prefInc = document.getElementById('prefInc');
+prefInc.checked = incOn();
+prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePrefs(); syncPush(); });
+// En canviar de perfil (sense haver-ho triat a mà), Producció passa a rebre-les
+document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
 const BUILD = '';
@@ -4239,7 +4304,7 @@ const noticeMine = () => notice && (!noticeTeam || noticeTeam === PROF) ? notice
 const noticeHead = () => `${html(noticeBy || 'Organización')}${noticeTeam ? ` <i class="nteam">· para ${html(WHO_L[noticeTeam])}</i>` : ''}`;
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
-const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}`).join('~');
+const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}|${x.note}`).join('~');
 // Avisos: l'aviso actiu de l'organització fixat dalt (no es pot tancar) i l'historial del dia (els 3 darrers; «Ver todos» per a la resta)
 var FEEDK = FEST.key + '-feed-v1';  // «var»: tick() hi mira abans que s'arribi aquí
 var feed = [], feedSeen = 0;
@@ -4359,12 +4424,24 @@ function fetchT(url, opts = {}, ms = 10000) {
 // Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
 let pubStamp = '', pubUntil = 0;
 let pulling = false, pullFails = 0;
+// Quan s'ha llegit changes.json per últim cop (hora real, no la del Modo prueba): surt a la línia d'estat
+// perquè ningú es refiï d'un horari vell sense saber-ho. Es guarda per si l'app s'obre sense cobertura.
+const SYNCK = FEST.key + '-sync';
+let lastSync = 0;
+try { lastSync = +localStorage.getItem(SYNCK) || 0; } catch (e) {}
+function syncTxt() {
+  if (!ONLINE || !lastSync) return '';
+  const m = Math.max(0, Math.floor((Date.now() - lastSync) / MIN)), off = document.body.classList.contains('offline');
+  const ago = m < 1 ? 'ahora' : m < 60 ? `hace ${m}${NB}min` : `hace ${dur(m * MIN)}`;
+  return ` · <span class="sync${off || m >= 10 ? ' old' : ''}">${off ? `sin conexión · horario de ${ago}` : `actualizado ${ago}`}</span>`;
+}
 async function pullChanges() {
   if (!ONLINE || pulling) return;
   pulling = true;
   try {
     const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
     pullFails = r.ok || r.status === 404 ? 0 : pullFails + 1;
+    if (r.ok || r.status === 404) { lastSync = Date.now(); try { localStorage.setItem(SYNCK, String(lastSync)); } catch (e) {} }
     if (r.ok) {
       const d = await r.json();
       const st = d && String(d.updated || '');
@@ -4378,7 +4455,8 @@ async function pullChanges() {
   } catch (e) { pullFails++; }
   pulling = false;
   const off = pullFails >= 2;
-  if (off !== document.body.classList.contains('offline')) { document.body.classList.toggle('offline', off); tick(true); }
+  document.body.classList.toggle('offline', off);
+  tick(true);  // refresca «actualizado hace…»
 }
 
 // Organització: editor protegit amb contrasenya.
@@ -4423,7 +4501,7 @@ const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === '
 
 function rawNow() {
   const raw = {};
-  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub, fx: [...x.fx] }));
+  for (const s of STAGES) raw[s.id] = SETS[s.id].map(x => ({ id: x.id, a: code(x.a), b: code(x.b), n: x.n, t: x.t, sub: x.sub, fx: [...x.fx], ...(x.note ? { note: x.note } : {}) }));
   return raw;
 }
 // Editor: una llista curta per escenari; en tocar una actuació s'obre amb tots els camps (hores, nom, importància, subtítol, efectes)
@@ -4457,6 +4535,8 @@ function renderEditor(badIdx) {
         <div><label class="edl">Importancia</label><select class="t" aria-label="Importancia: ${esc(r.n || 'actuación nueva')}">${[5, 4, 3, 2, 1, 0].map(v => `<option value="${v}"${+r.t === v ? ' selected' : ''}>${v ? `Importancia ${v}` : 'Sin color'}</option>`).join('')}</select></div>
         <div><label class="edl">Subtítulo</label><input class="sub" type="text" value="${html(r.sub || '')}" aria-label="Subtítulo: ${esc(r.n || 'actuación nueva')}" placeholder="Opcional" maxlength="80" autocorrect="off" spellcheck="false" enterkeyhint="done"></div>
       </div>
+      <label class="edl">Nota para el equipo</label>
+      <input class="note" type="text" value="${html(r.note || '')}" aria-label="Nota para el equipo: ${esc(r.n || 'actuación nueva')}" placeholder="Ej.: LED visual 3 · grabar la entrada (opcional)" maxlength="120" autocorrect="off" enterkeyhint="done">
       <div class="edacts"><button type="button" class="btn quiet del">Quitar actuación</button><button type="button" class="btn edok">Hecho</button></div>
     </div>`}</div>`).join('') || '<p class="empty">Este escenario no tiene actuaciones.</p>';
   edCountUI();
@@ -4484,7 +4564,7 @@ function markDirty() {
 }
 // Combina tres versions de l'horari: de la qual partia (base), la meva i la publicada per una altra persona.
 // Cada actuació (per id): si només l'ha canviada un, guanya aquell canvi; si l'han canviada tots dos, guanya la meva.
-const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || ''), normFx(r.fx).join()]) : '';
+const norm = r => r ? JSON.stringify([String(r.a), String(r.b), String(r.n), +r.t || 0, String(r.sub || ''), normFx(r.fx).join(), String(r.note || '').trim()]) : '';
 function merge3(base, mine, theirs, bn, mn, tn) {
   const sets = {}, clash = [];
   for (const s of STAGES) {
@@ -4587,6 +4667,7 @@ document.getElementById('edRows').addEventListener('input', e => {
   const r = draft.sets[edStage][+row.dataset.i];
   if (e.target.classList.contains('n')) r.n = e.target.value;
   if (e.target.classList.contains('sub')) r.sub = e.target.value;
+  if (e.target.classList.contains('note')) { if (e.target.value.trim()) r.note = e.target.value; else delete r.note; }
   markDirty();
   row.querySelector('.edhead').innerHTML = edHead(r, +row.dataset.i);
 });
@@ -6713,6 +6794,146 @@ setInterval(() => { if (!document.hidden) paintTabs(); }, 30000);
 document.addEventListener('change', e => { if (e.target.name === 'prof' || e.target.classList.contains('yosel')) setTimeout(paintTabs, 0); });
 holaBody.addEventListener('click', () => setTimeout(paintTabs, 0));
 // ==== /MI PLAN ====
+
+// ==== INCIDENCIAS ====
+// «Avisar a producción» (04-11-2026): qualsevol de l'equip envia una incidència (text, urgent, foto opcional) al servidor d'avisos.
+// Tothom la veu a Tareas i la pot donar per resolta; els mòbils amb «Avisarme de incidencias» reben un push (≤ 1 min).
+// Sense contrasenya, com les ✓ i les càmeres (decisió d'en Pau: és una eina d'equip). Sense servidor (artifact), no surt.
+const INC_LIVE = () => !!(PUSH && PUSH.url && ONLINE);
+const incSec = document.getElementById('inc'), incSheet = document.getElementById('incSheet');
+const INC_SEEN = FEST.key + '-inc-seen-v1';
+let INC = [], incImg = '', incBusy = false, incSeen = 0, incFirst = true;
+try { incSeen = +localStorage.getItem(INC_SEEN) || 0; } catch (e) {}
+const incWho = () => (typeof mcWho === 'function' && mcWho()) || (PROF ? WHO_L[PROF] : '') || '';
+const incAgo = at => { const m = Math.max(0, Math.round((Date.now() - at) / MIN)); return m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m}${NB}min` : new Date(at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' }); };
+function incLi(x) {
+  return `<li class="${x.urg && !x.st ? 'urg' : ''}" data-n="${x.n}">
+    <div class="ih"><span>${x.urg && !x.st ? '<span class="ut">URGENTE</span> ' : ''}<b>${html(x.who || 'Alguien')}</b> · ${incAgo(x.at)}</span></div>
+    <div class="it">${html(x.txt)}</div>
+    ${x.st ? `<div class="ok">✓ Resuelta${x.sby ? ' por ' + html(x.sby) : ''} · ${incAgo(x.sat)}</div>` : ''}
+    <div class="ia">${x.img ? '<button type="button" class="btn quiet" data-incimg>Ver foto</button>' : ''}<button type="button" class="btn${x.st ? ' quiet' : ''}" data-incst="${x.st ? '' : 'ok'}">${x.st ? 'Reabrir' : 'Resuelta'}</button></div>
+  </li>`;
+}
+function incPaint() {
+  incSec.hidden = !INC_LIVE();
+  if (incSec.hidden) return;
+  const day = Date.now() - 24 * 3600000;
+  const open = INC.filter(x => !x.st), done = INC.filter(x => x.st && x.at > day);
+  document.getElementById('incN').textContent = open.length ? `· ${open.length}` : '';
+  document.getElementById('incList').innerHTML = open.map(incLi).join('') || '<li class="ok">Sin incidencias abiertas.</li>';
+  document.getElementById('incOld').hidden = !done.length;
+  document.getElementById('incOldN').textContent = done.length;
+  document.getElementById('incOldList').innerHTML = done.map(incLi).join('');
+}
+async function incPull() {
+  if (!INC_LIVE()) return;
+  try {
+    const r = await fetchT(PUSH.url + '/inc', { cache: 'no-store' }, 8000);
+    if (!r.ok) return;
+    const d = await r.json();
+    if (!Array.isArray(d.inc)) return;
+    INC = d.inc;
+    // Amb l'app oberta: les noves (no meves) surten a la píndola; a la primera càrrega, no
+    const fresh = INC.filter(x => x.at > incSeen && !x.st);
+    if (!incFirst && incOn() && fresh.length) for (const x of fresh.slice(0, 3)) toast(`<b>${x.urg ? 'Incidencia URGENTE' : 'Incidencia'}</b> · ${html(x.who || 'Alguien')}<br>${html(x.txt)}`, 'org', null, 30000);
+    incFirst = false;
+    const mx = Math.max(incSeen, ...INC.map(x => x.at));
+    if (mx !== incSeen) { incSeen = mx; try { localStorage.setItem(INC_SEEN, String(mx)); } catch (e) {} }
+    incPaint();
+  } catch (e) {}
+}
+// Foto: es redueix al mòbil (JPEG, costat llarg 1024 px, < 250 KB) abans d'enviar-la
+async function incShrink(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    for (const [side, q] of [[1024, .6], [800, .5], [640, .45]]) {
+      const k = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const d = c.toDataURL('image/jpeg', q);
+      if (d.length <= 250000) return d;
+    }
+    return '';
+  } finally { URL.revokeObjectURL(url); }
+}
+function incMsg(t, bad) { const m = document.getElementById('incMsg'); m.hidden = !t; m.textContent = t || ''; m.classList.toggle('bad', !!bad); }
+function incOpen() {
+  incImg = '';
+  document.getElementById('incTxt').value = '';
+  document.getElementById('incUrg').setAttribute('aria-pressed', 'false');
+  document.getElementById('incPrev').hidden = true;
+  incMsg(incWho() ? '' : 'Elige «Soy…» en Ajustes para que se vea quién avisa.');
+  incSheet.hidden = false;
+  anim(incSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  document.body.classList.add('locked');
+  document.getElementById('incTxt').focus();
+}
+function incClose() { incSheet.hidden = true; document.body.classList.remove('locked'); document.getElementById('incGo').focus({ preventScroll: true }); }
+document.getElementById('incGo').addEventListener('click', incOpen);
+document.getElementById('incX').addEventListener('click', incClose);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !incSheet.hidden) incClose(); });
+document.getElementById('incUrg').addEventListener('click', e => e.currentTarget.setAttribute('aria-pressed', e.currentTarget.getAttribute('aria-pressed') !== 'true'));
+document.getElementById('incPhoto').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  incMsg('Preparando la foto…');
+  try { incImg = await incShrink(f); } catch (err) { incImg = ''; }
+  const p = document.getElementById('incPrev');
+  p.hidden = !incImg; if (incImg) p.src = incImg;
+  incMsg(incImg ? '' : 'No se ha podido usar esta foto. Puedes enviar el aviso sin foto.', !incImg);
+});
+document.getElementById('incSend').addEventListener('click', async () => {
+  const txt = document.getElementById('incTxt').value.trim();
+  if (!txt) { incMsg('Escribe qué pasa.', true); document.getElementById('incTxt').focus(); return; }
+  if (incBusy) return;
+  incBusy = true; incMsg('Enviando…');
+  try {
+    const d = await pushPost('/inc', { txt, who: incWho(), urg: document.getElementById('incUrg').getAttribute('aria-pressed') === 'true', img: incImg });
+    if (d.at) { incSeen = Math.max(incSeen, d.at); try { localStorage.setItem(INC_SEEN, String(incSeen)); } catch (e) {} }
+    incClose();
+    toast('<b>Aviso enviado a producción.</b> Lo ve todo el equipo en Tareas.', 'info', null, 6000);
+    incPull();
+  } catch (err) {
+    incMsg(/429/.test(err.message) ? 'Demasiados avisos seguidos: espera unos minutos.' : 'No se ha podido enviar. Mira la conexión y vuelve a probar (el texto no se borra).', true);
+  }
+  incBusy = false;
+});
+incSec.addEventListener('click', async e => {
+  const li = e.target.closest('li[data-n]');
+  if (!li) return;
+  const n = +li.dataset.n, x = INC.find(i => i.n === n);
+  if (!x) return;
+  const st = e.target.closest('[data-incst]');
+  if (st) {
+    const v = st.dataset.incst;
+    Object.assign(x, { st: v, sby: v ? incWho() : '', sat: Date.now() });  // es veu al moment; el servidor ho confirma al pròxim refresc
+    incPaint();
+    try { await pushPost('/incst', { n, st: v, who: incWho() }); } catch (err) { toast('No se ha podido guardar: mira la conexión.', 'info', null, 6000); }
+    incPull();
+    return;
+  }
+  const b = e.target.closest('[data-incimg]');
+  if (b) {
+    b.disabled = true; b.textContent = 'Cargando…';
+    try {
+      const r = await fetchT(`${PUSH.url}/incimg?n=${n}`, { cache: 'no-store' }, 15000);
+      const d = await r.json();
+      if (!/^data:image\/jpeg;base64,/.test(d.img || '')) throw new Error('img');
+      const img = document.createElement('img'); img.alt = 'Foto de la incidencia'; img.src = d.img;
+      b.closest('.ia').before(img); b.remove();
+    } catch (err) { b.disabled = false; b.textContent = 'Ver foto'; }
+  }
+});
+document.getElementById('prefIncL').hidden = !INC_LIVE();
+// Cada minut amb l'app oberta (i en tornar-hi): poca cosa, sense la foto
+incPaint();
+incPull();
+setInterval(() => { if (!document.hidden) incPull(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) incPull(); });
+// ==== /INCIDENCIAS ====
 
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
