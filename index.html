@@ -1351,6 +1351,52 @@ html[data-theme="light"] .tools .switch:not([aria-pressed="true"])::after { back
 html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(--fav) 16%, var(--panel)); }
 .temasel .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
+/* ==== Microanimacions (04-11-2026, inspirades en bencho.dev): només transform/opacitat, un cop per esdeveniment, res amb «Reducir movimiento» ==== */
+/* Números que rodolen: la xifra que canvia baixa com un comptaquilòmetres (clip-path i no overflow: no mou la línia de base) */
+span.rl, span.rl > span { all: unset; display: inline-block; }  /* que no hi arribin estils com «.left span» */
+span.rl { clip-path: inset(0 -.1em); }
+span.rl > span { position: relative; }
+span.rl > span::after { content: attr(data-o); position: absolute; left: 0; top: 100%; }
+/* ✓ de Mi plan: el ✓ es dibuixa i el text es ratlla d'esquerra a dreta abans que la tasca marxi */
+li.tk.ck .tkchk svg path { stroke-dasharray: 24; animation: ckdraw .32s cubic-bezier(.2,.8,.2,1) both; }
+li.tk.ck .tkn { justify-self: start; background: linear-gradient(currentColor, currentColor) 0 .62em / 0 2px no-repeat; animation: ckstrike .36s .1s cubic-bezier(.2,.8,.2,1) forwards; }
+li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
+@keyframes ckdraw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+@keyframes ckstrike { to { background-size: 100% 2px; opacity: .45; } }
+/* Píndola d'avisos de l'organització (com la Dynamic Island): negra sempre, a dalt; en tocar-la s'obre */
+.isl { position: fixed; z-index: 66; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 50%; translate: -50% 0; box-sizing: border-box; max-width: calc(100vw - 24px);
+  background: #000; color: #fff; border: 1px solid rgba(255,255,255,.16); border-radius: 22px; box-shadow: 0 8px 28px rgba(0,0,0,.55); overflow: hidden; cursor: pointer; touch-action: manipulation; }
+.isl .ib { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px 0 14px; white-space: nowrap; }
+.isl .ib .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--chg, #ff2bd6); box-shadow: 0 0 10px var(--chg, #ff2bd6); }
+.isl .ib .it { font: 800 13px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; }
+.isl .ib .is { font: 500 14px/1 var(--body); opacity: .75; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.isl .ib .in { flex: none; min-width: 20px; height: 20px; border-radius: 10px; background: rgba(255,255,255,.18); font: 800 12px/20px var(--body); text-align: center; padding: 0 5px; box-sizing: border-box; }
+.isl .ib .in:empty { display: none; }
+.isl .ix { display: none; }
+.isl.open { width: min(calc(100vw - 24px), 520px); border-radius: 26px; cursor: default; }
+.isl.open .ib .is { display: none; }
+.isl.open .ib { justify-content: flex-start; }
+.isl.open .ix { display: block; padding: 0 16px 14px; }
+.isl .ix ul { list-style: none; margin: 0; padding: 0; max-height: 52svh; overflow: auto; }
+.isl .ix li { font: 500 15px/1.35 var(--body); padding: 10px 0; border-top: 1px solid rgba(255,255,255,.12); overflow-wrap: anywhere; white-space: pre-line; }
+.isl .ix li b { color: #fff; }
+.isl .ix .ic { margin-top: 10px; width: 100%; height: 44px; border-radius: 22px; border: 0; background: rgba(255,255,255,.14); color: #fff; font: 700 15px var(--body); cursor: pointer; }
+/* Llisca per publicar: s'ha d'arrossegar fins al final (evita publicar sense voler) */
+.slide { position: relative; flex: 1 1 260px; max-width: 420px; height: 52px; border-radius: 26px; border: 1.5px solid var(--accent); background: var(--panel, #111); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.slide .sf { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); opacity: .35; }
+.slide .st { position: absolute; inset: 0; display: grid; place-items: center; padding-left: 40px; font: 800 15px var(--body); color: var(--ink); letter-spacing: .02em; pointer-events: none; }
+.slide .sk { position: absolute; top: 3px; left: 3px; width: 43px; height: 43px; border-radius: 50%; background: var(--accent); color: var(--accent-ink, #000); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.slide.ok .st { color: var(--accent-ink, #000); }
+.slide.ok .sf { opacity: 1; }
+.slide[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+.slide:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Estirar per actualitzar (a l'app de pantalla d'inici l'iPhone no ho fa) */
+.ptr { position: fixed; z-index: 64; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%; background: #000; border: 1px solid rgba(255,255,255,.18); color: #fff;
+  display: grid; place-items: center; transform: translateY(-70px); opacity: 0; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+.ptr svg { width: 22px; height: 22px; }
+.ptr.go svg { animation: ptrspin .8s linear infinite; }
+@keyframes ptrspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -1778,6 +1824,8 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="isl" id="isl" role="status" aria-live="polite" hidden><div class="ib"><span class="dot"></span><span class="it">Aviso</span><span class="is"></span><span class="in"></span></div><div class="ix"><ul></ul><button type="button" class="ic">Entendido</button></div></div>
+<div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div>
 
 <script>
 document.documentElement.lang = 'es';
@@ -2460,6 +2508,53 @@ const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const anim = (el, kf, o) => (!el || RM.matches || !el.animate) ? null : el.animate(kf, { easing: EASE, fill: 'backwards', ...o });
 const RISE = [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }];
 let booted = false;
+// Panell d'aeroport: quan canvia l'artista, el nom gira (rotateX) i les lletres «remenen» fins a quedar quietes, d'esquerra a dreta.
+// Un sol element, ~0,7 s, un cop per set; l'alçada queda fixada mentre dura perquè les lletres a l'atzar no facin saltar la fila
+const FLAPCH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function flap(el) {
+  if (!el || RM.matches || !el.animate) return;
+  const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+  while (tw.nextNode()) if (tw.currentNode.nodeValue.trim()) nodes.push([tw.currentNode, tw.currentNode.nodeValue]);
+  if (!nodes.length) return;
+  el.style.height = el.offsetHeight + 'px';
+  el.animate([{ transform: 'perspective(500px) rotateX(-88deg)', opacity: .2 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.3,1.35,.5,1)', transformOrigin: '50% 0' });
+  const t0 = performance.now(), STEP = 32, total = nodes.reduce((n, [, v]) => n + v.length, 0), END = Math.min(900, 220 + total * STEP);
+  let fr = 0;
+  (function f(now) {
+    const k = now - t0;
+    if (++fr % 2 || k >= END) {  // ~30 fps: és un panell mecànic, no cal més
+      let i = 0;
+      for (const [n, v] of nodes) {
+        let out = '';
+        for (const c of v) { out += (k >= END || k > 180 + i * STEP || !/[A-Za-z0-9]/.test(c)) ? c : FLAPCH[Math.random() * 36 | 0]; i++; }
+        if (n.nodeValue !== out) n.nodeValue = out;
+      }
+    }
+    if (k < END) requestAnimationFrame(f); else el.style.height = '';
+  })(t0);
+}
+// Números que rodolen: les xifres que canvien d'un compte enrere baixen com un comptaquilòmetres (només transform).
+// Només si el text té la mateixa llargada (si canvien les unitats, «1 h» → «59 min», es canvia sense més)
+function roll(el, old) {
+  if (!el || !booted || RM.matches || old == null || !el.animate) return;
+  const tn = el.firstChild;
+  if (!tn || tn.nodeType !== 3) return;
+  const nw = tn.nodeValue, o = old.slice(0, nw.length);
+  if (nw === o || o.length !== nw.length) return;
+  const frag = document.createDocumentFragment(), digs = [];
+  let buf = '';
+  for (let i = 0; i < nw.length; i++) {
+    if (nw[i] !== o[i] && /\d/.test(nw[i]) && /\d/.test(o[i])) {
+      if (buf) { frag.append(buf); buf = ''; }
+      const s = document.createElement('span'), d = document.createElement('span');
+      s.className = 'rl'; d.dataset.o = o[i]; d.textContent = nw[i]; s.append(d); frag.append(s); digs.push(d);
+    } else buf += nw[i];
+  }
+  if (buf) frag.append(buf);
+  tn.replaceWith(frag);
+  // de dreta a esquerra, com un comptador de veritat (les unitats primer)
+  digs.reverse().forEach((d, j) => d.animate([{ transform: 'translateY(-100%)' }, { transform: 'none' }], { duration: 520, delay: j * 70, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'backwards' }));
+}
 
 function rowHTML(s, t) {
   if (filt) return rowMine(s, t);
@@ -2561,6 +2656,7 @@ function upHTML(t) {
 // Avisos emergents. kind: 'mine' (groc, els meus artistes), 'org' (organització), 'info'. action: { label, fn }
 const toasts = document.getElementById('toasts');
 function toast(msg, kind = 'mine', action = null, ms = 10000) {
+  if (kind === 'org' && !action) return island(msg, ms);  // els de l'organització van a la píndola de dalt
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Cerrar aviso">✕</button>`;
@@ -2574,6 +2670,52 @@ function toast(msg, kind = 'mine', action = null, ms = 10000) {
   setTimeout(bye, ms);
   try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
+// Píndola d'avisos de l'organització (com la Dynamic Island): surt a dalt, plegada; en tocar-la s'obre amb tots els avisos.
+// Es canvia la mida d'un sol element petit (amplada/alçada), amb una molla curta. Plegada, marxa sola; oberta, fins a «Entendido»
+const isl = document.getElementById('isl');
+let islMsgs = [], islTimer = 0;
+const ISL_EASE = 'cubic-bezier(.3,1.25,.45,1)';
+function islResize(fn) {
+  const r0 = isl.getBoundingClientRect();
+  fn();
+  const r1 = isl.getBoundingClientRect();
+  if (RM.matches || !isl.animate || isl.hidden) return;
+  isl.animate([{ width: r0.width + 'px', height: r0.height + 'px' }, { width: r1.width + 'px', height: r1.height + 'px' }], { duration: 440, easing: ISL_EASE });
+  const ix = isl.querySelector(isl.classList.contains('open') ? '.ix' : '.ib');
+  ix.animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 260, delay: 90, easing: EASE, fill: 'backwards' });
+}
+function islPaint() {
+  const last = islMsgs[islMsgs.length - 1] || '';
+  const tmp = document.createElement('div'); tmp.innerHTML = last.replace(/<br>/g, ' · ');
+  isl.querySelector('.is').textContent = tmp.textContent;
+  isl.querySelector('.in').textContent = islMsgs.length > 1 ? String(islMsgs.length) : '';
+  isl.querySelector('.ix ul').innerHTML = islMsgs.slice().reverse().map(m => `<li>${m}</li>`).join('');
+}
+function islClose() {
+  clearTimeout(islTimer);
+  const done = () => { isl.hidden = true; isl.classList.remove('open'); islMsgs = []; };
+  const a = anim(isl, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-14px) scale(.8)' }], { duration: 200, fill: 'forwards' });
+  a ? a.onfinish = () => { done(); a.cancel(); } : done();
+}
+function island(msg, ms) {
+  islMsgs.push(msg);
+  if (islMsgs.length > 6) islMsgs.shift();
+  const was = !isl.hidden;
+  if (was) islResize(islPaint);
+  else {
+    islPaint(); isl.hidden = false;
+    anim(isl, [{ opacity: 0, transform: 'translateY(-18px) scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: ISL_EASE });
+  }
+  clearTimeout(islTimer);
+  if (!isl.classList.contains('open')) islTimer = setTimeout(islClose, ms || 30000);
+  try { if (navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+isl.addEventListener('click', e => {
+  if (e.target.closest('.ic')) { islClose(); return; }
+  if (isl.classList.contains('open')) { if (e.target.closest('.ib')) islResize(() => isl.classList.remove('open')), islTimer = setTimeout(islClose, 15000); return; }
+  clearTimeout(islTimer);
+  islResize(() => isl.classList.add('open'));
+});
 // Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
 const NKEY = FEST.key + '-notif-v1';
 let notifOn = false;
@@ -2743,11 +2885,13 @@ function tick(force) {
     const key = state + inner;
     if (rowCache[s.id] !== key) {
       const id = cur ? cur.id : nx ? 'n' + nx.id : state, prev = r.dataset.cur;
+      const ob = r.querySelector('.left b'), oldLeft = ob && ob.textContent;
       r.className = 'row ' + state;
       setHTML(r, inner);
       rowCache[s.id] = key;
-      // Canvi d'artista: el nou entra des de baix (no es repeteix cada minut perquè l'id no canvia)
-      if (booted && prev !== id) { anim(r.querySelector('.mid'), RISE, { duration: 380 }); anim(r.querySelector('.right'), RISE, { duration: 380, delay: 60 }); }
+      // Canvi d'artista: el nou entra des de baix i el nom gira com un panell d'aeroport (no es repeteix cada minut perquè l'id no canvia)
+      if (booted && prev !== id) { anim(r.querySelector('.mid'), RISE, { duration: 380 }); anim(r.querySelector('.right'), RISE, { duration: 380, delay: 60 }); if (cur) flap(r.querySelector('.dj')); }
+      else roll(r.querySelector('.left b'), oldLeft);  // el mateix artista: només rodola el «quedan»
       r.dataset.cur = id;
     }
     // Amb «Solo mis artistas», els pròxims surten per ordre d'hora
@@ -2814,10 +2958,11 @@ function tick(force) {
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
       : `<span class="mk">Fin de fiesta</span><span class="mbig">Hasta la próxima</span><span class="msub">Gracias por venir. Dudas o mejoras: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
     if (ms.dataset.k !== mh) {
-      const old = ms.querySelector('.mprog i'), w0 = old && old.style.width;
+      const old = ms.querySelector('.mprog i'), w0 = old && old.style.width, ob = ms.querySelector('.mbig'), oldBig = ob && ob.firstChild && ob.firstChild.nodeValue;
       ms.dataset.k = mh;
       const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc && mi.getAttribute('src') !== msrc) mi.src = msrc;
       ms.querySelector('.mtxt').innerHTML = mh;
+      roll(ms.querySelector('.mbig'), oldBig);
       // la barra creix des d'on era (o des de zero en obrir l'app)
       const nb = ms.querySelector('.mprog i');
       if (nb) { const w = nb.style.width; nb.style.width = w0 || '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { nb.style.width = w; })); }
@@ -3525,9 +3670,11 @@ function solCount(t) {
   else if (g1 && t < g1) { k = 'g'; l = 'Hora dorada: quedan'; v = left(g1); sub = t < set ? `Atardecer en ${left(set)} · ${hm(set)}` : `Hora azul a las ${hm(g1)}`; }
   else if (b1 && t < b1) { k = 'b'; l = 'Hora azul: quedan'; v = left(b1); sub = solRise2 ? `Mañana amanece a las ${hm(solRise2)}` : ''; }
   else { k = 'n'; l = 'Mañana amanece a las'; v = solRise2 ? hm(solRise2) : '—'; sub = solRise2 ? `En ${dur(solRise2 - t)}` : ''; }
-  const el = document.getElementById('solCd');
+  const el = document.getElementById('solCd'), ov = el.querySelector('.v'), oldV = ov && el.dataset.l === l ? ov.textContent : null;
+  el.dataset.l = l;
   el.className = `solcd ${k}`;
   el.innerHTML = `<span class="l">${l}</span><b class="v">${v}</b>${at ? `<span class="at">${at}</span>` : ''}${sub ? `<small>${sub}</small>` : ''}`;
+  roll(el.querySelector('.v'), oldV);
 }
 // Què toca ara i quin és el proper canvi de llum
 const SOL_EV = { '-6u': 'Empieza la hora azul', '-4u': 'Empieza la hora dorada', [SOL_RISE + 'u']: 'Amanecer', '6u': 'Termina la hora dorada',
@@ -4748,7 +4895,9 @@ function withWho(x) {
 // «IMPORTANTE»: només si la tasca comença amb «!» («Bon concert!» o «no és important» no ho són)
 const tkMust = x => /^!/.test(x.t);
 const tkTxt = t => String(t).replace(/^!\s*/, '');  // «!» al davant = important (no es mostra)
+let planHold = 0;  // mentre es dibuixa el ✓ (mig segon), la llista no es refà
 function renderPlan(force) {
+  if (Date.now() < planHold) return;
   const sec = document.getElementById('plan'), t = now();
   const show = taskOn() && TASKS.people.length && YO !== '-';
   sec.hidden = !show;
@@ -4794,15 +4943,21 @@ document.getElementById('plan').addEventListener('click', e => {
   if (e.target.closest('#planAll')) { planAll = !planAll; renderPlan(true); return; }
   if (e.target.closest('#planLate')) { planLate = !planLate; renderPlan(true); return; }
   const b = e.target.closest('[data-tk]');
-  if (b) toggleTask(b.dataset.tk);
+  if (b) toggleTask(b.dataset.tk, b);
 });
-function toggleTask(id) {
+function toggleTask(id, btn) {
   const on = !DONE.has(id);
   if (on) DONE.add(id); else DONE.delete(id);
   DQ = DQ.filter(q => q.id !== id || q.who !== YO); DQ.push({ id, v: on, who: YO });
   saveDone();
   try { if (on && navigator.vibrate) navigator.vibrate(30); } catch (e) {}
-  renderPlan(true);
+  // A «Mi plan»: el ✓ es dibuixa i el text es ratlla allà mateix; després la tasca marxa (amb «Reducir movimiento», de cop)
+  const li = on && btn && !RM.matches && btn.closest('li.tk');
+  if (li) {
+    btn.setAttribute('aria-pressed', 'true'); li.classList.add('ck');
+    planHold = Date.now() + 560;
+    setTimeout(() => { planHold = 0; renderPlan(true); }, 580);
+  } else renderPlan(true);
   renderTg(true);
   const tk = TASKS.list.find(x => x.id === id);
   if (on && tk) toast(`Hecha: <b>${html(tk.t.slice(0, 50))}</b>`, 'info', { label: 'Deshacer', fn: () => { if (DONE.has(id)) toggleTask(id); } }, 6000);
@@ -6341,4 +6496,89 @@ pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
 let pullN = 0;
 setInterval(() => { if (!document.hidden && (tvOn || ++pullN % 3 === 0)) pullChanges(); }, 60000);
+
+// ==== Llisca per publicar (04-11-2026) ====
+// Els «Guardar y publicar» de l'editor es fan lliscant fins al final: un toc sense voler ja no publica (Pages: ~10 publicacions/hora).
+// El botó de veritat es queda amagat i és el que rep el clic: tota la lògica de publicar és la mateixa
+function slideFor(btn) {
+  const sl = document.createElement('div');
+  sl.className = 'slide';
+  sl.setAttribute('role', 'button'); sl.tabIndex = 0;
+  sl.setAttribute('aria-label', btn.textContent + ' (desliza hasta el final)');
+  sl.innerHTML = `<div class="sf"></div><div class="st">Desliza para publicar</div><div class="sk" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></div>`;
+  btn.before(sl); btn.hidden = true;
+  const k = sl.querySelector('.sk'), f = sl.querySelector('.sf'), txt = sl.querySelector('.st');
+  const sync = () => sl.setAttribute('aria-disabled', String(btn.disabled));
+  new MutationObserver(sync).observe(btn, { attributes: true, attributeFilter: ['disabled'] }); sync();
+  let x0 = null, x = 0, max = 0, busy = false;
+  const put = v => { x = v; k.style.transform = `translateX(${v}px)`; f.style.transform = `scaleX(${max ? (v + 46) / (max + 46) : 0})`; txt.style.opacity = String(Math.max(0, 1 - v / (max * .6 || 1))); };
+  const back = () => {
+    const from = x;
+    if (RM.matches || !k.animate) return put(0);
+    put(0);
+    k.animate([{ transform: `translateX(${from}px)` }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.3,1.35,.5,1)' });
+    f.animate([{ transform: `scaleX(${(from + 46) / (max + 46)})` }, { transform: 'scaleX(0)' }], { duration: 420, easing: EASE });
+  };
+  const fire = () => {
+    busy = true; put(max); sl.classList.add('ok'); txt.style.opacity = '1'; txt.textContent = 'Publicando…';
+    try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {}
+    btn.click();
+    setTimeout(() => { sl.classList.remove('ok'); txt.textContent = 'Desliza para publicar'; back(); busy = false; }, 1400);
+  };
+  sl.addEventListener('pointerdown', e => {
+    if (busy || btn.disabled) return;
+    max = sl.clientWidth - 49; x0 = e.clientX - x;
+    sl.setPointerCapture(e.pointerId);
+  });
+  sl.addEventListener('pointermove', e => { if (x0 !== null) put(Math.min(max, Math.max(0, e.clientX - x0))); });  // segueix el dit exactament
+  const up = () => {
+    if (x0 === null) return;
+    x0 = null;
+    if (x >= max * .85) fire();  // passat el 85 %, acaba sol
+    else if (x < 6) {  // un toc: petita empenta per ensenyar que s'ha de lliscar
+      if (!RM.matches && k.animate) k.animate([{ transform: 'none' }, { transform: 'translateX(26px)' }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.3,1.35,.5,1)' });
+      put(0);
+    } else back();
+  };
+  sl.addEventListener('pointerup', up); sl.addEventListener('pointercancel', up);
+  sl.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !busy && !btn.disabled) { e.preventDefault(); max = sl.clientWidth - 49; fire(); } });
+}
+for (const id of ['edSave', 'edSave2', 'teSave', 'tkSave']) { const b = document.getElementById(id); if (b) slideFor(b); }
+
+// ==== Estirar per actualitzar (04-11-2026) ====
+// A dalt de tot de la pàgina, estirar avall i deixar anar torna a llegir els canvis, les tasques (i les càmeres) a l'instant.
+// Listeners passius: no frena el scroll. No s'activa des de dins de la graella, el mapa, els fulls ni la càmera
+const ptr = document.getElementById('ptr');
+let pY = null, pX = 0, pD = 0, pBusy = false;
+const PTR_NO = '.tl-wrap, .tg-wrap, .mapbox, .sheet, .solar, .mc3dbox, canvas, .slide, .isl, input, textarea, select, [contenteditable]';
+const ptrPut = d => { ptr.style.transform = `translateY(${Math.min(d * .5, 84) - 70}px)`; ptr.style.opacity = String(Math.min(1, d / 90)); ptr.querySelector('svg').style.transform = `rotate(${d * 2}deg)`; };
+document.addEventListener('touchstart', e => {
+  if (pBusy || e.touches.length !== 1 || scrollY > 0 || document.body.style.overflow === 'hidden' || e.target.closest(PTR_NO)) { pY = null; return; }
+  pY = e.touches[0].clientY; pX = e.touches[0].clientX; pD = 0;
+}, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (pY === null) return;
+  const dy = e.touches[0].clientY - pY, dx = Math.abs(e.touches[0].clientX - pX);
+  if (dy <= 0 || dx > dy || scrollY > 0) { if (pD) { pD = 0; ptrPut(0); } if (dy < -4 || dx > 12) pY = null; return; }
+  pD = dy;
+  ptr.style.transition = 'none';
+  ptrPut(dy);
+}, { passive: true });
+document.addEventListener('touchend', async () => {
+  if (pY === null) return;
+  pY = null;
+  ptr.style.transition = RM.matches ? '' : 'transform .35s cubic-bezier(.3,1.35,.5,1), opacity .25s';
+  if (pD * .5 < 64) { pD = 0; ptrPut(0); return; }
+  pBusy = true;
+  ptr.style.transform = 'translateY(14px)'; ptr.style.opacity = '1'; ptr.querySelector('svg').style.transform = '';
+  ptr.classList.add('go');
+  try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+  const t0 = Date.now();
+  await Promise.allSettled([pullChanges(), pullTasks(), typeof mcPull === 'function' && TAB === 'multi' ? mcPull() : null]);
+  tick(true);
+  await new Promise(r => setTimeout(r, Math.max(0, 600 - (Date.now() - t0))));  // que es vegi girar, encara que vagi molt de pressa
+  ptr.classList.remove('go');
+  ptr.style.transform = 'translateY(-70px)'; ptr.style.opacity = '0';
+  pD = 0; pBusy = false;
+}, { passive: true });
 </script>
