@@ -68,10 +68,15 @@ const cleanYo = y => typeof y === 'string' && /^[a-z0-9]{1,40}$/.test(y) ? y : '
 const cleanTeam = t => ['prod', 'mkt', 'video', 'foto'].includes(t) ? t : '';
 const okTaskId = id => typeof id === 'string' && /^[\w-]{1,40}$/.test(id);
 const MAX_DONE = 5000;
+// Multicámara (pestanya «Cámaras»): estat de cada càmera, compartit per tot l'equip (sense contrasenya, com les ✓)
+const MC_ST = ['', 'montada', 'grabando', 'parada', 'recogida'];
+const okMcId = id => typeof id === 'string' && /^[\w-]{1,80}$/.test(id);
+const mcText = (s, n) => typeof s === 'string' ? s.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n) : '';
+const MAX_MC = 400;
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
@@ -265,6 +270,7 @@ export class Store {
     this.sql.exec(`CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS rl (k TEXT PRIMARY KEY, n INTEGER NOT NULL, reset INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS done (who TEXT NOT NULL, id TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (who, id))`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS mc (id TEXT PRIMARY KEY, st TEXT NOT NULL, ssd TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
     if (!cols.includes('yo')) this.sql.exec("ALTER TABLE subs ADD COLUMN yo TEXT NOT NULL DEFAULT ''");
@@ -275,6 +281,7 @@ export class Store {
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
       this.sql.exec('DELETE FROM done');
+      this.sql.exec('DELETE FROM mc');
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
@@ -359,6 +366,21 @@ export class Store {
         this.sql.exec('INSERT INTO done (who, id, at) VALUES (?, ?, ?) ON CONFLICT(who, id) DO NOTHING', who, b.id, Date.now());
       } else this.sql.exec('DELETE FROM done WHERE who = ? AND id = ?', who, b.id);
       return json({ ok: true });
+    }
+    // Multicámara: una càmera (estat, SSD, nota, qui i quan). Tot buit = s'esborra
+    if (url.pathname === '/mc') {
+      if (!okMcId(b.id)) return json({ error: 'bad' }, 400);
+      const st = MC_ST.includes(b.st) ? b.st : '', ssd = mcText(b.ssd, 24), note = mcText(b.note, 140), who = mcText(b.who, 30);
+      if (!st && !ssd && !note) { this.sql.exec('DELETE FROM mc WHERE id = ?', b.id); return json({ ok: true }); }
+      if (!this.sql.exec('SELECT id FROM mc WHERE id = ?', b.id).toArray().length && this.sql.exec('SELECT COUNT(*) AS n FROM mc').one().n >= MAX_MC) return json({ error: 'full' }, 429);
+      this.sql.exec('INSERT INTO mc (id, st, ssd, note, who, at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET st = excluded.st, ssd = excluded.ssd, note = excluded.note, who = excluded.who, at = excluded.at',
+        b.id, st, ssd, note, who, Date.now());
+      return json({ ok: true });
+    }
+    if (url.pathname === '/mcall') {
+      const out = {};
+      for (const r of this.sql.exec('SELECT id, st, ssd, note, who, at FROM mc').toArray()) out[r.id] = { st: r.st, ssd: r.ssd, note: r.note, who: r.who, at: r.at };
+      return json({ mc: out });
     }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
     if (url.pathname === '/doneall') {
@@ -451,6 +473,12 @@ export default {
         const r = await callStore(env, '/done', { ...(await body()), ...lim('done') });
         return json(r, errStatus(r), origin);
       }
+      // Multicámara: cada mòbil canvia l'estat d'una càmera; tots el llegeixen
+      if (req.method === 'POST' && url.pathname === '/mc') {
+        const r = await callStore(env, '/mc', { ...(await body()), ...lim('mc') });
+        return json(r, errStatus(r), origin);
+      }
+      if (req.method === 'GET' && url.pathname === '/mc') { const r = await callStore(env, '/mcall', lim('mcall')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await body();

@@ -727,6 +727,26 @@ PAIRS = [
      '<span class="on">Admin</span><small class="od">Horari, avisos i tasques · amb contrasenya</small></span><span class="ogo">Entrar ›</span>'),
     ('data-back="ajustes">‹ Ajustes</button>', 'data-back="ajustes">‹ Ajustos</button>'),
     ('<h3 class="ch">Organización</h3>', '<h3 class="ch">Organització</h3>'),
+    # Multicámara (04-11): pestanya «Cámaras»
+    ("<span>Cámaras</span></button>", "<span>Càmeres</span></button>"),
+    ('<h2 id="mcH">Multi<span>cámara</span></h2>', '<h2 id="mcH">Multi<span>càmera</span></h2>'),
+    ("Dónde va cada cámara, con qué óptica y accesorios, y todo el material que hay que llevar.", "On va cada càmera, amb quina òptica i accessoris, i tot el material que cal portar."),
+    ("Todo sumado. Marca lo que ya está en la furgo (solo en este móvil).", "Tot sumat. Marca el que ja és a la furgo (només en aquest mòbil)."),
+    (">Quitar todas las marcas</button>", ">Treure totes les marques</button>"),
+    ("const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Parada'], ['recogida', 'Recogida']];",
+     "const MC_ST = [['montada', 'Muntada'], ['grabando', 'Gravant'], ['parada', 'Parada'], ['recogida', 'Recollida']];"),
+    ("[['cam', 'Cámaras'], ['opt', 'Ópticas'], ['acc', 'Accesorios'], ['pow', 'Corriente y audio']]", "[['cam', 'Càmeres'], ['opt', 'Òptiques'], ['acc', 'Accessoris'], ['pow', 'Corrent i àudio']]"),
+    ("[['', 'Todos'], ...MC.map(", "[['', 'Tots'], ...MC.map("),
+    ('aria-label="Estado">', 'aria-label="Estat">'),
+    ('placeholder="Nº o nombre"', 'placeholder="Núm. o nom"'),
+    ('<label>Nota<input', '<label>Nota<input'),
+    ('placeholder="Batería, tarjeta…"', 'placeholder="Bateria, targeta…"'),
+    ("`${s.who || 'Alguien'} · ${ago < 1 ? 'ahora mismo' : ago < 60 ? `hace ${ago} min`", "`${s.who || 'Algú'} · ${ago < 1 ? 'ara mateix' : ago < 60 ? `fa ${ago} min`"),
+    ("`● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`", "`● ${rec}/${n} gravant` : up ? `${up}/${n} muntades` : `${n} ${n === 1 ? 'càmera' : 'càmeres'}`"),
+    ("'Sin servidor: lo que marques solo se ve en este móvil.'", "'Sense servidor: el que marquis només es veu en aquest mòbil.'"),
+    ("'Sin conexión: puede que no sea lo último.'", "'Sense connexió: potser no és l’últim.'"),
+    ("'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'", "'No s’ha pogut desar. Revisa la connexió i torna a tocar.'"),
+    ("'· todos los escenarios'", "'· tots els escenaris'"),
 ]
 
 

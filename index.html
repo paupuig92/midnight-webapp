@@ -949,8 +949,64 @@ html, body { overscroll-behavior-y: none; }
 .totop { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .toasts { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 body.tvon .tabbar, body.tvon .totop { display: none !important; }
-body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol) { display: none !important; }
+body[data-tab="ahora"] :is(#plan, #tkgrid, #config, #admin, #hola, #orgOff, #whoBar, #mapa, #sol, #multi) { display: none !important; }
 body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
+/* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
+body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
+body[data-tab="multi"] #multi { display: block !important; }
+#multi { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #15161a; }
+#multi h2 { margin-bottom: 4px; }
+.mcchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 4px; }
+.mcchips button { font: 600 var(--fs-s)/1 var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 999px; min-height: 40px; padding: 0 14px; }
+.mcchips button[aria-selected="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+#multi .mch3 { margin: 30px 0 10px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
+#multi .mch3 span { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.mcsub { margin: -4px 0 10px; }
+.mcst { margin-top: 26px; }
+.mcst > h3 { margin: 0 0 10px; font: 800 var(--fs-l, 22px)/1.1 var(--title, var(--display)); color: var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.mcst > h3 small { font: 400 var(--fs-xs)/1 var(--mono, var(--body)); color: var(--muted); white-space: nowrap; }
+.mccams { display: grid; gap: 8px; }
+.mccam { display: grid; grid-template-columns: 14px 1fr; gap: 4px 12px; align-items: start; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r-card, 10px); padding: 12px 14px; }
+.mcdot { width: 14px; height: 14px; border-radius: 50%; margin-top: 3px; background: var(--muted); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 35%, transparent); }
+.mcdot.none { background: transparent; border: 1.5px dashed var(--muted); box-shadow: none; box-sizing: border-box; }
+.mccam b { font-size: var(--fs-m, 17px); color: var(--ink); }
+.mccam .mcgear { grid-column: 2; color: var(--ink); font-size: var(--fs-s); }
+.mccam .mcgear em { font-style: normal; font-family: var(--mono, var(--body)); color: var(--muted); font-size: var(--fs-xs); margin-left: 6px; }
+.mccam .mcacc { grid-column: 2; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.mccam .mcacc span { font-size: var(--fs-xs); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+.mcrid { margin-top: 12px; display: grid; gap: 2px; }
+.mcrid h4 { margin: 10px 0 4px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+.mcri { display: flex; gap: 10px; align-items: baseline; font-size: var(--fs-s); color: var(--ink); padding: 3px 0; }
+.mcri .n { flex: none; min-width: 2.2em; font-family: var(--mono, var(--body)); color: var(--muted); }
+.mcri .w { flex: 1; min-width: 0; }
+.mcri .w small { color: var(--muted); font-size: var(--fs-xs); }
+.mcri .dots { flex: none; display: inline-flex; gap: 3px; }
+.mcri .dots i { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 35%, transparent); }
+.mcok { flex: none; font-size: var(--fs-xs); color: var(--mc-verde); font-weight: 700; }
+.mcnote { margin-top: 12px; border-left: 3px solid var(--mc-amarillo); padding: 8px 12px; background: color-mix(in srgb, var(--mc-amarillo) 10%, transparent); font-size: var(--fs-s); color: var(--ink); }
+.mcgrp h4 { margin: 16px 0 6px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+.mcsts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.mcsts button { white-space: nowrap; min-height: 40px; padding: 0 4px; font: 600 var(--fs-s)/1 var(--body); color: var(--ink); background: transparent; border: 1.5px solid var(--line); border-radius: var(--r-btn, 8px); }
+.mcsts button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.mcsts button[data-mcst="grabando"][aria-pressed="true"] { color: #fff; background: var(--now, #e0162b); border-color: var(--now, #e0162b); }
+.mccam[data-st="grabando"] { border-color: var(--now, #e0162b); box-shadow: inset 3px 0 0 var(--now, #e0162b); }
+.mccam[data-st="recogida"] { opacity: .6; }
+.mcin { grid-column: 1 / -1; display: grid; grid-template-columns: 2fr 3fr; gap: 8px; margin-top: 8px; }
+.mcin label { min-width: 0; display: flex; flex-direction: column; gap: 4px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .06em); text-transform: uppercase; color: var(--muted); }
+.mcin input { width: 100%; box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: var(--r-btn, 8px); min-height: 40px; padding: 0 10px; min-width: 0; text-transform: none; letter-spacing: 0; }
+.mcby { grid-column: 1 / -1; min-height: 0; font-size: var(--fs-xs); color: var(--muted); }
+.mcby:empty { display: none; }
+.mcby:not(:empty) { margin-top: 6px; }
+.mcst > h3 small.rec { color: var(--now, #e0162b); font-weight: 700; }
+.mcmsg { margin: 10px 0 0; color: var(--chg, var(--muted)); }
+.mcline { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 6px 2px; background: none; border: 0; border-bottom: 1px solid var(--rule); color: var(--ink); font: 500 var(--fs-m, 17px)/1.2 var(--body); text-align: left; }
+.mcline .n { flex: none; min-width: 2.6em; font: 700 var(--fs-m, 17px)/1 var(--mono, var(--body)); }
+.mcline .t { flex: 1; min-width: 0; }
+.mcline .ck { flex: none; width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; }
+.mcline[aria-pressed="true"] { color: var(--muted); }
+.mcline[aria-pressed="true"] .t { text-decoration: line-through; }
+.mcline[aria-pressed="true"] .ck { background: var(--mc-verde); border-color: var(--mc-verde); }
+.mcline[aria-pressed="true"] .ck::after { content: "✓"; color: #fff; font: 800 15px/1 var(--body); }
 /* Sol (per a foto i vídeo): on és el sol ara, brúixola, recorregut del dia i hores clau. Colors del festival (vars) */
 body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
 #sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; --sol-day: #7cc0ff; --sol-night: #15214a; --sol-hair: color-mix(in srgb, var(--ink) 12%, transparent); }
@@ -1132,7 +1188,7 @@ body:not([data-tab="equipo"]) #whoBar, body.needyo #whoBar { display: none !impo
 .yogrp { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 body[data-tab="ajustes"] .wrap > :not(#config) { display: none !important; }
 body[data-tab="org"] .wrap > :not(#admin):not(#orgOff) { display: none !important; }
-body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"], [data-tab="sol"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+body:is([data-tab="ajustes"], [data-tab="equipo"], [data-tab="org"], [data-tab="mapa"], [data-tab="sol"], [data-tab="multi"]) .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
 .terows { display: flex; flex-direction: column; gap: 8px; }
 .terow { display: grid; grid-template-columns: 1fr auto 44px; gap: 6px; align-items: center; padding: 8px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--panel); }
 .terow .teg { grid-column: 1 / 3; }
@@ -1413,6 +1469,18 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
     </div>
   </section>
 
+  <section id="multi" hidden aria-labelledby="mcH">
+    <h2 id="mcH">Multi<span>cámara</span></h2>
+    <p class="note">Dónde va cada cámara, con qué óptica y accesorios, y todo el material que hay que llevar.</p>
+    <div class="mcchips" id="mcChips" role="tablist" aria-label="Escenario"></div>
+    <p class="note mcmsg" id="mcMsg" role="status" hidden></p>
+    <div id="mcBody"></div>
+    <h3 class="mch3" id="mcMatH">Material <span id="mcMatFor"></span></h3>
+    <p class="note mcsub">Todo sumado. Marca lo que ya está en la furgo (solo en este móvil).</p>
+    <div id="mcMat"></div>
+    <button type="button" class="linkbtn" id="mcClear" hidden>Quitar todas las marcas</button>
+  </section>
+
   <section id="mapa" hidden>
     <div id="mapList"></div>
     <p class="legend">Toca un mapa para ampliarlo y muévelo con el dedo. Vuelve a tocar para verlo entero.</p>
@@ -1642,6 +1710,7 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
   <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
+  <button type="button" data-tab="multi" id="tabMulti" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Cámaras</span></button>
   <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
 </nav>
@@ -1849,6 +1918,70 @@ html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0
 /* terra de reixa i feix: en fosc sobre clar */
 html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/deco-floor-light.webp") center bottom / cover no-repeat; }
 `;
+// Multicámara (opcional, pestanya «Cámaras»): on va cada càmera, amb què, i què cal de corrent i àudio.
+// Dades del rider tècnic del primer Duro (Google Doc «Rider Tecnico - SideBFilms», en Pau, 04-11).
+// Per escenari: cams = { c: color, pos: posició, cam, opt: òptica, acc: [accessoris; «2x Brazo grande» = 2] }
+//               rider = { z: zona, n: quantes, what: què (es suma a «Material»), where: on, c: [colors de les càmeres], ok: qui ho ha confirmat }
+// Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
+FEST.multicam = [
+  { stage: 'Main Stage',
+    cams: [
+      { c: 'morado', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Slider', '2x Brazo grande'] },
+      { c: 'rojo', pos: 'Cabina trasera', cam: 'Pocket 4', opt: '', acc: ['Brazo mediano'] },
+      { c: 'amarillo', pos: 'FOH abierta', cam: 'Black 4K', opt: '10mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH cerrada', cam: 'Black 4K', opt: '75mm', acc: ['Brazo grande', 'Antivibración'] },
+      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P2', opt: '', acc: ['Brazo mediano'] },
+      { c: 'negro', pos: 'Cenital cruz', cam: 'DJI Action 6', opt: '', acc: [] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'] },
+      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, en el toldo de truss', c: ['rojo'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'amarillo'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'en el «delay» izquierdo, al lado del árbol', c: ['verde'], ok: 'Uri' },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'arriba del todo de la cruz, justo encima de la pantalla', c: ['negro'] },
+    ] },
+  { stage: 'Cargo Stage',
+    cams: [
+      { c: 'rojo', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
+      { c: 'azul', pos: 'FOH cerrada', cam: 'Black 4K', opt: '42.5mm', acc: ['Brazo grande'] },
+      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P', opt: '', acc: ['Brazo mediano'] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['rojo'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['azul', 'naranja'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'lateral, en una farola', c: ['verde'], ok: 'Uri' },
+    ] },
+  { stage: 'Black Hangar',
+    cams: [
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['verde'] },
+      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, encima de las pantallas', c: ['azul'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'rojo'] },
+      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
+      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
+    ],
+    note: 'La cenital va encima de las pantallas: hace falta arnés y casco. Habla antes con Carles o Enric y con el responsable del escenario.' },
+  { stage: 'Secret Stage',
+    cams: [
+      { c: 'naranja', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
+      { c: 'verde', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano o grande'] },
+      { c: '', pos: 'Grabadora', cam: 'Zoom H4e', opt: '', acc: [] },
+    ],
+    rider: [
+      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['naranja'] },
+      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['verde'] },
+    ] },
+];
 /* ==== /FESTIVAL ==== */
 
 for (const [k, v] of Object.entries({ '--accent': FEST.accent, '--accent-rgb': FEST.accentRgb, '--accent-dim': FEST.accentDim, '--accent-deep': FEST.accentDeep, '--accent-ink': FEST.accentInk }))
@@ -5439,6 +5572,141 @@ document.getElementById('faces').addEventListener('click', e => {
 holaPaint();
 whoReady = true; paintWho();
 
+// ==== MULTICÁMARA ==== (pestanya «Cámaras», des del 04-11-2026)
+// Les posicions i el material són a FEST.multicam (al bloc del festival). L'estat de cada càmera (montada, grabando…, SSD i nota)
+// el comparteix tot l'equip a través del servidor d'avisos (POST/GET /mc), sense contrasenya. Les marques de «Material» són només d'aquest mòbil.
+const MC = Array.isArray(FEST.multicam) ? FEST.multicam : [];
+const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Parada'], ['recogida', 'Recogida']];
+const MC_CK = FEST.key + '-mc-carga-v1', MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
+const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
+// Un id per càmera: festival + escenari + posició (si es repeteix, amb número)
+for (const s of MC) {
+  const seen = {};
+  for (const c of s.cams || []) { let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
+}
+let mcState = {}, mcFilter = '', mcTimer = 0, mcErr = '', mcAt = 0;
+try { mcState = JSON.parse(localStorage.getItem(MC_SK) || '{}') || {}; } catch (e) {}
+try { mcFilter = localStorage.getItem(MC_FK) || ''; } catch (e) {}
+if (mcFilter && !MC.some(s => s.stage === mcFilter)) mcFilter = '';
+let mcCk = {};
+try { mcCk = JSON.parse(localStorage.getItem(MC_CK) || '{}') || {}; } catch (e) {}
+const mcLive = () => ONLINE && PUSH && PUSH.url;
+document.getElementById('tabMulti').hidden = !MC.length;
+
+// «2x Brazo grande» → [2, 'Brazo grande']
+const mcCount = a => { const m = /^\s*(\d+)\s*[x×]\s*(.+)$/i.exec(a) || /^(.+?)\s*[x×]\s*(\d+)\s*$/i.exec(a); return m ? (/^\d+$/.test(m[1]) ? [+m[1], m[2].trim()] : [+m[2], m[1].trim()]) : [1, a.trim()]; };
+function mcMaterial(list) {
+  const g = { cam: new Map(), opt: new Map(), acc: new Map(), pow: new Map() }, add = (m, k, n) => { if (k) m.set(k, (m.get(k) || 0) + n); };
+  for (const s of list) {
+    for (const c of s.cams || []) { add(g.cam, c.cam, 1); add(g.opt, c.opt, 1); for (const a of c.acc || []) { const [n, k] = mcCount(a); add(g.acc, k, n); } }
+    for (const r of s.rider || []) add(g.pow, r.what, +r.n || 1);
+  }
+  return [['cam', 'Cámaras'], ['opt', 'Ópticas'], ['acc', 'Accesorios'], ['pow', 'Corriente y audio']].map(([k, t]) => [k, t, [...g[k]].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]).filter(x => x[2].length);
+}
+const mcDots = cs => (cs || []).filter(Boolean).map(c => `<i style="background:${mcCol(c)}"></i>`).join('');
+function mcRender() {
+  const chips = document.getElementById('mcChips');
+  chips.hidden = MC.length < 2;
+  chips.innerHTML = MC.length < 2 ? '' : [['', 'Todos'], ...MC.map(s => [s.stage, s.stage])].map(([v, t]) => `<button type="button" role="tab" data-mcfilt="${html(v)}" aria-selected="${v === mcFilter}">${html(t)}</button>`).join('');
+  const list = MC.filter(s => !mcFilter || s.stage === mcFilter);
+  document.getElementById('mcBody').innerHTML = list.map(s => {
+    const zones = [];
+    for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
+    return `<div class="mcst"><h3>${html(s.stage)} <small data-mcsum="${html(s.stage)}"></small></h3>
+      <div class="mccams">${(s.cams || []).map(c => `<div class="mccam" data-mcid="${c.id}">
+        <span class="mcdot${c.c ? '' : ' none'}"${c.c ? ` style="background:${mcCol(c.c)}"` : ''}></span><b>${html(c.pos || '')}</b>
+        <div class="mcgear">${html(c.cam || '')}${c.opt ? `<em>${html(c.opt)}</em>` : ''}</div>
+        ${(c.acc || []).length ? `<div class="mcacc">${c.acc.map(a => `<span>${html(a)}</span>`).join('')}</div>` : ''}
+        <div class="mcsts" role="group" aria-label="Estado">${MC_ST.map(([v, t]) => `<button type="button" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('')}</div>
+        <div class="mcin"><label>SSD<input type="text" data-mcf="ssd" maxlength="24" placeholder="Nº o nombre" autocapitalize="characters" autocomplete="off" enterkeyhint="done"></label>
+          <label>Nota<input type="text" data-mcf="note" maxlength="140" placeholder="Batería, tarjeta…" autocomplete="off" enterkeyhint="done"></label></div>
+        <div class="mcby" aria-live="polite"></div>
+      </div>`).join('')}</div>
+      ${zones.length ? `<div class="mcrid">${zones.map(([z, rs]) => `<h4>${html(z)}</h4>${rs.map(r => `<div class="mcri"><span class="n">${+r.n || 1}×</span><span class="w">${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span class="dots">${mcDots(r.c)}</span>${r.ok ? `<span class="mcok">✓ ${html(r.ok)}</span>` : ''}</div>`).join('')}`).join('')}</div>` : ''}
+      ${s.note ? `<div class="mcnote">⚠️ ${html(s.note)}</div>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('mcMatFor').textContent = mcFilter ? '· ' + mcFilter : (MC.length > 1 ? '· todos los escenarios' : '');
+  const mat = mcMaterial(list), pre = mcSlug(mcFilter || 'todo');
+  document.getElementById('mcMat').innerHTML = mat.map(([k, t, rows]) => `<div class="mcgrp"><h4>${t}</h4>${rows.map(([name, n]) => { const id = pre + ':' + k + ':' + mcSlug(name); return `<button type="button" class="mcline" data-mcck="${html(id)}" aria-pressed="${!!mcCk[id]}"><span class="n">${n}×</span><span class="t">${html(name)}</span><span class="ck"></span></button>`; }).join('')}</div>`).join('');
+  document.getElementById('mcClear').hidden = !Object.keys(mcCk).length;
+  mcPaint();
+}
+// Pinta l'estat (sense tornar a fer les targetes: així no es perd el que s'està escrivint)
+function mcPaint() {
+  const t = Date.now();
+  for (const el of document.querySelectorAll('#mcBody .mccam')) {
+    const s = mcState[el.dataset.mcid] || {};
+    el.dataset.st = s.st || '';
+    for (const b of el.querySelectorAll('[data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
+    for (const i of el.querySelectorAll('input[data-mcf]')) if (i !== document.activeElement) i.value = s[i.dataset.mcf] || '';
+    const ago = s.at ? Math.max(0, Math.round((t - s.at) / 60000)) : -1;
+    el.querySelector('.mcby').textContent = s.at ? `${s.who || 'Alguien'} · ${ago < 1 ? 'ahora mismo' : ago < 60 ? `hace ${ago} min` : new Date(s.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}` : '';
+  }
+  for (const h of document.querySelectorAll('[data-mcsum]')) {
+    const st = MC.find(s => s.stage === h.dataset.mcsum), cams = st && st.cams || [], n = cams.length;
+    const rec = cams.filter(c => (mcState[c.id] || {}).st === 'grabando').length, up = cams.filter(c => ['montada', 'grabando', 'parada'].includes((mcState[c.id] || {}).st)).length;
+    h.textContent = rec ? `● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`;
+    h.classList.toggle('rec', !!rec);
+  }
+  const msg = document.getElementById('mcMsg');
+  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
+  msg.hidden = !msg.textContent;
+}
+function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
+async function mcPull() {
+  if (!mcLive()) return;
+  try {
+    const r = await fetchT(PUSH.url + '/mc', { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    // El que s'acaba de canviar en aquest mòbil i encara no ha arribat al servidor es manté
+    const keep = Object.fromEntries(Object.entries(mcState).filter(([, s]) => s.pending));
+    mcState = { ...(j.mc || {}), ...keep };
+    mcErr = ''; mcAt = Date.now(); mcSaveLocal();
+  } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
+  mcPaint();
+}
+async function mcSet(id, patch) {
+  const who = (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
+  const s = { ...(mcState[id] || {}), ...patch, who, at: Date.now(), pending: true };
+  mcState[id] = s; mcSaveLocal(); mcPaint();
+  if (!mcLive()) { delete s.pending; mcSaveLocal(); return; }
+  try {
+    const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, st: s.st || '', ssd: s.ssd || '', note: s.note || '', who }) }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    if (mcState[id] === s) delete s.pending;
+    mcErr = '';
+  } catch (e) { mcErr = 'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'; if (mcState[id] === s) delete s.pending; }
+  mcSaveLocal(); mcPaint();
+}
+function mcShow(on) {
+  clearInterval(mcTimer); mcTimer = 0;
+  if (!on || !MC.length) return;
+  if (!document.getElementById('mcBody').childElementCount) mcRender(); else mcPaint();
+  if (Date.now() - mcAt > 5000) mcPull();
+  mcTimer = setInterval(() => { if (!document.hidden) mcPull(); }, 15000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
+document.getElementById('multi').addEventListener('click', e => {
+  const f = e.target.closest("[data-mcfilt]");
+  if (f) { mcFilter = f.dataset.mcfilt; try { localStorage.setItem(MC_FK, mcFilter); } catch (er) {} mcRender(); return; }
+  const b = e.target.closest('[data-mcst]');
+  if (b) { const id = b.closest('[data-mcid]').dataset.mcid, cur = (mcState[id] || {}).st; mcSet(id, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); return; }
+  const k = e.target.closest('[data-mcck]');
+  if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-pressed', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }
+  if (e.target.id === 'mcClear') { mcCk = {}; try { localStorage.removeItem(MC_CK); } catch (er) {} mcRender(); }
+});
+document.getElementById('multi').addEventListener('change', e => {
+  const i = e.target.closest('input[data-mcf]');
+  if (!i) return;
+  const id = i.closest('[data-mcid]').dataset.mcid, v = i.value.trim();
+  if (v !== ((mcState[id] || {})[i.dataset.mcf] || '')) mcSet(id, { [i.dataset.mcf]: v });
+});
+document.getElementById('multi').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input[data-mcf]')) e.target.blur(); });
+// ==== /MULTICÁMARA ====
+
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
 var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
@@ -5454,6 +5722,7 @@ function showTab(t, top = true) {
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
   if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
+  if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
