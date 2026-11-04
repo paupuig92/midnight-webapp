@@ -60,6 +60,12 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - `festivals/bass-in-the-park-2026/original/` = còpia exacta de tota l'app tal com va funcionar al Bass.
 - Comptador «⏳ quedan X h» fins al final (status + barra fina de dalt).
 
+## Cámaras · multicàmera (des del 04-11-2026)
+- Pestanya pròpia. Dades a `FEST.multicam` (fora de l'objecte FEST, dins el bloc del festival): escenaris, càmeres (`c` color, `pos`, `cam`, `opt`, `acc`, `at` = % sobre la il·lustració, `at3d` = [x, y, z] en metres, `aim` opcional = [direcció°, inclinació°]), `rider`.
+- Estat compartit (Montada/Grabando…, SSD, nota) per dia via servidor (`POST/GET /mc`).
+- 3D amb three.js 0.170 (`vendor/`, el copia build_web només si hi ha `scene3d:`). Model procedural a `scene3d` (mides del stage plot). Looks «noche» i «plano» (com el PDF). Gestos: 1 dit gira (inèrcia), 2 dits apropen/mouen/giren, doble toc torna.
+- «Mover cámaras»: qualsevol de l'equip arrossega una càmera pel terra i en tria alçada/direcció/inclinació. Es desa al servidor com una entrada més de `/mc` amb id `<càmera>-pos` i nota `x,y,z,dir,incl` (no cal reinstal·lar el worker). Sense direcció, apunta sola (públic → pantalla; escenari → públic). Con de visió segons l'òptica.
+
 ## Mi plan · tasques de l'equip (des del 28-10-2026)
 - L'organització escriu l'equip i les tasques a Organización → **Tareas** (contrasenya) → publica `docs/tasks.json` (mateix commit per API que changes.json). Porta `fest`.
 - Equip: `Nom: grup1, grup2`. Tasques: `18:30 Text @Nom @grup @todos`, `18:30-19:00 …`, línia només amb `@Marc` = per a les de sota, o enganxar d'Excel (hora⇥tasca⇥qui). 6:00–12:00 = muntatge del mateix dia; de matinada = l'endemà.
