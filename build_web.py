@@ -30,10 +30,10 @@ push = json.loads(push_f.read_text()) if push_f.is_file() else None
 src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "public": push["public"]}) if push else "null")
 src = src.replace("/*ADMIN*/null/*ADMIN*/", "true" if push else "null")
 # Content-Security-Policy: segona capa per si mai s'hi colés codi estrany. La pàgina només pot parlar amb ella mateixa
-# i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts i la llibreria d'Excel de jsDelivr.
+# i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts (la llibreria d'Excel ara és a vendor/, a la mateixa web).
 import re
 PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
-CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
        "img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' " + PUSH_ORIGIN + "; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
@@ -208,12 +208,11 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))
-# Llibreries de vendor/ (three.js per a la vista 3D de «Cámaras»): només si el festival en fa servir (FEST.multicam[].scene3d)
+# Llibreries de vendor/: la d'Excel (editor de l'organització) sempre; three.js (vista 3D de «Cámaras») només si el festival en fa servir (FEST.multicam[].scene3d)
 USES3D = "scene3d:" in src
 if (OUT / "vendor").exists():
     shutil.rmtree(OUT / "vendor")
-if USES3D:
-    shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*"))
+shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*", *(() if USES3D else ("three-*",))))
 # Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
 for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
