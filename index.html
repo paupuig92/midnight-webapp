@@ -5797,7 +5797,13 @@ async function pullDone() {
   try {
     const r = await fetchT(PUSH.url + '/done?t=' + Date.now(), { cache: 'no-store' }, 8000);
     if (!r.ok) return null;
-    doneAll = (await r.json()).done || {};
+    return doneApply((await r.json()).done || {});
+  } catch (e) { return null; }
+}
+// Les ✓ de tothom (de GET /done o de la pregunta periòdica /live)
+function doneApply(all) {
+  try {
+    doneAll = all;
     if (YO && YO !== '-') {
       DONE = new Set(Object.keys(doneAll[YO] || {}));
       for (const q of DQ) if (q.v) DONE.add(q.id); else DONE.delete(q.id);
@@ -5840,8 +5846,7 @@ async function pullTasks() {
       }
     }
   } catch (e) {}
-  await flushDone();
-  if (taskOn() && (YO && YO !== '-' || tgTeam)) await pullDone();
+  await flushDone();   // les ✓ de tothom arriben amb la pregunta periòdica (/live)
 }
 let tkMin = -1;
 setInterval(() => {
@@ -6295,7 +6300,7 @@ document.getElementById('pGlobal').addEventListener('click', e => {
   if (b) { gvWho = gvWho === b.dataset.gv ? '' : b.dataset.gv; renderGlobal(); }
   if (e.target.closest('#gvRefresh')) pullDone().then(renderGlobal);
 });
-setInterval(() => { if (!document.hidden && !document.getElementById('pGlobal').hidden) pullDone().then(renderGlobal); }, 30000);
+// (la vista global s'actualitza amb la pregunta periòdica /live)
 // --- «¿Quién eres?»: surt dins la pestanya Tareas mentre no hagis triat qui ets (triar el nom posa l'equip) ---
 var holaEl = document.getElementById('hola'), holaBody = document.getElementById('holaBody'), holaPick = '';
 var holaForce = false, holaDept = '';
@@ -7189,13 +7194,19 @@ async function mcPull() {
   try {
     const r = await fetchT(PUSH.url + '/mc', { cache: 'no-store' }, 8000);
     if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
+    mcApply((await r.json()).mc, t0);
+  } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
+  mcPaint();
+}
+// Estat de les càmeres (de GET /mc o de /live); t0 = quan es va fer la pregunta
+function mcApply(mc, t0) {
+  {
     // Es manté el que aquest mòbil encara no ha enviat i el que s'ha tocat mentre arribava la resposta
     const keep = Object.fromEntries(Object.entries(mcState).filter(([id]) => mcOut[id] || (mcTouched[id] || 0) >= t0));
-    mcState = { ...(j.mc || {}), ...keep };
+    mcState = { ...(mc || {}), ...keep };
     if (!Object.keys(mcOut).length) mcErr = '';
     mcAt = Date.now(); mcSaveLocal();
-  } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
+  }
   mcPaint();
 }
 // Només s'envien els camps que canvien (així dos mòbils que toquen la mateixa càmera no es trepitgen)
@@ -7215,9 +7226,8 @@ function mcShow(on) {
   if (!document.getElementById('mcBody').childElementCount || (d !== mcDay && !mcDayPicked)) { if (!mcDayPicked) mcDay = d; mcRender(); } else mcPaint();
   if (Date.now() - mcAt > 5000) mcPull();
   mc3dAttach();
-  mcTimer = setInterval(() => { if (!document.hidden) mcPull(); }, 15000);
+  // (després, les càmeres arriben amb la pregunta periòdica /live: cada 30 s mentre toques, cada 60 s si no)
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
 document.getElementById('multi').addEventListener('click', e => {
   const nx = e.target.closest('[data-mcnext]');
   if (nx) {
@@ -7297,6 +7307,7 @@ async function mkPull() {
   mkPulling = false;
   if (!document.getElementById('mkList').hidden) mkRenderList();
 }
+function mkApply(list) { if (Array.isArray(list)) { mkSrv = list; if (!document.getElementById('mkList').hidden) mkRenderList(); } }
 function mkPaint() {
   const n = mkMine.length;
   document.getElementById('mkN').textContent = n ? String(n) : '';
@@ -7969,9 +7980,13 @@ async function incPull() {
   try {
     const r = await fetchT(PUSH.url + '/inc', { cache: 'no-store' }, 8000);
     if (!r.ok) return;
-    const d = await r.json();
-    if (!Array.isArray(d.inc)) return;
-    INC = d.inc;
+    incApply((await r.json()).inc);
+  } catch (e) {}
+}
+function incApply(list) {
+  if (!Array.isArray(list)) return;
+  {
+    INC = list;
     // Amb l'app oberta: les noves (no meves) surten a la píndola; a la primera càrrega, no
     const fresh = INC.filter(x => x.at > incSeen && !x.st);
     if (!incFirst && incOn() && fresh.length) for (const x of fresh.slice(0, 3)) toast(`<b>${x.urg ? 'Incidencia URGENTE' : 'Incidencia'}</b> · ${html(x.who || 'Alguien')}<br>${html(x.txt)}`, 'org', null, 30000);
@@ -7979,7 +7994,7 @@ async function incPull() {
     const mx = Math.max(incSeen, ...INC.map(x => x.at));
     if (mx !== incSeen) { incSeen = mx; try { localStorage.setItem(INC_SEEN, String(mx)); } catch (e) {} }
     incPaint();
-  } catch (e) {}
+  }
 }
 // Foto: es redueix al mòbil (JPEG, costat llarg 1024 px, < 250 KB) abans d'enviar-la
 async function incShrink(file) {
@@ -8057,22 +8072,60 @@ incSec.addEventListener('click', async e => {
   const b = e.target.closest('[data-incimg]');
   if (b) {
     b.disabled = true; b.textContent = 'Cargando…';
-    try {
-      const r = await fetchT(`${PUSH.url}/incimg?n=${n}`, { cache: 'no-store' }, 15000);
-      const d = await r.json();
-      if (!/^data:image\/jpeg;base64,/.test(d.img || '')) throw new Error('img');
-      const img = document.createElement('img'); img.alt = 'Foto de la incidencia'; img.src = d.img;
-      b.closest('.ia').before(img); b.remove();
-    } catch (err) { b.disabled = false; b.textContent = 'Ver foto'; }
+    // JPEG directe del servidor: el mòbil el guarda i, si es torna a obrir, no es torna a baixar
+    const img = document.createElement('img'); img.alt = 'Foto de la incidencia';
+    img.onload = () => { b.closest('.ia').before(img); b.remove(); };
+    img.onerror = () => { b.disabled = false; b.textContent = 'Ver foto'; };
+    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}`;
   }
 });
 document.getElementById('prefIncL').hidden = !INC_LIVE();
-// Cada minut amb l'app oberta (i en tornar-hi): poca cosa, sense la foto
 incPaint();
-incPull();
-setInterval(() => { if (!document.hidden) incPull(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) incPull(); });
 // ==== /INCIDENCIAS ====
+
+// ==== LIVE ==== (pla gratuït de Cloudflare, 04-11-2026: 100.000 peticions al dia per a tot el compte)
+// UNA sola pregunta periòdica al servidor (GET /live) amb tot el que cal: incidències, càmeres, ✓ i momentos.
+// Només amb l'app a la vista. Cada 60 s; a Cámaras, cada 30 s mentre toques (2 min). Si res no ha canviat, el
+// servidor respon gairebé buit. Si el dia va molt carregat (fre d'emergència), el servidor diu «slow» i es pregunta cada 5 min.
+let liveV = '', liveP = '', liveSlow = false, liveBusy = false, liveAt = 0, liveTouch = 0;
+function liveParts() {
+  const p = [];
+  if (INC_LIVE()) p.push('inc');
+  if (MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
+  if ((taskOn() && YO && YO !== '-') || tgTeam || !document.getElementById('pGlobal').hidden) p.push('done');
+  if (!document.getElementById('mkList').hidden) p.push('mk');
+  return p.join(',');
+}
+async function livePull(force) {
+  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden) return;
+  const p = liveParts();
+  if (!p) return;
+  liveBusy = true; liveAt = Date.now();
+  try {
+    if (p.includes('mc')) await mcFlush();
+    await flushDone();
+    const t0 = Date.now(), v = !force && p === liveP && liveV ? '&v=' + encodeURIComponent(liveV) : '';
+    const r = await fetchT(`${PUSH.url}/live?p=${p}${v}`, { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    liveSlow = !!d.slow; liveV = d.v || ''; liveP = p;
+    if (d.inc) incApply(d.inc);
+    if (d.mc) mcApply(d.mc, t0);
+    else if (p.includes('mc')) { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } }
+    if (d.done) { doneApply(d.done); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
+    if (d.mk) mkApply(d.mk);
+  } catch (e) {
+    liveV = '';
+    if (p.includes('mc')) { mcErr = 'Sin conexión: puede que no sea lo último.'; mcPaint(); }
+  }
+  liveBusy = false;
+}
+const liveEvery = () => liveSlow ? 5 * MIN : TAB === 'multi' && Date.now() - liveTouch < 2 * MIN ? 30000 : 60000;
+addEventListener('pointerdown', () => { liveTouch = Date.now(); }, { capture: true, passive: true });
+setInterval(() => { if (!document.hidden && Date.now() - liveAt >= liveEvery() - 1000) livePull(); }, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - liveAt > 10000) livePull(); });
+livePull();
+// ==== /LIVE ====
 
 setInterval(() => { if (!document.hidden) tick(); }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
@@ -8158,7 +8211,7 @@ document.addEventListener('touchend', async () => {
   ptr.classList.add('go');
   try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
   const t0 = Date.now();
-  await Promise.allSettled([pullChanges(), pullTasks(), typeof mcPull === 'function' && TAB === 'multi' ? mcPull() : null]);
+  await Promise.allSettled([pullChanges(), pullTasks(), livePull(true)]);
   tick(true);
   await new Promise(r => setTimeout(r, Math.max(0, 600 - (Date.now() - t0))));  // que es vegi girar, encara que vagi molt de pressa
   ptr.classList.remove('go');

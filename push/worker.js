@@ -17,6 +17,13 @@
 // i rep una sessió de 12 h. Amb la sessió pot llegir i publicar NOMÉS docs/changes.json i docs/tasks.json (POST /admin/read i /admin/commit).
 // Totes les rutes públiques tenen un límit de peticions per IP, perquè ningú pugui esgotar el pla gratuït ni omplir el servidor. Enllaços: STORE (Durable Object), SELF (el mateix worker).
 // CARTEL (l'horari del cartell) el posa instala.sh a partir de docs/cartel.json.
+//
+// Pla GRATUÏT de Cloudflare (04-11-2026): 100.000 peticions al dia per a tot el compte i 100.000 files escrites al dia.
+// Per això: els mòbils fan UNA sola pregunta periòdica (GET /live) amb tot el que necessiten; si res no ha canviat, la
+// resposta és mínima i no es llegeix la base de dades (memòria cau per parts). Els límits per IP viuen a la memòria (no
+// escriuen). El cron llegeix changes.json i tasks.json de l'API de GitHub amb ETag (no gasta peticions de Cloudflare) i
+// fora dels dies del festival només treballa cada 5 min. Fre d'emergència: passades SLOW_AT peticions en un dia, /live
+// diu als mòbils que preguntin cada 5 min (els avisos push continuen igual).
 
 const CARTEL = /*CARTEL*/null/*CARTEL*/;
 const PAGES = 'https://midnight-app.midnightgroup.workers.dev/';
@@ -91,8 +98,10 @@ function dueInc(sub, list, from, to) {
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
+const SLOW_AT = 70000;   // peticions al dia (de les 100.000 del pla gratuït) a partir de les quals els mòbils van a poc a poc
+const LIVE_PARTS = ['inc', 'mc', 'done', 'mk'];
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
 // Sessió de l'organització: «caducitat.signatura». Si es canvia la contrasenya, totes les sessions velles deixen de valer.
@@ -161,12 +170,38 @@ function digest(sets, stamp, notice) {
   const key = Object.keys(all).sort().map(id => `${id}|${all[id].a}|${all[id].b}|${all[id].n}|${all[id].note}`).join('~');
   return { all, key, stamp, notice: typeof notice === 'string' ? notice : '' };
 }
-// Llegeix changes.json. Si GitHub no respon bé, torna null (s'usarà l'últim horari bo i no s'avisarà de cap canvi)
-async function fetchSchedule() {
+// Llegeix un fitxer de docs/. Primer, l'API de GitHub amb el token del servidor i ETag: si no ha canviat, GitHub respon 304
+// (no compta al seu límit) i es fa servir la còpia de la memòria. Així el cron no gasta peticions de Cloudflare
+// (abans ho llegia del worker midnight-app, que és del mateix compte: 2.880 peticions al dia). Si GitHub falla, la web.
+const ghFiles = new Map();
+async function readDoc(env, name) {
+  if (env.GH_TOKEN) {
+    try {
+      const c = ghFiles.get(name);
+      const r = await fetch(`https://api.github.com/repos/${REPO}/contents/docs/${name}?ref=main`, {
+        headers: { Authorization: `Bearer ${env.GH_TOKEN}`, Accept: 'application/vnd.github.raw+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'midnight-push', ...(c ? { 'If-None-Match': c.etag } : {}) },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (r.status === 304 && c) return { status: 200, data: c.data };
+      if (r.status === 404) return { status: 404 };
+      if (r.ok) {
+        const data = await r.json(), etag = r.headers.get('etag');
+        if (etag) ghFiles.set(name, { etag, data });
+        return { status: 200, data };
+      }
+    } catch (e) {}
+  }
   try {
-    const r = await fetch(`${PAGES}changes.json?t=${Date.now()}`, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(6000) });
-    if (!r.ok) return null;
-    const c = await r.json();
+    const r = await fetch(`${PAGES}${name}?t=${Date.now()}`, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(6000) });
+    return r.ok ? { status: 200, data: await r.json() } : { status: r.status };
+  } catch (e) { return { status: 0 }; }
+}
+// Llegeix changes.json. Si GitHub no respon bé, torna null (s'usarà l'últim horari bo i no s'avisarà de cap canvi)
+async function fetchSchedule(env) {
+  try {
+    const r = await readDoc(env, 'changes.json');
+    if (r.status !== 200) return null;
+    const c = r.data;
     if (!c || typeof c !== 'object' || typeof c.updated !== 'string') return null;
     if (!sameFest(c)) return { sets: CARTEL.sets, stamp: 'cartel', notice: '' };  // són d'un altre festival
     return { sets: c.sets && typeof c.sets === 'object' ? c.sets : CARTEL.sets, stamp: c.updated, notice: c.notice, noticeTeam: cleanTeam(c.noticeTeam) };
@@ -174,12 +209,12 @@ async function fetchSchedule() {
 }
 
 // Tasques: { list: [{ id, a, b, t, p: [qui] }] } (a i b ja en ms; p = les persones a qui toca, ja resoltes per l'app)
-async function fetchTasks() {
+async function fetchTasks(env) {
   try {
-    const r = await fetch(`${PAGES}tasks.json?t=${Date.now()}`, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(6000) });
+    const r = await readDoc(env, 'tasks.json');
     if (r.status === 404) return { list: [], stamp: 'none' };
-    if (!r.ok) return null;
-    const c = await r.json();
+    if (r.status !== 200) return null;
+    const c = r.data;
     if (!c || typeof c !== 'object' || c.fest !== CARTEL.fest || !Array.isArray(c.list)) return { list: [], stamp: 'none' };
     const list = c.list.filter(x => x && okTaskId(x.id) && Number.isFinite(x.a) && typeof x.t === 'string' && Array.isArray(x.p))
       .slice(0, 2000).map(x => ({ id: x.id, a: x.a, b: Number.isFinite(x.b) ? x.b : 0, t: x.t.slice(0, 120), p: x.p.filter(k => cleanYo(k)) }));
@@ -273,9 +308,12 @@ async function sendBatch(env, list) {
 }
 
 // Cada minut
+// Dies del festival (des de 18 h abans de l'inici, pel muntatge): cada minut. Abans: cada 5 min (només avisos de l'organització)
+const BUSY_FROM = T(CARTEL.start) - 18 * 3600000;
 async function everyMinute(env, now) {
   if (now > END) return;
-  const [fresh, tasks] = await Promise.all([fetchSchedule(), fetchTasks()]);
+  if (now < BUSY_FROM && Math.floor(now / MIN) % 5) return;
+  const [fresh, tasks] = await Promise.all([fetchSchedule(env), fetchTasks(env)]);
   const res = await callStore(env, '/tick', { now, fresh, tasks });
   const targets = res.targets || [];
   if (!targets.length) return;
@@ -325,7 +363,44 @@ export class Store {
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
+    // Per trobar de pressa les incidències noves (sense índex, el cron llegia totes les files cada minut)
+    this.sql.exec('CREATE INDEX IF NOT EXISTS inc_at ON inc (at)');
+    this.sql.exec('DROP TABLE IF EXISTS rl');   // els límits per IP ara són a la memòria
+    this.rl = new Map();
+    // /live: «ver» canvia amb cada canvi de dades; «cache» guarda la resposta de cada part fins que canvia
+    this.boot = Date.now().toString(36); this.ver = 0; this.cache = {};
+    // Comptador de peticions del dia (UTC, com el pla gratuït). Es desa cada 100 per no gastar escriptures
+    const q = this.get('quota') || {};
+    this.qDay = q.day || ''; this.qN = q.n || 0;
     this.ready = state.blockConcurrencyWhile(() => this.importOld());
+  }
+  touch(part) { this.ver++; delete this.cache[part]; }
+  // Límit d'una taula sense llegir-la sencera: MAX(rowid) és una sola fila i mai és més petit que el nombre de files
+  full(table, max) {
+    if (this.sql.exec(`SELECT MAX(rowid) AS m FROM ${table}`).one().m < max) return false;
+    return this.sql.exec(`SELECT COUNT(*) AS n FROM ${table}`).one().n >= max;
+  }
+  quota() {
+    const day = new Date().toISOString().slice(0, 10);
+    if (day !== this.qDay) { this.qDay = day; this.qN = 0; }
+    if (++this.qN % 100 === 0) this.put('quota', { day, n: this.qN });
+    return this.qN;
+  }
+  part(name) {
+    if (this.cache[name]) return this.cache[name];
+    let v;
+    if (name === 'mk') v = this.sql.exec('SELECT id, uid, t, s, n, k, note, who FROM mk ORDER BY t').toArray();
+    else if (name === 'mc') {
+      v = {};
+      for (const r of this.sql.exec('SELECT id, st, ssd, note, who, at, since FROM mc').toArray()) v[r.id] = { st: r.st, ssd: r.ssd, note: r.note, who: r.who, at: r.at, since: r.since };
+    } else if (name === 'inc') {
+      v = this.sql.exec("SELECT n, at, who, txt, urg, img <> '' AS img, st, sby, sat FROM inc ORDER BY n DESC LIMIT 60").toArray()
+        .map(r => ({ ...r, urg: !!r.urg, img: !!r.img }));
+    } else if (name === 'done') {
+      v = {};
+      for (const r of this.sql.exec('SELECT who, id, at FROM done').toArray()) (v[r.who] = v[r.who] || {})[r.id] = r.at;
+    }
+    return (this.cache[name] = v);
   }
   get(k) { const r = this.sql.exec('SELECT v FROM kv WHERE k = ?', k).toArray()[0]; return r ? JSON.parse(r.v) : null; }
   put(k, v) { this.sql.exec('INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, JSON.stringify(v)); }
@@ -346,16 +421,14 @@ export class Store {
       id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team, inc ? 1 : 0, sol);
   }
   // Límit de peticions (finestra fixa): true si encara en queden
+  // A la memòria del Durable Object (n'hi ha un de sol): no escriu res a la base de dades. Si es reinicia, es comença de zero
   hit(k, max, win) {
     const now = Date.now();
-    if (Math.random() < 0.02) this.sql.exec('DELETE FROM rl WHERE reset < ?', now);
-    const r = this.sql.exec('SELECT n, reset FROM rl WHERE k = ?', k).toArray()[0];
-    if (!r || r.reset <= now) {
-      this.sql.exec('INSERT INTO rl (k, n, reset) VALUES (?, 1, ?) ON CONFLICT(k) DO UPDATE SET n = 1, reset = excluded.reset', k, now + win);
-      return true;
-    }
+    if (this.rl.size > 5000) for (const [key, r] of this.rl) if (r.reset <= now) this.rl.delete(key);
+    const r = this.rl.get(k);
+    if (!r || r.reset <= now) { this.rl.set(k, { n: 1, reset: now + win }); return true; }
     if (r.n >= max) return false;
-    this.sql.exec('UPDATE rl SET n = n + 1 WHERE k = ?', k);
+    r.n++;
     return true;
   }
   incSince(t) { return this.sql.exec('SELECT n, at, who, txt, urg, st FROM inc WHERE at > ?', t).toArray(); }
@@ -367,6 +440,7 @@ export class Store {
     await this.ready;
     const url = new URL(req.url);
     const b = req.method === 'POST' ? await req.json() : {};
+    const used = this.quota();
     if (Array.isArray(b._rl)) {
       const [k, max, win] = b._rl;
       if (!this.hit(String(k).slice(0, 80), +max, +win)) return json({ error: 'slow' }, 429);
@@ -406,9 +480,10 @@ export class Store {
       const who = cleanYo(b.who);
       if (!who || !okTaskId(b.id)) return json({ error: 'bad' }, 400);
       if (b.v) {
-        if (this.sql.exec('SELECT COUNT(*) AS n FROM done').one().n >= MAX_DONE) return json({ error: 'full' }, 429);
+        if (this.full('done', MAX_DONE)) return json({ error: 'full' }, 429);
         this.sql.exec('INSERT INTO done (who, id, at) VALUES (?, ?, ?) ON CONFLICT(who, id) DO NOTHING', who, b.id, Date.now());
       } else this.sql.exec('DELETE FROM done WHERE who = ? AND id = ?', who, b.id);
+      this.touch('done');
       return json({ ok: true });
     }
     // Multicámara: una càmera (estat, SSD, nota, qui i quan). Només es canvien els camps que s'envien
@@ -423,10 +498,11 @@ export class Store {
         this.sql.exec('INSERT INTO mclog (id, st, ssd, who, at) VALUES (?, ?, ?, ?, ?)', b.id, st, ssd, who, now);
         this.sql.exec('DELETE FROM mclog WHERE n <= (SELECT MAX(n) - 500 FROM mclog)');
       }
-      if (!st && !ssd && !note) { this.sql.exec('DELETE FROM mc WHERE id = ?', b.id); return json({ ok: true }); }
-      if (!this.sql.exec('SELECT id FROM mc WHERE id = ?', b.id).toArray().length && this.sql.exec('SELECT COUNT(*) AS n FROM mc').one().n >= MAX_MC) return json({ error: 'full' }, 429);
+      if (!st && !ssd && !note) { this.sql.exec('DELETE FROM mc WHERE id = ?', b.id); this.touch('mc'); return json({ ok: true }); }
+      if (!this.sql.exec('SELECT id FROM mc WHERE id = ?', b.id).toArray().length && this.full('mc', MAX_MC)) return json({ error: 'full' }, 429);
       this.sql.exec('INSERT INTO mc (id, st, ssd, note, who, at, since) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET st = excluded.st, ssd = excluded.ssd, note = excluded.note, who = excluded.who, at = excluded.at, since = excluded.since',
         b.id, st, ssd, note, who, now, since);
+      this.touch('mc');
       return json({ ok: true, mc: { st, ssd, note, who, at: now, since } });
     }
     // Un Momento: es crea o es canvia (etiqueta, nota). del = s'esborra (només el mòbil que el va fer)
@@ -434,21 +510,26 @@ export class Store {
       if (!okMkId(b.id) || !okMkId(b.uid)) return json({ error: 'bad' }, 400);
       const old = this.sql.exec('SELECT uid FROM mk WHERE id = ?', b.id).toArray()[0];
       if (old && old.uid !== b.uid) return json({ error: 'bad' }, 400);
-      if (b.del) { this.sql.exec('DELETE FROM mk WHERE id = ?', b.id); return json({ ok: true }); }
+      if (b.del) { this.sql.exec('DELETE FROM mk WHERE id = ?', b.id); this.touch('mk'); return json({ ok: true }); }
       const t = +b.t;
       if (!Number.isFinite(t) || Math.abs(t - Date.now()) > 400 * 86400000) return json({ error: 'bad' }, 400);
-      if (!old && this.sql.exec('SELECT COUNT(*) AS n FROM mk').one().n >= MAX_MK) return json({ error: 'full' }, 429);
+      if (!old && this.full('mk', MAX_MK)) return json({ error: 'full' }, 429);
       this.sql.exec('INSERT INTO mk (id, uid, t, s, n, k, note, who, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET t = excluded.t, s = excluded.s, n = excluded.n, k = excluded.k, note = excluded.note, who = excluded.who, at = excluded.at',
         b.id, b.uid, Math.round(t), mcText(b.s, 40), mcText(b.n, 120), MK_TAG.includes(b.k) ? b.k : '', mcText(b.note, 140), mcText(b.who, 30), Date.now());
+      this.touch('mk');
       return json({ ok: true });
     }
-    if (url.pathname === '/mkall') {
-      return json({ mk: this.sql.exec('SELECT id, uid, t, s, n, k, note, who FROM mk ORDER BY t').toArray() });
-    }
-    if (url.pathname === '/mcall') {
-      const out = {};
-      for (const r of this.sql.exec('SELECT id, st, ssd, note, who, at, since FROM mc').toArray()) out[r.id] = { st: r.st, ssd: r.ssd, note: r.note, who: r.who, at: r.at, since: r.since };
-      return json({ mc: out });
+    if (url.pathname === '/mkall') return json({ mk: this.part('mk') });
+    if (url.pathname === '/mcall') return json({ mc: this.part('mc') });
+    // Una sola pregunta periòdica de l'app: p = les parts que vol (inc, mc, done, mk), v = la versió que ja té.
+    // Si no ha canviat res, només torna { v } (sense llegir la base de dades)
+    if (url.pathname === '/live') {
+      const want = String(b.p || '').split(',').filter(x => LIVE_PARTS.includes(x));
+      const v = `${this.boot}.${this.ver}`, out = { v };
+      if (used > SLOW_AT) out.slow = 1;
+      if (b.v === v) return json(out);
+      for (const k of want) out[k] = this.part(k);
+      return json(out);
     }
     if (url.pathname === '/mclogall') {
       return json({ log: this.sql.exec('SELECT id, st, ssd, who, at FROM mclog ORDER BY n DESC LIMIT 80').toArray() });
@@ -460,6 +541,7 @@ export class Store {
       const now = Date.now();
       this.sql.exec('INSERT INTO inc (at, who, txt, urg, img, st, sby, sat) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', now, who, txt, b.urg ? 1 : 0, img, '', '', 0);
       this.sql.exec('DELETE FROM inc WHERE n <= (SELECT MAX(n) - ? FROM inc)', MAX_INC);
+      this.touch('inc');
       return json({ ok: true, n: this.sql.exec('SELECT MAX(n) AS n FROM inc').one().n, at: now });
     }
     // Resolta (st = 'ok') o tornar-la a obrir (st = '')
@@ -468,24 +550,21 @@ export class Store {
       if (!(n > 0)) return json({ error: 'bad' }, 400);
       const st = b.st === 'ok' ? 'ok' : '';
       this.sql.exec('UPDATE inc SET st = ?, sby = ?, sat = ? WHERE n = ?', st, st ? mcText(b.who, 30) : '', st ? Date.now() : 0, n);
+      this.touch('inc');
       return json({ ok: true });
     }
     // Les últimes 60 (sense la foto: va a part, només si algú l'obre)
-    if (url.pathname === '/incall') {
-      const list = this.sql.exec("SELECT n, at, who, txt, urg, img <> '' AS img, st, sby, sat FROM inc ORDER BY n DESC LIMIT 60").toArray()
-        .map(r => ({ ...r, urg: !!r.urg, img: !!r.img }));
-      return json({ inc: list });
-    }
+    if (url.pathname === '/incall') return json({ inc: this.part('inc') });
+    // La foto com a JPEG de veritat (no JSON): el mòbil la guarda a la memòria cau i no la torna a demanar mai més
     if (url.pathname === '/incimg') {
-      const r = this.sql.exec('SELECT img FROM inc WHERE n = ?', Math.floor(+b.n) || 0).toArray()[0];
-      return json({ img: r ? r.img : '' });
+      const r = this.sql.exec('SELECT img FROM inc WHERE n = ?', Math.floor(+url.searchParams.get('n')) || 0).toArray()[0];
+      if (!r || !r.img) return new Response('', { status: 404 });
+      const bin = atob(r.img.slice(r.img.indexOf(',') + 1)), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new Response(bytes, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=31536000, immutable' } });
     }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
-    if (url.pathname === '/doneall') {
-      const out = {};
-      for (const r of this.sql.exec('SELECT who, id, at FROM done').toArray()) (out[r.who] = out[r.who] || {})[r.id] = r.at;
-      return json({ done: out });
-    }
+    if (url.pathname === '/doneall') return json({ done: this.part('done') });
 
     // Horari vigent: el fresc si n'hi ha; si no, l'últim bo; si no, el cartell
     const current = fresh => {
@@ -498,7 +577,10 @@ export class Store {
       const { now, fresh } = b;
       const sch = current(fresh);
       // Tasques: les fresques si n'hi ha; si GitHub falla, les últimes bones
-      if (b.tasks) this.put('tasks', b.tasks);
+      if (b.tasks) {
+        if (this.tasksStamp === undefined) this.tasksStamp = (this.get('tasks') || {}).stamp;
+        if (b.tasks.stamp !== this.tasksStamp) { this.put('tasks', b.tasks); this.tasksStamp = b.tasks.stamp; }
+      }
       const tasks = (b.tasks || this.get('tasks') || {}).list || [];
       if (fresh) {
         const s = this.get('sets');
@@ -591,7 +673,18 @@ export default {
         return json(r, errStatus(r), origin);
       }
       if (req.method === 'GET' && url.pathname === '/inc') { const r = await callStore(env, '/incall', lim('incall')); return json(r, errStatus(r), origin); }
-      if (req.method === 'GET' && url.pathname === '/incimg') { const r = await callStore(env, '/incimg', { n: url.searchParams.get('n'), ...lim('incimg') }); return json(r, errStatus(r), origin); }
+      // La foto: el Durable Object ja dona el JPEG; aquí només es passa (el límit es mira abans)
+      if (req.method === 'GET' && url.pathname === '/incimg') {
+        const rl = await callStore(env, '/rl', lim('incimg'));
+        if (rl.error) return json(rl, 429, origin);
+        const r = await store(env).fetch('https://store/incimg?n=' + encodeURIComponent(String(url.searchParams.get('n') || '').slice(0, 12)));
+        return new Response(r.body, { status: r.status, headers: { 'content-type': 'image/jpeg', 'cache-control': r.status === 200 ? 'public, max-age=31536000, immutable' : 'no-store', ...cors(origin) } });
+      }
+      // Una sola pregunta periòdica (incidències, càmeres, ✓, momentos)
+      if (req.method === 'GET' && url.pathname === '/live') {
+        const r = await callStore(env, '/live', { p: String(url.searchParams.get('p') || '').slice(0, 40), v: String(url.searchParams.get('v') || '').slice(0, 40), ...lim('live') });
+        return json(r, errStatus(r), origin);
+      }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await body();
