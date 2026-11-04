@@ -230,7 +230,8 @@ body:has(.row > img.band) .row > .logo { justify-self: center; }
 .row .left b { display: block; color: var(--accent); font-size: var(--fs-m); }
 .row .left span { font-size: var(--fs-xs); color: var(--muted); }
 .row .bar { grid-column: 1 / -1; height: 4px; margin: 0 -10px; background: var(--rule); }
-.row .bar > div { height: 100%; background: var(--accent); width: 0; }
+.row .bar > div { height: 100%; background: var(--accent); width: 100%; transform: scaleX(0); transform-origin: left; transition: transform 1s linear; }  /* s'omple cada segon (04-11): només transform */
+@media (prefers-reduced-motion: reduce) { .row .bar > div { transition: none; } }
 .closedline { color: var(--muted); font-size: var(--fs-s); margin: 8px 2px 0; }
 .closedline b { color: var(--ink); font-weight: 700; }
 .underrows { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
@@ -2479,6 +2480,53 @@ function paintFavs() {
   document.getElementById('sheetCount').textContent = n ? `(${n})` : '';
 }
 
+// Barra de «quedan» en directe: cada segon un scaleX amb transició lineal d'1 s (es veu avançar contínua, sense repintar la fila).
+// Una barra nova (fila refeta) es col·loca de cop, perquè no torni a créixer des de zero
+function setBar(el, f) {
+  if (!el) return;
+  const v = `scaleX(${Math.min(1, Math.max(0, f)).toFixed(4)})`;
+  if (!el.dataset.on) { el.style.transition = 'none'; el.style.transform = v; el.offsetWidth; el.style.transition = ''; el.dataset.on = '1'; }
+  else if (el.style.transform !== v) el.style.transform = v;
+}
+function liveBars(t) {
+  if (document.hidden) return;
+  for (const s of STAGES) {
+    const r = document.getElementById('r-' + s.id);
+    if (!r || !r.classList.contains('live')) continue;
+    const cur = SETS[s.id].find(x => t >= x.a && t < x.b);
+    if (cur) setBar(r.querySelector('.bar > div'), (t - cur.a) / (cur.b - cur.a));
+  }
+  const rr = document.getElementById('r-rides');
+  if (rr && rr.classList.contains('live') && rr.dataset.a1) setBar(rr.querySelector('.bar > div'), (t - +rr.dataset.a0) / (+rr.dataset.a1 - +rr.dataset.a0));
+}
+// En arribar a la graella (obrir l'app, tornar a Horarios), llisca suau fins a la línia d'«ara» i la línia fa un parpelleig.
+// Si l'usuari toca la graella mentre llisca, s'atura. Amb «Reducir movimiento», hi va de cop (com abans)
+let tlGlide = true, glideRaf = 0;
+function glideToNow() {
+  const t = now();
+  if (t < G0 || t >= GEND || !tlwrap.clientHeight) return;
+  const head = tl.querySelector('.hd').offsetHeight, to = Math.max(0, y(t) - (tlwrap.clientHeight - head) / 3);
+  if (RM.matches) { tlwrap.scrollTop = to; return; }
+  const from = Math.max(0, to - Math.min(360, tlwrap.clientHeight * .7));
+  if (to - from < 40) return;
+  tlwrap.scrollTop = from;
+  const t0 = performance.now(), D = 950;
+  cancelAnimationFrame(glideRaf);
+  const step = n => {
+    const k = Math.min(1, (n - t0) / D);
+    tlwrap.scrollTop = from + (to - from) * (1 - Math.pow(1 - k, 3));
+    if (k < 1) glideRaf = requestAnimationFrame(step);
+    else if (nowline && !nowline.hidden) anim(nowline, [{ opacity: 1 }, { opacity: .25 }, { opacity: 1 }, { opacity: .25 }, { opacity: 1 }], { duration: 900 });
+  };
+  glideRaf = requestAnimationFrame(step);
+}
+for (const ev of ['touchstart', 'wheel', 'pointerdown']) tlwrap.addEventListener(ev, () => cancelAnimationFrame(glideRaf), { passive: true });
+if ('IntersectionObserver' in window) new IntersectionObserver(es => {
+  for (const e of es) {
+    if (e.isIntersecting && tlGlide) { tlGlide = false; glideToNow(); }
+    else if (!e.isIntersecting && !tlwrap.offsetParent) tlGlide = true;  // amagada (una altra pestanya): la propera vegada torna a lliscar
+  }
+}, { threshold: .3 }).observe(tlwrap);
 function scrollToNow(smooth) {
   const t = now();
   const head = tl.querySelector('.hd').offsetHeight;
@@ -2887,6 +2935,7 @@ function tick(force) {
   ml.hidden = !(t >= T0 && t < TEND) || gapNext(t) >= 0 || !!(nextMine && innerWidth < 440);  // amb el meu proper a la barra, no hi cap en un mòbil
   if (!ml.hidden) ml.innerHTML = ICO.time + dur((NDAYS > 1 ? dayEnd(dayAt(t)) : TEND) - t).replace(NB + 'min', '′').replace(NB + 'h', 'h');
   const minute = Math.floor(t / MIN);
+  liveBars(t);  // la barra del que sona s'omple cada segon, no cada minut
   if (!force && minute === lastMin) return;
   lastMin = minute;
   if (NDAYS > 1 && !gPick && autoDay(t) !== GDAY) return showDay(autoDay(t));  // ha canviat el dia: la graella el segueix
@@ -2934,7 +2983,7 @@ function tick(force) {
     // Amb «Solo mis artistas», els pròxims surten per ordre d'hora
     r.style.order = state === 'idle mine' && nx ? String(10 + Math.round((nx.a - t) / MIN)) : '';
     if (state === 'closed') closed.push(s.name);
-    if (cur) r.querySelector('.bar > div').style.width = ((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1) + '%';
+    if (cur) setBar(r.querySelector('.bar > div'), (t - cur.a) / (cur.b - cur.a));
   }
 
   // Atraccions: una fila com un escenari més (no surt amb «Solo mis artistas»; tancades, a la línia de tancats)
@@ -2954,7 +3003,7 @@ function tick(force) {
       : rstate === 'idle' ? `${ricon}<div class="mid"><div class="sn">${rn}</div><div class="dj">Abren a las ${lbl(later[0].a)}</div><div class="after">${later.map(r => html(r.name)).join(' · ')}</div></div><div class="right"><div class="left"><span>abren en</span><b>${dur(later[0].a - t)}</b></div></div>`
       : '';
     if (rowCache.rides !== rstate + rin) { rr.className = 'row ' + rstate; rr.style.order = rstate === 'live' ? '1' : '2'; rr.innerHTML = rin; rowCache.rides = rstate + rin; }
-    if (rstate === 'live') { const a0 = Math.min(...openR.map(r => r.a)); rr.querySelector('.bar > div').style.width = ((t - a0) / (last - a0) * 100).toFixed(1) + '%'; }
+    if (rstate === 'live') { const a0 = Math.min(...openR.map(r => r.a)); rr.dataset.a0 = a0; rr.dataset.a1 = last; setBar(rr.querySelector('.bar > div'), (t - a0) / (last - a0)); }
     if (rstate === 'closed' && t >= T0) closed.push(RIDES_NAME);
   }
 
@@ -3299,7 +3348,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '04/11 22:06';
+const BUILD = '04/11 22:13';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -6026,12 +6075,13 @@ function mc3dCams() {
   const { T, camsG, P, s } = mc3d;
   for (const o of [...camsG.children]) { camsG.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }
   const UP = new T.Vector3(0, 1, 0), tube = new T.CylinderGeometry(1, 1, 1, 6, 1, true);
-  mc3d.pos = {};
+  mc3d.pos = {}; mc3d.recMats = [];
   for (const c of s.cams || []) {
     const q = mcPosOf(c, s.scene3d);
     if (!q) continue;
     mc3d.pos[c.id] = q;
-    const col = new T.Color(mcCss(c.c ? mcCol(c.c) : 'var(--muted)')), sel = mcEd && mcEd.sel === c.id;
+    const rec = (mcState[mcKey(c)] || {}).st === 'grabando', foc = !mcEd && mc3d.focus === c.id;
+    const col = new T.Color(mcCss(rec ? 'var(--now)' : c.c ? mcCol(c.c) : 'var(--muted)')), sel = (mcEd && mcEd.sel === c.id) || foc;
     const [x, y, z] = q.p, base = P(x, y, 0), top = P(x, y, z);
     if (z > .05) {
       const m = new T.Mesh(tube, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: .8 }));
@@ -6049,26 +6099,53 @@ function mc3dCams() {
     const lp = [];
     for (let i = 0; i < 4; i++) lp.push(top, cor[i], cor[i], cor[(i + 1) % 4]);
     const lg = new T.BufferGeometry().setFromPoints(lp);
-    camsG.add(new T.LineSegments(lg, new T.LineBasicMaterial({ color: col, transparent: true, opacity: sel ? 1 : .85 })));
+    const lm = new T.LineBasicMaterial({ color: col, transparent: true, opacity: sel ? 1 : .85 });
+    camsG.add(new T.LineSegments(lg, lm));
     const fp = [];
     for (let i = 0; i < 4; i++) fp.push(top, cor[i], cor[(i + 1) % 4]);
     const fgm = new T.BufferGeometry().setFromPoints(fp);
-    camsG.add(new T.Mesh(fgm, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .2 : .09, side: T.DoubleSide, depthWrite: false })));
+    const fm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .22 : rec ? .18 : .09, side: T.DoubleSide, depthWrite: false });
+    camsG.add(new T.Mesh(fgm, fm));
+    if (rec) mc3d.recMats.push([fm, lm]);
   }
   mc3d.camSig = mc3dSig();
+  mc3dPulse();
 }
-const mc3dSig = () => mc3d ? JSON.stringify([(mc3d.s.cams || []).map(c => mcPosOf(c, mc3d.s.scene3d)), mcEd && mcEd.sel]) : '';
+const mc3dSig = () => mc3d ? JSON.stringify([(mc3d.s.cams || []).map(c => [mcPosOf(c, mc3d.s.scene3d), (mcState[mcKey(c)] || {}).st === 'grabando']), mcEd && mcEd.sel, mc3d.focus]) : '';
+// Les que graven: el con batega en vermell (20 fps, només amb la pestanya a la vista; quiet amb «Reducir movimiento»)
+function mc3dPulse() {
+  const m = mc3d;
+  if (!m || m.pulsing || !m.recMats.length || RM.matches) return;
+  m.pulsing = true;
+  const tick = () => {
+    if (!mc3d || mc3d !== m || !m.recMats.length) { m.pulsing = false; return; }
+    if (document.hidden || TAB !== 'multi') { setTimeout(tick, 1000); return; }
+    const k = .5 + .5 * Math.sin(performance.now() / 260);
+    for (const [fm, lm] of m.recMats) { fm.opacity = .1 + .28 * k; lm.opacity = .55 + .45 * k; }
+    mc3dDraw(); setTimeout(tick, 50);
+  };
+  tick();
+}
+// Toca una càmera: la vista hi vola i el seu con s'encén
+function mc3dFocus(c) {
+  if (!mc3d || mcEd) return;
+  mc3d.focus = c.id; mc3dCams();
+  const q = mc3d.pos[c.id];
+  if (q) mc3dGo({ az: (q.yaw || 0) * Math.PI / 180 + 2.4, pol: .72, rad: 26, tx: q.p[0], tz: q.p[1] }, RM.matches ? 0 : 750);  // per darrere i de costat, des d'amunt: es veu la càmera i cap on mira
+  else mc3dDraw();
+}
 function mc3dPinsPos() {
   if (!mc3d) return;
   const { T, cam, wrap, P } = mc3d, W = wrap.clientWidth, H = wrap.clientHeight, v = new T.Vector3();
   for (const el of wrap.querySelectorAll('.mcpin')) {
     const c = mc3d.byKey[el.dataset.mcid], q = c && mc3d.pos[c.id];
-    if (!q) { el.style.visibility = 'hidden'; continue; }
+    const cut = mc3d.ren.clippingPlanes[0];  // mentre la carpa es dibuixa, els números surten quan hi arriba
+    if (!q || (cut && q.p[0] > cut.constant)) { el.style.visibility = 'hidden'; continue; }
     v.copy(P(q.p[0], q.p[1], q.p[2])).project(cam);
     const off = v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05;
     el.style.visibility = off ? 'hidden' : '';
     el.style.left = (v.x + 1) / 2 * W + 'px'; el.style.top = (1 - v.y) / 2 * H + 'px';
-    el.classList.toggle('sel', !!(mcEd && mcEd.sel === c.id));
+    el.classList.toggle('sel', mcEd ? mcEd.sel === c.id : mc3d.focus === c.id);
   }
 }
 const MC3D_HOME = { az: -.8, pol: .98, rad: 84, tx: 0, tz: 0 };  // com la isomètrica del plànol: escenari a dalt a la dreta
@@ -6105,7 +6182,7 @@ function mc3dGo(to, ms = 450) {
   const from = { az: m.az, pol: m.pol, rad: m.rad, tx: m.tx, tz: m.tz }, t0 = performance.now();
   let daz = (to.az - from.az) % (2 * Math.PI); if (daz > Math.PI) daz -= 2 * Math.PI; if (daz < -Math.PI) daz += 2 * Math.PI;
   const step = now => {
-    const k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+    const k = ms ? Math.min(1, (now - t0) / ms) : 1, e = 1 - Math.pow(1 - k, 3);
     for (const p of ['pol', 'rad', 'tx', 'tz']) m[p] = from[p] + (to[p] - from[p]) * e;
     m.az = from.az + daz * e; mc3dDraw();
     if (k < 1) m.anim = requestAnimationFrame(step);
@@ -6142,7 +6219,22 @@ async function mc3dAttach() {
   wrap.classList.toggle('mcediting', !!mcEd);
   const lb = wrap.querySelector('[data-mc3d="look"]'); if (lb) lb.textContent = look === 'plano' ? 'Vista noche' : 'Vista plano';
   mc3dCams(); mc3dEdPaint();
-  mc3dDraw();
+  if (!mc3dShown && !RM.matches) mc3dReveal(); else mc3dDraw();
+  mc3dShown = true;
+}
+// El primer cop que s'obre: la carpa es dibuixa d'un extrem a l'altre (un pla de tall que avança), com qui traça el plànol
+let mc3dShown = false;
+function mc3dReveal() {
+  const m = mc3d, T = m.T, L = m.s.scene3d.tent.len / 2 + 2, pl = new T.Plane(new T.Vector3(-1, 0, 0), -L), t0 = performance.now();
+  m.ren.clippingPlanes = [pl];
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 1500), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    pl.constant = -L + 2 * L * e;
+    if (k >= 1) m.ren.clippingPlanes = [];
+    m.raf = 0; mc3dDraw();
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 // Gestos: 1 dit gira (amb inèrcia) · 2 dits apropen, desplacen i giren · doble toc torna a la vista inicial.
 // Ratolí: arrossegar gira, botó dret o Maj+arrossegar desplaça, roda apropa. Editant: arrossegar una càmera la mou per terra.
@@ -6244,8 +6336,8 @@ function mc3dTouch(cv) {
     if (wasMulti) return;
     if (tap && !tap.moved && tnow - tap.t < 280) {
       const c = !mcEd && pick(tap.x, tap.y);
-      if (c) { lastTap = 0; mcOpenSheet(mcKey(c)); return; }   // toc sobre una càmera: la seva fitxa
-      if (tnow - lastTap < 350 && Math.hypot(tap.x - lastXY[0], tap.y - lastXY[1]) < 40) { lastTap = 0; mc3dGo(MC3D_HOME); }
+      if (c) { lastTap = 0; if (mc3d.focus === c.id) mcOpenSheet(mcKey(c)); else mc3dFocus(c); return; }   // 1r toc: hi vola · 2n toc: la seva fitxa
+      if (tnow - lastTap < 350 && Math.hypot(tap.x - lastXY[0], tap.y - lastXY[1]) < 40) { lastTap = 0; if (mc3d.focus) { mc3d.focus = ''; mc3dCams(); } mc3dGo(MC3D_HOME); }
       else { lastTap = tnow; lastXY = [tap.x, tap.y]; }
       return;
     }
@@ -6358,7 +6450,7 @@ function mcRender() {
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
-      ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
+      ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Toca una cámara para ir a ella (otra vez: su ficha) · un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
         <div class="mctools"><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
         <div class="mced" hidden>
           <div class="edtabs mcsel" role="tablist" aria-label="Cámara">${(s.cams || []).map((c, i) => `<button type="button" role="tab" data-mcsel="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}"><i class="mcn">${i + 1}</i>${html(c.pos || c.cam)}</button>`).join('')}</div>
@@ -6429,6 +6521,7 @@ function mcOpenSheet(id) {
   const [s, c] = mcAll().find(([, c]) => mcKey(c) === id) || [];
   if (!c) return;
   mcOpen = id;
+  if (mc3d && mc3d.s === s && mc3d.focus !== c.id) mc3dFocus(c);
   document.getElementById('mcSheetH').textContent = c.pos || c.cam;
   document.getElementById('mcSheetInfo').textContent = [s.stage, NDAYS > 1 ? DAYS[mcDay].name : '', [c.cam, c.opt].filter(Boolean).join(' '), (c.acc || []).join(', ')].filter(Boolean).join(' · ');
   document.getElementById('mcSheetSt').innerHTML = MC_ST.map(([v, t]) => `<button type="button" class="btn" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('');
