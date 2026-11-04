@@ -1410,6 +1410,109 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
 .ptr.go svg { animation: ptrspin .8s linear infinite; }
 @keyframes ptrspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
+/* ==== MOMENTOS (04-11-2026): botó «Momento» a Horarios i Cámaras, marques per a l'edició ==== */
+.mkfab { position: fixed; z-index: 12; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--accent-ink); font: 800 var(--fs-m)/1 var(--body); letter-spacing: .01em; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.mkfab svg { width: 20px; height: 20px; flex: none; }
+.mkfab:active { transform: scale(.94); }
+.mkfab .mkn { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font: 800 11px/20px var(--mono, var(--body)); text-align: center; }
+.mkfab .mkn:empty { display: none; }
+body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkfab, body.tvon .mkfab, body.aron .mkfab, body.locked .mkfab { display: none !important; }
+.mkpop { position: fixed; z-index: 13; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 136px);
+  max-width: 520px; margin: 0 auto; padding: 14px 14px 12px; border-radius: var(--r-card, 14px); background: var(--panel); color: var(--ink);
+  border: 1.5px solid var(--accent); box-shadow: 0 14px 40px rgba(0, 0, 0, .55); }
+.mkpop[hidden] { display: none !important; }
+body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkpop, body.locked .mkpop { display: none !important; }
+.mkpop .mkh { display: flex; align-items: baseline; gap: 10px; margin: 0 34px 2px 0; font: 800 var(--fs-l)/1.2 var(--body); }
+.mkpop .mkh b { font: 700 var(--fs-l)/1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+.mkpop .mkwho { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-s); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkpop .mkx { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+.mktags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.mktags button { min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: 700 var(--fs-s) var(--body); cursor: pointer; }
+.mktags button i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--mkc); vertical-align: 0; }
+.mktags button[aria-pressed="true"] { border-color: var(--mkc); background: color-mix(in srgb, var(--mkc) 26%, transparent); }
+.mkpop input, #mkList select, #mkList input { box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; min-height: 44px; padding: 0 12px; }
+.mkpop input { width: 100%; margin: 2px 0 6px; }
+#mkList { z-index: 20; }  /* per sobre de la barra de baix */
+.mkpop .mkrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.mkpop .mkrow .linkbtn { margin: 0; padding: 8px 0; }
+.mkstages { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.mkstages button { min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); font: 700 var(--fs-xs) var(--body); cursor: pointer; }
+.mkstages button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+#mkList .mkl { list-style: none; margin: 0; padding: 0; }
+#mkList .mkl li { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+#mkList .mkl .tm { font: 700 var(--fs-m)/1.1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+#mkList .mkl .tx { min-width: 0; }
+#mkList .mkl .tx b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mkList .mkl .tx small { display: block; color: var(--muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mkList .mkl .tg { display: inline-block; padding: 1px 7px; margin-right: 6px; border-radius: 999px; font: 800 10px/16px var(--body); text-transform: uppercase; letter-spacing: .04em; background: color-mix(in srgb, var(--mkc) 30%, transparent); color: var(--ink); }
+#mkList .mkl .del { width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+#mkList .mkl .ns { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; margin-left: 6px; vertical-align: 1px; }
+#mkList h3 { margin: 22px 0 8px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+#mkList .mkexp { display: grid; gap: 8px; }
+#mkList .mkopts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 4px 0 12px; font-size: var(--fs-s); }
+#mkList .mkopts select, #mkList .mkopts input { min-height: 40px; }
+#mkList .mkopts input { width: 76px; }
+#mkList .mkempty { color: var(--muted); padding: 16px 0; }
+
+/* ==== TIEMPO (04-11-2026): previsió (Open-Meteo) + radar de pluja (RainViewer) ==== */
+body:not([data-tab="tiempo"]) #tiempo { display: none !important; }
+body[data-tab="tiempo"] .wrap > :not(#tiempo) { display: none !important; }
+body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+#tiempo h2 { margin-bottom: 4px; }
+#tiempo h3 { margin: 28px 0 10px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
+#tiempo .tqsrc { margin: 0 0 14px; }
+.tqnow { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; padding: 18px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
+.tqnow .ic { grid-row: span 2; font-size: 56px; line-height: 1; }
+.tqnow .tp { font: 800 56px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.tqnow .tp small { font-size: var(--fs-l); font-weight: 600; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+.tqnow .ds { color: var(--muted); font-size: var(--fs-m); }
+.tqnow .kv { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: var(--fs-s); }
+.tqnow .kv span { color: var(--muted); }
+.tqnow .kv b { color: var(--ink); }
+.tqnow .arw { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+.tqal { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.tqal li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fill, rgba(255,255,255,.06)); font-size: var(--fs-s); line-height: 1.35; }
+.tqal li.warn { background: color-mix(in srgb, var(--fav) 18%, transparent); }
+.tqal li.bad { background: color-mix(in srgb, var(--now) 22%, transparent); }
+.tqal li .e { font-size: 18px; line-height: 1.1; flex: none; }
+.tqhours { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.tqhours .h { flex: none; width: 54px; display: grid; justify-items: center; gap: 4px; padding: 10px 0 8px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); scroll-snap-align: start; font-size: var(--fs-xs); }
+.tqhours .h.fest { border-color: var(--accent); }
+.tqhours .h .hh { color: var(--muted); font: 700 var(--fs-xs) var(--mono, var(--body)); }
+.tqhours .h .e { font-size: 22px; line-height: 1; }
+.tqhours .h .t { font: 800 var(--fs-m) var(--body); }
+.tqhours .h .rb { width: 8px; height: 34px; border-radius: 4px; background: var(--fill-2, rgba(255,255,255,.12)); position: relative; overflow: hidden; }
+.tqhours .h .rb i { position: absolute; left: 0; right: 0; bottom: 0; background: #4b8bff; }
+.tqhours .h .rp { color: #7aa8ff; font-weight: 700; }
+.tqhours .h .rp.z { color: var(--muted); font-weight: 500; }
+.tqhours .h .gw { color: var(--muted); }
+.tqhours .h .gw.hi { color: var(--fav-ink, var(--fav)); font-weight: 800; }
+.tqfest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tqfest li { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); }
+.tqfest li .e { grid-row: span 2; font-size: 34px; }
+.tqfest li b { font-size: var(--fs-m); }
+.tqfest li span { color: var(--muted); font-size: var(--fs-s); }
+.tqmap { position: relative; height: 340px; overflow: hidden; border-radius: var(--r-card, 14px); background: #0d0f14; border: 1px solid var(--rule); touch-action: pan-y; }
+.tqmap .ly { position: absolute; inset: 0; }
+.tqmap img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap .rd { opacity: 0; transition: opacity .25s; }
+.tqmap .rd.on { opacity: .82; }
+.tqmap svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tqmap svg.rings circle.r { fill: none; stroke: rgba(255,255,255,.45); stroke-width: 1; stroke-dasharray: 3 4; }
+.tqmap svg.rings text { fill: rgba(255,255,255,.75); font: 700 10px var(--mono, var(--body)); paint-order: stroke; stroke: rgba(0,0,0,.6); stroke-width: 3px; }
+.tqmap svg.rings circle.pin { fill: var(--now); stroke: #fff; stroke-width: 2; }
+.tqmap .ts { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.65); color: #fff; font: 700 var(--fs-s) var(--mono, var(--body)); }
+.tqmap .msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #c9ccd2; font-size: var(--fs-s); }
+.tqmap .msg[hidden] { display: none; }
+.tqctl { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; }
+.tqctl input[type="range"] { flex: 1; accent-color: var(--accent); }
+.tqctl .btn { min-width: 44px; padding: 0 12px; }
+.tqleg { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; color: var(--muted); font-size: var(--fs-xs); }
+.tqleg i { flex: 1; max-width: 160px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #88ddee, #0099cc, #0077aa, #005588, #ffee00, #ffaa00, #ff4400, #c10000, #ffaaff); }
+#tiempo .tqattr { margin-top: 18px; font-size: var(--fs-xs); }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -1560,6 +1663,31 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     </div>
   </section>
 
+  <section id="tiempo" aria-labelledby="tqH">
+    <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
+    <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
+    <div class="tqnow" id="tqNow" hidden></div>
+    <ul class="tqal" id="tqAl"></ul>
+    <h3>Próximas horas</h3>
+    <div class="tqhours" id="tqHours" role="list"></div>
+    <h3>Radar de lluvia · últimas 2 h</h3>
+    <div class="tqmap" id="tqMap" role="img" aria-label="Radar de lluvia alrededor del festival">
+      <div class="ly" id="tqBase"></div>
+      <div class="ly" id="tqRad"></div>
+      <svg class="rings" id="tqRings" aria-hidden="true"></svg>
+      <span class="ts" id="tqTs" hidden></span>
+      <p class="msg" id="tqMsg">Cargando el radar…</p>
+    </div>
+    <div class="tqctl">
+      <button type="button" class="btn" id="tqPlay" aria-label="Reproducir">▶</button>
+      <input type="range" id="tqSlide" min="0" max="0" value="0" aria-label="Momento del radar">
+      <button type="button" class="btn" id="tqZoom">Más zona</button>
+    </div>
+    <p class="tqleg"><span>Débil</span><i></i><span>Fuerte</span></p>
+    <h3>Días del festival</h3>
+    <ul class="tqfest" id="tqFest"></ul>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+  </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
     <p class="note">Toca una cámara para marcar si está montada o grabando y qué SSD lleva. Lo ve todo el equipo.</p>
@@ -1825,6 +1953,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
   <button type="button" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Sol</span></button>
+  <button type="button" data-tab="tiempo" id="tabTiempo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Tiempo</span></button>
   <button type="button" data-tab="multi" id="tabMulti" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Cámaras</span></button>
   <button type="button" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Mapa</span></button>
   <button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Ajustes</span></button>
@@ -1840,6 +1969,41 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <button class="btn" type="button" id="instOvX">Entendido</button>
   </div>
   <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
+<button class="mkfab" id="mkFab" type="button" aria-label="Marcar momento para la edición"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg><span>Momento</span><span class="mkn" id="mkN"></span></button>
+<div class="mkpop" id="mkPop" role="dialog" aria-labelledby="mkPopH" hidden>
+  <button type="button" class="mkx" id="mkPopX" aria-label="Cerrar">✕</button>
+  <p class="mkh" id="mkPopH"></p>
+  <p class="mkwho" id="mkPopWho"></p>
+  <div class="mkstages" id="mkPopSt" role="group" aria-label="Escenario" hidden></div>
+  <div class="mktags" id="mkPopTags" role="group" aria-label="Tipo"></div>
+  <input type="text" id="mkPopNote" maxlength="140" placeholder="Nota (opcional): «drop brutal», «cámara 2»…" autocomplete="off" enterkeyhint="done">
+  <div class="mkrow"><button type="button" class="linkbtn" id="mkPopDel">Borrar</button><button type="button" class="linkbtn" id="mkPopAll">Ver todos</button></div>
+</div>
+<div class="sheet" id="mkList" role="dialog" aria-modal="true" aria-labelledby="mkListH" hidden>
+  <header>
+    <h2 id="mkListH">Momentos</h2>
+    <button class="btn" id="mkListX2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note" id="mkListInfo"></p>
+    <div class="edtabs" id="mkDays" role="tablist" aria-label="Día" hidden></div>
+    <div class="edtabs" id="mkWhoF" role="tablist" aria-label="De quién"></div>
+    <ul class="mkl" id="mkL"></ul>
+    <h3>Exportar para la edición</h3>
+    <div class="mkopts">
+      <label>Fotogramas <select id="mkFps"><option>25</option><option>24</option><option>30</option><option>50</option></select></label>
+      <label>Ajuste <input type="number" id="mkOff" value="0" step="1" min="-600" max="600" inputmode="numeric"> s</label>
+    </div>
+    <div class="mkexp">
+      <button type="button" class="btn primary" data-mkexp="edl">DaVinci Resolve (.edl)</button>
+      <button type="button" class="btn" data-mkexp="fcpxml">Final Cut Pro (.fcpxml)</button>
+      <button type="button" class="btn" data-mkexp="csv">Lista (.csv para Excel)</button>
+    </div>
+    <p class="note" style="margin-top:14px">Las marcas van a la <b>hora real</b> (timecode de hora del día). Solo encajan si las cámaras graban con el timecode en hora del día y bien sincronizado. «Ajuste» corrige un reloj adelantado o retrasado (o el tiempo que tardas en tocar: −5 s pone la marca 5 s antes).</p>
+    <p class="note"><b>DaVinci:</b> en la línea de tiempo, clic derecho › <i>Timelines › Import › Timeline Markers from EDL</i>. La línea de tiempo debe empezar en la hora real de los clips.<br><b>Final Cut:</b> Archivo › Importar › XML. Crea un proyecto «Momentos» con las marcas en su hora: pon encima el multicam o los clips sincronizados.</p>
+  </div>
+  <div class="foot"><button class="btn primary" id="mkListX" type="button">Listo</button></div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="isl" id="isl" role="status" aria-live="polite" hidden><div class="ib"><span class="dot"></span><span class="it">Aviso</span><span class="is"></span><span class="in"></span></div><div class="ix"><ul></ul><button type="button" class="ic">Entendido</button></div></div>
@@ -6669,6 +6833,392 @@ document.getElementById('multi').addEventListener('click', e => {
 document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid], li[data-mcck]')) { e.preventDefault(); e.target.click(); } });
 // ==== /MULTICÁMARA ====
 
+// ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
+// Botó «Momento» a Horarios i Cámaras: guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
+// Es comparteixen per al servidor d'avisos (POST/GET /mk) i s'exporten amb timecode d'hora del dia per a DaVinci (EDL),
+// Final Cut (FCPXML) o Excel (CSV). Sense servidor (artifact) o sense cobertura: queden al mòbil i s'envien després.
+const MKK = FEST.key + '-mk-v1';
+const MK_TAGS = [['drop', 'Drop', '#ff3b3b', 'Red'], ['publico', 'Público', '#3b8bff', 'Blue'], ['artista', 'Artista', '#ffd23b', 'Yellow'],
+  ['backstage', 'Backstage', '#b06bff', 'Purple'], ['error', 'Fallo', '#ff5fd2', 'Fuchsia']];
+const mkTag = k => MK_TAGS.find(x => x[0] === k);
+let mkUid = '';
+try { mkUid = localStorage.getItem('midnight-mk-uid') || ''; } catch (e) {}
+if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + Math.random().toString(36).slice(2, 12); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+let mkMine = [], mkDel = [], mkSrv = null, mkCur = null, mkPopT = 0, mkDayF = -1, mkWho = 'all', mkPulling = false;
+try { const v = JSON.parse(localStorage.getItem(MKK) || 'null'); if (v && Array.isArray(v.m)) { mkMine = v.m.filter(m => m && typeof m.id === 'string' && Number.isFinite(m.t)); mkDel = Array.isArray(v.del) ? v.del : []; } } catch (e) {}
+const mkSave = () => { try { localStorage.setItem(MKK, JSON.stringify({ m: mkMine, del: mkDel })); } catch (e) {} };
+const mkFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+const mkHMS = t => mkFmt.format(t);
+// Què sona ara a cada escenari (pot ser més d'un)
+const mkLive = t => STAGES.map(s => ({ s, x: (SETS[s.id] || []).find(x => t >= x.a && t < x.b) })).filter(o => o.x);
+const mkStageName = id => { const s = STAGES.find(s => s.id === id); return s ? s.name : ''; };
+// Tots: els del servidor + els meus (els meus manen: poden tenir canvis que encara no han arribat)
+function mkList() {
+  const by = new Map();
+  for (const m of mkSrv || []) if (!mkDel.includes(m.id)) by.set(m.id, m);
+  for (const m of mkMine) by.set(m.id, { ...m, uid: mkUid });
+  return [...by.values()].sort((a, b) => a.t - b.t);
+}
+async function mkSend(m) {
+  if (!PUSH || !PUSH.url) return false;
+  try {
+    const r = await fetchT(PUSH.url + '/mk', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(m.del ? { id: m.id, uid: mkUid, del: 1 } : { id: m.id, uid: mkUid, t: m.t, s: m.s, n: m.n, k: m.k, note: m.note, who: m.who }) }, 8000);
+    return r.ok;
+  } catch (e) { return false; }
+}
+// Envia el que falta (nous, canviats i esborrats). Es crida en marcar, en tornar a l'app i cada minut
+async function mkFlush() {
+  if (!PUSH || !PUSH.url || !navigator.onLine) return;
+  for (const m of mkMine.filter(m => !m.sent)) { const v = m.v; if (await mkSend(m)) { if (m.v === v) m.sent = true; } else break; }
+  for (const id of mkDel.slice()) if (await mkSend({ id, del: 1 })) mkDel = mkDel.filter(x => x !== id); else break;
+  mkSave(); mkPaint();
+}
+async function mkPull() {
+  if (!PUSH || !PUSH.url || mkPulling) return;
+  mkPulling = true;
+  try {
+    const r = await fetchT(PUSH.url + '/mk', { cache: 'no-store' }, 8000);
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j.mk)) mkSrv = j.mk; }
+  } catch (e) {}
+  mkPulling = false;
+  if (!document.getElementById('mkList').hidden) mkRenderList();
+}
+function mkPaint() {
+  const n = mkMine.length;
+  document.getElementById('mkN').textContent = n ? String(n) : '';
+}
+function mkTap() {
+  const t = now(), live = mkLive(t), pick = live[0];
+  const m = { id: mkUid + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
+    who: typeof mcWho === 'function' ? mcWho() : '', v: 1, sent: false };
+  mkMine.push(m); mkSave(); mkPaint();
+  try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+  anim(document.getElementById('mkFab'), [{ transform: 'scale(.86)' }, { transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 320 });
+  mkOpen(m, live);
+  mkFlush();
+}
+function mkOpen(m, live) {
+  mkCur = m;
+  const pop = document.getElementById('mkPop');
+  document.getElementById('mkPopH').innerHTML = `Momento <b>${mkHMS(m.t)}</b>`;
+  const who = () => document.getElementById('mkPopWho').textContent = m.n ? `${m.n}${STAGES.length > 1 && m.s ? ' · ' + mkStageName(m.s) : ''}` : (m.s ? mkStageName(m.s) + ' · sin artista ahora' : 'No suena nadie ahora');
+  who();
+  // Diversos escenaris sonant: es pot triar de quin és el moment (per defecte el primer)
+  const st = document.getElementById('mkPopSt');
+  st.hidden = live.length < 2;
+  st.innerHTML = live.length < 2 ? '' : live.map(o => `<button type="button" data-mks="${esc(o.s.id)}" aria-pressed="${o.s.id === m.s}">${esc(o.s.name)}</button>`).join('');
+  st.onclick = e => { const b = e.target.closest('[data-mks]'); if (!b) return; const o = live.find(o => o.s.id === b.dataset.mks); m.s = o.s.id; m.n = o.x.n; mkChanged(m);
+    for (const x of st.children) x.setAttribute('aria-pressed', x === b); who(); };
+  const tg = document.getElementById('mkPopTags');
+  tg.innerHTML = MK_TAGS.map(([k, l, c]) => `<button type="button" data-mkt="${k}" style="--mkc:${c}" aria-pressed="${m.k === k}"><i></i>${l}</button>`).join('');
+  const note = document.getElementById('mkPopNote');
+  note.value = m.note || '';
+  pop.hidden = false;
+  anim(pop, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 220 });
+  mkArm();
+}
+// El quadre marxa sol als 8 s sense tocar-lo (per poder seguir gravant); mentre s'escriu la nota no
+function mkArm() { clearTimeout(mkPopT); mkPopT = setTimeout(() => { if (document.activeElement !== document.getElementById('mkPopNote')) mkClose(); else mkArm(); }, 8000); }
+function mkClose() { clearTimeout(mkPopT); document.getElementById('mkPop').hidden = true; mkCur = null; }
+function mkChanged(m) { m.v = (m.v || 0) + 1; m.sent = false; mkSave(); clearTimeout(mkChanged.t); mkChanged.t = setTimeout(mkFlush, 600); }
+document.getElementById('mkFab').addEventListener('click', mkTap);
+document.getElementById('mkPopX').addEventListener('click', mkClose);
+document.getElementById('mkPop').addEventListener('pointerdown', mkArm);
+document.getElementById('mkPopTags').addEventListener('click', e => {
+  const b = e.target.closest('[data-mkt]'); if (!b || !mkCur) return;
+  mkCur.k = mkCur.k === b.dataset.mkt ? '' : b.dataset.mkt;
+  for (const x of b.parentElement.children) x.setAttribute('aria-pressed', x.dataset.mkt === mkCur.k);
+  mkChanged(mkCur);
+});
+document.getElementById('mkPopNote').addEventListener('input', e => { if (!mkCur) return; mkCur.note = e.target.value.slice(0, 140); mkChanged(mkCur); mkArm(); });
+document.getElementById('mkPopNote').addEventListener('keydown', e => { if (e.key === 'Enter') { e.target.blur(); mkClose(); } });
+function mkRemove(id) {
+  const m = mkMine.find(x => x.id === id);
+  if (!m) return;
+  mkMine = mkMine.filter(x => x.id !== id);
+  if (m.sent || m.v > 1) mkDel.push(id);
+  if (mkSrv) mkSrv = mkSrv.filter(x => x.id !== id);
+  mkSave(); mkPaint(); mkFlush();
+}
+document.getElementById('mkPopDel').addEventListener('click', () => { if (mkCur) mkRemove(mkCur.id); mkClose(); toast('Momento borrado.', 'info', null, 3000); });
+document.getElementById('mkPopAll').addEventListener('click', () => { mkClose(); mkOpenList(); });
+
+// Llista i exportació
+function mkFiltered() {
+  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || m.uid === mkUid));
+}
+function mkRenderList() {
+  const all = mkList();
+  const days = document.getElementById('mkDays');
+  days.hidden = NDAYS < 2;
+  if (NDAYS > 1) days.innerHTML = [`<button type="button" role="tab" data-mkd="-1" aria-selected="${mkDayF < 0}">Todos</button>`]
+    .concat(DAYS.map(d => `<button type="button" role="tab" data-mkd="${d.d}" aria-selected="${mkDayF === d.d}">${esc(d.name || 'Día ' + (d.d + 1))} <span>${all.filter(m => dayAt(m.t) === d.d).length}</span></button>`)).join('');
+  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(m => m.uid === mkUid).length]]
+    .map(([k, l, n]) => `<button type="button" role="tab" data-mkw="${k}" aria-selected="${mkWho === k}">${l} <span>${n}</span></button>`).join('');
+  const L = mkFiltered();
+  const pend = mkMine.filter(m => !m.sent).length + mkDel.length;
+  document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Solo en este móvil (esta versión no tiene servidor).'
+    : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
+  document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
+    const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
+    return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
+  }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Momento» en Horarios o Cámaras mientras graba.</li>';
+  for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
+}
+function mkOpenList() {
+  const sh = document.getElementById('mkList');
+  if (mkDayF < 0 && NDAYS > 1) mkDayF = dayAt(now());
+  sh.hidden = false; document.body.classList.add('locked');
+  anim(sh, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  mkRenderList(); mkPull(); mkFlush();
+}
+function mkCloseList() { document.getElementById('mkList').hidden = true; document.body.classList.remove('locked'); }
+document.getElementById('mkListX').addEventListener('click', mkCloseList);
+document.getElementById('mkListX2').addEventListener('click', mkCloseList);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('mkList').hidden) mkCloseList(); });
+document.getElementById('mkList').addEventListener('click', e => {
+  const d = e.target.closest('[data-mkd]'), w = e.target.closest('[data-mkw]'), x = e.target.closest('[data-mkdel]'), ex = e.target.closest('[data-mkexp]');
+  if (d) { mkDayF = +d.dataset.mkd; mkRenderList(); }
+  else if (w) { mkWho = w.dataset.mkw; mkRenderList(); }
+  else if (x) { mkRemove(x.dataset.mkdel); mkRenderList(); }
+  else if (ex) mkExport(ex.dataset.mkexp);
+});
+// Timecode d'hora del dia (hora de Madrid). sod = segons des de les 00:00 del primer dia de la llista
+// (el que passa de mitjanit continua: 24:30 a Final Cut; a l'EDL torna a 00:30, com a la càmera)
+function mkSod(t, base) {
+  const [h, mi, s] = mkHMS(t).split(':').map(Number);
+  const day = Math.round((new Date(t).setHours(12, 0, 0, 0) - new Date(base).setHours(12, 0, 0, 0)) / 86400000);
+  return day * 86400 + h * 3600 + mi * 60 + s + (t % 1000) / 1000;
+}
+const mkTC = (sec, fps) => { const f = Math.floor(sec * fps + 1e-6), F = f % fps, S = Math.floor(f / fps); const p = n => String(n).padStart(2, '0');
+  return `${p(Math.floor(S / 3600) % 24)}:${p(Math.floor(S / 60) % 60)}:${p(S % 60)}:${p(F)}`; };
+const mkLabel = m => { const tg = mkTag(m.k); return [tg ? tg[1] : '', m.n || (STAGES.length > 1 ? '' : 'Sin artista'), STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who].filter(Boolean).join(' · '); };
+const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function mkExport(kind) {
+  const L = mkFiltered();
+  if (!L.length) return;
+  const fps = +document.getElementById('mkFps').value || 25, off = Math.max(-600, Math.min(600, +document.getElementById('mkOff').value || 0));
+  const base = L[0].t, sod = m => Math.max(0, mkSod(m.t, base) + off);
+  const dayName = NDAYS > 1 && mkDayF >= 0 ? ' ' + (DAYS[mkDayF].name || 'Día ' + (mkDayF + 1)) : '';
+  const title = `Momentos ${FEST.name}${dayName}`, fname = title.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
+  let text, ext, type;
+  if (kind === 'edl') {
+    const w = L.length > 999 ? 4 : 3;
+    text = `TITLE: ${title}\r\nFCM: NON-DROP FRAME\r\n\r\n` + L.map((m, i) => {
+      const a = mkTC(sod(m), fps), b = mkTC(sod(m) + 1 / fps, fps), tg = mkTag(m.k);
+      return `${String(i + 1).padStart(w, '0')}  001      V     C        ${a} ${b} ${a} ${b}  \r\n |C:ResolveColor${tg ? tg[3] : 'Green'} |M:${mkLabel(m).replace(/\|/g, '/')} |D:1\r\n`;
+    }).join('\r\n');
+    ext = 'edl'; type = 'text/plain';
+  } else if (kind === 'fcpxml') {
+    const fr = s => `${Math.round(s * fps)}/${fps}s`, first = Math.max(0, Math.floor(sod(L[0]) - 60)), last = Math.ceil(sod(L[L.length - 1]) + 60);
+    text = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE fcpxml>\n<fcpxml version="1.10">\n  <resources>\n    <format id="r1" name="FFVideoFormat1080p${fps}" frameDuration="1/${fps}s" width="1920" height="1080"/>\n  </resources>\n`
+      + `  <library>\n    <event name="${xml(title)}">\n      <project name="${xml(title)}">\n        <sequence format="r1" tcStart="${fr(first)}" tcFormat="NDF" duration="${fr(last - first)}">\n          <spine>\n`
+      + `            <gap name="Momentos" offset="${fr(first)}" start="${fr(first)}" duration="${fr(last - first)}">\n`
+      + L.map(m => `              <marker start="${fr(sod(m))}" duration="1/${fps}s" value="${xml(mkLabel(m))}"${m.k === 'error' ? ' completed="0"' : ''}/>\n`).join('')
+      + `            </gap>\n          </spine>\n        </sequence>\n      </project>\n    </event>\n  </library>\n</fcpxml>\n`;
+    ext = 'fcpxml'; type = 'application/xml';
+  } else {
+    const q = s => `"${String(s ?? '').replace(/"/g, '""')}"`, fd = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', year: 'numeric' });
+    text = '﻿' + ['Fecha;Hora;Timecode;Escenario;Artista;Tipo;Nota;Quién'].concat(L.map(m => [fd.format(m.t), mkHMS(m.t), mkTC(sod(m), fps), mkStageName(m.s), m.n, (mkTag(m.k) || ['', ''])[1], m.note, m.who].map(q).join(';'))).join('\r\n');
+    ext = 'csv'; type = 'text/csv';
+  }
+  mkDownload(`${fname}.${ext}`, text, type);
+}
+async function mkDownload(name, text, type) {
+  const f = new File([text], name, { type });
+  try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: name }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(f), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
+mkPaint();
+mkFlush();
+setInterval(() => { if (!document.hidden) mkFlush(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) mkFlush(); });
+addEventListener('online', mkFlush);
+// ==== /MOMENTOS ====
+
+// ==== TIEMPO ==== (pestanya pròpia des del 04-11-2026: previsió d'Open-Meteo + radar de pluja de RainViewer)
+// Ubicació: la mateixa que la pestanya Sol (solWhere). Les dades es desen al mòbil: sense cobertura es veu l'última previsió.
+// Pensat per a l'equip d'AV: avisos de pluja que arriba, ratxes (trípodes, pantalles, dron), fred (bateries) i condensació.
+const TQK = 'midnight-tiempo-v1', TQ_AGE = 15 * MIN;
+let tq = null, tqBusy = false, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
+document.getElementById('tqFestN').textContent = FEST.name;
+const tqWhere = () => typeof solWhere === 'function' ? solWhere() : { lat: 41.5536, lon: 2.2492 };
+const tqKey = w => `${w.lat.toFixed(3)},${w.lon.toFixed(3)}`;
+// Codis WMO → icona i text
+function tqCode(c, day = 1) {
+  if (c === 0) return [day ? '☀️' : '🌙', 'Despejado'];
+  if (c === 1) return [day ? '🌤️' : '🌙', 'Casi despejado'];
+  if (c === 2) return ['⛅', 'Nubes y claros'];
+  if (c === 3) return ['☁️', 'Nublado'];
+  if (c === 45 || c === 48) return ['🌫️', 'Niebla'];
+  if (c >= 51 && c <= 57) return ['🌦️', 'Llovizna'];
+  if (c === 61 || c === 80) return ['🌦️', c === 80 ? 'Chubascos débiles' : 'Lluvia débil'];
+  if (c === 63 || c === 81) return ['🌧️', c === 81 ? 'Chubascos' : 'Lluvia'];
+  if (c === 65 || c === 82) return ['🌧️', 'Lluvia fuerte'];
+  if (c === 66 || c === 67) return ['🌧️', 'Lluvia helada'];
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return ['🌨️', 'Nieve'];
+  if (c >= 95) return ['⛈️', c > 95 ? 'Tormenta con granizo' : 'Tormenta'];
+  return ['☁️', ''];
+}
+const TQ16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const tqDir = d => TQ16[Math.round(d / 22.5) % 16];
+// Fletxa cap on va el vent (el vent «del NO» bufa cap al SE)
+const tqArw = d => `<svg class="arw" viewBox="0 0 14 14" style="transform:rotate(${(d + 180) % 360}deg)" aria-hidden="true"><path d="M7 1.5v11M3 5.5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const tqDeg = v => `${Math.round(v) === 0 ? 0 : Math.round(v)}°`.replace('-', '−');
+async function tqFetch(force) {
+  const w = tqWhere(), k = tqKey(w);
+  if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
+  tqBusy = true;
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`
+    + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day'
+    + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day,dew_point_2m'
+    + '&minutely_15=precipitation&forecast_minutely_15=12&timezone=Europe%2FMadrid&timeformat=unixtime&forecast_days=16&wind_speed_unit=kmh';
+  try {
+    const r = await fetchT(u, { cache: 'no-store' }, 12000);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if (!d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
+    tq = { k, at: Date.now(), d, mine: !!w.mine };
+    try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (e) {}
+    tq.err = '';
+  } catch (e) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
+  tqBusy = false;
+  tqPaint();
+}
+// Hores de la previsió com a llista d'objectes (t en ms)
+function tqHours() {
+  const h = tq && tq.d && tq.d.hourly;
+  if (!h) return [];
+  return h.time.map((s, i) => ({ t: s * 1000, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i],
+    w: h.wind_speed_10m[i], g: h.wind_gusts_10m[i], wd: h.wind_direction_10m[i], day: h.is_day[i], dp: h.dew_point_2m[i] }));
+}
+function tqPaint() {
+  const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
+  const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
+  if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
+  const ago = Math.round((Date.now() - tq.at) / MIN);
+  src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
+  const c = tq.d.current || {}, H = tqHours(), t = Date.now();
+  const [ic, ds] = tqCode(c.weather_code, c.is_day);
+  nowEl.hidden = false;
+  nowEl.innerHTML = `<span class="ic" aria-hidden="true">${ic}</span><span class="tp">${tqDeg(c.temperature_2m)}<small>sensación ${tqDeg(c.apparent_temperature)}</small></span><span class="ds">${ds}</span>`
+    + `<div class="kv"><span>Viento <b>${tqArw(c.wind_direction_10m)}${Math.round(c.wind_speed_10m)} km/h ${tqDir(c.wind_direction_10m)}</b></span><span>Rachas <b>${Math.round(c.wind_gusts_10m)} km/h</b></span><span>Humedad <b>${Math.round(c.relative_humidity_2m)} %</b></span></div>`;
+  // Avisos útils per a l'equip
+  const al = [], next = H.filter(h => h.t > t - 3600000 && h.t < t + 12 * 3600000);
+  const m15 = tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
+  if (m15.length && m15[0].mm >= 0.1) al.push(['bad', '🌧️', 'Está lloviendo ahora. Protege cámaras y material.']);
+  else { const r = m15.find(x => x.mm >= 0.1); if (r) al.push(['bad', '🌧️', `Lluvia en ~${Math.max(5, Math.round((r.t - t) / MIN / 5) * 5)} min (hacia las ${hm(r.t)}). Ten a mano fundas y bolsas.`]); }
+  if (!al.length) { const r = next.find(h => h.t > t && h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}.`]); }
+  const gmax = next.filter(h => h.t > t).reduce((a, h) => h.g > (a ? a.g : 0) ? h : a, null);
+  if (gmax && gmax.g >= 40) al.push([gmax.g >= 60 ? 'bad' : 'warn', '💨', `Rachas de ${Math.round(gmax.g)} km/h hacia las ${hm(gmax.t)}: asegura trípodes, brazos y pantallas. Con más de ~38 km/h, mejor no volar el dron.`]);
+  const tmin = next.filter(h => h.t > t).reduce((a, h) => Math.min(a, h.tp), Infinity);
+  if (tmin <= 6) al.push(['warn', '🥶', `Mínima de ${tqDeg(tmin)}: las baterías duran menos con frío. Guarda las de recambio en el bolsillo.`]);
+  if (tmin <= 10) al.push(['', '💧', 'Al entrar del frío a un sitio cálido las lentes se empañan: deja la cámara en la bolsa 10–15 min antes de sacarla.']);
+  document.getElementById('tqAl').innerHTML = al.map(([k, e, x]) => `<li class="${k}"><span class="e" aria-hidden="true">${e}</span><span>${x}</span></li>`).join('');
+  // Properes 24 h (les hores del festival amb vora)
+  const inFest = h => DAYS.some(d => h.t >= d.t0 && h.t < (NDAYS > 1 ? d.tend0 : TEND));
+  document.getElementById('tqHours').innerHTML = H.filter(h => h.t > t - 3600000 && h.t < t + 24 * 3600000).map(h => {
+    const [e] = tqCode(h.c, h.day);
+    return `<div class="h${inFest(h) ? ' fest' : ''}" role="listitem" aria-label="${hm(h.t)}: ${tqDeg(h.tp)}, lluvia ${h.pp} %, rachas ${Math.round(h.g)} km/h"><span class="hh">${hm(h.t).slice(0, 2)}h</span><span class="e" aria-hidden="true">${e}</span><span class="t">${tqDeg(h.tp)}</span>`
+      + `<span class="rb" aria-hidden="true"><i style="height:${Math.min(100, h.pp)}%"></i></span><span class="rp${h.pp < 10 ? ' z' : ''}">${h.pp}%</span>${h.mm >= 0.1 ? `<span class="rp">${h.mm.toFixed(1)}</span>` : ''}<span class="gw${h.g >= 40 ? ' hi' : ''}">${Math.round(h.g)}</span></div>`;
+  }).join('');
+  // Dies del festival (la previsió arriba fins a 16 dies)
+  const last = H.length ? H[H.length - 1].t : 0, fd = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'long' });
+  document.getElementById('tqFest').innerHTML = DAYS.map(d => {
+    const a = d.t0, b = NDAYS > 1 ? d.tend0 : TEND, name = d.name || fd.format(a);
+    if (b < t) return '';
+    const L = H.filter(h => h.t >= a && h.t < b);
+    if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
+    const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds] = tqCode(worst.c, 1);
+    const mn = Math.min(...L.map(h => h.tp)), mx = Math.max(...L.map(h => h.tp)), pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), g = Math.max(...L.map(h => h.g));
+    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${ds} · ${tqDeg(mn)} a ${tqDeg(mx)} · lluvia ${pp} %${mm >= 0.1 ? ` (${mm.toFixed(1)} mm)` : ''} · rachas ${Math.round(g)} km/h</span></li>`;
+  }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
+}
+
+// Radar: mapa de fons de CARTO (zoom tqZ, rajoles de 256 px) i pluja de RainViewer (només fins al zoom 7: a tqZ = 8 es fan servir rajoles de 512 px)
+const TQ_TILE = 256;
+function tqWorld(lat, lon, z) {
+  const n = 2 ** z * TQ_TILE, s = Math.sin(lat * Math.PI / 180);
+  return [(lon + 180) / 360 * n, (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n];
+}
+function tqTiles(z, size, left, top, W, H) {
+  const out = [], n = 2 ** z;
+  for (let y = Math.floor(top / size); y * size < top + H; y++) for (let x = Math.floor(left / size); x * size < left + W; x++)
+    if (y >= 0 && y < n) out.push({ x: ((x % n) + n) % n, y, l: x * size - left, t: y * size - top });
+  return out;
+}
+function tqMapBase() {
+  const map = document.getElementById('tqMap'), W = map.clientWidth, H = map.clientHeight;
+  if (!W) return null;
+  const w = tqWhere(), [px, py] = tqWorld(w.lat, w.lon, tqZ), left = Math.round(px - W / 2), top = Math.round(py - H / 2);
+  const light = document.documentElement.dataset.theme === 'light' ? 'light_all' : 'dark_all';
+  document.getElementById('tqBase').innerHTML = tqTiles(tqZ, TQ_TILE, left, top, W, H).map((p, i) =>
+    `<img alt="" src="https://${'abcd'[i % 4]}.basemaps.cartocdn.com/${light}/${tqZ}/${p.x}/${p.y}@2x.png" style="left:${p.l}px;top:${p.t}px;width:${TQ_TILE}px;height:${TQ_TILE}px">`).join('');
+  // Anells de 10, 25 i 50 km (a la latitud del festival)
+  const mpp = 156543.034 * Math.cos(w.lat * Math.PI / 180) / 2 ** tqZ, cx = W / 2, cy = H / 2;
+  document.getElementById('tqRings').innerHTML = [10, 25, 50, 100].map(km => { const r = km * 1000 / mpp;
+    return r > Math.max(W, H) * .75 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx + r * .707 + 3).toFixed(1)}" y="${(cy - r * .707 - 3).toFixed(1)}">${km} km</text>`; }).join('')
+    + `<circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
+  return { W, H, w, left, top };
+}
+async function tqRadar(force) {
+  const msg = document.getElementById('tqMsg'), g = tqMapBase();
+  if (!g) return;
+  if (force || !tqRad || Date.now() - tqRadAt > 10 * MIN) {
+    try {
+      const r = await fetchT('https://api.rainviewer.com/public/weather-maps.json', { cache: 'no-store' }, 10000);
+      const j = await r.json();
+      if (!j.host || !j.radar || !Array.isArray(j.radar.past) || !j.radar.past.length) throw new Error('mal');
+      tqRad = j; tqRadAt = Date.now(); tqI = j.radar.past.length - 1;
+    } catch (e) { if (!tqRad) { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; return; } }
+  }
+  msg.hidden = true;
+  // Pluja: z7 amb rajoles de 512 px si el fons és z8 (cada rajola de pluja = 2×2 del fons)
+  const size = TQ_TILE * 2 ** (tqZ - 7), [px, py] = tqWorld(g.w.lat, g.w.lon, tqZ), left = Math.round(px - g.W / 2), top = Math.round(py - g.H / 2);
+  const T = tqTiles(7, size, left, top, g.W, g.H), rs = size > 256 ? 512 : 256, F = tqRad.radar.past;
+  document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
+    `<img alt="" src="${tqRad.host}${f.path}/${rs}/7/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
+  const sl = document.getElementById('tqSlide');
+  sl.max = F.length - 1; sl.value = tqI;
+  tqFrame(tqI);
+}
+function tqFrame(i) {
+  if (!tqRad) return;
+  const F = tqRad.radar.past;
+  tqI = Math.max(0, Math.min(F.length - 1, i));
+  for (const d of document.querySelectorAll('#tqRad .rd')) d.classList.toggle('on', +d.dataset.i === tqI);
+  document.getElementById('tqSlide').value = tqI;
+  const ts = document.getElementById('tqTs'), ago = Math.round((Date.now() - F[tqI].time * 1000) / MIN);
+  ts.hidden = false; ts.textContent = `${hm(F[tqI].time * 1000)} · ${ago <= 10 ? 'ahora' : `hace ${ago} min`}`;
+}
+function tqStop() { clearInterval(tqPlayT); tqPlayT = 0; document.getElementById('tqPlay').textContent = '▶'; document.getElementById('tqPlay').setAttribute('aria-label', 'Reproducir'); }
+function tqPlay() {
+  if (tqPlayT) return tqStop();
+  if (!tqRad) return;
+  const F = tqRad.radar.past;
+  if (tqI >= F.length - 1) tqFrame(0);
+  document.getElementById('tqPlay').textContent = '❚❚'; document.getElementById('tqPlay').setAttribute('aria-label', 'Pausa');
+  let wait = 0;
+  tqPlayT = setInterval(() => { if (wait-- > 0) return; if (tqI >= F.length - 1) { tqFrame(0); return; } tqFrame(tqI + 1); if (tqI === F.length - 1) wait = 3; }, 450);
+}
+document.getElementById('tqPlay').addEventListener('click', tqPlay);
+document.getElementById('tqSlide').addEventListener('input', e => { tqStop(); tqFrame(+e.target.value); });
+document.getElementById('tqZoom').addEventListener('click', e => { tqZ = tqZ === 8 ? 7 : 8; e.target.textContent = tqZ === 8 ? 'Más zona' : 'Más cerca'; tqRadar(); });
+function tqShow(on) {
+  tqOn = on;
+  clearInterval(tqTimer); tqTimer = 0; tqStop();
+  if (!on) return;
+  tqPaint(); tqFetch(); tqRadar();
+  tqTimer = setInterval(() => { if (document.hidden) return; tqFetch(); tqRadar(); }, 5 * MIN);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && tqOn) { tqFetch(); tqRadar(); } });
+addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(() => tqRadar(), 300); } });
+// ==== /TIEMPO ====
+
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
 var TABK = FEST.key + '-tab-v1', TAB = 'ahora';
 function showTab(t, top = true) {
@@ -6685,6 +7235,8 @@ function showTab(t, top = true) {
   if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
   if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
+  if (typeof tqShow === 'function' && (ch || t === 'tiempo')) tqShow(t === 'tiempo');  // el temps: es baixa i es refresca només amb la pestanya a la vista
+  if (t !== 'ahora' && t !== 'multi' && typeof mkClose === 'function') mkClose();
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {

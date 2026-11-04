@@ -73,10 +73,15 @@ const MC_ST = ['', 'montada', 'grabando', 'parada', 'recogida'];
 const okMcId = id => typeof id === 'string' && /^[\w-]{1,80}$/.test(id);
 const mcText = (s, n) => typeof s === 'string' ? s.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n) : '';
 const MAX_MC = 400;
+// Momentos (marques per a l'edició): qualsevol de l'equip toca «Momento» i queda l'hora, l'escenari i l'artista.
+// Tots les veuen i les exporten per a DaVinci / Final Cut. Cadascú només esborra les seves (per «uid» del mòbil)
+const MK_TAG = ['', 'drop', 'publico', 'artista', 'backstage', 'error'];
+const okMkId = id => typeof id === 'string' && /^[\w-]{4,40}$/.test(id);
+const MAX_MK = 4000;
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
@@ -273,6 +278,7 @@ export class Store {
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mc (id TEXT PRIMARY KEY, st TEXT NOT NULL, ssd TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Multicámara: «since» = quan va canviar l'estat (per al «REC hace 1 h 52») i historial de canvis (els últims 500)
     if (!this.sql.exec('PRAGMA table_info(mc)').toArray().some(c => c.name === 'since')) this.sql.exec('ALTER TABLE mc ADD COLUMN since INTEGER NOT NULL DEFAULT 0');
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS mk (id TEXT PRIMARY KEY, uid TEXT NOT NULL, t INTEGER NOT NULL, s TEXT NOT NULL, n TEXT NOT NULL, k TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mclog (n INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL, st TEXT NOT NULL, ssd TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
@@ -286,6 +292,7 @@ export class Store {
       this.sql.exec('DELETE FROM done');
       this.sql.exec('DELETE FROM mc');
       this.sql.exec('DELETE FROM mclog');
+      this.sql.exec('DELETE FROM mk');
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
@@ -388,6 +395,22 @@ export class Store {
       this.sql.exec('INSERT INTO mc (id, st, ssd, note, who, at, since) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET st = excluded.st, ssd = excluded.ssd, note = excluded.note, who = excluded.who, at = excluded.at, since = excluded.since',
         b.id, st, ssd, note, who, now, since);
       return json({ ok: true, mc: { st, ssd, note, who, at: now, since } });
+    }
+    // Un Momento: es crea o es canvia (etiqueta, nota). del = s'esborra (només el mòbil que el va fer)
+    if (url.pathname === '/mk') {
+      if (!okMkId(b.id) || !okMkId(b.uid)) return json({ error: 'bad' }, 400);
+      const old = this.sql.exec('SELECT uid FROM mk WHERE id = ?', b.id).toArray()[0];
+      if (old && old.uid !== b.uid) return json({ error: 'bad' }, 400);
+      if (b.del) { this.sql.exec('DELETE FROM mk WHERE id = ?', b.id); return json({ ok: true }); }
+      const t = +b.t;
+      if (!Number.isFinite(t) || Math.abs(t - Date.now()) > 400 * 86400000) return json({ error: 'bad' }, 400);
+      if (!old && this.sql.exec('SELECT COUNT(*) AS n FROM mk').one().n >= MAX_MK) return json({ error: 'full' }, 429);
+      this.sql.exec('INSERT INTO mk (id, uid, t, s, n, k, note, who, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET t = excluded.t, s = excluded.s, n = excluded.n, k = excluded.k, note = excluded.note, who = excluded.who, at = excluded.at',
+        b.id, b.uid, Math.round(t), mcText(b.s, 40), mcText(b.n, 120), MK_TAG.includes(b.k) ? b.k : '', mcText(b.note, 140), mcText(b.who, 30), Date.now());
+      return json({ ok: true });
+    }
+    if (url.pathname === '/mkall') {
+      return json({ mk: this.sql.exec('SELECT id, uid, t, s, n, k, note, who FROM mk ORDER BY t').toArray() });
     }
     if (url.pathname === '/mcall') {
       const out = {};
@@ -493,6 +516,12 @@ export default {
         const r = await callStore(env, '/mc', { ...(await body()), ...lim('mc') });
         return json(r, errStatus(r), origin);
       }
+      // Momentos (marques per a l'edició)
+      if (req.method === 'POST' && url.pathname === '/mk') {
+        const r = await callStore(env, '/mk', { ...(await body()), ...lim('mk') });
+        return json(r, errStatus(r), origin);
+      }
+      if (req.method === 'GET' && url.pathname === '/mk') { const r = await callStore(env, '/mkall', lim('mkall')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/mc') { const r = await callStore(env, '/mcall', lim('mcall')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/mclog') { const r = await callStore(env, '/mclogall', lim('mclog')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
