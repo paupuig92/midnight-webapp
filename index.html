@@ -954,59 +954,49 @@ body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
 /* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
 body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
 body[data-tab="multi"] #multi { display: block !important; }
-#multi { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #15161a; }
-#multi h2 { margin-bottom: 4px; }
-.mcchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 4px; }
-.mcchips button { font: 600 var(--fs-s)/1 var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 999px; min-height: 40px; padding: 0 14px; }
-.mcchips button[aria-selected="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
-#multi .mch3 { margin: 30px 0 10px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
-#multi .mch3 span { font-weight: 400; text-transform: none; letter-spacing: 0; }
-.mcsub { margin: -4px 0 10px; }
-.mcst { margin-top: 26px; }
-.mcst > h3 { margin: 0 0 10px; font: 800 var(--fs-l, 22px)/1.1 var(--title, var(--display)); color: var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.mcst > h3 small { font: 400 var(--fs-xs)/1 var(--mono, var(--body)); color: var(--muted); white-space: nowrap; }
-.mccams { display: grid; gap: 8px; }
-.mccam { display: grid; grid-template-columns: 14px 1fr; gap: 4px 12px; align-items: start; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r-card, 10px); padding: 12px 14px; }
-.mcdot { width: 14px; height: 14px; border-radius: 50%; margin-top: 3px; background: var(--muted); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 35%, transparent); }
-.mcdot.none { background: transparent; border: 1.5px dashed var(--muted); box-shadow: none; box-sizing: border-box; }
-.mccam b { font-size: var(--fs-m, 17px); color: var(--ink); }
-.mccam .mcgear { grid-column: 2; color: var(--ink); font-size: var(--fs-s); }
-.mccam .mcgear em { font-style: normal; font-family: var(--mono, var(--body)); color: var(--muted); font-size: var(--fs-xs); margin-left: 6px; }
-.mccam .mcacc { grid-column: 2; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-.mccam .mcacc span { font-size: var(--fs-xs); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
-.mcrid { margin-top: 12px; display: grid; gap: 2px; }
-.mcrid h4 { margin: 10px 0 4px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
-.mcri { display: flex; gap: 10px; align-items: baseline; font-size: var(--fs-s); color: var(--ink); padding: 3px 0; }
-.mcri .n { flex: none; min-width: 2.2em; font-family: var(--mono, var(--body)); color: var(--muted); }
-.mcri .w { flex: 1; min-width: 0; }
-.mcri .w small { color: var(--muted); font-size: var(--fs-xs); }
-.mcri .dots { flex: none; display: inline-flex; gap: 3px; }
-.mcri .dots i { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 35%, transparent); }
-.mcok { flex: none; font-size: var(--fs-xs); color: var(--mc-verde); font-weight: 700; }
-.mcnote { margin-top: 12px; border-left: 3px solid var(--mc-amarillo); padding: 8px 12px; background: color-mix(in srgb, var(--mc-amarillo) 10%, transparent); font-size: var(--fs-s); color: var(--ink); }
-.mcgrp h4 { margin: 16px 0 6px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
-.mcsts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
-.mcsts button { white-space: nowrap; min-height: 40px; padding: 0 4px; font: 600 var(--fs-s)/1 var(--body); color: var(--ink); background: transparent; border: 1.5px solid var(--line); border-radius: var(--r-btn, 8px); }
-.mcsts button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
-.mcsts button[data-mcst="grabando"][aria-pressed="true"] { color: #fff; background: var(--now, #e0162b); border-color: var(--now, #e0162b); }
-.mccam[data-st="grabando"] { border-color: var(--now, #e0162b); box-shadow: inset 3px 0 0 var(--now, #e0162b); }
-.mccam[data-st="recogida"] { opacity: .6; }
-.mcin { grid-column: 1 / -1; display: grid; grid-template-columns: 2fr 3fr; gap: 8px; margin-top: 8px; }
-.mcin label { min-width: 0; display: flex; flex-direction: column; gap: 4px; font: 700 var(--fs-xs)/1 var(--mono, var(--body)); letter-spacing: var(--caps, .06em); text-transform: uppercase; color: var(--muted); }
-.mcin input { width: 100%; box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: var(--r-btn, 8px); min-height: 40px; padding: 0 10px; min-width: 0; text-transform: none; letter-spacing: 0; }
-.mcby { grid-column: 1 / -1; min-height: 0; font-size: var(--fs-xs); color: var(--muted); }
-.mcby:empty { display: none; }
-.mcby:not(:empty) { margin-top: 6px; }
-.mcst > h3 small.rec { color: var(--now, #e0162b); font-weight: 700; }
-.mcmsg { margin: 10px 0 0; color: var(--chg, var(--muted)); }
-.mcline { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 6px 2px; background: none; border: 0; border-bottom: 1px solid var(--rule); color: var(--ink); font: 500 var(--fs-m, 17px)/1.2 var(--body); text-align: left; }
-.mcline .n { flex: none; min-width: 2.6em; font: 700 var(--fs-m, 17px)/1 var(--mono, var(--body)); }
-.mcline .t { flex: 1; min-width: 0; }
-.mcline .ck { flex: none; width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; }
-.mcline[aria-pressed="true"] { color: var(--muted); }
-.mcline[aria-pressed="true"] .t { text-decoration: line-through; }
-.mcline[aria-pressed="true"] .ck { background: var(--mc-verde); border-color: var(--mc-verde); }
-.mcline[aria-pressed="true"] .ck::after { content: "✓"; color: #fff; font: 800 15px/1 var(--body); }
+#multi { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
+#multi .edtabs { margin-top: 14px; }
+#multi .mcmsg { margin: 8px 0 0; }
+/* Les càmeres: com «A continuación» (vora del color de la càmera, nom gran en majúscules) */
+#multi .upnext li.grp b { text-transform: uppercase; }
+#multi .upnext li.it { --sc: var(--muted); grid-template-columns: minmax(0, 1fr) auto; cursor: pointer; padding-top: 10px; padding-bottom: 10px; }
+#multi .upnext .cm { display: block; margin-top: 3px; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--ink); }
+#multi .upnext .acc { display: block; font: 500 var(--fs-xs)/1.3 var(--body); color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+#multi .mcs { text-align: right; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
+#multi .mcs b { display: block; font-weight: 700; color: var(--ink); }
+#multi .mcs b::after { content: " ›"; color: var(--muted); }
+#multi li.it[data-st="grabando"] .mcs b { color: var(--now); }
+#multi li.it[data-st="grabando"] .mcs b::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; }
+#multi li.it[data-st="recogida"] { opacity: .55; }
+#multi .mcsum { color: var(--muted); }
+#multi .mcsum.rec { color: var(--now); }
+/* Rider i material: llistes de línies, sense caixes */
+#multi .mcl { list-style: none; margin: 0; padding: 0; }
+#multi .mcl li { display: grid; grid-template-columns: 2.6em minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: var(--fs-s); }
+#multi .mcl li.grp { display: block; border: 0; padding: 14px 0 2px; font: 600 12px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+#multi .mcl .n { font: 700 var(--fs-s)/1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+#multi .mcl small { color: var(--muted); }
+#multi .mcl .sq { display: inline-flex; gap: 3px; }
+#multi .mcl .sq i { width: 10px; height: 10px; border-radius: 2px; background: var(--sc); }
+#multi .mcl .ok { color: var(--accent); font: 600 11px var(--mono, var(--body)); text-transform: uppercase; }
+#multi .mcl button.mcck { all: unset; display: contents; cursor: pointer; }
+#multi .mcl li.ck { cursor: pointer; }
+#multi .mcl li.ck .box { width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 4px; display: grid; place-items: center; align-self: center; font: 800 14px/1 var(--body); color: var(--accent-ink); }
+#multi .mcl li.ck[aria-checked="true"] { color: var(--muted); }
+#multi .mcl li.ck[aria-checked="true"] .t { text-decoration: line-through; }
+#multi .mcl li.ck[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); }
+#multi .mcl li.ck[aria-checked="true"] .box::after { content: "✓"; }
+#multi .mcnote { margin: 14px 0 0; }
+#multi .mch2 { margin-top: 40px; }
+#multi .mcempty { margin: 6px 0 0; }
+/* Fitxa d'una càmera (a sobre, com «Mis artistas») */
+#mcSheet { z-index: 20; }  /* per sobre de la barra de baix */
+#mcSheet .body h3 { margin: 20px 0 8px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#mcSheet .row2 .btn { flex: 1 1 40%; }
+#mcSheet .row2 .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+#mcSheet .row2 .btn[data-mcst="grabando"][aria-pressed="true"] { background: var(--now); border-color: var(--now); color: #fff; }
+#mcSheet input { width: 100%; box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 46px; padding: 0 12px; }
+#mcSheet .mcby { margin-top: 18px; }
 /* Sol (per a foto i vídeo): on és el sol ara, brúixola, recorregut del dia i hores clau. Colors del festival (vars) */
 body[data-tab="sol"] .wrap > :not(#sol) { display: none !important; }
 #sol { --sol-gold: #f2a93b; --sol-blue: #4b74e6; --sol-day: #7cc0ff; --sol-night: #15214a; --sol-hair: color-mix(in srgb, var(--ink) 12%, transparent); }
@@ -1471,13 +1461,14 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
 
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
-    <p class="note">Dónde va cada cámara, con qué óptica y accesorios, y todo el material que hay que llevar.</p>
-    <div class="mcchips" id="mcChips" role="tablist" aria-label="Escenario"></div>
+    <p class="note">Toca una cámara para marcar si está montada o grabando y qué SSD lleva. Lo ve todo el equipo.</p>
+    <div class="edtabs gdays" id="mcDays" role="tablist" aria-label="Día" hidden></div>
+    <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenario" hidden></div>
     <p class="note mcmsg" id="mcMsg" role="status" hidden></p>
     <div id="mcBody"></div>
-    <h3 class="mch3" id="mcMatH">Material <span id="mcMatFor"></span></h3>
-    <p class="note mcsub">Todo sumado. Marca lo que ya está en la furgo (solo en este móvil).</p>
-    <div id="mcMat"></div>
+    <h2 class="mch2">Material</h2>
+    <p class="note">Todo sumado<span id="mcMatFor"></span>. Marca lo que ya está cargado (solo en este móvil).</p>
+    <ul class="mcl" id="mcMat"></ul>
     <button type="button" class="linkbtn" id="mcClear" hidden>Quitar todas las marcas</button>
   </section>
 
@@ -1706,6 +1697,24 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <div class="foot"><button class="btn primary" id="sheetDone" type="button">Listo</button></div>
 </div>
 
+<div class="sheet" id="mcSheet" role="dialog" aria-modal="true" aria-labelledby="mcSheetH" hidden>
+  <header>
+    <h2 id="mcSheetH"></h2>
+    <button class="btn" id="mcDone2" type="button">Listo</button>
+  </header>
+  <div class="body">
+    <p class="note" id="mcSheetInfo"></p>
+    <h3>Estado</h3>
+    <div class="row2" id="mcSheetSt" role="group" aria-label="Estado"></div>
+    <h3><label for="mcSsd">SSD</label></h3>
+    <input type="text" id="mcSsd" maxlength="24" placeholder="Número o nombre del SSD" autocomplete="off" enterkeyhint="done">
+    <h3><label for="mcNote">Nota</label></h3>
+    <input type="text" id="mcNote" maxlength="140" placeholder="Batería, tarjeta, encuadre…" autocomplete="off" enterkeyhint="done">
+    <p class="note mcby" id="mcSheetBy"></p>
+  </div>
+  <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
+</div>
+
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
   <button type="button" data-tab="ahora" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Horarios</span></button>
   <button type="button" data-tab="equipo" id="tabEquipo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5l1.6 1.6L9.5 5M5 12.5l1.6 1.6L9.5 11M5 18.5l1.6 1.6 2.9-3.1M12.5 7h7M12.5 13h7M12.5 19h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Tareas</span><b class="tabbadge" id="tabBadge" hidden></b></button>
@@ -1919,68 +1928,16 @@ html[data-theme="light"] .blk.on { box-shadow: 0 0 0 1px rgba(11, 12, 14, .7), 0
 html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, transparent, rgba(11, 12, 14, .7)) 71% 0 / 2px 54% no-repeat, url("img/deco-floor-light.webp") center bottom / cover no-repeat; }
 `;
 // Multicámara (opcional, pestanya «Cámaras»): on va cada càmera, amb què, i què cal de corrent i àudio.
-// Dades del rider tècnic del primer Duro (Google Doc «Rider Tecnico - SideBFilms», en Pau, 04-11).
 // Per escenari: cams = { c: color, pos: posició, cam, opt: òptica, acc: [accessoris; «2x Brazo grande» = 2] }
 //               rider = { z: zona, n: quantes, what: què (es suma a «Material»), where: on, c: [colors de les càmeres], ok: qui ho ha confirmat }
-// Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
+//               note = avís (p. ex. arnès i casc)
+// Exemple: { c: 'morado', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Slider', '2x Brazo grande'] }
+//          { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'], ok: 'Uri' }
+// Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Amb diversos dies, l'estat (grabando, SSD…) va per dia.
+// Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
+// PENDENT (04-11): en Pau ha de passar les càmeres i el rider del Black Hangar.
 FEST.multicam = [
-  { stage: 'Main Stage',
-    cams: [
-      { c: 'morado', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Slider', '2x Brazo grande'] },
-      { c: 'rojo', pos: 'Cabina trasera', cam: 'Pocket 4', opt: '', acc: ['Brazo mediano'] },
-      { c: 'amarillo', pos: 'FOH abierta', cam: 'Black 4K', opt: '10mm', acc: ['Brazo grande'] },
-      { c: 'naranja', pos: 'FOH cerrada', cam: 'Black 4K', opt: '75mm', acc: ['Brazo grande', 'Antivibración'] },
-      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P2', opt: '', acc: ['Brazo mediano'] },
-      { c: 'negro', pos: 'Cenital cruz', cam: 'DJI Action 6', opt: '', acc: [] },
-    ],
-    rider: [
-      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'] },
-      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, en el toldo de truss', c: ['rojo'] },
-      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'amarillo'] },
-      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
-      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
-      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'en el «delay» izquierdo, al lado del árbol', c: ['verde'], ok: 'Uri' },
-      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'arriba del todo de la cruz, justo encima de la pantalla', c: ['negro'] },
-    ] },
-  { stage: 'Cargo Stage',
-    cams: [
-      { c: 'rojo', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
-      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
-      { c: 'azul', pos: 'FOH cerrada', cam: 'Black 4K', opt: '42.5mm', acc: ['Brazo grande'] },
-      { c: 'verde', pos: 'FOH lateral', cam: 'Pocket 4P', opt: '', acc: ['Brazo mediano'] },
-    ],
-    rider: [
-      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['rojo'] },
-      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['azul', 'naranja'] },
-      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
-      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
-      { z: 'Otros', n: 1, what: 'Punto de luz', where: 'lateral, en una farola', c: ['verde'], ok: 'Uri' },
-    ] },
-  { stage: 'Black Hangar',
-    cams: [
-      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
-      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'] },
-      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'] },
-      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'] },
-    ],
-    rider: [
-      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['verde'] },
-      { z: 'Cabina', n: 1, what: 'Punto de luz + alargo', where: 'cámara trasera, encima de las pantallas', c: ['azul'] },
-      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['naranja', 'rojo'] },
-      { z: 'FOH', n: 2, what: 'Canon audio', where: 'de la mesa', c: [] },
-      { z: 'FOH', n: 1, what: 'Punto de luz', where: 'para la grabadora', c: [] },
-    ],
-    note: 'La cenital va encima de las pantallas: hace falta arnés y casco. Habla antes con Carles o Enric y con el responsable del escenario.' },
-  { stage: 'Secret Stage',
-    cams: [
-      { c: 'naranja', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'] },
-      { c: 'verde', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano o grande'] },
-      { c: '', pos: 'Grabadora', cam: 'Zoom H4e', opt: '', acc: [] },
-    ],
-    rider: [
-      { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['naranja'] },
-      { z: 'FOH', n: 1, what: 'Regleta de 3', where: 'en FOH', c: ['verde'] },
-    ] },
+  { stage: 'Black Hangar', cams: [], rider: [] },
 ];
 /* ==== /FESTIVAL ==== */
 
@@ -5586,6 +5543,10 @@ for (const s of MC) {
   for (const c of s.cams || []) { let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
 }
 let mcState = {}, mcFilter = '', mcTimer = 0, mcErr = '', mcAt = 0;
+// Diversos dies: l'estat (grabando, SSD…) va per dia. Per defecte, el dia del festival d'avui (abans, el 1r; després, l'últim)
+let mcDay = 0, mcDayPicked = false;
+const mcToday = () => { const t = now(); let d = 0; for (const x of DAYS) if (t >= x.t0 - 6 * 3600000) d = x.d; return d; };
+const mcKey = c => NDAYS > 1 ? c.id + '-d' + (mcDay + 1) : c.id;
 try { mcState = JSON.parse(localStorage.getItem(MC_SK) || '{}') || {}; } catch (e) {}
 try { mcFilter = localStorage.getItem(MC_FK) || ''; } catch (e) {}
 if (mcFilter && !MC.some(s => s.stage === mcFilter)) mcFilter = '';
@@ -5604,56 +5565,104 @@ function mcMaterial(list) {
   }
   return [['cam', 'Cámaras'], ['opt', 'Ópticas'], ['acc', 'Accesorios'], ['pow', 'Corriente y audio']].map(([k, t]) => [k, t, [...g[k]].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]).filter(x => x[2].length);
 }
-const mcDots = cs => (cs || []).filter(Boolean).map(c => `<i style="background:${mcCol(c)}"></i>`).join('');
+const mcSq = cs => (cs || []).filter(Boolean).map(c => `<i style="--sc:${mcCol(c)}"></i>`).join('');
+const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
+const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
+let mcOpen = null;
 function mcRender() {
-  const chips = document.getElementById('mcChips');
+  const days = document.getElementById('mcDays'), chips = document.getElementById('mcChips');
+  days.hidden = NDAYS < 2;
+  if (NDAYS > 1) days.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-mcday="${x.d}" aria-selected="${x.d === mcDay}">${(DECO.days || [])[x.d] ? `<img class="dlogo" src="${DECO.days[x.d]}" alt="">` : ''}${html(x.name || `Día ${x.d + 1}`)}</button>`).join('');
   chips.hidden = MC.length < 2;
   chips.innerHTML = MC.length < 2 ? '' : [['', 'Todos'], ...MC.map(s => [s.stage, s.stage])].map(([v, t]) => `<button type="button" role="tab" data-mcfilt="${html(v)}" aria-selected="${v === mcFilter}">${html(t)}</button>`).join('');
   const list = MC.filter(s => !mcFilter || s.stage === mcFilter);
   document.getElementById('mcBody').innerHTML = list.map(s => {
     const zones = [];
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
-    return `<div class="mcst"><h3>${html(s.stage)} <small data-mcsum="${html(s.stage)}"></small></h3>
-      <div class="mccams">${(s.cams || []).map(c => `<div class="mccam" data-mcid="${c.id}">
-        <span class="mcdot${c.c ? '' : ' none'}"${c.c ? ` style="background:${mcCol(c.c)}"` : ''}></span><b>${html(c.pos || '')}</b>
-        <div class="mcgear">${html(c.cam || '')}${c.opt ? `<em>${html(c.opt)}</em>` : ''}</div>
-        ${(c.acc || []).length ? `<div class="mcacc">${c.acc.map(a => `<span>${html(a)}</span>`).join('')}</div>` : ''}
-        <div class="mcsts" role="group" aria-label="Estado">${MC_ST.map(([v, t]) => `<button type="button" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('')}</div>
-        <div class="mcin"><label>SSD<input type="text" data-mcf="ssd" maxlength="24" placeholder="Nº o nombre" autocapitalize="characters" autocomplete="off" enterkeyhint="done"></label>
-          <label>Nota<input type="text" data-mcf="note" maxlength="140" placeholder="Batería, tarjeta…" autocomplete="off" enterkeyhint="done"></label></div>
-        <div class="mcby" aria-live="polite"></div>
-      </div>`).join('')}</div>
-      ${zones.length ? `<div class="mcrid">${zones.map(([z, rs]) => `<h4>${html(z)}</h4>${rs.map(r => `<div class="mcri"><span class="n">${+r.n || 1}×</span><span class="w">${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span class="dots">${mcDots(r.c)}</span>${r.ok ? `<span class="mcok">✓ ${html(r.ok)}</span>` : ''}</div>`).join('')}`).join('')}</div>` : ''}
-      ${s.note ? `<div class="mcnote">⚠️ ${html(s.note)}</div>` : ''}
-    </div>`;
+    return `<ul class="upnext mccams">
+      <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
+      ${(s.cams || []).map(c => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
+        <span class="who"><span class="nmc">${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
+        <span class="mcs"><b></b><span class="ssd"></span></span>
+      </li>`).join('')}
+    </ul>
+    ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario.</p>'}
+    ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
+    ${s.note ? `<p class="note mcnote">⚠️ ${html(s.note)}</p>` : ''}`;
   }).join('');
-  document.getElementById('mcMatFor').textContent = mcFilter ? '· ' + mcFilter : (MC.length > 1 ? '· todos los escenarios' : '');
+  document.getElementById('mcMatFor').textContent = mcFilter ? ' · ' + mcFilter : (MC.length > 1 ? ' · todos los escenarios' : '');
   const mat = mcMaterial(list), pre = mcSlug(mcFilter || 'todo');
-  document.getElementById('mcMat').innerHTML = mat.map(([k, t, rows]) => `<div class="mcgrp"><h4>${t}</h4>${rows.map(([name, n]) => { const id = pre + ':' + k + ':' + mcSlug(name); return `<button type="button" class="mcline" data-mcck="${html(id)}" aria-pressed="${!!mcCk[id]}"><span class="n">${n}×</span><span class="t">${html(name)}</span><span class="ck"></span></button>`; }).join('')}</div>`).join('');
+  document.getElementById('mcMat').innerHTML = mat.map(([k, t, rows]) => `<li class="grp">${t}</li>${rows.map(([name, n]) => { const id = pre + ':' + k + ':' + mcSlug(name); return `<li class="ck" role="checkbox" tabindex="0" data-mcck="${html(id)}" aria-checked="${!!mcCk[id]}"><span class="n">${n}×</span><span class="t">${html(name)}</span><span class="box"></span></li>`; }).join('')}`).join('');
   document.getElementById('mcClear').hidden = !Object.keys(mcCk).length;
   mcPaint();
 }
-// Pinta l'estat (sense tornar a fer les targetes: així no es perd el que s'està escrivint)
+function mcAgo(s) {
+  if (!s.at) return '';
+  const m = Math.max(0, Math.round((Date.now() - s.at) / 60000));
+  return `${s.who || 'Alguien'} · ${m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m} min` : new Date(s.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}`;
+}
+// Pinta l'estat (també el de la fitxa oberta, sense trepitjar el que s'hi escriu)
 function mcPaint() {
-  const t = Date.now();
-  for (const el of document.querySelectorAll('#mcBody .mccam')) {
+  for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
     const s = mcState[el.dataset.mcid] || {};
     el.dataset.st = s.st || '';
-    for (const b of el.querySelectorAll('[data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
-    for (const i of el.querySelectorAll('input[data-mcf]')) if (i !== document.activeElement) i.value = s[i.dataset.mcf] || '';
-    const ago = s.at ? Math.max(0, Math.round((t - s.at) / 60000)) : -1;
-    el.querySelector('.mcby').textContent = s.at ? `${s.who || 'Alguien'} · ${ago < 1 ? 'ahora mismo' : ago < 60 ? `hace ${ago} min` : new Date(s.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}` : '';
+    el.querySelector('.mcs b').textContent = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    el.querySelector('.mcs .ssd').textContent = s.ssd || '';
   }
   for (const h of document.querySelectorAll('[data-mcsum]')) {
     const st = MC.find(s => s.stage === h.dataset.mcsum), cams = st && st.cams || [], n = cams.length;
-    const rec = cams.filter(c => (mcState[c.id] || {}).st === 'grabando').length, up = cams.filter(c => ['montada', 'grabando', 'parada'].includes((mcState[c.id] || {}).st)).length;
-    h.textContent = rec ? `● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`;
+    const rec = cams.filter(c => (mcState[mcKey(c)] || {}).st === 'grabando').length, up = cams.filter(c => ['montada', 'grabando', 'parada'].includes((mcState[mcKey(c)] || {}).st)).length;
+    h.textContent = !n ? '' : rec ? `● ${rec}/${n} grabando` : up ? `${up}/${n} montadas` : `${n} ${n === 1 ? 'cámara' : 'cámaras'}`;
     h.classList.toggle('rec', !!rec);
   }
   const msg = document.getElementById('mcMsg');
   msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
   msg.hidden = !msg.textContent;
+  if (mcOpen) {
+    const s = mcState[mcOpen] || {};
+    for (const b of document.querySelectorAll('#mcSheetSt [data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
+    for (const [i, f] of [['mcSsd', 'ssd'], ['mcNote', 'note']]) { const el = document.getElementById(i); if (el !== document.activeElement) el.value = s[f] || ''; }
+    document.getElementById('mcSheetBy').textContent = s.at ? 'Último cambio: ' + mcAgo(s) : '';
+  }
 }
+// Fitxa d'una càmera (a sobre de tot, com «Mis artistas»)
+const mcSheet = document.getElementById('mcSheet');
+function mcOpenSheet(id) {
+  const [s, c] = mcAll().find(([, c]) => mcKey(c) === id) || [];
+  if (!c) return;
+  mcOpen = id;
+  document.getElementById('mcSheetH').textContent = c.pos || c.cam;
+  document.getElementById('mcSheetInfo').textContent = [s.stage, NDAYS > 1 ? DAYS[mcDay].name : '', [c.cam, c.opt].filter(Boolean).join(' '), (c.acc || []).join(', ')].filter(Boolean).join(' · ');
+  document.getElementById('mcSheetSt').innerHTML = MC_ST.map(([v, t]) => `<button type="button" class="btn" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('');
+  mcSheet.hidden = false;
+  anim(mcSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  document.body.classList.add('locked');
+  mcPaint();
+  document.getElementById('mcDone2').focus();
+}
+function mcSaveFields() {
+  if (!mcOpen) return;
+  const s = mcState[mcOpen] || {}, ssd = document.getElementById('mcSsd').value.trim(), note = document.getElementById('mcNote').value.trim();
+  if (ssd !== (s.ssd || '') || note !== (s.note || '')) mcSet(mcOpen, { ssd, note });
+}
+function mcCloseSheet() {
+  const id = mcOpen;
+  if (!id) return;
+  mcSaveFields();
+  mcOpen = null; mcSheet.hidden = true;
+  document.body.classList.remove('locked');
+  const li = document.querySelector(`#mcBody li[data-mcid="${id}"]`);
+  if (li) li.focus({ preventScroll: true });
+}
+document.getElementById('mcDone').addEventListener('click', mcCloseSheet);
+document.getElementById('mcDone2').addEventListener('click', mcCloseSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !mcSheet.hidden) mcCloseSheet(); });
+mcSheet.addEventListener('click', e => {
+  const b = e.target.closest('[data-mcst]');
+  if (b && mcOpen) { const cur = (mcState[mcOpen] || {}).st; mcSet(mcOpen, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); }
+});
+mcSheet.addEventListener('change', e => { if (e.target.matches('input')) mcSaveFields(); });
+mcSheet.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
 function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
 async function mcPull() {
   if (!mcLive()) return;
@@ -5684,27 +5693,24 @@ async function mcSet(id, patch) {
 function mcShow(on) {
   clearInterval(mcTimer); mcTimer = 0;
   if (!on || !MC.length) return;
-  if (!document.getElementById('mcBody').childElementCount) mcRender(); else mcPaint();
+  const d = NDAYS > 1 ? mcToday() : 0;
+  if (!document.getElementById('mcBody').childElementCount || (d !== mcDay && !mcDayPicked)) { if (!mcDayPicked) mcDay = d; mcRender(); } else mcPaint();
   if (Date.now() - mcAt > 5000) mcPull();
   mcTimer = setInterval(() => { if (!document.hidden) mcPull(); }, 15000);
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
 document.getElementById('multi').addEventListener('click', e => {
-  const f = e.target.closest("[data-mcfilt]");
+  const dy = e.target.closest('[data-mcday]');
+  if (dy) { mcDay = +dy.dataset.mcday; mcDayPicked = true; mcRender(); return; }
+  const f = e.target.closest('[data-mcfilt]');
   if (f) { mcFilter = f.dataset.mcfilt; try { localStorage.setItem(MC_FK, mcFilter); } catch (er) {} mcRender(); return; }
-  const b = e.target.closest('[data-mcst]');
-  if (b) { const id = b.closest('[data-mcid]').dataset.mcid, cur = (mcState[id] || {}).st; mcSet(id, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); return; }
+  const c = e.target.closest('li[data-mcid]');
+  if (c) { mcOpenSheet(c.dataset.mcid); return; }
   const k = e.target.closest('[data-mcck]');
-  if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-pressed', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }
+  if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-checked', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }
   if (e.target.id === 'mcClear') { mcCk = {}; try { localStorage.removeItem(MC_CK); } catch (er) {} mcRender(); }
 });
-document.getElementById('multi').addEventListener('change', e => {
-  const i = e.target.closest('input[data-mcf]');
-  if (!i) return;
-  const id = i.closest('[data-mcid]').dataset.mcid, v = i.value.trim();
-  if (v !== ((mcState[id] || {})[i.dataset.mcf] || '')) mcSet(id, { [i.dataset.mcf]: v });
-});
-document.getElementById('multi').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input[data-mcf]')) e.target.blur(); });
+document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid], li[data-mcck]')) { e.preventDefault(); e.target.click(); } });
 // ==== /MULTICÁMARA ====
 
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
