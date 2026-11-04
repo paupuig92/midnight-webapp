@@ -209,6 +209,18 @@ function dueFor(sub, all, from, to) {
   return items;
 }
 
+// Hora daurada (pestanya Sol): CARTEL.sol = per a cada dia del festival, quan comença (t) i l'hora de la posta (set). sub.sol = minuts abans (0 = no)
+function dueSol(sub, from, to) {
+  const items = [];
+  if (!(sub.sol > 0)) return items;
+  for (const x of CARTEL.sol || []) {
+    const pre = x.t - sub.sol * MIN;
+    if (pre > from && pre <= to) items.push({ title: `Hora daurada · d’aquí a ${sub.sol} min`, body: `Posta del sol a les ${x.set}.`, tag: `sol@${x.t}` });
+  }
+  return items;
+}
+const cleanSol = v => [0, 10, 20, 30, 45].includes(+v) ? +v : 0;
+
 // Push sense contingut amb VAPID. El JWT es fa un cop per servei de push (Apple, Google…) i es reaprofita 1 h
 const b64u = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 let keyCache = null;
@@ -295,6 +307,7 @@ export class Store {
     if (!cols.includes('team')) this.sql.exec("ALTER TABLE subs ADD COLUMN team TEXT NOT NULL DEFAULT ''");
     // Vol rebre les incidències (per defecte, Producció)
     if (!cols.includes('inc')) this.sql.exec('ALTER TABLE subs ADD COLUMN inc INTEGER NOT NULL DEFAULT 0');
+    if (!cols.includes('sol')) this.sql.exec('ALTER TABLE subs ADD COLUMN sol INTEGER NOT NULL DEFAULT 0');
     // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
@@ -320,10 +333,10 @@ export class Store {
     } catch (e) {}
     this.put('imported', true);
   }
-  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10, team = '', inc = 0) {
-    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb, team, inc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team, inc = excluded.inc`,
-      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team, inc ? 1 : 0);
+  upsert(id, endpoint, favs, before, changes, at, yo = '', tb = 10, team = '', inc = 0, sol = 0) {
+    this.sql.exec(`INSERT INTO subs (id, endpoint, favs, before, changes, at, yo, tb, team, inc, sol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET endpoint = excluded.endpoint, favs = excluded.favs, before = excluded.before, changes = excluded.changes, at = excluded.at, yo = excluded.yo, tb = excluded.tb, team = excluded.team, inc = excluded.inc, sol = excluded.sol`,
+      id, endpoint, JSON.stringify(favs), before, changes ? 1 : 0, at, yo, tb, team, inc ? 1 : 0, sol);
   }
   // Límit de peticions (finestra fixa): true si encara en queden
   hit(k, max, win) {
@@ -354,11 +367,11 @@ export class Store {
     }
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
-      let { favs, before, changes, yo, tb, team, inc } = b;
+      let { favs, before, changes, yo, tb, team, inc, sol } = b;
       if (b.old && b.old !== b.endpoint) {
         const oldId = await idOf(b.old), prev = this.row(oldId);
         // Renovació de la subscripció (pushsubscriptionchange): conserva les preferències del registre vell
-        if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team, inc } = prev);
+        if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team, inc, sol } = prev);
         this.sql.exec('DELETE FROM subs WHERE id = ?', oldId);
       }
       const cur = this.row(id);
@@ -368,9 +381,10 @@ export class Store {
       const ne = team === undefined ? (cur ? cur.team || '' : '') : cleanTeam(team);
       // Un mòbil sense la versió nova (no envia «inc»): Producció rep les incidències
       const ni = inc === undefined ? (cur ? cur.inc || 0 : ne === 'prod' ? 1 : 0) : inc ? 1 : 0;
-      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne && (cur.inc || 0) === ni) return json({ ok: true, id, same: true });
+      const ns = sol === undefined ? (cur ? cur.sol || 0 : 0) : cleanSol(sol);
+      if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne && (cur.inc || 0) === ni && (cur.sol || 0) === ns) return json({ ok: true, id, same: true });
       if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) return json({ error: 'full' }, 429);
-      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne, ni);
+      this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne, ni, ns);
       return json({ ok: true, id });
     }
     if (url.pathname === '/unsub') { this.sql.exec('DELETE FROM subs WHERE id = ?', await idOf(b.endpoint)); return json({ ok: true }); }
@@ -471,7 +485,7 @@ export class Store {
       const incs = this.incSince(now - MIN);
       for (const sub of this.sql.exec('SELECT * FROM subs').toArray()) {
         const s = { ...sub, favs: JSON.parse(sub.favs), changes: !!sub.changes };
-        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length || dueInc(s, incs, now - MIN, now).length) targets.set(s.id, s.endpoint);
+        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length || dueInc(s, incs, now - MIN, now).length || dueSol(s, now - MIN, now).length) targets.set(s.id, s.endpoint);
       }
       // Canvi de l'organització: només si l'horari publicat és més nou que el que ja s'havia vist
       if (fresh) {
@@ -499,7 +513,7 @@ export class Store {
       if (!sub) return json({ items: [] });
       const sch = current(null);
       // 15 min: el mateix temps que Apple guarda el push si el mòbil no té cobertura (TTL 900 s); el mòbil no repeteix el que ja ha mostrat
-      const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now), ...dueInc(sub, this.incSince(b.now - 15 * MIN), b.now - 15 * MIN, b.now)];
+      const items = [...dueFor(sub, sch.all, b.now - 15 * MIN, b.now), ...dueTasks(sub, (this.get('tasks') || {}).list, b.now - 15 * MIN, b.now), ...dueInc(sub, this.incSince(b.now - 15 * MIN), b.now - 15 * MIN, b.now), ...dueSol(sub, b.now - 15 * MIN, b.now)];
       const last = this.get('last');
       if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) {
         if (!last.team || sub.team === last.team) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
