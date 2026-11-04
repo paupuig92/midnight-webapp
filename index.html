@@ -1933,7 +1933,8 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .wrap > section:not(.admin):not(.tools) { padding-top: 20px;
   background: var(--plus) 0 0 no-repeat, var(--plus) 100% 0 no-repeat, linear-gradient(var(--hair), var(--hair)) 0 5px / 100% 1px no-repeat; }
 .wrap > section h2 { letter-spacing: -.005em; }
-/* (04-11, UI) sense fletxa «↓» als títols ni creus «+» (semblava massa plantilla). Les creus: regla «--plus: none» al final */
+.wrap > section h2::after { content: " ↓"; font: 300 .72em/1 var(--mono); color: var(--muted); letter-spacing: 0; vertical-align: .08em; }
+.wrap > section .shead h2::after, #horario > h2::after { white-space: nowrap; }
 /* etiquetes petites en mono, com «11:00 A 23:00 H» del cartell */
 .brandline { font-family: var(--mono); font-weight: 500; font-size: 10px; letter-spacing: .06em; }
 .brandline b { font-weight: 700; }
@@ -1992,8 +1993,8 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
-/* (04-11, UI) sense creus «+»: els fons que les fan servir queden buits. Per tornar-les, treure aquesta regla */
-:root:root, html:root[data-theme] { --plus: none; --plus-dim: none; --plus-w: none; }
+/* (04-11, UI, punt entremig d'en Pau) creus i fletxes només a les seccions; les targetes (artista d'ara i «Quedan») van netes. Per tornar-les-hi, treure aquesta regla */
+.row.live, .mascot { --plus: none; --plus-dim: none; --plus-w: none; }
 `;
 // Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
 // el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
