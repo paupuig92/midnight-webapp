@@ -31,13 +31,13 @@ src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "publi
 src = src.replace("/*ADMIN*/null/*ADMIN*/", "true" if push else "null")
 # Content-Security-Policy: segona capa per si mai s'hi colés codi estrany. La pàgina només pot parlar amb ella mateixa
 # i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts i la llibreria d'Excel de jsDelivr.
-# Pestanya Tiempo (04-11): previsió d'Open-Meteo, radar de RainViewer i mapa de fons de CARTO.
+# Pestanya Tiempo (04-11): previsió d'Open-Meteo, radar de RainViewer, mapa de fons de CARTO i el widget de Windy (iframe).
 import re
 PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
 CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
        "img-src 'self' data: blob: https://tilecache.rainviewer.com https://*.basemaps.cartocdn.com; media-src 'self' data: blob:; "
-       "connect-src 'self' https://api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; "
+       "connect-src 'self' https://api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)

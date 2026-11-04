@@ -1457,75 +1457,143 @@ body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkpop, body.locked .mkpop 
 #mkList .mkopts input { width: 76px; }
 #mkList .mkempty { color: var(--muted); padding: 16px 0; }
 
-/* ==== TIEMPO (04-11-2026): previsió (Open-Meteo) + radar de pluja (RainViewer) ==== */
+/* ==== TIEMPO (04-11-2026, estil Windy): mapa a tota l'amplada amb capes, partícules de vent i barra de temps ==== */
 body:not([data-tab="tiempo"]) #tiempo { display: none !important; }
 body[data-tab="tiempo"] .wrap > :not(#tiempo) { display: none !important; }
 body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
-#tiempo h2 { margin-bottom: 4px; }
+#tiempo h2 { margin: 18px 0 4px; }
 #tiempo h3 { margin: 28px 0 10px; font: 700 var(--fs-xs)/1.2 var(--mono, var(--body)); letter-spacing: var(--caps, .1em); text-transform: uppercase; color: var(--muted); }
 #tiempo .tqsrc { margin: 0 0 14px; }
+.tqhero { width: 100vw; margin-left: calc(50% - 50vw); }
+@media (min-width: 720px) { .tqhero { width: auto; margin-left: 0; } .tqhero .tqmap { border-radius: 18px; } }
+.tqmap { position: relative; height: min(62vh, 560px); min-height: 380px; overflow: hidden; background: #0b0d12; touch-action: pan-y; color: #fff; }
+.tqmap .ly { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tqmap #tqBase img, .tqmap #tqRad img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap #tqBase { filter: saturate(.6); }
+.tqmap .tqheat { opacity: .72; mix-blend-mode: normal; }
+.tqmap .rd { opacity: 0; transition: opacity .25s; }
+.tqmap .rd.on { opacity: .85; }
+.tqmap #tqPc { pointer-events: none; }
+.tqmap .tqwin { border: 0; background: #0b0d12; z-index: 3; }
+.tqmap .tqwin iframe { width: 100%; height: 100%; border: 0; display: block; }
+.tqmap svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tqmap svg.rings circle.r { fill: none; stroke: rgba(255,255,255,.4); stroke-width: 1; stroke-dasharray: 3 4; }
+.tqmap svg.rings text { fill: rgba(255,255,255,.8); font: 700 10px var(--mono, monospace); paint-order: stroke; stroke: rgba(0,0,0,.65); stroke-width: 3px; }
+.tqmap svg.rings circle.pin { fill: var(--now, #e0162b); stroke: #fff; stroke-width: 2.5; }
+.tqmap svg.rings circle.pulse { fill: none; stroke: var(--now, #e0162b); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: tqPulse 2.4s ease-out infinite; }
+@keyframes tqPulse { from { transform: scale(1); opacity: .9; } to { transform: scale(4); opacity: 0; } }
+.tqglass { background: rgba(14, 16, 22, .62); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); border: 1px solid rgba(255,255,255,.12); }
+.tqtop { position: absolute; z-index: 4; left: 12px; top: 12px; right: 84px; }
+.tqpill { display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 999px; font-size: var(--fs-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqpill b { font: 800 var(--fs-l) var(--display); }
+.tqpill span { color: rgba(255,255,255,.75); overflow: hidden; text-overflow: ellipsis; }
+.tqlayers { position: absolute; z-index: 5; right: 10px; top: 10px; display: grid; gap: 6px; }
+.tqlayers button { display: grid; justify-items: center; gap: 2px; width: 62px; padding: 8px 0 6px; border-radius: 14px; color: rgba(255,255,255,.85); cursor: pointer; font: 700 10px var(--body);
+  background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqlayers button svg { width: 22px; height: 22px; }
+.tqlayers button[aria-selected="true"] { background: #fff; color: #0b0d12; border-color: #fff; }
+.tqzoom { position: absolute; z-index: 4; left: 12px; top: 58px; display: grid; border-radius: 12px; overflow: hidden; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqzoom button { width: 40px; height: 40px; border: 0; background: none; color: #fff; font: 600 22px/1 var(--body); cursor: pointer; }
+.tqzoom button + button { border-top: 1px solid rgba(255,255,255,.12); }
+.tqzoom button:disabled { opacity: .35; }
+.tqleg { position: absolute; z-index: 4; left: 12px; right: 12px; bottom: 74px; display: flex; align-items: center; justify-content: flex-start; }
+.tqleg .bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; font: 700 9px/18px var(--mono, monospace); color: rgba(0,0,0,.75); box-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.tqleg .bar span { padding: 0 5px; min-width: 18px; text-align: center; }
+.tqleg .u { margin-left: 6px; font: 700 10px var(--mono, monospace); color: #fff; text-shadow: 0 1px 3px #000; }
+.tqbar { position: absolute; z-index: 5; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 16px;
+  background: rgba(14,16,22,.7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.12); }
+.tqbar[hidden] { display: none; }
+.tqbar button { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #fff; color: #0b0d12; display: grid; place-items: center; cursor: pointer; }
+.tqbar button svg { width: 18px; height: 18px; }
+.tqtl { flex: 1; min-width: 0; position: relative; }
+.tqtl input { width: 100%; margin: 0; accent-color: #fff; }
+.tqticks { position: relative; height: 12px; font: 700 9px/12px var(--mono, monospace); color: rgba(255,255,255,.6); }
+.tqticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.tqts { flex: none; min-width: 64px; text-align: right; font: 700 var(--fs-s)/1.15 var(--mono, monospace); }
+.tqts small { display: block; font-size: 10px; color: rgba(255,255,255,.65); }
+.tqmap .msg { position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 80%; margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(14,16,22,.8); text-align: center; font-size: var(--fs-s); }
+.tqmap .msg[hidden] { display: none; }
+.tqmap.windy .tqtop, .tqmap.windy .tqzoom, .tqmap.windy .tqleg, .tqmap.windy .tqbar, .tqmap.windy svg.rings { display: none; }
 .tqnow { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; padding: 18px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
-.tqnow .ic { grid-row: span 2; font-size: 56px; line-height: 1; }
-.tqnow .tp { font: 800 56px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.tqnow .tp small { font-size: var(--fs-l); font-weight: 600; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+.tqnow .ic { grid-row: span 2; font-size: 52px; line-height: 1; }
+.tqnow .tp { font: 800 52px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.tqnow .tp.rain { font-size: clamp(26px, 8vw, 40px); line-height: 1.05; white-space: normal; }
+.tqnow .tp small { font-size: var(--fs-m); font-weight: 600; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
 .tqnow .ds { color: var(--muted); font-size: var(--fs-m); }
 .tqnow .kv { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: var(--fs-s); }
 .tqnow .kv span { color: var(--muted); }
 .tqnow .kv b { color: var(--ink); }
-.tqnow .arw { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+.arw { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
 .tqal { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
 .tqal li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fill, rgba(255,255,255,.06)); font-size: var(--fs-s); line-height: 1.35; }
 .tqal li.warn { background: color-mix(in srgb, var(--fav) 18%, transparent); }
 .tqal li.bad { background: color-mix(in srgb, var(--now) 22%, transparent); }
 .tqal li .e { font-size: 18px; line-height: 1.1; flex: none; }
-.tqhours { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
-.tqhours .h { flex: none; width: 54px; display: grid; justify-items: center; gap: 4px; padding: 10px 0 8px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); scroll-snap-align: start; font-size: var(--fs-xs); }
-.tqhours .h.fest { border-color: var(--accent); }
-.tqhours .h .hh { color: var(--muted); font: 700 var(--fs-xs) var(--mono, var(--body)); }
-.tqhours .h .e { font-size: 22px; line-height: 1; }
-.tqhours .h .t { font: 800 var(--fs-m) var(--body); }
-.tqhours .h .rb { width: 8px; height: 34px; border-radius: 4px; background: var(--fill-2, rgba(255,255,255,.12)); position: relative; overflow: hidden; }
-.tqhours .h .rb i { position: absolute; left: 0; right: 0; bottom: 0; background: #4b8bff; }
-.tqhours .h .rp { color: #7aa8ff; font-weight: 700; }
-.tqhours .h .rp.z { color: var(--muted); font-weight: 500; }
-.tqhours .h .gw { color: var(--muted); }
-.tqhours .h .gw.hi { color: var(--fav-ink, var(--fav)); font-weight: 800; }
+/* Taula per hores, com la de Windy: una columna per hora, files fixes a l'esquerra */
+.tqtab { display: grid; grid-template-columns: 58px 1fr; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: var(--panel); }
+.tqtab .lab { display: grid; grid-auto-rows: var(--rh, 30px); border-right: 1px solid var(--rule); font: 700 9px/1.1 var(--mono, monospace); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.tqtab .lab span { display: flex; align-items: center; padding: 0 8px; }
+.tqtab .sc { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.tqtab .sc::-webkit-scrollbar { display: none; }
+.tqtab .cols { display: grid; grid-auto-flow: column; grid-auto-columns: 46px; }
+.tqtab .col { display: grid; grid-auto-rows: var(--rh, 30px); text-align: center; font-size: var(--fs-xs); }
+.tqtab .col > * { display: grid; place-items: center; }
+.tqtab .col.dn { border-left: 1.5px solid var(--line); }
+.tqtab .col.fest .hh { color: var(--ink); background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.tqtab .col.nowc .hh { background: var(--now); color: #fff; }
+.tqtab .dd { font: 800 10px var(--mono, monospace); color: var(--ink); justify-items: start !important; padding-left: 4px; white-space: nowrap; overflow: visible; text-transform: uppercase; }
+.tqtab .hh { font: 700 11px var(--mono, monospace); color: var(--muted); }
+.tqtab .e { font-size: 18px; }
+.tqtab .mm { margin: 3px 4px; border-radius: 5px; font-weight: 800; color: #111; }
+.tqtab .pp { color: #7fb2ff; font-weight: 700; }
+.tqtab .pp.z { color: var(--muted); font-weight: 400; opacity: .55; }
+.tqtab .cc { margin: 3px 4px; border-radius: 5px; background: rgba(200, 205, 215, calc(var(--cc) * .55)); color: var(--ink); }
+.tqtab .tp2 { color: var(--muted); }
 .tqfest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .tqfest li { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); }
 .tqfest li .e { grid-row: span 2; font-size: 34px; }
 .tqfest li b { font-size: var(--fs-m); }
 .tqfest li span { color: var(--muted); font-size: var(--fs-s); }
-.tqmap { position: relative; height: 340px; overflow: hidden; border-radius: var(--r-card, 14px); background: #0d0f14; border: 1px solid var(--rule); touch-action: pan-y; }
-.tqmap .ly { position: absolute; inset: 0; }
-.tqmap img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
-.tqmap .rd { opacity: 0; transition: opacity .25s; }
-.tqmap .rd.on { opacity: .82; }
-.tqmap svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.tqmap svg.rings circle.r { fill: none; stroke: rgba(255,255,255,.45); stroke-width: 1; stroke-dasharray: 3 4; }
-.tqmap svg.rings text { fill: rgba(255,255,255,.75); font: 700 10px var(--mono, var(--body)); paint-order: stroke; stroke: rgba(0,0,0,.6); stroke-width: 3px; }
-.tqmap svg.rings circle.pin { fill: var(--now); stroke: #fff; stroke-width: 2; }
-.tqmap .ts { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.65); color: #fff; font: 700 var(--fs-s) var(--mono, var(--body)); }
-.tqmap .msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #c9ccd2; font-size: var(--fs-s); }
-.tqmap .msg[hidden] { display: none; }
-.tqctl { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; }
-.tqctl input[type="range"] { flex: 1; accent-color: var(--accent); }
-.tqctl .btn { min-width: 44px; padding: 0 12px; }
-.tqleg { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; color: var(--muted); font-size: var(--fs-xs); }
-.tqleg i { flex: 1; max-width: 160px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #88ddee, #0099cc, #0077aa, #005588, #ffee00, #ffaa00, #ff4400, #c10000, #ffaaff); }
-#tiempo .tqattr { margin-top: 18px; font-size: var(--fs-xs); }
+.tqwindy { margin-top: 18px; }
+#tiempo .tqattr { margin-top: 14px; font-size: var(--fs-xs); }
+@media (prefers-reduced-motion: reduce) { .tqmap svg.rings circle.pulse { animation: none; opacity: 0; } }
 
 /* ==== APPS (04-11-2026): hub amb Sol, Tiempo, Cámaras, Mapa, Momentos i Claqueta; a baix només Horarios · Tareas · Apps · Ajustes ==== */
 body:not([data-tab="apps"]) #apps { display: none !important; }
 body[data-tab="apps"] .wrap > :not(#apps) { display: none !important; }
 body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
-.appgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
-.apptile { display: grid; align-content: start; justify-items: start; gap: 6px; min-height: 128px; padding: 16px; text-align: left; border-radius: var(--r-card, 14px);
-  border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent; }
+.aphead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.aphead .apsub { color: var(--muted); font: 700 var(--fs-s) var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
+.appgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.apptile { --ac: var(--accent); position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ai go" "b b" "big big" "sm sm"; align-content: start; gap: 2px 10px;
+  min-height: 168px; padding: 14px 14px 16px; text-align: left; overflow: hidden; isolation: isolate; border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--ac) 22%, var(--rule)); color: var(--ink); cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--ac) 16%, transparent), transparent 60%), var(--panel);
+  transition: transform .18s cubic-bezier(.3,1.3,.5,1), border-color .2s; }
+.apptile.w { grid-column: span 2; min-height: 150px; grid-template-columns: auto 1fr auto; grid-template-areas: "ai b go" "big big big" "sm sm sm" "dots dots dots"; }
 .apptile[hidden] { display: none; }
-.apptile svg { width: 30px; height: 30px; color: var(--accent); margin-bottom: 8px; }
-.apptile b { font: 800 var(--fs-l)/1.1 var(--body); }
-.apptile small { color: var(--muted); font-size: var(--fs-s); line-height: 1.3; }
-.apptile:active { transform: scale(.97); }
+.apptile:active { transform: scale(.965); }
+.apptile .ai { grid-area: ai; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: color-mix(in srgb, var(--ac) 18%, transparent); color: var(--ac); }
+.apptile .ai svg { width: 22px; height: 22px; }
+.apptile .go { grid-area: go; justify-self: end; align-self: start; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--fill, rgba(255,255,255,.07)); color: var(--muted); }
+.apptile .go svg { width: 14px; height: 14px; }
+.apptile > b { grid-area: b; align-self: center; margin-top: 10px; font: 700 var(--fs-s)/1.1 var(--mono, var(--body)); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.apptile.w > b { margin-top: 0; }
+.apptile .big { grid-area: big; margin-top: 6px; font: 800 34px/1 var(--display); letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.apptile .big.mono { font: 700 clamp(26px, 9vw, 44px)/1 var(--mono, ui-monospace, monospace); letter-spacing: -.02em; }
+.apptile .big small { font-size: .55em; color: var(--muted); margin-left: 2px; }
+.apptile > small { grid-area: sm; margin-top: 6px; color: var(--muted); font-size: var(--fs-s); line-height: 1.3; }
+.apptile .dots { grid-area: dots; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.apptile .dots:empty { display: none; }
+.apptile .dots i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line); }
+.apptile .dots i.montada { background: #3ddc97; border-color: #3ddc97; }
+.apptile .dots i.grabando { background: var(--now, #e0162b); border-color: var(--now, #e0162b); box-shadow: 0 0 0 3px color-mix(in srgb, var(--now, #e0162b) 30%, transparent); animation: apRec 1.6s ease-in-out infinite; }
+.apptile .dots i.parada { background: #f2a93b; border-color: #f2a93b; }
+.apptile .dots i.recogida { background: var(--muted); border-color: var(--muted); }
+@keyframes apRec { 50% { box-shadow: 0 0 0 6px transparent; } }
+.apptile.tc { background: linear-gradient(135deg, #000, #111 60%, #1b1b1b); border-color: #2c2c2c; color: #fff; }
+.apptile.tc .ai { background: rgba(255,255,255,.12); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .apptile .dots i.grabando { animation: none; } }
 .appback { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 6px -4px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: 700 var(--fs-m) var(--body); cursor: pointer; }
 .tqwindy { margin-top: 14px; }
 /* Claqueta: pantalla negra amb el timecode en gran; el destell la posa blanca 2 fotogrames */
@@ -1698,42 +1766,51 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   </section>
 
   <section id="apps" aria-labelledby="appsH">
-    <h2 id="appsH">Apps</h2>
-    <p class="note">Herramientas para el equipo durante el festival.</p>
+    <div class="aphead"><h2 id="appsH">Apps</h2><span class="apsub" id="apSub"></span></div>
     <div class="appgrid">
-      <button type="button" class="apptile" data-tab="multi" id="tabMulti" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><b>Cámaras</b><small id="ap-multi">Dónde va cada cámara y quién graba</small></button>
-      <button type="button" class="apptile" data-tab="tiempo" id="tabTiempo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><b>Tiempo</b><small id="ap-tiempo">Previsión, avisos y radar de lluvia</small></button>
-      <button type="button" class="apptile" data-tab="sol" id="tabSol"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>Sol</b><small id="ap-sol">Luz, hora dorada y brújula</small></button>
-      <button type="button" class="apptile" data-tab="mapa" id="tabMapa" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><b>Mapa</b><small id="ap-mapa">El recinto y dónde estás</small></button>
-      <button type="button" class="apptile" data-app="mk"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><b>Momentos</b><small id="ap-mk">Marcas para la edición</small></button>
-      <button type="button" class="apptile" data-app="tc"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg><b>Claqueta</b><small>Timecode en hora real para sincronizar</small></button>
+      <button type="button" class="apptile w" data-tab="multi" id="tabMulti" hidden style="--ac:#ff3b3b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Multicams</b><span class="big" id="ap-multi-big">—</span><small id="ap-multi">Dónde va cada cámara y quién graba</small><span class="dots" id="ap-multi-dots" aria-hidden="true"></span><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="tiempo" id="tabTiempo" style="--ac:#4b9bff"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Tiempo</b><span class="big" id="ap-tiempo-big">—</span><small id="ap-tiempo">Lluvia: radar y previsión</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="sol" id="tabSol" style="--ac:#f2a93b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>Sol</b><span class="big" id="ap-sol-big">—</span><small id="ap-sol">Luz, hora dorada y brújula</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real con fotogramas, destello y pitido para sincronizar cámaras</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-app="mk" style="--ac:#ffd23b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Momentos</b><span class="big" id="ap-mk-big">0</span><small id="ap-mk">Marcas para la edición</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="mapa" id="tabMapa" hidden style="--ac:#3ddc97"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Mapa</b><span class="big" id="ap-mapa-big">GPS</span><small>El recinto y dónde estás</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
     </div>
   </section>
   <section id="tiempo" aria-labelledby="tqH">
+    <div class="tqhero">
+      <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de lluvia y nubes alrededor del festival">
+        <div class="ly" id="tqBase"></div>
+        <canvas class="ly tqheat" id="tqHeat" aria-hidden="true"></canvas>
+        <div class="ly" id="tqRad"></div>
+        <canvas class="ly" id="tqPc" aria-hidden="true"></canvas>
+        <svg class="rings" id="tqRings" aria-hidden="true"></svg>
+        <div class="ly tqwin" id="tqWin" hidden></div>
+        <div class="tqtop"><span class="tqpill"><b id="tqPillT">—</b><span id="tqPillN"></span></span></div>
+        <div class="tqlayers" id="tqLayers" role="tablist" aria-label="Capa">
+          <button type="button" role="tab" data-ly="radar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 9a3.8 3.8 0 00.6 7.5zM9 19l-1 2M13 19l-1 2M17 19l-1 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Lluvia</span></button>
+          <button type="button" role="tab" data-ly="clouds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 18h11a3.8 3.8 0 00.5-7.6A5.5 5.5 0 007.4 9.8 4.1 4.1 0 006.5 18z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.2A4 4 0 0121 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Nubes</span></button>
+          <button type="button" role="tab" data-ly="windy"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Windy</span></button>
+        </div>
+        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Acercar">+</button><button type="button" id="tqZout" aria-label="Alejar">−</button></div>
+        <div class="tqleg" id="tqLeg" aria-hidden="true"></div>
+        <div class="tqbar" id="tqBar">
+          <button type="button" id="tqPlay" aria-label="Reproducir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+          <div class="tqtl"><input type="range" id="tqSlide" min="0" max="0" value="0" aria-label="Hora"><div class="tqticks" id="tqTicks" aria-hidden="true"></div></div>
+          <span class="tqts" id="tqTs"></span>
+        </div>
+        <p class="msg" id="tqMsg" hidden></p>
+      </div>
+    </div>
     <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
     <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
     <div class="tqnow" id="tqNow" hidden></div>
     <ul class="tqal" id="tqAl"></ul>
-    <h3>Próximas horas</h3>
-    <div class="tqhours" id="tqHours" role="list"></div>
-    <h3>Radar de lluvia · últimas 2 h</h3>
-    <div class="tqmap" id="tqMap" role="img" aria-label="Radar de lluvia alrededor del festival">
-      <div class="ly" id="tqBase"></div>
-      <div class="ly" id="tqRad"></div>
-      <svg class="rings" id="tqRings" aria-hidden="true"></svg>
-      <span class="ts" id="tqTs" hidden></span>
-      <p class="msg" id="tqMsg">Cargando el radar…</p>
-    </div>
-    <div class="tqctl">
-      <button type="button" class="btn" id="tqPlay" aria-label="Reproducir">▶</button>
-      <input type="range" id="tqSlide" min="0" max="0" value="0" aria-label="Momento del radar">
-      <button type="button" class="btn" id="tqZoom">Más zona</button>
-    </div>
-    <p class="tqleg"><span>Débil</span><i></i><span>Fuerte</span></p>
-    <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
+    <h3>Previsión por horas</h3>
+    <div class="tqtab" id="tqTab"></div>
     <h3>Días del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+    <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ECMWF, ICON, AROME) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
@@ -2049,8 +2126,8 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   </div>
   <div class="foot"><button class="btn primary" id="mkListX" type="button">Listo</button></div>
 </div>
-<div class="tcs" id="tcS" role="dialog" aria-modal="true" aria-label="Claqueta" hidden>
-  <button type="button" class="tcx" id="tcX" aria-label="Cerrar claqueta">✕</button>
+<div class="tcs" id="tcS" role="dialog" aria-modal="true" aria-label="Timecode" hidden>
+  <button type="button" class="tcx" id="tcX" aria-label="Cerrar timecode">✕</button>
   <p class="tch" id="tcH"></p>
   <div class="tcv" id="tcV" aria-live="off">00:00:00:00</div>
   <p class="tcc" id="tcC"></p>
@@ -7093,20 +7170,25 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) mkFl
 addEventListener('online', mkFlush);
 // ==== /MOMENTOS ====
 
-// ==== TIEMPO ==== (pestanya pròpia des del 04-11-2026: previsió d'Open-Meteo + radar de pluja de RainViewer)
-// Ubicació: la mateixa que la pestanya Sol (solWhere). Les dades es desen al mòbil: sense cobertura es veu l'última previsió.
-// Pensat per a l'equip d'AV: avisos de pluja que arriba, ratxes (trípodes, pantalles, dron), fred (bateries) i condensació.
-const TQK = 'midnight-tiempo-v1', TQ_AGE = 15 * MIN;
+// ==== TIEMPO ==== (des del 04-11-2026; estil Windy des de les 22:00, i NOMÉS PLUJA I NÚVOLS: és el que interessa a en Pau per als festivals)
+// Dades: Open-Meteo (models ECMWF, ICON, AROME: els mateixos que Windy) per al punt i per a una graella de 7×7 punts del mapa (pluja i núvols, 48 h);
+// radar de RainViewer (pluja real de les últimes 2 h, fins al zoom 7); capa «Windy» = el widget oficial gratuït (embed.windy.com) dins l'app.
+// Barra de temps de la capa Lluvia: primer el radar (passat) i després la previsió (futur), seguits.
+// Ubicació: la de la pestanya Sol (solWhere). Sense cobertura es veu l'última previsió desada.
+const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN;
 let tq = null, tqBusy = false, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+let tqLy = 'radar', tqGrid = null, tqGridBusy = false, tqH = 0, tqView = null, tqField = null, tqPos = 0;
 try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
+try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts) tqGrid = v; } catch (e) {}
+try { const v = localStorage.getItem(TQLK); if (['radar', 'clouds', 'windy'].includes(v)) tqLy = v; } catch (e) {}
 document.getElementById('tqFestN').textContent = FEST.name;
+const tqFmtW = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short' });
 const tqWhere = () => typeof solWhere === 'function' ? solWhere() : { lat: 41.5536, lon: 2.2492 };
 const tqKey = w => `${w.lat.toFixed(3)},${w.lon.toFixed(3)}`;
-// Codis WMO → icona i text
 function tqCode(c, day = 1) {
   if (c === 0) return [day ? '☀️' : '🌙', 'Despejado'];
   if (c === 1) return [day ? '🌤️' : '🌙', 'Casi despejado'];
-  if (c === 2) return ['⛅', 'Nubes y claros'];
+  if (c === 2) return [day ? '⛅' : '☁️', 'Nubes y claros'];
   if (c === 3) return ['☁️', 'Nublado'];
   if (c === 45 || c === 48) return ['🌫️', 'Niebla'];
   if (c >= 51 && c <= 57) return ['🌦️', 'Llovizna'];
@@ -7120,107 +7202,136 @@ function tqCode(c, day = 1) {
 }
 const TQ16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
 const tqDir = d => TQ16[Math.round(d / 22.5) % 16];
-// Fletxa cap on va el vent (el vent «del NO» bufa cap al SE)
 const tqArw = d => `<svg class="arw" viewBox="0 0 14 14" style="transform:rotate(${(d + 180) % 360}deg)" aria-hidden="true"><path d="M7 1.5v11M3 5.5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const tqDeg = v => `${Math.round(v) === 0 ? 0 : Math.round(v)}°`.replace('-', '−');
+// Escala de pluja (mm/h), com la del radar
+const TQ_RAIN = [[0.1, [136, 221, 238]], [0.5, [0, 153, 204]], [1, [0, 85, 170]], [2, [255, 238, 0]], [4, [255, 136, 0]], [8, [221, 0, 0]], [15, [255, 120, 255]]];
+function tqColor(sc, v) {
+  if (v <= sc[0][0]) return sc[0][1];
+  for (let i = 1; i < sc.length; i++) if (v <= sc[i][0]) { const [a, ca] = sc[i - 1], [b, cb] = sc[i], k = (v - a) / (b - a); return ca.map((x, j) => Math.round(x + (cb[j] - x) * k)); }
+  return sc[sc.length - 1][1];
+}
+const tqRgb = c => `rgb(${c.join(',')})`;
+
+// --- Previsió del punt (ara, avisos, taula per hores, dies del festival)
 async function tqFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
   tqBusy = true;
   const u = `https://api.open-meteo.com/v1/forecast?latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`
-    + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day'
-    + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day,dew_point_2m'
+    + '&current=temperature_2m,precipitation,weather_code,cloud_cover,is_day'
+    + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover,is_day'
     + '&minutely_15=precipitation&forecast_minutely_15=12&timezone=Europe%2FMadrid&timeformat=unixtime&forecast_days=16&wind_speed_unit=kmh';
   try {
     const r = await fetchT(u, { cache: 'no-store' }, 12000);
     if (!r.ok) throw new Error(r.status);
     const d = await r.json();
     if (!d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
-    tq = { k, at: Date.now(), d, mine: !!w.mine };
+    tq = { k, at: Date.now(), d };
     try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (e) {}
     tq.err = '';
   } catch (e) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
   tqBusy = false;
   tqPaint();
+  if (TAB === 'apps' && typeof appsPaint === 'function') appsPaint();
 }
-// Hores de la previsió com a llista d'objectes (t en ms)
 function tqHours() {
   const h = tq && tq.d && tq.d.hourly;
   if (!h) return [];
   return h.time.map((s, i) => ({ t: s * 1000, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i],
-    w: h.wind_speed_10m[i], g: h.wind_gusts_10m[i], wd: h.wind_direction_10m[i], day: h.is_day[i], dp: h.dew_point_2m[i] }));
+    cc: h.cloud_cover[i] ?? 0, day: h.is_day[i] }));
 }
+const tqFestEnd = d => NDAYS > 1 ? d.tend0 : TEND;
+const tqInFest = t => DAYS.some(d => t >= d.t0 && t < tqFestEnd(d));
 function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
   const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
+  document.getElementById('tqPillN').textContent = where === 'tu ubicación' ? 'Tu ubicación' : FEST.name;
   if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
   const ago = Math.round((Date.now() - tq.at) / MIN);
   src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
   const c = tq.d.current || {}, H = tqHours(), t = Date.now();
   const [ic, ds] = tqCode(c.weather_code, c.is_day);
+  document.getElementById('tqPillT').textContent = `${ic} ${tqDeg(c.temperature_2m)}`;
   nowEl.hidden = false;
-  nowEl.innerHTML = `<span class="ic" aria-hidden="true">${ic}</span><span class="tp">${tqDeg(c.temperature_2m)}<small>sensación ${tqDeg(c.apparent_temperature)}</small></span><span class="ds">${ds}</span>`
-    + `<div class="kv"><span>Viento <b>${tqArw(c.wind_direction_10m)}${Math.round(c.wind_speed_10m)} km/h ${tqDir(c.wind_direction_10m)}</b></span><span>Rachas <b>${Math.round(c.wind_gusts_10m)} km/h</b></span><span>Humedad <b>${Math.round(c.relative_humidity_2m)} %</b></span></div>`;
-  // Avisos útils per a l'equip
-  const al = [], next = H.filter(h => h.t > t - 3600000 && h.t < t + 12 * 3600000);
+  // El resum és la pluja: si plou, quan para; si no, quan comença
   const m15 = tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
-  if (m15.length && m15[0].mm >= 0.1) al.push(['bad', '🌧️', 'Está lloviendo ahora. Protege cámaras y material.']);
-  else { const r = m15.find(x => x.mm >= 0.1); if (r) al.push(['bad', '🌧️', `Lluvia en ~${Math.max(5, Math.round((r.t - t) / MIN / 5) * 5)} min (hacia las ${hm(r.t)}). Ten a mano fundas y bolsas.`]); }
-  if (!al.length) { const r = next.find(h => h.t > t && h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}.`]); }
-  const gmax = next.filter(h => h.t > t).reduce((a, h) => h.g > (a ? a.g : 0) ? h : a, null);
-  if (gmax && gmax.g >= 40) al.push([gmax.g >= 60 ? 'bad' : 'warn', '💨', `Rachas de ${Math.round(gmax.g)} km/h hacia las ${hm(gmax.t)}: asegura trípodes, brazos y pantallas. Con más de ~38 km/h, mejor no volar el dron.`]);
-  const tmin = next.filter(h => h.t > t).reduce((a, h) => Math.min(a, h.tp), Infinity);
-  if (tmin <= 6) al.push(['warn', '🥶', `Mínima de ${tqDeg(tmin)}: las baterías duran menos con frío. Guarda las de recambio en el bolsillo.`]);
-  if (tmin <= 10) al.push(['', '💧', 'Al entrar del frío a un sitio cálido las lentes se empañan: deja la cámara en la bolsa 10–15 min antes de sacarla.']);
+  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50, raining = (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
+  let big, sub;
+  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
+  else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
+    if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
+    else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
+    else { big = 'Sin lluvia'; sub = 'en las próximas 48 h'; } }
+  nowEl.innerHTML = `<span class="ic" aria-hidden="true">${raining ? '🌧️' : ic}</span><span class="tp rain">${big}</span><span class="ds">${sub}</span>`
+    + `<div class="kv"><span>Ahora <b>${ds}</b></span><span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
+  const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1);
+  if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}. Ten a mano fundas y bolsas.`]); }
+  if (raining || soon) al.push(['bad', '🎥', 'Protege cámaras, brazos y material: fundas, bolsas y toallas.']);
+  const tot = next.reduce((s2, h) => s2 + h.mm, 0); if (tot >= 5) al.push(['bad', '🌧️', `${tot.toFixed(0)} mm previstos en 12 h: lluvia fuerte.`]);
   document.getElementById('tqAl').innerHTML = al.map(([k, e, x]) => `<li class="${k}"><span class="e" aria-hidden="true">${e}</span><span>${x}</span></li>`).join('');
-  // Properes 24 h (les hores del festival amb vora)
-  const inFest = h => DAYS.some(d => h.t >= d.t0 && h.t < (NDAYS > 1 ? d.tend0 : TEND));
-  document.getElementById('tqHours').innerHTML = H.filter(h => h.t > t - 3600000 && h.t < t + 24 * 3600000).map(h => {
-    const [e] = tqCode(h.c, h.day);
-    return `<div class="h${inFest(h) ? ' fest' : ''}" role="listitem" aria-label="${hm(h.t)}: ${tqDeg(h.tp)}, lluvia ${h.pp} %, rachas ${Math.round(h.g)} km/h"><span class="hh">${hm(h.t).slice(0, 2)}h</span><span class="e" aria-hidden="true">${e}</span><span class="t">${tqDeg(h.tp)}</span>`
-      + `<span class="rb" aria-hidden="true"><i style="height:${Math.min(100, h.pp)}%"></i></span><span class="rp${h.pp < 10 ? ' z' : ''}">${h.pp}%</span>${h.mm >= 0.1 ? `<span class="rp">${h.mm.toFixed(1)}</span>` : ''}<span class="gw${h.g >= 40 ? ' hi' : ''}">${Math.round(h.g)}</span></div>`;
-  }).join('');
+  tqTable(H, t);
   // Dies del festival (la previsió arriba fins a 16 dies)
   const last = H.length ? H[H.length - 1].t : 0, fd = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'long' });
   document.getElementById('tqFest').innerHTML = DAYS.map(d => {
-    const a = d.t0, b = NDAYS > 1 ? d.tend0 : TEND, name = d.name || fd.format(a);
+    const a = d.t0, b = tqFestEnd(d), name = d.name || fd.format(a);
     if (b < t) return '';
     const L = H.filter(h => h.t >= a && h.t < b);
     if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
-    const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds] = tqCode(worst.c, 1);
-    const mn = Math.min(...L.map(h => h.tp)), mx = Math.max(...L.map(h => h.tp)), pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), g = Math.max(...L.map(h => h.g));
-    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${ds} · ${tqDeg(mn)} a ${tqDeg(mx)} · lluvia ${pp} %${mm >= 0.1 ? ` (${mm.toFixed(1)} mm)` : ''} · rachas ${Math.round(g)} km/h</span></li>`;
+    const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds2] = tqCode(worst.c, 1);
+    const pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), cc = Math.round(L.reduce((s, h) => s + h.cc, 0) / L.length), W = L.filter(h => h.mm >= 0.1 || h.pp >= 50);
+    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sin lluvia prevista';
+    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
   }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
 }
-
-// Radar: mapa de fons de CARTO (zoom tqZ, rajoles de 256 px) i pluja de RainViewer (només fins al zoom 7: a tqZ = 8 es fan servir rajoles de 512 px)
-const TQ_TILE = 256;
-function tqWorld(lat, lon, z) {
-  const n = 2 ** z * TQ_TILE, s = Math.sin(lat * Math.PI / 180);
-  return [(lon + 180) / 360 * n, (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n];
+// Taula per hores (com la de Windy): 48 h, files fixes a l'esquerra, colors de temperatura i vent
+function tqTable(H, t) {
+  const L = H.filter(h => h.t > t - 3600000).slice(0, 48), fdw = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric' });
+  if (!L.length) { document.getElementById('tqTab').innerHTML = ''; return; }
+  let prevDay = '';
+  const cols = L.map((h, i) => {
+    const day = fdw.format(h.t), dn = day !== prevDay; prevDay = day;
+    const [e] = tqCode(h.c, h.day), now = h.t <= t && t < h.t + 3600000;
+    return `<div class="col${dn && i ? ' dn' : ''}${tqInFest(h.t) ? ' fest' : ''}${now ? ' nowc' : ''}"><span class="dd">${dn ? esc(day) : ''}</span><span class="hh">${hm(h.t).slice(0, 2)}</span><span class="e">${e}</span>`
+      + `<span class="mm"${h.mm >= 0.1 ? ` style="background:${tqRgb(tqColor(TQ_RAIN, h.mm))}"` : ''}>${h.mm >= 0.1 ? h.mm.toFixed(1) : ''}</span><span class="pp${h.pp < 20 ? ' z' : ''}">${h.pp}%</span>`
+      + `<span class="cc" style="--cc:${h.cc / 100}">${Math.round(h.cc)}</span><span class="tp2">${tqDeg(h.tp)}</span></div>`;
+  }).join('');
+  const box = document.getElementById('tqTab'), sc = box.querySelector('.sc'), x = sc ? sc.scrollLeft : 0;
+  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
+  box.querySelector('.sc').scrollLeft = x;
 }
+
+// --- Mapa: geometria (Web Mercator), fons de CARTO
+const TQ_TILE = 256;
+function tqWorld(lat, lon, z) { const n = 2 ** z * TQ_TILE, s = Math.sin(lat * Math.PI / 180); return [(lon + 180) / 360 * n, (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n]; }
+function tqLatLon(x, y, z) { const n = 2 ** z * TQ_TILE; return [Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI, x / n * 360 - 180]; }
 function tqTiles(z, size, left, top, W, H) {
   const out = [], n = 2 ** z;
   for (let y = Math.floor(top / size); y * size < top + H; y++) for (let x = Math.floor(left / size); x * size < left + W; x++)
     if (y >= 0 && y < n) out.push({ x: ((x % n) + n) % n, y, l: x * size - left, t: y * size - top });
   return out;
 }
-function tqMapBase() {
+function tqLayout() {
   const map = document.getElementById('tqMap'), W = map.clientWidth, H = map.clientHeight;
   if (!W) return null;
-  const w = tqWhere(), [px, py] = tqWorld(w.lat, w.lon, tqZ), left = Math.round(px - W / 2), top = Math.round(py - H / 2);
+  const w = tqWhere(), [px, py] = tqWorld(w.lat, w.lon, tqZ);
+  // El punt del festival una mica per sobre del centre (a baix hi ha la barra de temps)
+  tqView = { W, H, w, z: tqZ, left: Math.round(px - W / 2), top: Math.round(py - H * .44) };
   const light = document.documentElement.dataset.theme === 'light' ? 'light_all' : 'dark_all';
-  document.getElementById('tqBase').innerHTML = tqTiles(tqZ, TQ_TILE, left, top, W, H).map((p, i) =>
+  document.getElementById('tqBase').innerHTML = tqTiles(tqZ, TQ_TILE, tqView.left, tqView.top, W, H).map((p, i) =>
     `<img alt="" src="https://${'abcd'[i % 4]}.basemaps.cartocdn.com/${light}/${tqZ}/${p.x}/${p.y}@2x.png" style="left:${p.l}px;top:${p.t}px;width:${TQ_TILE}px;height:${TQ_TILE}px">`).join('');
-  // Anells de 10, 25 i 50 km (a la latitud del festival)
-  const mpp = 156543.034 * Math.cos(w.lat * Math.PI / 180) / 2 ** tqZ, cx = W / 2, cy = H / 2;
-  document.getElementById('tqRings').innerHTML = [10, 25, 50, 100].map(km => { const r = km * 1000 / mpp;
-    return r > Math.max(W, H) * .75 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx + r * .707 + 3).toFixed(1)}" y="${(cy - r * .707 - 3).toFixed(1)}">${km} km</text>`; }).join('')
-    + `<circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
-  return { W, H, w, left, top };
+  const mpp = 156543.034 * Math.cos(w.lat * Math.PI / 180) / 2 ** tqZ, cx = px - tqView.left, cy = py - tqView.top;
+  document.getElementById('tqRings').innerHTML = [10, 25, 50, 100, 200].map(km => { const r = km * 1000 / mpp;
+    return r < 30 || r > Math.max(W, H) * .8 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx + r * .707 + 3).toFixed(1)}" y="${(cy - r * .707 - 3).toFixed(1)}">${km} km</text>`; }).join('')
+    + `<circle class="pulse" cx="${cx}" cy="${cy}" r="6"/><circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
+  for (const id of ['tqHeat', 'tqPc']) { const c = document.getElementById(id), dpr = Math.min(2, devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
+  document.getElementById('tqZin').disabled = tqZ >= 10; document.getElementById('tqZout').disabled = tqZ <= 6;
+  return tqView;
 }
+
+// --- Capa Lluvia: radar de RainViewer (passat, cada 10 min)
 async function tqRadar(force) {
-  const msg = document.getElementById('tqMsg'), g = tqMapBase();
+  const msg = document.getElementById('tqMsg'), g = tqView;
   if (!g) return;
   if (force || !tqRad || Date.now() - tqRadAt > 10 * MIN) {
     try {
@@ -7228,50 +7339,164 @@ async function tqRadar(force) {
       const j = await r.json();
       if (!j.host || !j.radar || !Array.isArray(j.radar.past) || !j.radar.past.length) throw new Error('mal');
       tqRad = j; tqRadAt = Date.now(); tqI = j.radar.past.length - 1;
-    } catch (e) { if (!tqRad) { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; return; } }
+    } catch (e) { if (!tqRad) { if (tqLy === 'radar') { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; } return; } }
   }
-  msg.hidden = true;
-  // Pluja: z7 amb rajoles de 512 px si el fons és z8 (cada rajola de pluja = 2×2 del fons)
-  const size = TQ_TILE * 2 ** (tqZ - 7), [px, py] = tqWorld(g.w.lat, g.w.lon, tqZ), left = Math.round(px - g.W / 2), top = Math.round(py - g.H / 2);
-  const T = tqTiles(7, size, left, top, g.W, g.H), rs = size > 256 ? 512 : 256, F = tqRad.radar.past;
+  if (tqLy === 'radar') msg.hidden = true;
+  // RainViewer només fins al zoom 7: a zoom més alt es fan servir les rajoles de 512 px, ampliades
+  const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = size > 256 ? 512 : 256;
+  const T = tqTiles(zr, size, g.left, g.top, g.W, g.H), F = tqRad.radar.past;
   document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
-    `<img alt="" src="${tqRad.host}${f.path}/${rs}/7/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
-  const sl = document.getElementById('tqSlide');
-  sl.max = F.length - 1; sl.value = tqI;
-  tqFrame(tqI);
+    `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
+  if (tqLy === 'radar') tqBarSetup();
 }
-function tqFrame(i) {
-  if (!tqRad) return;
-  const F = tqRad.radar.past;
-  tqI = Math.max(0, Math.min(F.length - 1, i));
-  for (const d of document.querySelectorAll('#tqRad .rd')) d.classList.toggle('on', +d.dataset.i === tqI);
-  document.getElementById('tqSlide').value = tqI;
-  const ts = document.getElementById('tqTs'), ago = Math.round((Date.now() - F[tqI].time * 1000) / MIN);
-  ts.hidden = false; ts.textContent = `${hm(F[tqI].time * 1000)} · ${ago <= 10 ? 'ahora' : `hace ${ago} min`}`;
+
+// --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
+const TQ_N = 7;
+async function tqGridFetch(force) {
+  const g = tqView; if (!g) return;
+  const k = `${g.z}|${g.left}|${g.top}|${g.W}|${g.H}`;
+  if (tqGridBusy || (!force && tqGrid && tqGrid.k === k && Date.now() - tqGrid.at < 30 * MIN)) return;
+  tqGridBusy = true;
+  const pts = [];
+  for (let j = 0; j < TQ_N; j++) for (let i = 0; i < TQ_N; i++) { const x = -0.1 * g.W + i * 1.2 * g.W / (TQ_N - 1), y = -0.1 * g.H + j * 1.2 * g.H / (TQ_N - 1); pts.push([x, y, ...tqLatLon(g.left + x, g.top + y, g.z)]); }
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${pts.map(p => p[2].toFixed(3)).join(',')}&longitude=${pts.map(p => p[3].toFixed(3)).join(',')}`
+    + '&hourly=precipitation,cloud_cover&forecast_hours=48&past_hours=1&timeformat=unixtime&wind_speed_unit=kmh&timezone=Europe%2FMadrid';
+  try {
+    const r = await fetchT(u, { cache: 'no-store' }, 15000);
+    if (!r.ok) throw new Error(r.status);
+    let d = await r.json(); if (!Array.isArray(d)) d = [d];
+    if (d.length !== pts.length || !d[0].hourly) throw new Error('mal');
+    tqGrid = { k, at: Date.now(), time: d[0].hourly.time.map(s => s * 1000), pts: pts.map(p => [p[0], p[1]]),
+      P: d.map(x => x.hourly.precipitation), C: d.map(x => x.hourly.cloud_cover) };
+    try { localStorage.setItem(TQGK, JSON.stringify(tqGrid)); } catch (e) {}
+    const now0 = Date.now(); tqH = Math.max(0, tqGrid.time.findIndex(x => x + 3600000 > now0));
+  } catch (e) { if (!tqGrid && tqLy === 'clouds') { const msg = document.getElementById('tqMsg'); msg.hidden = false; msg.textContent = 'Sin conexión: la previsión del mapa necesita internet.'; } }
+  tqGridBusy = false;
+  if (tqGrid && tqLy !== 'windy') { if (tqLy === 'clouds') document.getElementById('tqMsg').hidden = true; tqBarSetup(); }
 }
-function tqStop() { clearInterval(tqPlayT); tqPlayT = 0; document.getElementById('tqPlay').textContent = '▶'; document.getElementById('tqPlay').setAttribute('aria-label', 'Reproducir'); }
+// Camp a l'hora tqH (pluja en mm/h i núvols en %), interpolat entre els punts de la graella
+function tqFieldBuild() {
+  if (!tqGrid || !tqView) { tqField = null; tqHeat(); return; }
+  const h = Math.min(tqH, tqGrid.time.length - 1), g = tqView, sx = 1.2 * g.W / (TQ_N - 1), sy = 1.2 * g.H / (TQ_N - 1);
+  const P = tqGrid.P.map(a => a[h] || 0), C = tqGrid.C.map(a => a[h] || 0);
+  const at = (A, x, y) => { const fx = Math.max(0, Math.min(TQ_N - 1.001, (x + 0.1 * g.W) / sx)), fy = Math.max(0, Math.min(TQ_N - 1.001, (y + 0.1 * g.H) / sy)), i = Math.floor(fx), j = Math.floor(fy), a = fx - i, b = fy - j, k = j * TQ_N + i;
+    return A[k] * (1 - a) * (1 - b) + A[k + 1] * a * (1 - b) + A[k + TQ_N] * (1 - a) * b + A[k + TQ_N + 1] * a * b; };
+  tqField = { p: (x, y) => at(P, x, y), c: (x, y) => at(C, x, y) };
+  tqHeat();
+}
+// Previsió pintada sobre el mapa: es calcula petit (1 píxel cada 8) i el navegador l'amplia suau
+function tqHeat() {
+  const c = document.getElementById('tqHeat'), ctx = c.getContext('2d'), g = tqView;
+  if (!g) return;
+  ctx.clearRect(0, 0, g.W, g.H);
+  const fc = tqLy === 'radar' && tqPos >= tqRadN();
+  if (!tqField || (tqLy !== 'clouds' && !fc)) return;
+  const st = 8, w = Math.ceil(g.W / st) + 1, h = Math.ceil(g.H / st) + 1, off = document.createElement('canvas'); off.width = w; off.height = h;
+  const oc = off.getContext('2d'), img = oc.createImageData(w, h), light = document.documentElement.dataset.theme === 'light';
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = (y * w + x) * 4;
+    if (tqLy === 'clouds') { const v = tqField.c(x * st, y * st) / 100, k = light ? 120 : 235; img.data[o] = img.data[o + 1] = img.data[o + 2] = k; img.data[o + 3] = Math.round(Math.pow(v, 1.3) * 200); }
+    else { const v = tqField.p(x * st, y * st); if (v < 0.05) continue; const col = tqColor(TQ_RAIN, v); img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = Math.round(Math.min(1, v / 0.4) * 215); }
+  }
+  oc.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(off, 0, 0, w * st, h * st);
+}
+// --- Barra de temps (com la de Windy): Lluvia = últimes 2 h; Viento/Temp. = properes 48 h
+const tqRadN = () => tqRad ? tqRad.radar.past.length : 0;
+// Futur de la previsió a partir de l'hora següent a l'últim radar
+const tqFut = () => { if (!tqGrid) return []; const last = tqRad ? tqRad.radar.past[tqRad.radar.past.length - 1].time * 1000 : Date.now(); return tqGrid.time.map((x, i) => [x, i]).filter(([x]) => x > last).slice(0, 24); };
+const tqSteps = () => tqLy === 'radar' ? [...(tqRad ? tqRad.radar.past.map((f, i) => ({ t: f.time * 1000, r: i })) : []), ...tqFut().map(([x, i]) => ({ t: x, h: i }))]
+  : tqGrid ? tqGrid.time.map((x, i) => ({ t: x, h: i })) : [];
+function tqBarSetup() {
+  const sl = document.getElementById('tqSlide'), ticks = document.getElementById('tqTicks'), S = tqSteps();
+  if (!S.length) return;
+  sl.max = S.length - 1;
+  if (tqLy === 'radar') { if (!tqBarSetup.done && tqRad) { tqPos = Math.max(0, tqRadN() - 1); tqBarSetup.done = true; } }
+  else if (!tqBarSetup.cl) { const n0 = Date.now(); tqPos = Math.max(0, S.findIndex(x => x.t + 3600000 > n0)); tqBarSetup.cl = true; }
+  tqPos = Math.min(tqPos, S.length - 1);
+  const nr = tqLy === 'radar' ? tqRadN() : 0, pc = i => i / (S.length - 1) * 100;
+  ticks.innerHTML = tqLy === 'radar'
+    ? (nr ? `<span style="left:0%;transform:none">−2 h</span><span style="left:${pc(nr - 1)}%">ahora</span>` : '') + (S.length > nr + 6 ? `<span style="left:${pc(S.length - 1)}%;transform:translateX(-100%)">+${Math.round((S[S.length - 1].t - Date.now()) / 3600000)} h</span>` : '')
+    : (() => { let lastP = -99; return S.map((x, i) => { if (!(i === 0 || hm(x.t).startsWith('00')) || pc(i) - lastP < 14) return ''; lastP = pc(i);
+        return `<span style="left:${pc(i)}%${i === 0 ? ';transform:none' : ''}">${i === 0 ? 'ahora' : tqFmtW.format(x.t)}</span>`; }).join(''); })();
+  tqGo(tqPos);
+}
+// Un pas de la barra: un fotograma del radar o una hora de la previsió
+function tqGo(i) {
+  const S = tqSteps(); if (!S.length) return;
+  tqPos = Math.max(0, Math.min(S.length - 1, i));
+  const x = S[tqPos];
+  document.getElementById('tqSlide').value = tqPos;
+  if (x.r !== undefined) tqI = x.r;
+  for (const d of document.querySelectorAll('#tqRad .rd')) d.classList.toggle('on', tqLy === 'radar' && x.r !== undefined && +d.dataset.i === x.r);
+  if (x.h !== undefined) { tqH = x.h; tqFieldBuild(); } else tqHeat();
+  const d = Math.round((x.t - Date.now()) / MIN);
+  document.getElementById('tqTs').innerHTML = `${hm(x.t)}<small>${x.r !== undefined ? (d >= -10 ? 'radar · ahora' : `radar · hace ${-d} min`) : `previsión · ${d < 60 ? 'ahora' : '+' + Math.round(d / 60) + ' h'}`}</small>`;
+}
+function tqStop() { clearInterval(tqPlayT); tqPlayT = 0; const b = document.getElementById('tqPlay'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>'; b.setAttribute('aria-label', 'Reproducir'); }
 function tqPlay() {
   if (tqPlayT) return tqStop();
-  if (!tqRad) return;
-  const F = tqRad.radar.past;
-  if (tqI >= F.length - 1) tqFrame(0);
-  document.getElementById('tqPlay').textContent = '❚❚'; document.getElementById('tqPlay').setAttribute('aria-label', 'Pausa');
+  const S = tqSteps(); if (!S.length) return;
+  if (tqPos >= S.length - 1) tqGo(0);
+  const b = document.getElementById('tqPlay'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>'; b.setAttribute('aria-label', 'Pausa');
   let wait = 0;
-  tqPlayT = setInterval(() => { if (wait-- > 0) return; if (tqI >= F.length - 1) { tqFrame(0); return; } tqFrame(tqI + 1); if (tqI === F.length - 1) wait = 3; }, 450);
+  tqPlayT = setInterval(() => { if (wait-- > 0) return; const n = tqSteps().length - 1; if (tqPos >= n) { tqGo(0); return; } tqGo(tqPos + 1); if (tqPos === n) wait = 3; }, 500);
 }
 document.getElementById('tqPlay').addEventListener('click', tqPlay);
-document.getElementById('tqSlide').addEventListener('input', e => { tqStop(); tqFrame(+e.target.value); });
-document.getElementById('tqZoom').addEventListener('click', e => { tqZ = tqZ === 8 ? 7 : 8; e.target.textContent = tqZ === 8 ? 'Más zona' : 'Más cerca'; tqRadar(); });
+document.getElementById('tqSlide').addEventListener('input', e => { tqStop(); tqGo(+e.target.value); });
+
+// --- Llegenda i canvi de capa
+function tqLegend() {
+  const el = document.getElementById('tqLeg');
+  el.innerHTML = tqLy === 'clouds'
+    ? `<div class="bar">${[0, 25, 50, 75, 100].map(v => `<span style="background:rgba(235,235,235,${Math.pow(v / 100, 1.3) * .8 + .1});color:#111">${v}</span>`).join('')}</div><span class="u">% nubes</span>`
+    : `<div class="bar">${[0.1, 0.5, 1, 2, 4, 8, 15].map(v => `<span style="background:${tqRgb(tqColor(TQ_RAIN, v))}">${v}</span>`).join('')}</div><span class="u">mm/h</span>`;
+}
+function tqWindy(on) {
+  const box = document.getElementById('tqWin'), w = tqWhere();
+  box.hidden = !on;
+  document.getElementById('tqMap').classList.toggle('windy', on);
+  if (!on) return;
+  if (!navigator.onLine) { box.innerHTML = '<p class="msg">Sin conexión: la capa de Windy necesita internet.</p>'; return; }
+  const src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=${tqZ}&overlay=radar&product=ecmwf&level=surface&lat=${w.lat.toFixed(3)}&lon=${w.lon.toFixed(3)}&detailLat=${w.lat.toFixed(3)}&detailLon=${w.lon.toFixed(3)}&marker=true&message=true`;
+  if (box.dataset.src !== src) { box.dataset.src = src; box.innerHTML = `<iframe title="Windy" src="${src}" loading="lazy" allow="fullscreen"></iframe>`; }
+}
+function tqSetLayer(ly) {
+  const ch = ly !== tqLy;
+  tqLy = ly; try { localStorage.setItem(TQLK, ly); } catch (e) {}
+  tqStop();
+  for (const b of document.querySelectorAll('#tqLayers [data-ly]')) b.setAttribute('aria-selected', b.dataset.ly === ly);
+  document.getElementById('tqMsg').hidden = true;
+  tqWindy(ly === 'windy');
+  if (ly === 'windy') return;
+  if (ch) { tqBarSetup.done = tqBarSetup.cl = false; }
+  tqLegend();
+  if (ly === 'radar') tqRadar();
+  tqGridFetch();
+  tqBarSetup();
+}
+document.getElementById('tqLayers').addEventListener('click', e => { const b = e.target.closest('[data-ly]'); if (b && b.dataset.ly !== tqLy) tqSetLayer(b.dataset.ly); });
+function tqZoom(dz) { const z = Math.max(6, Math.min(10, tqZ + dz)); if (z === tqZ) return; tqZ = z; tqRedraw(); }
+document.getElementById('tqZin').addEventListener('click', () => tqZoom(1));
+document.getElementById('tqZout').addEventListener('click', () => tqZoom(-1));
+function tqRedraw() {
+  if (!tqLayout()) return;
+  if (tqGrid && tqGrid.k !== `${tqView.z}|${tqView.left}|${tqView.top}|${tqView.W}|${tqView.H}`) { tqField = null; tqHeat(); tqGridFetch(true); } else tqFieldBuild();
+  tqRadar();
+  tqSetLayer(tqLy);
+}
 function tqShow(on) {
   tqOn = on;
   clearInterval(tqTimer); tqTimer = 0; tqStop();
   if (!on) return;
-  tqPaint(); tqFetch(); tqRadar();
-  const ww = tqWhere(); document.getElementById('tqWindy').href = `https://www.windy.com/?radar,${ww.lat.toFixed(3)},${ww.lon.toFixed(3)},9`;
-  tqTimer = setInterval(() => { if (document.hidden) return; tqFetch(); tqRadar(); }, 5 * MIN);
+  const ww = tqWhere(); document.getElementById('tqWindy').href = `https://www.windy.com/?${ww.lat.toFixed(3)},${ww.lon.toFixed(3)},9`;
+  tqPaint(); tqFetch();
+  requestAnimationFrame(tqRedraw);
+  tqTimer = setInterval(() => { if (document.hidden) return; tqFetch(); tqRadar(); tqGridFetch(); }, 5 * MIN);
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && tqOn) { tqFetch(); tqRadar(); } });
-addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(() => tqRadar(), 300); } });
+document.addEventListener('visibilitychange', () => { if (tqOn && !document.hidden) { tqFetch(); tqRadar(); tqGridFetch(); } });
+addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(tqRedraw, 300); } });
 // ==== /TIEMPO ====
 
 // ==== APPS ==== (hub, des del 04-11-2026: a baix només Horarios · Tareas · Apps · Ajustes)
@@ -7284,11 +7509,50 @@ document.getElementById('apps').addEventListener('click', e => {
   else if (b.dataset.app === 'mk') mkOpenList();
   else if (b.dataset.app === 'tc') tcOpen();
 });
-function appsPaint() {
-  const n = mkList().length;
-  document.getElementById('ap-mk').textContent = n ? `${n} marca${n > 1 ? 's' : ''} del equipo` : 'Marcas para la edición';
-  if (tq && tq.d && tq.d.current) { const c = tq.d.current; document.getElementById('ap-tiempo').textContent = `${tqDeg(c.temperature_2m)} · ${tqCode(c.weather_code, c.is_day)[1]} · rachas ${Math.round(c.wind_gusts_10m)} km/h`; }
+let apRaf = 0;
+function apTick() {
+  if (TAB !== 'apps' || document.hidden) { apRaf = 0; return; }
+  const t = Date.now(), f = Math.floor((t % 1000) / 1000 * (tcFps || 25));
+  const el = document.getElementById('ap-tc-big'); if (el) el.innerHTML = `${mkHMS(t)}<small>:${String(f).padStart(2, '0')}</small>`;
+  apRaf = requestAnimationFrame(apTick);
 }
+let apSolK = '', apSolD = null;
+function appsPaint() {
+  const t = now();
+  document.getElementById('apSub').textContent = `${FEST.name} · ${hm(t)}`;
+  // Sense mapa, Momentos ocupa tota la fila (no queda una fitxa sola a mitja amplada)
+  document.querySelector('#apps [data-app="mk"]').classList.toggle('w', document.getElementById('tabMapa').hidden);
+  // Momentos
+  const L = mkList(), n = L.length, last = L[L.length - 1];
+  document.getElementById('ap-mk-big').textContent = String(n);
+  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Toca «Momento» en Horarios o Multicams';
+  // Multicams: quantes graven i un punt per càmera
+  const cams = MC.flatMap(sx => sx.cams || []);
+  if (cams.length) {
+    const st = c => (mcState[mcKey(c)] || {}).st || '', rec = cams.filter(c => st(c) === 'grabando').length, up = cams.filter(c => st(c) === 'montada').length;
+    document.getElementById('ap-multi-big').innerHTML = rec ? `● ${rec} REC` : `${up}<small>/${cams.length} montadas</small>`;
+    if (rec) document.getElementById('ap-multi-big').style.color = 'var(--now)'; else document.getElementById('ap-multi-big').style.color = '';
+    document.getElementById('ap-multi').textContent = rec ? `${rec} grabando · ${up} montadas · ${cams.length} cámaras` : `${cams.length} cámaras · toca para ver dónde va cada una`;
+    document.getElementById('ap-multi-dots').innerHTML = cams.map(c => `<i class="${st(c)}" title="${esc(c.pos || c.cam || '')}"></i>`).join('');
+  }
+  // Tiempo
+  if (tq && tq.d && tq.d.current) { const c = tq.d.current, [e, ds] = tqCode(c.weather_code, c.is_day);
+    document.getElementById('ap-tiempo-big').textContent = `${(c.precipitation || 0) >= 0.1 ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
+    const nx = tqHours().find(h => h.t > Date.now() && h.t < Date.now() + 6 * 3600000 && h.pp >= 50);
+    document.getElementById('ap-tiempo').textContent = nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
+  else if (!tqBusy) tqFetch();
+  // Sol: el proper canvi de llum
+  if (typeof solDay === 'function' && typeof SOL_EV === 'object') {
+    const w = tqWhere(), k = tqKey(w) + Math.floor(t / 86400000);
+    if (k !== apSolK) { apSolK = k; apSolD = solDay(t, w.lat, w.lon); }
+    let nx = apSolD.X.find(x => x.t > t);
+    if (!nx) nx = solDay(apSolD.b + 3600000, w.lat, w.lon).X.find(x => x.t > t);
+    if (nx) { document.getElementById('ap-sol-big').textContent = hm(nx.t); document.getElementById('ap-sol').textContent = `${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} · ${inDur(nx.t - t)}`; }
+  }
+  if (!apRaf) apTick();
+}
+setInterval(() => { if (TAB === 'apps' && !document.hidden) appsPaint(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'apps') appsPaint(); });
 
 // ==== CLAQUETA ==== (timecode d'hora del dia en gran, per sincronitzar les càmeres amb els Momentos)
 // Hora del mòbil (iOS la sincronitza per xarxa: error típic < 0,1 s). Destell blanc + pitet de 1 kHz just al canvi de segon, 3 vegades
@@ -7358,7 +7622,7 @@ function showTab(t, top = true) {
   if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
   if (typeof tqShow === 'function' && (ch || t === 'tiempo')) tqShow(t === 'tiempo');  // el temps: es baixa i es refresca només amb la pestanya a la vista
   if (t !== 'ahora' && t !== 'multi' && typeof mkClose === 'function') mkClose();
-  if (t === 'apps' && typeof appsPaint === 'function') appsPaint();
+  if (t === 'apps' && typeof appsPaint === 'function') { appsPaint(); if (ch) [...document.querySelectorAll('#apps .apptile:not([hidden])')].forEach((el, i) => anim(el, [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: i * 45 })); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
