@@ -1030,6 +1030,28 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi li.mcplan img { display: block; width: 100%; height: auto; border-radius: var(--r-card, 10px); -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 62%, transparent 100%); }  /* la il·lustració es fon amb el fons */
 #multi .mcpin { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid var(--bg); background: var(--sc); color: #0b0b0b; font: 800 12px/1 var(--body); display: grid; place-items: center; cursor: pointer; }
 #multi .mcpin[data-st=""] { opacity: .5; }
+#multi .mcpin.nopos { display: none; }
+#multi .on3d .mcpin.nopos { display: grid; }
+#multi .on3d .mcpin { width: 24px; height: 24px; transform: translate(-50%, -50%); transition: box-shadow .2s; }
+#multi .on3d .mcpin.sel { width: 32px; height: 32px; font-size: 14px; box-shadow: 0 0 0 3px var(--ink); }
+#multi .mcediting .mcpin { pointer-events: none; }
+#multi .on3d[data-look="plano"] .mc3dbox { background: #f5f5f2; border-radius: var(--r-card, 10px); }
+#multi .on3d[data-look="plano"] .mcpin { border-color: #f5f5f2; }
+#multi .mctools { display: none; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+#multi .on3d .mctools { display: flex; }
+#multi .mctools .btn, #multi .mced .btn { min-height: 38px; padding: 0 14px; font-size: var(--fs-s); }
+#multi .mced { margin-top: 10px; padding: 12px 0 4px; border-top: 1px solid var(--rule); }
+#multi .mced .mcsel { margin: 0 0 8px; }
+#multi .mced .mcsel button { display: inline-flex; align-items: center; }
+#multi .mced .mcsel button.nopos { opacity: .55; }
+#multi .mced .mcsel .mcn { margin-right: 6px; }
+#multi .mcedw { margin: 4px 0 8px; }
+#multi .mcedf { display: grid; grid-template-columns: 6.8em minmax(0, 1fr) 4.4em; align-items: center; gap: 8px; font: 600 12px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+#multi .mcedf[hidden] { display: none; }
+#multi .mcedf input { width: 100%; min-height: 40px; margin: 0; }
+#multi .mcedf output { white-space: nowrap; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+#multi .mcedb { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+#multi .mcedn { margin: 0; }
 #multi .mcpin[data-st="grabando"] { box-shadow: 0 0 0 3px var(--now); animation: mcrec 1.6s ease-in-out infinite; }
 @keyframes mcrec { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--now) 25%, transparent); } }
 @media (prefers-reduced-motion: reduce) { #multi .mcpin[data-st="grabando"] { animation: none; } }
@@ -1356,6 +1378,52 @@ html[data-theme="light"] .tools .switch:not([aria-pressed="true"])::after { back
 html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(--fav) 16%, var(--panel)); }
 .temasel .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
+/* ==== Microanimacions (04-11-2026, inspirades en bencho.dev): només transform/opacitat, un cop per esdeveniment, res amb «Reducir movimiento» ==== */
+/* Números que rodolen: la xifra que canvia baixa com un comptaquilòmetres (clip-path i no overflow: no mou la línia de base) */
+span.rl, span.rl > span { all: unset; display: inline-block; }  /* que no hi arribin estils com «.left span» */
+span.rl { clip-path: inset(0 -.1em); }
+span.rl > span { position: relative; }
+span.rl > span::after { content: attr(data-o); position: absolute; left: 0; top: 100%; }
+/* ✓ de Mi plan: el ✓ es dibuixa i el text es ratlla d'esquerra a dreta abans que la tasca marxi */
+li.tk.ck .tkchk svg path { stroke-dasharray: 24; animation: ckdraw .32s cubic-bezier(.2,.8,.2,1) both; }
+li.tk.ck .tkn { justify-self: start; background: linear-gradient(currentColor, currentColor) 0 .62em / 0 2px no-repeat; animation: ckstrike .36s .1s cubic-bezier(.2,.8,.2,1) forwards; }
+li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
+@keyframes ckdraw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+@keyframes ckstrike { to { background-size: 100% 2px; opacity: .45; } }
+/* Píndola d'avisos de l'organització (com la Dynamic Island): negra sempre, a dalt; en tocar-la s'obre */
+.isl { position: fixed; z-index: 66; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 50%; translate: -50% 0; box-sizing: border-box; max-width: calc(100vw - 24px);
+  background: #000; color: #fff; border: 1px solid rgba(255,255,255,.16); border-radius: 22px; box-shadow: 0 8px 28px rgba(0,0,0,.55); overflow: hidden; cursor: pointer; touch-action: manipulation; }
+.isl .ib { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px 0 14px; white-space: nowrap; }
+.isl .ib .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--chg, #ff2bd6); box-shadow: 0 0 10px var(--chg, #ff2bd6); }
+.isl .ib .it { font: 800 13px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; }
+.isl .ib .is { font: 500 14px/1 var(--body); opacity: .75; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.isl .ib .in { flex: none; min-width: 20px; height: 20px; border-radius: 10px; background: rgba(255,255,255,.18); font: 800 12px/20px var(--body); text-align: center; padding: 0 5px; box-sizing: border-box; }
+.isl .ib .in:empty { display: none; }
+.isl .ix { display: none; }
+.isl.open { width: min(calc(100vw - 24px), 520px); border-radius: 26px; cursor: default; }
+.isl.open .ib .is { display: none; }
+.isl.open .ib { justify-content: flex-start; }
+.isl.open .ix { display: block; padding: 0 16px 14px; }
+.isl .ix ul { list-style: none; margin: 0; padding: 0; max-height: 52svh; overflow: auto; }
+.isl .ix li { font: 500 15px/1.35 var(--body); padding: 10px 0; border-top: 1px solid rgba(255,255,255,.12); overflow-wrap: anywhere; white-space: pre-line; }
+.isl .ix li b { color: #fff; }
+.isl .ix .ic { margin-top: 10px; width: 100%; height: 44px; border-radius: 22px; border: 0; background: rgba(255,255,255,.14); color: #fff; font: 700 15px var(--body); cursor: pointer; }
+/* Llisca per publicar: s'ha d'arrossegar fins al final (evita publicar sense voler) */
+.slide { position: relative; flex: 1 1 260px; max-width: 420px; height: 52px; border-radius: 26px; border: 1.5px solid var(--accent); background: var(--panel, #111); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.slide .sf { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); opacity: .35; }
+.slide .st { position: absolute; inset: 0; display: grid; place-items: center; padding-left: 40px; font: 800 15px var(--body); color: var(--ink); letter-spacing: .02em; pointer-events: none; }
+.slide .sk { position: absolute; top: 3px; left: 3px; width: 43px; height: 43px; border-radius: 50%; background: var(--accent); color: var(--accent-ink, #000); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.slide.ok .st { color: var(--accent-ink, #000); }
+.slide.ok .sf { opacity: 1; }
+.slide[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+.slide:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Estirar per actualitzar (a l'app de pantalla d'inici l'iPhone no ho fa) */
+.ptr { position: fixed; z-index: 64; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%; background: #000; border: 1px solid rgba(255,255,255,.18); color: #fff;
+  display: grid; place-items: center; transform: translateY(-70px); opacity: 0; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+.ptr svg { width: 22px; height: 22px; }
+.ptr.go svg { animation: ptrspin .8s linear infinite; }
+@keyframes ptrspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
@@ -1793,6 +1861,8 @@ html[data-theme="light"] .blk.fav:not(.on) { background: color-mix(in srgb, var(
   <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="isl" id="isl" role="status" aria-live="polite" hidden><div class="ib"><span class="dot"></span><span class="it">Aviso</span><span class="is"></span><span class="in"></span></div><div class="ix"><ul></ul><button type="button" class="ic">Entendido</button></div></div>
+<div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div>
 
 <script>
 document.documentElement.lang = 'es';
@@ -2004,16 +2074,16 @@ FEST.multicam = [
       { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
-    // Mides del stage plot (vista de dalt): carpa 64×32 m. Cada càmera: at3d: [x, y, z]
+    // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
-      tent: { len: 64, wid: 32, h: 14, wall: 4 },
-      stage: { x0: -26, x1: -16, wid: 21.6, h: 1.4 },
-      screen: { x: -24.5, wid: 19, h: 8.5 },
+      tent: { len: 64, wid: 32, h: 13 },
+      stage: { x0: -26, x1: -16, wid: 22, h: 1.6 },
+      screen: { x: -24.5, wid: 15.3, z0: 2.7, h: 5.7 },
       booth: { x: -18.6, l: 3.4, w: 1.3, h: 1.1 },
-      barrier: { x: -13.8, wid: 28 },
-      triangles: [[-15.8, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8.1, 'ambar'], [16.1, 'ambar']],
+      barrier: { x: -13.8, wid: 28.8 },
+      triangles: [[-16, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8, 'ambar'], [16, 'ambar']],
       platform: { x: 0, s: 3.5, h: 0.7 },
-      foh: { x0: 26.4, x1: 31, wid: 8 },
+      foh: { x0: 27.5, x1: 31.5, wid: 7.4 },
     },
     rider: [] },
 ];
@@ -2475,6 +2545,53 @@ const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const anim = (el, kf, o) => (!el || RM.matches || !el.animate) ? null : el.animate(kf, { easing: EASE, fill: 'backwards', ...o });
 const RISE = [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }];
 let booted = false;
+// Panell d'aeroport: quan canvia l'artista, el nom gira (rotateX) i les lletres «remenen» fins a quedar quietes, d'esquerra a dreta.
+// Un sol element, ~0,7 s, un cop per set; l'alçada queda fixada mentre dura perquè les lletres a l'atzar no facin saltar la fila
+const FLAPCH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function flap(el) {
+  if (!el || RM.matches || !el.animate) return;
+  const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+  while (tw.nextNode()) if (tw.currentNode.nodeValue.trim()) nodes.push([tw.currentNode, tw.currentNode.nodeValue]);
+  if (!nodes.length) return;
+  el.style.height = el.offsetHeight + 'px';
+  el.animate([{ transform: 'perspective(500px) rotateX(-88deg)', opacity: .2 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.3,1.35,.5,1)', transformOrigin: '50% 0' });
+  const t0 = performance.now(), STEP = 32, total = nodes.reduce((n, [, v]) => n + v.length, 0), END = Math.min(900, 220 + total * STEP);
+  let fr = 0;
+  (function f(now) {
+    const k = now - t0;
+    if (++fr % 2 || k >= END) {  // ~30 fps: és un panell mecànic, no cal més
+      let i = 0;
+      for (const [n, v] of nodes) {
+        let out = '';
+        for (const c of v) { out += (k >= END || k > 180 + i * STEP || !/[A-Za-z0-9]/.test(c)) ? c : FLAPCH[Math.random() * 36 | 0]; i++; }
+        if (n.nodeValue !== out) n.nodeValue = out;
+      }
+    }
+    if (k < END) requestAnimationFrame(f); else el.style.height = '';
+  })(t0);
+}
+// Números que rodolen: les xifres que canvien d'un compte enrere baixen com un comptaquilòmetres (només transform).
+// Només si el text té la mateixa llargada (si canvien les unitats, «1 h» → «59 min», es canvia sense més)
+function roll(el, old) {
+  if (!el || !booted || RM.matches || old == null || !el.animate) return;
+  const tn = el.firstChild;
+  if (!tn || tn.nodeType !== 3) return;
+  const nw = tn.nodeValue, o = old.slice(0, nw.length);
+  if (nw === o || o.length !== nw.length) return;
+  const frag = document.createDocumentFragment(), digs = [];
+  let buf = '';
+  for (let i = 0; i < nw.length; i++) {
+    if (nw[i] !== o[i] && /\d/.test(nw[i]) && /\d/.test(o[i])) {
+      if (buf) { frag.append(buf); buf = ''; }
+      const s = document.createElement('span'), d = document.createElement('span');
+      s.className = 'rl'; d.dataset.o = o[i]; d.textContent = nw[i]; s.append(d); frag.append(s); digs.push(d);
+    } else buf += nw[i];
+  }
+  if (buf) frag.append(buf);
+  tn.replaceWith(frag);
+  // de dreta a esquerra, com un comptador de veritat (les unitats primer)
+  digs.reverse().forEach((d, j) => d.animate([{ transform: 'translateY(-100%)' }, { transform: 'none' }], { duration: 520, delay: j * 70, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'backwards' }));
+}
 
 function rowHTML(s, t) {
   if (filt) return rowMine(s, t);
@@ -2576,6 +2693,7 @@ function upHTML(t) {
 // Avisos emergents. kind: 'mine' (groc, els meus artistes), 'org' (organització), 'info'. action: { label, fn }
 const toasts = document.getElementById('toasts');
 function toast(msg, kind = 'mine', action = null, ms = 10000) {
+  if (kind === 'org' && !action) return island(msg, ms);  // els de l'organització van a la píndola de dalt
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.innerHTML = `<div class="msg">${msg}</div>${action ? `<button type="button" class="act">${html(action.label)}</button>` : ''}<button type="button" class="x" aria-label="Cerrar aviso">✕</button>`;
@@ -2589,6 +2707,52 @@ function toast(msg, kind = 'mine', action = null, ms = 10000) {
   setTimeout(bye, ms);
   try { if (kind !== 'info' && navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
 }
+// Píndola d'avisos de l'organització (com la Dynamic Island): surt a dalt, plegada; en tocar-la s'obre amb tots els avisos.
+// Es canvia la mida d'un sol element petit (amplada/alçada), amb una molla curta. Plegada, marxa sola; oberta, fins a «Entendido»
+const isl = document.getElementById('isl');
+let islMsgs = [], islTimer = 0;
+const ISL_EASE = 'cubic-bezier(.3,1.25,.45,1)';
+function islResize(fn) {
+  const r0 = isl.getBoundingClientRect();
+  fn();
+  const r1 = isl.getBoundingClientRect();
+  if (RM.matches || !isl.animate || isl.hidden) return;
+  isl.animate([{ width: r0.width + 'px', height: r0.height + 'px' }, { width: r1.width + 'px', height: r1.height + 'px' }], { duration: 440, easing: ISL_EASE });
+  const ix = isl.querySelector(isl.classList.contains('open') ? '.ix' : '.ib');
+  ix.animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 260, delay: 90, easing: EASE, fill: 'backwards' });
+}
+function islPaint() {
+  const last = islMsgs[islMsgs.length - 1] || '';
+  const tmp = document.createElement('div'); tmp.innerHTML = last.replace(/<br>/g, ' · ');
+  isl.querySelector('.is').textContent = tmp.textContent;
+  isl.querySelector('.in').textContent = islMsgs.length > 1 ? String(islMsgs.length) : '';
+  isl.querySelector('.ix ul').innerHTML = islMsgs.slice().reverse().map(m => `<li>${m}</li>`).join('');
+}
+function islClose() {
+  clearTimeout(islTimer);
+  const done = () => { isl.hidden = true; isl.classList.remove('open'); islMsgs = []; };
+  const a = anim(isl, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-14px) scale(.8)' }], { duration: 200, fill: 'forwards' });
+  a ? a.onfinish = () => { done(); a.cancel(); } : done();
+}
+function island(msg, ms) {
+  islMsgs.push(msg);
+  if (islMsgs.length > 6) islMsgs.shift();
+  const was = !isl.hidden;
+  if (was) islResize(islPaint);
+  else {
+    islPaint(); isl.hidden = false;
+    anim(isl, [{ opacity: 0, transform: 'translateY(-18px) scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: ISL_EASE });
+  }
+  clearTimeout(islTimer);
+  if (!isl.classList.contains('open')) islTimer = setTimeout(islClose, ms || 30000);
+  try { if (navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+isl.addEventListener('click', e => {
+  if (e.target.closest('.ic')) { islClose(); return; }
+  if (isl.classList.contains('open')) { if (e.target.closest('.ib')) islResize(() => isl.classList.remove('open')), islTimer = setTimeout(islClose, 15000); return; }
+  clearTimeout(islTimer);
+  islResize(() => isl.classList.add('open'));
+});
 // Notificacions del sistema: només si s'han activat en aquest mòbil, hi ha permís i no és el Modo prueba
 const NKEY = FEST.key + '-notif-v1';
 let notifOn = false;
@@ -2758,11 +2922,13 @@ function tick(force) {
     const key = state + inner;
     if (rowCache[s.id] !== key) {
       const id = cur ? cur.id : nx ? 'n' + nx.id : state, prev = r.dataset.cur;
+      const ob = r.querySelector('.left b'), oldLeft = ob && ob.textContent;
       r.className = 'row ' + state;
       setHTML(r, inner);
       rowCache[s.id] = key;
-      // Canvi d'artista: el nou entra des de baix (no es repeteix cada minut perquè l'id no canvia)
-      if (booted && prev !== id) { anim(r.querySelector('.mid'), RISE, { duration: 380 }); anim(r.querySelector('.right'), RISE, { duration: 380, delay: 60 }); }
+      // Canvi d'artista: el nou entra des de baix i el nom gira com un panell d'aeroport (no es repeteix cada minut perquè l'id no canvia)
+      if (booted && prev !== id) { anim(r.querySelector('.mid'), RISE, { duration: 380 }); anim(r.querySelector('.right'), RISE, { duration: 380, delay: 60 }); if (cur) flap(r.querySelector('.dj')); }
+      else roll(r.querySelector('.left b'), oldLeft);  // el mateix artista: només rodola el «quedan»
       r.dataset.cur = id;
     }
     // Amb «Solo mis artistas», els pròxims surten per ordre d'hora
@@ -2829,10 +2995,11 @@ function tick(force) {
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(T0 - t)}</span><span class="msub">Abre a las ${lbl(T0)}${FIRST ? ` · Primer concierto: <b>${deco(FIRST.n)}</b>, ${lbl(FIRST.a)}` : ''}</span>`
       : `<span class="mk">Fin de fiesta</span><span class="mbig">Hasta la próxima</span><span class="msub">Gracias por venir. Dudas o mejoras: <a href="mailto:pau.puig@midnight.es">pau.puig@midnight.es</a></span>`;
     if (ms.dataset.k !== mh) {
-      const old = ms.querySelector('.mprog i'), w0 = old && old.style.width;
+      const old = ms.querySelector('.mprog i'), w0 = old && old.style.width, ob = ms.querySelector('.mbig'), oldBig = ob && ob.firstChild && ob.firstChild.nodeValue;
       ms.dataset.k = mh;
       const mi = ms.querySelector('img'); mi.hidden = !msrc; if (msrc && mi.getAttribute('src') !== msrc) mi.src = msrc;
       ms.querySelector('.mtxt').innerHTML = mh;
+      roll(ms.querySelector('.mbig'), oldBig);
       // la barra creix des d'on era (o des de zero en obrir l'app)
       const nb = ms.querySelector('.mprog i');
       if (nb) { const w = nb.style.width; nb.style.width = w0 || '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { nb.style.width = w; })); }
@@ -3132,7 +3299,7 @@ prefBefore.addEventListener('change', () => { prefs.before = +prefBefore.value; 
 prefChanges.addEventListener('change', () => { prefs.changes = prefChanges.checked; savePrefs(); syncPush(); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '04/11 18:23';
+const BUILD = '04/11 21:55';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3540,9 +3707,11 @@ function solCount(t) {
   else if (g1 && t < g1) { k = 'g'; l = 'Hora dorada: quedan'; v = left(g1); sub = t < set ? `Atardecer en ${left(set)} · ${hm(set)}` : `Hora azul a las ${hm(g1)}`; }
   else if (b1 && t < b1) { k = 'b'; l = 'Hora azul: quedan'; v = left(b1); sub = solRise2 ? `Mañana amanece a las ${hm(solRise2)}` : ''; }
   else { k = 'n'; l = 'Mañana amanece a las'; v = solRise2 ? hm(solRise2) : '—'; sub = solRise2 ? `En ${dur(solRise2 - t)}` : ''; }
-  const el = document.getElementById('solCd');
+  const el = document.getElementById('solCd'), ov = el.querySelector('.v'), oldV = ov && el.dataset.l === l ? ov.textContent : null;
+  el.dataset.l = l;
   el.className = `solcd ${k}`;
   el.innerHTML = `<span class="l">${l}</span><b class="v">${v}</b>${at ? `<span class="at">${at}</span>` : ''}${sub ? `<small>${sub}</small>` : ''}`;
+  roll(el.querySelector('.v'), oldV);
 }
 // Què toca ara i quin és el proper canvi de llum
 const SOL_EV = { '-6u': 'Empieza la hora azul', '-4u': 'Empieza la hora dorada', [SOL_RISE + 'u']: 'Amanecer', '6u': 'Termina la hora dorada',
@@ -4763,7 +4932,9 @@ function withWho(x) {
 // «IMPORTANTE»: només si la tasca comença amb «!» («Bon concert!» o «no és important» no ho són)
 const tkMust = x => /^!/.test(x.t);
 const tkTxt = t => String(t).replace(/^!\s*/, '');  // «!» al davant = important (no es mostra)
+let planHold = 0;  // mentre es dibuixa el ✓ (mig segon), la llista no es refà
 function renderPlan(force) {
+  if (Date.now() < planHold) return;
   const sec = document.getElementById('plan'), t = now();
   const show = taskOn() && TASKS.people.length && YO !== '-';
   sec.hidden = !show;
@@ -4809,15 +4980,21 @@ document.getElementById('plan').addEventListener('click', e => {
   if (e.target.closest('#planAll')) { planAll = !planAll; renderPlan(true); return; }
   if (e.target.closest('#planLate')) { planLate = !planLate; renderPlan(true); return; }
   const b = e.target.closest('[data-tk]');
-  if (b) toggleTask(b.dataset.tk);
+  if (b) toggleTask(b.dataset.tk, b);
 });
-function toggleTask(id) {
+function toggleTask(id, btn) {
   const on = !DONE.has(id);
   if (on) DONE.add(id); else DONE.delete(id);
   DQ = DQ.filter(q => q.id !== id || q.who !== YO); DQ.push({ id, v: on, who: YO });
   saveDone();
   try { if (on && navigator.vibrate) navigator.vibrate(30); } catch (e) {}
-  renderPlan(true);
+  // A «Mi plan»: el ✓ es dibuixa i el text es ratlla allà mateix; després la tasca marxa (amb «Reducir movimiento», de cop)
+  const li = on && btn && !RM.matches && btn.closest('li.tk');
+  if (li) {
+    btn.setAttribute('aria-pressed', 'true'); li.classList.add('ck');
+    planHold = Date.now() + 560;
+    setTimeout(() => { planHold = 0; renderPlan(true); }, 580);
+  } else renderPlan(true);
   renderTg(true);
   const tk = TASKS.list.find(x => x.id === id);
   if (on && tk) toast(`Hecha: <b>${html(tk.t.slice(0, 50))}</b>`, 'info', { label: 'Deshacer', fn: () => { if (DONE.has(id)) toggleTask(id); } }, 6000);
@@ -5646,125 +5823,260 @@ function mcMaterial(list) {
 // --- Vista 3D (FEST.multicam[].scene3d): la carpa modelada amb three.js a partir de les mides del stage plot ---
 // Es carrega només quan s'obre la pestanya (vendor/three…, ~170 kB comprimit). Mentre carrega, o si el mòbil no pot fer WebGL,
 // es veu la il·lustració (plan) amb els punts. Es dibuixa només quan cal (en girar o en canviar la mida): no gasta bateria parat.
+// Dos looks: «noche» (fosc, llums que brillen) i «plano» (fons clar i línies com el PDF del Juanjo Reverte).
+// Posicions de les càmeres: les de FEST (at3d + aim) o les que l'equip mou amb «Mover cámaras», que es comparteixen
+// pel servidor com una entrada més de /mc (id «<càmera>-pos», nota «x,y,z,direcció,inclinació»). Així no cal tocar el servidor.
 const MC3D_LIB = 'vendor/three-0.170.0.module.min.js';
-const MC3D_COL = { ambar: '#ffae5e', blanco: '#eef2ff' };
-let mc3dLib = null, mc3d = null;
+const MC3D_PAL = {
+  noche: { bg: '', tent: '#3a3e47', floor: ['#2f323b', '#15161b', '#0c0d10'], grid: 'rgba(255,255,255,.05)', stage: '#1b1d22', scaf: '#454a54', screen: '#e9eeff', glow: true,
+    barrier: '#7a7f89', leg: '#3fae5c', raf: '#c8414a', tri: '#ffae5e', triW: '#eef2ff', dot1: '#6ff0f4', dot2: '#ff5fe0', spine: '#50545e', desk: '#2a2c32', fog: true },
+  plano: { bg: '#f5f5f2', tent: '#a6a9b0', floor: ['#ffffff', '#f6f6f3', '#efefeb'], grid: 'rgba(0,0,0,.06)', stage: '#d3d4d8', scaf: '#a3a7ae', screen: '#6f80f0', glow: false,
+    barrier: '#1d1e22', leg: '#2e9a4a', raf: '#c33a43', tri: '#e8962c', triW: '#e8962c', dot1: '#14b9c2', dot2: '#d61fb6', spine: '#55585f', desk: '#2a2c32', fog: false },
+};
+const MC3D_LK = 'midnight-mc3d-look-v1';
+let mc3dLib = null, mc3d = null, mcEd = null;
+let mcLook = '';
+try { mcLook = localStorage.getItem(MC3D_LK) || ''; } catch (e) {}
+const mc3dLook = () => MC3D_PAL[mcLook] ? mcLook : document.documentElement.dataset.theme === 'light' ? 'plano' : 'noche';
 function mc3dLoad() {
   if (!mc3dLib) mc3dLib = import(new URL(MC3D_LIB, location.href).href).catch(() => null);
   return mc3dLib;
 }
-function mc3dBuild(T, sc) {
-  const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  const bg = new T.Color(cssv('--bg') || '#050608'), light = document.documentElement.dataset.theme === 'light';
+// Color CSS (també var(--…)) → color que entén three.js
+function mcCss(c) {
+  const el = document.createElement('i'), host = document.getElementById('multi') || document.body; el.style.color = c; host.appendChild(el);
+  const v = getComputedStyle(el).color; el.remove(); return v || '#888';
+}
+// Posició d'una càmera: la que s'està movent (sense desar) > la desada per l'equip > la del festival
+const mcPosKey = c => c.id.slice(0, 76) + '-pos';
+function mcPosOf(c, sc) {
+  if (mcEd && mcEd.draft[c.id]) return mcEd.draft[c.id];
+  const s = mcState[mcPosKey(c)], n = s && s.note ? s.note.split(',').map(Number) : null;
+  if (n && n.length >= 3 && n.every(Number.isFinite)) return { p: n.slice(0, 3), yaw: n[3], tilt: n[4], saved: true };
+  if (!c.at3d) return null;
+  const p = c.at3d.slice(0, 3);
+  if (c.aim) return { p, yaw: c.aim[0], tilt: c.aim[1] || 0 };
+  return { p, ...mcAimAuto(p, sc) };
+}
+// Sense direcció: les de davant de la tanca miren l'escenari, les de l'escenari miren el públic
+function mcAimAuto(p, sc) {
+  if (!sc) return { yaw: 180, tilt: 0 };
+  const t = p[0] > sc.barrier.x ? [sc.screen.x, 0, sc.stage.h + sc.screen.h / 2] : [(sc.foh.x0 + sc.barrier.x) / 2, 0, 1.5];
+  const dx = t[0] - p[0], dy = t[1] - p[1], dz = t[2] - p[2];
+  return { yaw: Math.round(Math.atan2(dy, dx) * 180 / Math.PI), tilt: Math.round(Math.atan2(dz, Math.hypot(dx, dy)) * 180 / Math.PI) };
+}
+// Camp de visió aproximat a partir de l'òptica (sensor ~17 mm d'ample); sense òptica (acció) = gran angular
+function mcFov(c) {
+  const m = /(\d+(?:[.,]\d+)?)\s*mm/i.exec(c.opt || '');
+  const h = m ? 2 * Math.atan(17.3 / (2 * parseFloat(m[1].replace(',', '.')))) * 180 / Math.PI : 100;
+  return Math.max(12, Math.min(118, h));
+}
+function mc3dBuild(T, sc, pal) {
   const scene = new T.Scene();
-  scene.fog = new T.Fog(bg, 70, 150);
+  const bgc = new T.Color(pal.bg || getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#050608');
+  if (pal.fog) scene.fog = new T.Fog(bgc, 80, 220);
   const P = (x, y, z) => new T.Vector3(x, z, y);  // dades: z amunt → three: y amunt
-  const tube = new T.CylinderGeometry(1, 1, 1, 5, 1, true), unitBox = new T.BoxGeometry(1, 1, 1);
-  // Barres (costelles de la carpa, truss): un cilindre per segment, tots en un sol InstancedMesh
-  const bars = (segs, r, color) => {
-    const m = new T.InstancedMesh(tube, new T.MeshBasicMaterial({ color, fog: true }), segs.length), o = new T.Object3D(), up = new T.Vector3(0, 1, 0);
+  const tube = new T.CylinderGeometry(1, 1, 1, 5, 1, true), unitBox = new T.BoxGeometry(1, 1, 1), ball = new T.SphereGeometry(1, 8, 6);
+  const UP = new T.Vector3(0, 1, 0);
+  // Barres: un cilindre per segment, totes les d'un color en un sol InstancedMesh
+  const bars = (segs, r, color, extra) => {
+    if (!segs.length) return null;
+    const m = new T.InstancedMesh(tube, new T.MeshBasicMaterial({ color, ...extra }), segs.length), o = new T.Object3D();
     segs.forEach(([a, b], i) => {
       const d = b.clone().sub(a), len = d.length();
       o.position.copy(a).addScaledVector(d, .5); o.scale.set(r, len, r);
-      o.quaternion.setFromUnitVectors(up, d.normalize()); o.updateMatrix(); m.setMatrixAt(i, o.matrix);
+      o.quaternion.setFromUnitVectors(UP, d.normalize()); o.updateMatrix(); m.setMatrixAt(i, o.matrix);
     });
     scene.add(m); return m;
   };
+  const dots = (pts, r, color) => {
+    if (!pts.length) return;
+    const m = new T.InstancedMesh(ball, new T.MeshBasicMaterial({ color }), pts.length), o = new T.Object3D();
+    pts.forEach((p, i) => { o.position.copy(p); o.scale.setScalar(r); o.updateMatrix(); m.setMatrixAt(i, o.matrix); });
+    scene.add(m);
+  };
+  const along = (a, b, step, out) => { const n = Math.max(1, Math.round(a.distanceTo(b) / step)); for (let i = 0; i <= n; i++) out.push(a.clone().lerp(b, i / n)); };
   const box = (x0, x1, y0, y1, z0, z1, color, opts = {}) => {
     const m = new T.Mesh(unitBox, new T.MeshBasicMaterial({ color, ...opts }));
     m.position.copy(P((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)); m.scale.set(x1 - x0, z1 - z0, y1 - y0); scene.add(m); return m;
   };
-  // Línia de llum: tub fi + halo additiu (fa de «bloom» sense postprocessat)
-  const glow = (a, b, color) => {
-    bars([[a, b]], .13, color);
-    const h = bars([[a, b]], .55, color);
-    Object.assign(h.material, { transparent: true, opacity: .16, blending: T.AdditiveBlending, depthWrite: false });
+  // Truss d'escala (dos travessers + graons), com al plànol
+  const ladder = (a, b, w, out) => {
+    const d = b.clone().sub(a).normalize();
+    const side = new T.Vector3().crossVectors(d, UP);
+    if (side.lengthSq() < 1e-4) side.set(1, 0, 0);
+    side.normalize().multiplyScalar(w / 2);
+    const a1 = a.clone().add(side), a2 = a.clone().sub(side), b1 = b.clone().add(side), b2 = b.clone().sub(side);
+    out.push([a1, b1], [a2, b2]);
+    const n = Math.max(1, Math.round(a.distanceTo(b) / .75));
+    for (let i = 0; i <= n; i++) out.push([a1.clone().lerp(b1, i / n), a2.clone().lerp(b2, i / n)]);
   };
-  // Carpa: contorn d'estadi (rectangle amb dos semicercles), perfil paret + cúpula
+  // Línia de llum: tub + halo additiu (fa de «bloom» sense postprocessat). En el look «plano», només el tub
+  const glow = (segs, color) => {
+    bars(segs, pal.glow ? .12 : .09, color);
+    if (pal.glow) bars(segs, .5, color, { transparent: true, opacity: .15, blending: T.AdditiveBlending, depthWrite: false });
+  };
+  // Carpa: contorn d'estadi (rectangle + dos semicercles). Perfil de cúpula tret de la vista frontal del plànol:
+  // [fracció de l'amplada, alçada en fracció de t.h]. Paret baixa (~3 m) i coberta que puja per facetes fins al carener.
   const t = sc.tent, L = t.len, W = t.wid, R = W / 2, half = L / 2 - R;
-  const NP = 72, prof = [[1, 0], [1, t.wall], [.96, t.wall + 3], [.84, t.wall + 6], [.64, t.h - 2], [.34, t.h - .5], [0, t.h]];
-  const outline = [];
-  const per = 2 * (2 * half) + 2 * Math.PI * R;
-  for (let i = 0; i < NP; i++) {
-    let s = i / NP * per, x, y;
-    if (s < 2 * half) { x = -half + s; y = -R; }
-    else if ((s -= 2 * half) < Math.PI * R) { const a = -Math.PI / 2 + s / R; x = half + R * Math.cos(a); y = R * Math.sin(a); }
-    else if ((s -= Math.PI * R) < 2 * half) { x = half - s; y = R; }
-    else { s -= 2 * half; const a = Math.PI / 2 + s / R; x = -half + R * Math.cos(a); y = R * Math.sin(a); }
-    outline.push([x, y, Math.max(-half, Math.min(half, x))]);
-  }
-  // Terra: la forma de la carpa, fosc, amb la llum de la pantalla escampada des de l'escenari
-  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
-  const g = cv.getContext('2d'), gr = g.createRadialGradient(20, 64, 4, 20, 64, 230);
-  gr.addColorStop(0, light ? '#ffffff' : '#3b3e49'); gr.addColorStop(.45, light ? '#d9dadd' : '#17181d'); gr.addColorStop(1, light ? '#cfd0d3' : '#0d0e11');
-  g.fillStyle = gr; g.fillRect(0, 0, 256, 128);
-  const shp = new T.Shape(outline.map(([x, y]) => new T.Vector2(x, -y)));
+  const prof = (t.prof || [[1, 0], [.95, .25], [.88, .38], [.81, .52], [.72, .65], [.61, .74], [.5, .82], [.36, .92], [0, 1]]).map(([r, z]) => [r, z * t.h]);
+  // Costelles: cada 4 m als costats rectes i cada 15° als extrems (com al plànol). [x, y, centre]
+  const outline = [], rib = t.rib || 4, capN = 12;
+  const side = (y, x0, x1) => { const n = Math.max(1, Math.round(Math.abs(x1 - x0) / rib)); for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * i / n; outline.push([x, y, x]); } };
+  const cap = (cx, a0) => { for (let i = 0; i < capN; i++) { const a = a0 + Math.PI * i / capN; outline.push([cx + R * Math.cos(a), R * Math.sin(a), cx]); } };
+  side(-R, -half, half); cap(half, -Math.PI / 2); side(R, half, -half); cap(-half, Math.PI / 2);
+  const NP = outline.length;
+  // Terra: la forma de la carpa, amb la llum de l'escenari escampada i una graella de 4 m
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  const g = cv.getContext('2d'), gr = g.createRadialGradient(40, 128, 8, 40, 128, 470);
+  gr.addColorStop(0, pal.floor[0]); gr.addColorStop(.45, pal.floor[1]); gr.addColorStop(1, pal.floor[2]);
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
+  g.strokeStyle = pal.grid; g.lineWidth = 1;
+  for (let m = 0; m <= L; m += 4) { const x = Math.round(m / L * 512) + .5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
+  for (let m = 0; m <= W; m += 4) { const y = Math.round(m / W * 256) + .5; g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke(); }
+  const fine = [];
+  for (let i = 0; i < 96; i++) { const a = i / 96 * 2 * Math.PI, cx = Math.cos(a) >= 0 ? half : -half; fine.push(new T.Vector2(cx + R * Math.cos(a), -R * Math.sin(a))); }
+  const shp = new T.Shape(fine);
   const fg = new T.ShapeGeometry(shp, 1), uv = fg.attributes.uv, pos = fg.attributes.position;
   for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + L / 2) / L, (pos.getY(i) + R) / W);
-  const ftx = new T.CanvasTexture(cv); ftx.colorSpace = T.SRGBColorSpace;
+  const ftx = new T.CanvasTexture(cv); ftx.colorSpace = T.SRGBColorSpace; ftx.anisotropy = 4;
   const floor = new T.Mesh(fg, new T.MeshBasicMaterial({ map: ftx }));
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
-  const at = (i, k) => { const [x, y, cx] = outline[i % NP], [r, z] = prof[k]; return P(cx + (x - cx) * r, y * r, z); };
-  const segs = [];
-  for (let i = 0; i < NP; i++) for (let k = 0; k < prof.length - 1; k++) {
-    if (i % 2 === 0 || k < 2) segs.push([at(i, k), at(i, k + 1)]);    // costelles
-    if (k > 0) segs.push([at(i, k), at(i + 1, k)]);                    // anelles
+  const at = (i, k) => { const [x, y, cx] = outline[(i + NP) % NP], [r, z] = prof[k]; return P(cx + (x - cx) * r, y * r, z); };
+  const tent = [], K = prof.length - 1;
+  for (let i = 0; i < NP; i++) for (let k = 0; k < K; k++) {
+    tent.push([at(i, k), at(i, k + 1)]);                       // costelles fins al carener
+    if (k < K) tent.push([at(i, k), at(i + 1, k)]);            // anelles (la de terra inclosa)
   }
-  bars(segs, .07, light ? '#6d7078' : '#3b3f47');
-  // Escenari, pantalla (brilla), cabina, tanca, plataforma i FOH
-  const st = sc.stage, s2 = st.wid / 2, sh = st.h;
-  box(st.x0, st.x1, -s2, s2, 0, sh, light ? '#55585f' : '#1d1f24');
-  const sw = sc.screen.wid / 2;
-  box(sc.screen.x - .3, sc.screen.x, -sw, sw, sh, sh + sc.screen.h, '#e9eeff');
-  const halo = box(sc.screen.x - .1, sc.screen.x + .6, -sw - .8, sw + .8, sh - .5, sh + sc.screen.h + .8, '#9fb4ff', { transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false });
-  const sx = sc.screen.x;  // bastida als costats de la pantalla
-  for (const y0 of [-sw - 2.5, sw + .5]) {
-    const tw = [];
-    for (const [a, b] of [[0, 0], [2, 0], [0, 2], [2, 2]]) tw.push([P(sx - 1 + a, y0 + b, sh), P(sx - 1 + a, y0 + b, sh + sc.screen.h + 1)]);
-    for (let z = sh; z <= sh + sc.screen.h + 1; z += 2.4) for (const [a, b, c, d] of [[0, 0, 2, 0], [0, 2, 2, 2], [0, 0, 0, 2], [2, 0, 2, 2]]) tw.push([P(sx - 1 + a, y0 + b, z), P(sx - 1 + c, y0 + d, z)]);
-    bars(tw, .05, light ? '#6d7078' : '#5a5e68');
+  tent.push([P(-half, 0, t.h), P(half, 0, t.h)]);              // carener
+  bars(tent, .055, pal.tent);
+  // Escenari: tarima, bastida (gris) i pantalla LED amb la seva quadrícula
+  const st = sc.stage, s2 = st.wid / 2, sh = st.h, sw = sc.screen.wid / 2, sx = sc.screen.x, sz = sc.screen.z0 || sh, top3 = sz + sc.screen.h;
+  box(st.x0, st.x1, -s2, s2, 0, sh, pal.stage);
+  const scaf = [];
+  for (let x = st.x0; x <= st.x1 + .01; x += 2.5) for (let y = -s2; y <= s2 + .01; y += 2.7) scaf.push([P(x, y, 0), P(x, y, sh)]);
+  for (const y0 of [-sw - 2.5, sw + .5]) {  // torres als costats de la pantalla
+    for (const [a, b] of [[0, 0], [2, 0], [0, 2], [2, 2]]) scaf.push([P(sx - 1 + a, y0 + b, sh), P(sx - 1 + a, y0 + b, top3 + 1)]);
+    for (let z = sh; z <= top3 + 1; z += 2) for (const [a, b, c, d] of [[0, 0, 2, 0], [0, 2, 2, 2], [0, 0, 0, 2], [2, 0, 2, 2], [0, 0, 2, 2]]) scaf.push([P(sx - 1 + a, y0 + b, z), P(sx - 1 + c, y0 + d, z)]);
   }
+  for (let y = -sw; y <= sw + .01; y += 2) scaf.push([P(sx - 1.4, y, sh), P(sx - 1.4, y, top3 + .5)]);  // bastida de darrere la pantalla
+  for (let z = sh; z <= top3 + .6; z += 2) scaf.push([P(sx - 1.4, -sw, z), P(sx - 1.4, sw, z)]);
+  bars(scaf, .045, pal.scaf);
+  box(sx - .3, sx, -sw, sw, sz, top3, pal.screen, pal.glow ? {} : { transparent: true, opacity: .18 });
+  const led = [];
+  for (let y = -sw; y <= sw + .01; y += sc.screen.wid / 8) led.push([P(sx + .02, y, sz), P(sx + .02, y, top3)]);
+  for (let z = sz; z <= top3 + .01; z += sc.screen.h / 5) led.push([P(sx + .02, -sw, z), P(sx + .02, sw, z)]);
+  bars(led, .035, pal.glow ? '#b9c6ff' : pal.screen);
+  if (pal.glow) box(sx - .1, sx + .6, -sw - .8, sw + .8, sz - .5, top3 + .8, '#9fb4ff', { transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false });
   const bo = sc.booth;
-  box(bo.x - bo.w / 2, bo.x + bo.w / 2, -bo.l / 2, bo.l / 2, sh, sh + bo.h, light ? '#2c2e33' : '#2a2c32');
-  const fence = (x0, x1, y0, y1) => {
-    const f = [], h = 1.1, rail = (a, b) => { f.push([P(a[0], a[1], h), P(b[0], b[1], h)], [P(a[0], a[1], .1), P(b[0], b[1], .1)]); };
-    rail([x0, y0], [x1, y0]); rail([x1, y0], [x1, y1]); rail([x0, y1], [x1, y1]);
-    for (let x = x0; x <= x1 + .01; x += 1) f.push([P(x, y0, 0), P(x, y0, h)], [P(x, y1, 0), P(x, y1, h)]);
-    for (let y = y0; y <= y1 + .01; y += 1) f.push([P(x1, y, 0), P(x1, y, h)]);
-    bars(f, .035, light ? '#2c2e33' : '#555a63');
+  box(bo.x - bo.w / 2, bo.x + bo.w / 2, -bo.l / 2, bo.l / 2, sh, sh + bo.h, pal.desk);
+  // Tanques: la de davant de l'escenari i la U del FOH (negres i reixades, com al plànol)
+  const fen = [], fence = (a, b, h = 1.15) => { // a, b: [x, y]
+    fen.push([P(a[0], a[1], h), P(b[0], b[1], h)], [P(a[0], a[1], .08), P(b[0], b[1], .08)]);
+    const n = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / .9));
+    for (let i = 0; i <= n; i++) { const q = [a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]; fen.push([P(q[0], q[1], 0), P(q[0], q[1], h)]); }
   };
-  const bw = sc.barrier.wid / 2, bx = sc.barrier.x, bf = [];
-  bf.push([P(bx, -bw, 1.1), P(bx, bw, 1.1)], [P(bx, -bw, .1), P(bx, bw, .1)]);
-  for (let y = -bw; y <= bw + .01; y += 1) bf.push([P(bx, y, 0), P(bx, y, 1.1)]);
-  bars(bf, .035, light ? '#2c2e33' : '#555a63');
-  const pf = sc.platform;
-  box(pf.x - pf.s / 2, pf.x + pf.s / 2, -pf.s / 2, pf.s / 2, 0, pf.h, light ? '#55585f' : '#22242a');
+  const bw = sc.barrier.wid / 2, bx = sc.barrier.x;
+  fence([bx, -bw], [bx, bw]); fence([bx + .9, -bw], [bx + .9, bw], .25);
   const fo = sc.foh, fw = fo.wid / 2;
-  box(fo.x0 + 1, fo.x0 + 2.2, -2.6, 2.6, 0, 1.05, light ? '#2c2e33' : '#2a2c32');
+  fence([fo.x0, -fw], [fo.x1, -fw]); fence([fo.x0, fw], [fo.x1, fw]); fence([fo.x0, -fw], [fo.x0, -1.2]); fence([fo.x0, 1.2], [fo.x0, fw]);
+  bars(fen, .04, pal.barrier);
+  box(fo.x0 + 1, fo.x0 + 2.2, -2.6, 2.6, 0, 1.05, pal.desk);
   box(fo.x0 + 1.4, fo.x0 + 1.5, -2, 2, 1.05, 1.6, '#7fd0ff', { transparent: true, opacity: .55 });  // pantalles de la taula
-  fence(fo.x0, fo.x1, -fw, fw);
-  // Triangles penjats (cap per avall) amb llum, i les bigues fosques que els aguanten
-  const truss = [];
+  // Plataforma del mig (bastida) amb els tubs de llum
+  const pf = sc.platform, ps = pf.s / 2, pfs = [];
+  for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pfs.push([P(pf.x + a * ps, b * ps, 0), P(pf.x + a * ps, b * ps, pf.h)]);
+  box(pf.x - ps, pf.x + ps, -ps, ps, pf.h - .08, pf.h, pal.stage);
+  bars(pfs, .05, pal.scaf);
+  glow([[P(pf.x - ps + .3, -ps + .3, pf.h), P(pf.x - ps + .3, -ps + .3, pf.h + 1.6)], [P(pf.x + ps - .3, ps - .3, pf.h), P(pf.x + ps - .3, ps - .3, pf.h + 1.6)]], pal.dot2);
+  // Rigging (mides de la vista frontal i de dalt del plànol, escalables amb sc.rig):
+  // - a cada triangle, un truss vermell de travès a dalt i el triangle penjat (cap per avall) amb focus cian
+  // - entre triangles, als dos costats, truss verds en diagonal amb una pota que baixa, amb focus magenta
+  // - una biga central de punta a punta i un truss perimetral a l'alçada de la paret
+  const rg = { top: .87, half: 6.3, triTop: .7, triBot: .29, triHalf: 3.05, gOut: R - 4.2, gIn: 5.8, gLow: .52, gHigh: .79, gFoot: .23, ...(sc.rig || {}) };
+  const legs = [], rafs = [], spine = [], drops = [], cyan = [], mag = [], peri = [];
+  const zTop = rg.top * t.h;
   for (const [x, col] of sc.triangles) {
-    const top = t.h - 3.6, s = 4.4, c = MC3D_COL[col] || col;
-    const A = P(x, -s, top), B = P(x, s, top), C = P(x, 0, top - 2 * s * .866);
-    glow(A, B, c); glow(B, C, c); glow(C, A, c);
-    truss.push([P(x, -R + 1.5, t.wall + 4), P(x, -3, t.h - 1.2)], [P(x, R - 1.5, t.wall + 4), P(x, 3, t.h - 1.2)]);
+    ladder(P(x, -rg.half, zTop), P(x, rg.half, zTop), .45, rafs);
+    const c = col === 'blanco' ? pal.triW : !col || col === 'ambar' ? pal.tri : col;
+    const A = P(x, -rg.triHalf, rg.triTop * t.h), B = P(x, rg.triHalf, rg.triTop * t.h), C = P(x, 0, rg.triBot * t.h);
+    glow([[A, B], [B, C], [C, A]], c);
+    along(A, B, 1.1, cyan); along(B, C, 1.1, cyan); along(C, A, 1.1, cyan);
+    drops.push([P(x, -rg.triHalf + .6, zTop), P(x, -rg.triHalf + .6, rg.triTop * t.h)], [P(x, rg.triHalf - .6, zTop), P(x, rg.triHalf - .6, rg.triTop * t.h)]);
   }
-  bars(truss, .1, light ? '#3a3d44' : '#24262c');
-  glow(P(-half, -R + 6, t.h - 3.5), P(half, -R + 6, t.h - 3.5), MC3D_COL.ambar);
-  return { scene, halo };
+  const xs = sc.triangles.map(q => q[0]).sort((a, b) => a - b);
+  const greens = sc.greens || xs.slice(1).map((x, i) => (x + xs[i]) / 2);
+  for (const x of greens) for (const sg of [-1, 1]) {
+    const lo = P(x, sg * rg.gOut, rg.gLow * t.h), hi = P(x, sg * rg.gIn, rg.gHigh * t.h), foot = P(x, sg * rg.gOut, rg.gFoot * t.h);
+    ladder(lo, hi, .45, legs); ladder(foot, lo, .45, legs);
+    along(lo, hi, 1.4, mag); along(foot, lo, 1.4, mag);
+    drops.push([hi, P(x, sg * rg.gIn, zTop + .4)]);
+  }
+  if (xs.length) ladder(P(xs[0] + 1, 0, zTop), P((sc.foh ? sc.foh.x1 : xs[xs.length - 1] + 6) - 3, 0, zTop), .4, spine);
+  for (const sg of [-1, 1]) ladder(P(xs[0] - 1, sg * (R - 1.1), .25 * t.h), P(half, sg * (R - 1.1), .25 * t.h), .3, peri);
+  bars(legs, .05, pal.leg); bars(rafs, .05, pal.raf); bars(spine, .045, pal.spine); bars(drops, .03, pal.raf); bars(peri, .035, pal.spine);
+  dots(cyan, .16, pal.dot1); dots(mag, .13, pal.dot2);
+  // Les càmeres van en un grup a part (es refà quan es mouen)
+  const camsG = new T.Group(); scene.add(camsG);
+  return { scene, camsG, P, bars, tube };
 }
+// Marques de les càmeres: pal fins a terra, anella a terra i el con de visió (cap on mira i com d'obert)
+function mc3dCams() {
+  if (!mc3d) return;
+  const { T, camsG, P, s } = mc3d;
+  for (const o of [...camsG.children]) { camsG.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }
+  const UP = new T.Vector3(0, 1, 0), tube = new T.CylinderGeometry(1, 1, 1, 6, 1, true);
+  mc3d.pos = {};
+  for (const c of s.cams || []) {
+    const q = mcPosOf(c, s.scene3d);
+    if (!q) continue;
+    mc3d.pos[c.id] = q;
+    const col = new T.Color(mcCss(c.c ? mcCol(c.c) : 'var(--muted)')), sel = mcEd && mcEd.sel === c.id;
+    const [x, y, z] = q.p, base = P(x, y, 0), top = P(x, y, z);
+    if (z > .05) {
+      const m = new T.Mesh(tube, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: .8 }));
+      m.position.copy(base).lerp(top, .5); m.scale.set(sel ? .07 : .045, z, sel ? .07 : .045); camsG.add(m);
+    }
+    const ring = new T.Mesh(new T.RingGeometry(sel ? .9 : .55, sel ? 1.15 : .75, 28), new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? 1 : .75, side: T.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.copy(base).setY(.04); camsG.add(ring);
+    // Con de visió
+    const yaw = (q.yaw || 0) * Math.PI / 180, tilt = (q.tilt || 0) * Math.PI / 180, hf = mcFov(c) * Math.PI / 360, vf = Math.atan(Math.tan(hf) * 9 / 16);
+    const D = 4 + 9 * (1 - mcFov(c) / 118);
+    const dir = [Math.cos(tilt) * Math.cos(yaw), Math.cos(tilt) * Math.sin(yaw), Math.sin(tilt)];
+    const rt = [Math.sin(yaw), -Math.cos(yaw), 0];
+    const up = [rt[1] * dir[2] - rt[2] * dir[1], rt[2] * dir[0] - rt[0] * dir[2], rt[0] * dir[1] - rt[1] * dir[0]];
+    const cor = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => P(...[0, 1, 2].map(i => q.p[i] + D * (dir[i] + a * Math.tan(hf) * rt[i] + b * Math.tan(vf) * up[i])) ));
+    const lp = [];
+    for (let i = 0; i < 4; i++) lp.push(top, cor[i], cor[i], cor[(i + 1) % 4]);
+    const lg = new T.BufferGeometry().setFromPoints(lp);
+    camsG.add(new T.LineSegments(lg, new T.LineBasicMaterial({ color: col, transparent: true, opacity: sel ? 1 : .85 })));
+    const fp = [];
+    for (let i = 0; i < 4; i++) fp.push(top, cor[i], cor[(i + 1) % 4]);
+    const fgm = new T.BufferGeometry().setFromPoints(fp);
+    camsG.add(new T.Mesh(fgm, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .26 : .14, side: T.DoubleSide, depthWrite: false })));
+  }
+  mc3d.camSig = mc3dSig();
+}
+const mc3dSig = () => mc3d ? JSON.stringify([(mc3d.s.cams || []).map(c => mcPosOf(c, mc3d.s.scene3d)), mcEd && mcEd.sel]) : '';
 function mc3dPinsPos() {
   if (!mc3d) return;
-  const { T, cam, wrap, pts } = mc3d, W = wrap.clientWidth, H = wrap.clientHeight, v = new T.Vector3();
-  for (const [el, p] of pts) {
-    v.copy(p).project(cam);
-    const off = v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1;
+  const { T, cam, wrap, P } = mc3d, W = wrap.clientWidth, H = wrap.clientHeight, v = new T.Vector3();
+  for (const el of wrap.querySelectorAll('.mcpin')) {
+    const c = mc3d.byKey[el.dataset.mcid], q = c && mc3d.pos[c.id];
+    if (!q) { el.style.visibility = 'hidden'; continue; }
+    v.copy(P(q.p[0], q.p[1], q.p[2])).project(cam);
+    const off = v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05;
     el.style.visibility = off ? 'hidden' : '';
     el.style.left = (v.x + 1) / 2 * W + 'px'; el.style.top = (1 - v.y) / 2 * H + 'px';
+    el.classList.toggle('sel', !!(mcEd && mcEd.sel === c.id));
   }
 }
+const MC3D_HOME = { az: -.8, pol: .98, rad: 84, tx: 0, tz: 0 };  // com la isomètrica del plànol: escenari a dalt a la dreta
+const mc3dClamp = m => {
+  const t = m.s.scene3d.tent;
+  m.rad = Math.max(10, Math.min(130, m.rad)); m.pol = Math.max(.12, Math.min(1.45, m.pol));
+  m.tx = Math.max(-t.len / 2, Math.min(t.len / 2, m.tx)); m.tz = Math.max(-t.wid / 2, Math.min(t.wid / 2, m.tz));
+};
 function mc3dDraw() {
   if (!mc3d || mc3d.raf) return;
   mc3d.raf = requestAnimationFrame(() => {
@@ -5772,13 +6084,29 @@ function mc3dDraw() {
     const { cam, ren, wrap } = m, W = wrap.clientWidth, H = wrap.clientHeight;
     if (!W || !H) return;
     if (m.w !== W || m.h !== H) { ren.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); m.w = W; m.h = H; }
-    cam.position.set(m.tg.x + m.rad * Math.sin(m.pol) * Math.cos(m.az), m.tg.y + m.rad * Math.cos(m.pol), m.tg.z + m.rad * Math.sin(m.pol) * Math.sin(m.az));
-    cam.lookAt(m.tg);
+    mc3dClamp(m);
+    const ty = 2;
+    cam.position.set(m.tx + m.rad * Math.sin(m.pol) * Math.cos(m.az), ty + m.rad * Math.cos(m.pol), m.tz + m.rad * Math.sin(m.pol) * Math.sin(m.az));
+    cam.lookAt(m.tx, ty, m.tz);
+    if (m.scene.fog) { m.scene.fog.near = m.rad * .9; m.scene.fog.far = m.rad * 2.6 + 40; }
     ren.render(m.scene, cam);
     mc3dPinsPos();
   });
 }
-const MC3D_HOME = { az: 2.35, pol: .95, rad: 92 };
+// Animació suau cap a una vista (doble toc, «Centrar»)
+function mc3dGo(to, ms = 450) {
+  const m = mc3d; if (!m) return;
+  cancelAnimationFrame(m.anim);
+  const from = { az: m.az, pol: m.pol, rad: m.rad, tx: m.tx, tz: m.tz }, t0 = performance.now();
+  let daz = (to.az - from.az) % (2 * Math.PI); if (daz > Math.PI) daz -= 2 * Math.PI; if (daz < -Math.PI) daz += 2 * Math.PI;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+    for (const p of ['pol', 'rad', 'tx', 'tz']) m[p] = from[p] + (to[p] - from[p]) * e;
+    m.az = from.az + daz * e; mc3dDraw();
+    if (k < 1) m.anim = requestAnimationFrame(step);
+  };
+  m.anim = requestAnimationFrame(step);
+}
 async function mc3dAttach() {
   const wrap = document.querySelector('#multi .mcplan[data-scene]');
   if (!wrap) return;
@@ -5786,52 +6114,210 @@ async function mc3dAttach() {
   if (!s || !s.scene3d || !ONLINE) return;
   const T = await mc3dLoad();
   if (!T || !document.body.contains(wrap)) return;
+  const look = mc3dLook(), pal = MC3D_PAL[look];
   try {
-    if (!mc3d || mc3d.stage !== s.stage || mc3d.theme !== document.documentElement.dataset.theme) {
-      if (mc3d) mc3d.ren.dispose();
+    if (!mc3d) {
       const ren = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
       ren.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-      ren.setClearColor(0, 0);
-      const { scene } = mc3dBuild(T, s.scene3d);
-      mc3d = { T, ren, scene, stage: s.stage, theme: document.documentElement.dataset.theme, cam: new T.PerspectiveCamera(30, 1.5, 1, 400), tg: new T.Vector3(0, 3, 0), ...MC3D_HOME, pts: [] };
+      mc3d = { T, ren, cam: new T.PerspectiveCamera(32, 1.5, .3, 900), ...MC3D_HOME, pts: [] };
       mc3dTouch(ren.domElement);
     }
+    if (mc3d.stage !== s.stage || mc3d.look !== look) {
+      if (mc3d.scene) mc3d.scene.traverse(o => { o.geometry && o.geometry.dispose(); const mt = o.material; if (mt) { mt.map && mt.map.dispose(); mt.dispose(); } });
+      Object.assign(mc3d, mc3dBuild(T, s.scene3d, pal), { stage: s.stage, look, s });
+      mc3d.ren.setClearColor(pal.bg || 0, pal.bg ? 1 : 0);
+    }
   } catch (e) { mc3d = null; return; }  // sense WebGL: es queda la il·lustració
+  mc3d.s = s;
+  mc3d.byKey = Object.fromEntries((s.cams || []).map(c => [mcKey(c), c]));
   const box3 = wrap.querySelector('.mc3dbox');
-  box3.prepend(mc3d.ren.domElement);
+  if (mc3d.ren.domElement.parentNode !== box3) box3.prepend(mc3d.ren.domElement);
   mc3d.wrap = box3; mc3d.w = 0;
-  mc3d.pts = [...box3.querySelectorAll('.mcpin')].map(el => { const c = (s.cams || []).find(c => mcKey(c) === el.dataset.mcid); return c && c.at3d ? [el, new T.Vector3(c.at3d[0], c.at3d[2], c.at3d[1])] : null; }).filter(Boolean);
-  wrap.classList.add('on3d');
+  wrap.classList.add('on3d'); wrap.dataset.look = look;
+  wrap.classList.toggle('mcediting', !!mcEd);
+  const lb = wrap.querySelector('[data-mc3d="look"]'); if (lb) lb.textContent = look === 'plano' ? 'Vista noche' : 'Vista plano';
+  mc3dCams(); mc3dEdPaint();
   mc3dDraw();
 }
+// Gestos: 1 dit gira (amb inèrcia) · 2 dits apropen, desplacen i giren · doble toc torna a la vista inicial.
+// Ratolí: arrossegar gira, botó dret o Maj+arrossegar desplaça, roda apropa. Editant: arrossegar una càmera la mou per terra.
 function mc3dTouch(cv) {
   const ptr = new Map();
-  let pinch = 0, last = 0;
+  let g = null, tap = null, lastTap = 0, lastXY = [0, 0], vel = [0, 0], velT = 0, inert = 0, drag = null, pan = false;
+  const two = () => { const [a, b] = [...ptr.values()]; return { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, ang: Math.atan2(b[1] - a[1], b[0] - a[0]), mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; };
+  const panBy = (dx, dy) => {
+    const m = mc3d, k = 2 * m.rad * Math.tan(m.cam.fov * Math.PI / 360) / (m.h || 300);
+    const rx = Math.sin(m.az), rz = -Math.cos(m.az), fx = -Math.cos(m.az), fz = -Math.sin(m.az);
+    m.tx -= (rx * dx - fx * dy / Math.max(.35, Math.cos(m.pol) + .2)) * k; m.tz -= (rz * dx - fz * dy / Math.max(.35, Math.cos(m.pol) + .2)) * k;
+  };
+  // Punt de terra sota el dit (per moure càmeres)
+  const ground = (x, y) => {
+    const m = mc3d, T = m.T, r = cv.getBoundingClientRect(), rc = new T.Raycaster(), hit = new T.Vector3();
+    rc.setFromCamera(new T.Vector2((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1), m.cam);
+    return rc.ray.intersectPlane(new T.Plane(new T.Vector3(0, 1, 0), 0), hit) ? [hit.x, hit.z] : null;
+  };
+  // Càmera més propera al dit (pel número o per la base), a menys de 34 px
+  const pick = (x, y) => {
+    const m = mc3d, T = m.T, r = cv.getBoundingClientRect(), v = new T.Vector3();
+    let best = null, bd = 34;
+    for (const c of m.s.cams || []) {
+      const q = m.pos[c.id]; if (!q) continue;
+      for (const z of [q.p[2], 0]) {
+        v.copy(m.P(q.p[0], q.p[1], z)).project(m.cam);
+        const d = Math.hypot((v.x + 1) / 2 * r.width + r.left - x, (1 - v.y) / 2 * r.height + r.top - y);
+        if (d < bd) { bd = d; best = c; }
+      }
+    }
+    return best;
+  };
+  const stopInert = () => { cancelAnimationFrame(inert); inert = 0; if (mc3d) cancelAnimationFrame(mc3d.anim); };
+  cv.addEventListener('contextmenu', e => e.preventDefault());
   cv.addEventListener('pointerdown', e => {
-    cv.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
-    const t = Date.now();
-    if (t - last < 300 && ptr.size === 1) { Object.assign(mc3d, MC3D_HOME); mc3dDraw(); }  // doble toc: vista inicial
-    last = t;
+    if (!mc3d) return;
+    cv.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); stopInert();
+    if (ptr.size === 1) {
+      tap = { t: performance.now(), x: e.clientX, y: e.clientY, moved: false };
+      pan = e.button === 2 || e.shiftKey; vel = [0, 0];
+      drag = null;
+      if (mcEd) {
+        const c = pick(e.clientX, e.clientY);
+        if (c) {
+          if (mcEd.sel !== c.id) { mcEd.sel = c.id; mc3dEdPaint(); }
+          const q = mc3d.pos[c.id], h = ground(e.clientX, e.clientY);
+          if (q && h) drag = { c, off: [q.p[0] - h[0], q.p[1] - h[1]] };
+          mc3dCams(); mc3dDraw();
+        }
+      }
+    } else { g = two(); tap = null; drag = null; }
   });
   cv.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId);
     if (!p || !mc3d) return;
     const dx = e.clientX - p[0], dy = e.clientY - p[1];
     ptr.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptr.size === 1) { mc3d.az += dx * .009; mc3d.pol = Math.max(.25, Math.min(1.4, mc3d.pol - dy * .006)); }
-    else if (ptr.size === 2) {
-      const [a, b] = [...ptr.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (pinch) mc3d.rad = Math.max(35, Math.min(140, mc3d.rad * pinch / d));
-      pinch = d;
+    if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 8) tap.moved = true;
+    const m = mc3d;
+    if (ptr.size === 1) {
+      if (drag) {
+        const h = ground(e.clientX, e.clientY), t = m.s.scene3d.tent;
+        if (h) {
+          const q = mcEd.draft[drag.c.id] || (mcEd.draft[drag.c.id] = { ...m.pos[drag.c.id], p: m.pos[drag.c.id].p.slice() });
+          q.p[0] = Math.round(Math.max(-t.len / 2, Math.min(t.len / 2, h[0] + drag.off[0])) * 10) / 10;
+          q.p[1] = Math.round(Math.max(-t.wid / 2, Math.min(t.wid / 2, h[1] + drag.off[1])) * 10) / 10;
+          mc3dCams(); mc3dEdPaint();
+        }
+      } else if (pan) panBy(dx, dy);
+      else { m.az += dx * .008; m.pol -= dy * .006; vel = [dx, dy]; velT = performance.now(); }
+    } else if (ptr.size >= 2 && g) {
+      const G = two();
+      m.rad *= g.d / G.d;
+      let da = G.ang - g.ang; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+      m.az -= da;
+      panBy(G.mx - g.mx, G.my - g.my);
+      g = G;
     }
     mc3dDraw();
   });
-  const up = e => { ptr.delete(e.pointerId); if (ptr.size < 2) pinch = 0; };
+  const up = e => {
+    if (!ptr.has(e.pointerId)) return;
+    ptr.delete(e.pointerId);
+    if (ptr.size === 1) { g = null; tap = null; vel = [0, 0]; return; }  // d'una pinça a un dit: no saltar
+    if (ptr.size) return;
+    const tnow = performance.now();
+    if (drag) { drag = null; return; }
+    if (tap && !tap.moved && tnow - tap.t < 280) {
+      if (tnow - lastTap < 350 && Math.hypot(tap.x - lastXY[0], tap.y - lastXY[1]) < 40) { lastTap = 0; mc3dGo(MC3D_HOME); }
+      else { lastTap = tnow; lastXY = [tap.x, tap.y]; }
+      return;
+    }
+    // Inèrcia en deixar anar un gir ràpid
+    if (!pan && tnow - velT < 60 && Math.hypot(vel[0], vel[1]) > 2) {
+      const spin = () => {
+        if (!mc3d) return;
+        vel = [vel[0] * .92, vel[1] * .92];
+        mc3d.az += vel[0] * .008; mc3d.pol -= vel[1] * .006; mc3dDraw();
+        inert = Math.hypot(vel[0], vel[1]) > .25 ? requestAnimationFrame(spin) : 0;
+      };
+      inert = requestAnimationFrame(spin);
+    }
+  };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-  cv.addEventListener('wheel', e => { e.preventDefault(); mc3d.rad = Math.max(35, Math.min(140, mc3d.rad * (1 + e.deltaY * .001))); mc3dDraw(); }, { passive: false });
+  cv.addEventListener('wheel', e => { e.preventDefault(); if (!mc3d) return; stopInert(); mc3d.rad *= Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0015)); mc3dDraw(); }, { passive: false });
 }
 addEventListener('resize', () => { if (TAB === 'multi') mc3dDraw(); });
+// --- Editor de posicions («Mover cámaras») ---
+function mc3dEdPaint() {
+  const box = document.querySelector('#multi .mced');
+  if (!box || !mc3d) return;
+  box.hidden = !mcEd;
+  const tb = document.querySelector('#multi [data-mc3d="edit"]'); if (tb) tb.hidden = !!mcEd;
+  if (!mcEd) return;
+  for (const b of box.querySelectorAll('[data-mcsel]')) {
+    const c = mc3d.byKey[b.dataset.mcsel];
+    b.setAttribute('aria-selected', !!(c && mcEd.sel === c.id));
+    b.classList.toggle('nopos', !(c && mc3d.pos && mc3d.pos[c.id]) && !(c && mcPosOf(c, mc3d.s.scene3d)));
+  }
+  const c = (mc3d.s.cams || []).find(x => x.id === mcEd.sel), q = c && mcPosOf(c, mc3d.s.scene3d);
+  for (const el of box.querySelectorAll('.mcedf')) el.hidden = !q;
+  box.querySelector('.mcedw').textContent = !c ? 'Toca una cámara en el 3D o elígela aquí.' : q ? `${c.pos || c.cam}: arrástrala por el suelo con el dedo.` : `${c.pos || c.cam} aún no tiene sitio. Toca «Colocar» y luego arrástrala.`;
+  box.querySelector('[data-mced="place"]').hidden = !c || !!q;
+  if (q) {
+    const set = (k, v, txt) => { const i = box.querySelector(`[data-mcr="${k}"]`); if (i !== document.activeElement) i.value = v; i.nextElementSibling.textContent = txt; };
+    set('z', q.p[2], q.p[2].toFixed(1).replace('.', ',') + ' m');
+    set('yaw', q.yaw || 0, (q.yaw || 0) + '°');
+    set('tilt', q.tilt || 0, (q.tilt || 0) + '°');
+  }
+  const n = Object.keys(mcEd.draft).length;
+  box.querySelector('[data-mced="save"]').disabled = !n;
+  box.querySelector('[data-mced="orig"]').hidden = !c || !(mcEd.draft[c.id] || (mcState[mcPosKey(c)] || {}).note);
+  box.querySelector('.mcedn').textContent = n ? `${n} sin guardar` : '';
+}
+function mc3dEdit(on) {
+  mcEd = on ? { sel: '', draft: {} } : null;
+  const w = document.querySelector('#multi .mcplan'); if (w) w.classList.toggle('mcediting', !!mcEd);
+  if (mc3d) { mc3dCams(); mc3dEdPaint(); mc3dDraw(); }
+}
+document.getElementById('multi').addEventListener('click', e => {
+  const t = e.target.closest('[data-mc3d], [data-mced], [data-mcsel]');
+  if (!t || !mc3d) return;
+  e.stopPropagation();
+  const a = t.dataset.mc3d, b = t.dataset.mced;
+  if (a === 'home') mc3dGo(MC3D_HOME);
+  else if (a === 'look') { mcLook = mc3dLook() === 'plano' ? 'noche' : 'plano'; try { localStorage.setItem(MC3D_LK, mcLook); } catch (er) {} mc3dAttach(); }
+  else if (a === 'edit') mc3dEdit(true);
+  else if (t.dataset.mcsel) { const c = mc3d.byKey[t.dataset.mcsel]; if (c) { mcEd.sel = c.id; mc3dCams(); mc3dEdPaint(); mc3dDraw(); } }
+  else if (b === 'place') {
+    const c = (mc3d.s.cams || []).find(x => x.id === mcEd.sel); if (!c) return;
+    const p = [Math.round(mc3d.tx * 10) / 10, Math.round(mc3d.tz * 10) / 10, 2];
+    mcEd.draft[c.id] = { p, ...mcAimAuto(p, mc3d.s.scene3d) };
+    mc3dCams(); mc3dEdPaint(); mc3dDraw();
+  }
+  else if (b === 'orig') {
+    const c = (mc3d.s.cams || []).find(x => x.id === mcEd.sel); if (!c) return;
+    delete mcEd.draft[c.id];
+    if ((mcState[mcPosKey(c)] || {}).note) mcSet(mcPosKey(c), { note: '' });
+    mc3dCams(); mc3dEdPaint(); mc3dDraw();
+  }
+  else if (b === 'save') {
+    for (const [id, q] of Object.entries(mcEd.draft)) {
+      const c = (mc3d.s.cams || []).find(x => x.id === id);
+      if (c) mcSet(mcPosKey(c), { note: [...q.p.map(v => Math.round(v * 10) / 10), Math.round(q.yaw || 0), Math.round(q.tilt || 0)].join(',') });
+    }
+    mc3dEdit(false);
+  }
+  else if (b === 'cancel') mc3dEdit(false);
+}, true);
+document.getElementById('multi').addEventListener('input', e => {
+  const k = e.target.dataset.mcr;
+  if (!k || !mcEd || !mc3d) return;
+  const c = (mc3d.s.cams || []).find(x => x.id === mcEd.sel), cur = c && mcPosOf(c, mc3d.s.scene3d);
+  if (!cur) return;
+  const q = mcEd.draft[c.id] || (mcEd.draft[c.id] = { ...cur, p: cur.p.slice() });
+  delete q.saved;
+  const v = +e.target.value;
+  if (k === 'z') q.p[2] = v; else q[k] = v;
+  mc3dCams(); mc3dEdPaint(); mc3dDraw();
+});
 const mcSq = cs => (cs || []).filter(Boolean).map(c => `<i style="--sc:${mcCol(c)}"></i>`).join('');
 const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
 const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
@@ -5848,7 +6334,18 @@ function mcRender() {
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
-      ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at ? `<button type="button" class="mcpin" data-mcid="${mcKey(c)}" style="left:${+c.at[0]}%;top:${+c.at[1]}%;--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? '<p class="note mchint">Arrastra para girarlo · pellizca para acercar · doble toque para volver.</p>' : ''}</li>` : ''}
+      ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
+        <div class="mctools"><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
+        <div class="mced" hidden>
+          <div class="edtabs mcsel" role="tablist" aria-label="Cámara">${(s.cams || []).map((c, i) => `<button type="button" role="tab" data-mcsel="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}"><i class="mcn">${i + 1}</i>${html(c.pos || c.cam)}</button>`).join('')}</div>
+          <p class="note mcedw"></p>
+          <button type="button" class="btn" data-mced="place" hidden>Colocar</button>
+          <label class="mcedf"><span>Altura</span><input type="range" data-mcr="z" min="0" max="14" step="0.1"><output></output></label>
+          <label class="mcedf"><span>Dirección</span><input type="range" data-mcr="yaw" min="-180" max="180" step="1"><output></output></label>
+          <label class="mcedf"><span>Inclinación</span><input type="range" data-mcr="tilt" min="-90" max="45" step="1"><output></output></label>
+          <div class="mcedb"><button type="button" class="btn primary" data-mced="save">Guardar</button><button type="button" class="btn" data-mced="cancel">Cancelar</button><span class="mcedn note"></span></div>
+          <button type="button" class="linkbtn" data-mced="orig" hidden>Volver a su sitio original</button>
+        </div>` : ''}</li>` : ''}
       ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
       ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
         <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
@@ -5891,6 +6388,7 @@ function mcPaint() {
     const st = MC.find(s => s.stage === el.dataset.mcstats), cams = st && st.cams || [], cnt = k => cams.filter(c => ((mcState[mcKey(c)] || {}).st || '') === k).length;
     el.innerHTML = [['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']].map(([k, l]) => `<span class="${k === 'grabando' && cnt(k) ? 'rec' : ''}"><b>${cnt(k)}</b>${l}</span>`).join('');
   }
+  if (mc3d && mc3d.wrap && document.body.contains(mc3d.wrap) && mc3dSig() !== mc3d.camSig) { mc3dCams(); mc3dEdPaint(); mc3dDraw(); }
   const msg = document.getElementById('mcMsg');
   msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
   msg.hidden = !msg.textContent;
@@ -6041,6 +6539,91 @@ pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
 let pullN = 0;
 setInterval(() => { if (!document.hidden && (tvOn || ++pullN % 3 === 0)) pullChanges(); }, 60000);
+
+// ==== Llisca per publicar (04-11-2026) ====
+// Els «Guardar y publicar» de l'editor es fan lliscant fins al final: un toc sense voler ja no publica (Pages: ~10 publicacions/hora).
+// El botó de veritat es queda amagat i és el que rep el clic: tota la lògica de publicar és la mateixa
+function slideFor(btn) {
+  const sl = document.createElement('div');
+  sl.className = 'slide';
+  sl.setAttribute('role', 'button'); sl.tabIndex = 0;
+  sl.setAttribute('aria-label', btn.textContent + ' (desliza hasta el final)');
+  sl.innerHTML = `<div class="sf"></div><div class="st">Desliza para publicar</div><div class="sk" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></div>`;
+  btn.before(sl); btn.hidden = true;
+  const k = sl.querySelector('.sk'), f = sl.querySelector('.sf'), txt = sl.querySelector('.st');
+  const sync = () => sl.setAttribute('aria-disabled', String(btn.disabled));
+  new MutationObserver(sync).observe(btn, { attributes: true, attributeFilter: ['disabled'] }); sync();
+  let x0 = null, x = 0, max = 0, busy = false;
+  const put = v => { x = v; k.style.transform = `translateX(${v}px)`; f.style.transform = `scaleX(${max ? (v + 46) / (max + 46) : 0})`; txt.style.opacity = String(Math.max(0, 1 - v / (max * .6 || 1))); };
+  const back = () => {
+    const from = x;
+    if (RM.matches || !k.animate) return put(0);
+    put(0);
+    k.animate([{ transform: `translateX(${from}px)` }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.3,1.35,.5,1)' });
+    f.animate([{ transform: `scaleX(${(from + 46) / (max + 46)})` }, { transform: 'scaleX(0)' }], { duration: 420, easing: EASE });
+  };
+  const fire = () => {
+    busy = true; put(max); sl.classList.add('ok'); txt.style.opacity = '1'; txt.textContent = 'Publicando…';
+    try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {}
+    btn.click();
+    setTimeout(() => { sl.classList.remove('ok'); txt.textContent = 'Desliza para publicar'; back(); busy = false; }, 1400);
+  };
+  sl.addEventListener('pointerdown', e => {
+    if (busy || btn.disabled) return;
+    max = sl.clientWidth - 49; x0 = e.clientX - x;
+    sl.setPointerCapture(e.pointerId);
+  });
+  sl.addEventListener('pointermove', e => { if (x0 !== null) put(Math.min(max, Math.max(0, e.clientX - x0))); });  // segueix el dit exactament
+  const up = () => {
+    if (x0 === null) return;
+    x0 = null;
+    if (x >= max * .85) fire();  // passat el 85 %, acaba sol
+    else if (x < 6) {  // un toc: petita empenta per ensenyar que s'ha de lliscar
+      if (!RM.matches && k.animate) k.animate([{ transform: 'none' }, { transform: 'translateX(26px)' }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.3,1.35,.5,1)' });
+      put(0);
+    } else back();
+  };
+  sl.addEventListener('pointerup', up); sl.addEventListener('pointercancel', up);
+  sl.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !busy && !btn.disabled) { e.preventDefault(); max = sl.clientWidth - 49; fire(); } });
+}
+for (const id of ['edSave', 'edSave2', 'teSave', 'tkSave']) { const b = document.getElementById(id); if (b) slideFor(b); }
+
+// ==== Estirar per actualitzar (04-11-2026) ====
+// A dalt de tot de la pàgina, estirar avall i deixar anar torna a llegir els canvis, les tasques (i les càmeres) a l'instant.
+// Listeners passius: no frena el scroll. No s'activa des de dins de la graella, el mapa, els fulls ni la càmera
+const ptr = document.getElementById('ptr');
+let pY = null, pX = 0, pD = 0, pBusy = false;
+const PTR_NO = '.tl-wrap, .tg-wrap, .mapbox, .sheet, .solar, .mc3dbox, canvas, .slide, .isl, input, textarea, select, [contenteditable]';
+const ptrPut = d => { ptr.style.transform = `translateY(${Math.min(d * .5, 84) - 70}px)`; ptr.style.opacity = String(Math.min(1, d / 90)); ptr.querySelector('svg').style.transform = `rotate(${d * 2}deg)`; };
+document.addEventListener('touchstart', e => {
+  if (pBusy || e.touches.length !== 1 || scrollY > 0 || document.body.style.overflow === 'hidden' || e.target.closest(PTR_NO)) { pY = null; return; }
+  pY = e.touches[0].clientY; pX = e.touches[0].clientX; pD = 0;
+}, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (pY === null) return;
+  const dy = e.touches[0].clientY - pY, dx = Math.abs(e.touches[0].clientX - pX);
+  if (dy <= 0 || dx > dy || scrollY > 0) { if (pD) { pD = 0; ptrPut(0); } if (dy < -4 || dx > 12) pY = null; return; }
+  pD = dy;
+  ptr.style.transition = 'none';
+  ptrPut(dy);
+}, { passive: true });
+document.addEventListener('touchend', async () => {
+  if (pY === null) return;
+  pY = null;
+  ptr.style.transition = RM.matches ? '' : 'transform .35s cubic-bezier(.3,1.35,.5,1), opacity .25s';
+  if (pD * .5 < 64) { pD = 0; ptrPut(0); return; }
+  pBusy = true;
+  ptr.style.transform = 'translateY(14px)'; ptr.style.opacity = '1'; ptr.querySelector('svg').style.transform = '';
+  ptr.classList.add('go');
+  try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+  const t0 = Date.now();
+  await Promise.allSettled([pullChanges(), pullTasks(), typeof mcPull === 'function' && TAB === 'multi' ? mcPull() : null]);
+  tick(true);
+  await new Promise(r => setTimeout(r, Math.max(0, 600 - (Date.now() - t0))));  // que es vegi girar, encara que vagi molt de pressa
+  ptr.classList.remove('go');
+  ptr.style.transform = 'translateY(-70px)'; ptr.style.opacity = '0';
+  pD = 0; pBusy = false;
+}, { passive: true });
 </script>
 
 <script>
