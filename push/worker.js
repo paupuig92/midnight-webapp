@@ -76,7 +76,7 @@ const MAX_MC = 400;
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
@@ -271,6 +271,9 @@ export class Store {
     this.sql.exec(`CREATE TABLE IF NOT EXISTS rl (k TEXT PRIMARY KEY, n INTEGER NOT NULL, reset INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS done (who TEXT NOT NULL, id TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (who, id))`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mc (id TEXT PRIMARY KEY, st TEXT NOT NULL, ssd TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
+    // Multicámara: «since» = quan va canviar l'estat (per al «REC hace 1 h 52») i historial de canvis (els últims 500)
+    if (!this.sql.exec('PRAGMA table_info(mc)').toArray().some(c => c.name === 'since')) this.sql.exec('ALTER TABLE mc ADD COLUMN since INTEGER NOT NULL DEFAULT 0');
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS mclog (n INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL, st TEXT NOT NULL, ssd TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
     if (!cols.includes('yo')) this.sql.exec("ALTER TABLE subs ADD COLUMN yo TEXT NOT NULL DEFAULT ''");
@@ -282,6 +285,7 @@ export class Store {
       this.sql.exec('DELETE FROM subs');
       this.sql.exec('DELETE FROM done');
       this.sql.exec('DELETE FROM mc');
+      this.sql.exec('DELETE FROM mclog');
       this.sql.exec("DELETE FROM kv WHERE k <> 'imported'");
       this.put('fest', CARTEL.fest);
     }
@@ -367,20 +371,31 @@ export class Store {
       } else this.sql.exec('DELETE FROM done WHERE who = ? AND id = ?', who, b.id);
       return json({ ok: true });
     }
-    // Multicámara: una càmera (estat, SSD, nota, qui i quan). Tot buit = s'esborra
+    // Multicámara: una càmera (estat, SSD, nota, qui i quan). Només es canvien els camps que s'envien
+    // (així dos mòbils no es trepitgen: un posa REC i l'altre l'SSD, i queden tots dos). Tot buit = s'esborra
     if (url.pathname === '/mc') {
       if (!okMcId(b.id)) return json({ error: 'bad' }, 400);
-      const st = MC_ST.includes(b.st) ? b.st : '', ssd = mcText(b.ssd, 24), note = mcText(b.note, 140), who = mcText(b.who, 30);
+      const old = this.sql.exec('SELECT st, ssd, note, since FROM mc WHERE id = ?', b.id).toArray()[0] || { st: '', ssd: '', note: '', since: 0 };
+      const st = 'st' in b ? (MC_ST.includes(b.st) ? b.st : '') : old.st;
+      const ssd = 'ssd' in b ? mcText(b.ssd, 24) : old.ssd, note = 'note' in b ? mcText(b.note, 140) : old.note, who = mcText(b.who, 30), now = Date.now();
+      const since = st !== old.st ? now : old.since || 0;
+      if (!/-pos$/.test(b.id) && (st !== old.st || ssd !== old.ssd)) {
+        this.sql.exec('INSERT INTO mclog (id, st, ssd, who, at) VALUES (?, ?, ?, ?, ?)', b.id, st, ssd, who, now);
+        this.sql.exec('DELETE FROM mclog WHERE n <= (SELECT MAX(n) - 500 FROM mclog)');
+      }
       if (!st && !ssd && !note) { this.sql.exec('DELETE FROM mc WHERE id = ?', b.id); return json({ ok: true }); }
       if (!this.sql.exec('SELECT id FROM mc WHERE id = ?', b.id).toArray().length && this.sql.exec('SELECT COUNT(*) AS n FROM mc').one().n >= MAX_MC) return json({ error: 'full' }, 429);
-      this.sql.exec('INSERT INTO mc (id, st, ssd, note, who, at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET st = excluded.st, ssd = excluded.ssd, note = excluded.note, who = excluded.who, at = excluded.at',
-        b.id, st, ssd, note, who, Date.now());
-      return json({ ok: true });
+      this.sql.exec('INSERT INTO mc (id, st, ssd, note, who, at, since) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET st = excluded.st, ssd = excluded.ssd, note = excluded.note, who = excluded.who, at = excluded.at, since = excluded.since',
+        b.id, st, ssd, note, who, now, since);
+      return json({ ok: true, mc: { st, ssd, note, who, at: now, since } });
     }
     if (url.pathname === '/mcall') {
       const out = {};
-      for (const r of this.sql.exec('SELECT id, st, ssd, note, who, at FROM mc').toArray()) out[r.id] = { st: r.st, ssd: r.ssd, note: r.note, who: r.who, at: r.at };
+      for (const r of this.sql.exec('SELECT id, st, ssd, note, who, at, since FROM mc').toArray()) out[r.id] = { st: r.st, ssd: r.ssd, note: r.note, who: r.who, at: r.at, since: r.since };
       return json({ mc: out });
+    }
+    if (url.pathname === '/mclogall') {
+      return json({ log: this.sql.exec('SELECT id, st, ssd, who, at FROM mclog ORDER BY n DESC LIMIT 80').toArray() });
     }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
     if (url.pathname === '/doneall') {
@@ -479,6 +494,7 @@ export default {
         return json(r, errStatus(r), origin);
       }
       if (req.method === 'GET' && url.pathname === '/mc') { const r = await callStore(env, '/mcall', lim('mcall')); return json(r, errStatus(r), origin); }
+      if (req.method === 'GET' && url.pathname === '/mclog') { const r = await callStore(env, '/mclogall', lim('mclog')); return json(r, errStatus(r), origin); }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await body();

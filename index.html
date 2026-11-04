@@ -964,10 +964,22 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .upnext .cm { display: block; margin-top: 3px; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--ink); }
 #multi .upnext .acc { display: block; font: 500 var(--fs-xs)/1.3 var(--body); color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
 #multi .mcs { text-align: right; font: 600 11px/1.3 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
-#multi .mcs b { display: block; font-weight: 700; color: var(--ink); }
-#multi .mcs b::after { content: " ›"; color: var(--muted); }
-#multi li.it[data-st="grabando"] .mcs b { color: var(--now); }
-#multi li.it[data-st="grabando"] .mcs b::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: .05em; }
+#multi .mcs { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+#multi .mcnext { min-height: 34px; min-width: 76px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); font: 700 11px/1 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+#multi .mcnext::after { content: ""; }
+#multi li.it[data-st="montada"] .mcnext { border-color: var(--ink); }
+#multi li.it[data-st="grabando"] .mcnext { background: var(--now); border-color: var(--now); color: #fff; }
+#multi li.it[data-st="parada"] .mcnext { border-style: dashed; }
+#multi .mcs .rt { font-variant-numeric: tabular-nums; }
+#multi li.it[data-lim="warn"] .mcs .rt { color: #f5c518; font-weight: 800; }
+#multi li.it[data-lim="over"] .mcs .rt { color: var(--now); font-weight: 800; }
+#multi li.it[data-lim="over"] .mcs .rt::before { content: "⚠ "; }
+#multi li.mcsame { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+#multi li.mcsame[hidden] { display: none; }
+#multi li.mcsame .note { margin: 0; }
+#multi .mclog li { grid-template-columns: 4em minmax(0, 1fr) auto; gap: 10px; }
+#multi .mclog .who { color: var(--muted); font-size: var(--fs-xs); }
+#multi .mcplan.mcfold .mc3dbox, #multi .mcplan.mcfold .mchint, #multi .mcplan.mcfold .mced, #multi .mcfold .mctools .btn:not([data-mc3d="fold"]) { display: none; }
 #multi li.it[data-st="recogida"] { opacity: .55; }
 #multi .mcsum { color: var(--muted); }
 #multi .mcsum.rec { color: var(--now); }
@@ -1013,7 +1025,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .on3d[data-look="plano"] .mcpin { border-color: #f5f5f2; }
 #multi .mctools { display: none; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 #multi .on3d .mctools { display: flex; }
-#multi .mctools .btn, #multi .mced .btn { min-height: 38px; padding: 0 14px; font-size: var(--fs-s); }
+#multi .mctools .btn, #multi .mced .btn { min-height: 44px; padding: 0 14px; font-size: var(--fs-s); }
 #multi .mced { margin-top: 10px; padding: 12px 0 4px; border-top: 1px solid var(--rule); }
 #multi .mced .mcsel { margin: 0 0 8px; }
 #multi .mced .mcsel button { display: inline-flex; align-items: center; }
@@ -1555,6 +1567,10 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenario" hidden></div>
     <p class="note mcmsg" id="mcMsg" role="status" hidden></p>
     <div id="mcBody"></div>
+    <h2 class="mch2">Historial</h2>
+    <p class="note">Quién ha cambiado qué (estado y SSD), lo último arriba.</p>
+    <ul class="mcl mclog" id="mcLog"></ul>
+    <button type="button" class="btn" id="mcLogBtn">Ver historial</button>
     <h2 class="mch2">Material</h2>
     <p class="note">Todo sumado<span id="mcMatFor"></span>. Marca lo que ya está cargado (solo en este móvil).</p>
     <ul class="mcl" id="mcMat"></ul>
@@ -1800,6 +1816,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
     <h3><label for="mcNote">Nota</label></h3>
     <input type="text" id="mcNote" maxlength="140" placeholder="Batería, tarjeta, encuadre…" autocomplete="off" enterkeyhint="done">
     <p class="note mcby" id="mcSheetBy"></p>
+    <button type="button" class="linkbtn" id="mcSheetClr" hidden>Quitar estado (vuelve a «Sin montar»)</button>
   </div>
   <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
 </div>
@@ -2032,11 +2049,12 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 FEST.multicam = [
   { stage: 'Black Hangar', plan: 'img/carpa-3d.webp',
     cams: [
-      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
-      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
-      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
+      { uid: 'black-hangar-cabina', c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { uid: 'black-hangar-cabina-cenital', c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts de targeta/bateria (avís al 80 %; el de la DJI és provisional).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
@@ -5804,10 +5822,11 @@ const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Par
 const MC_CK = FEST.key + '-mc-carga-v1', MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
 const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
-// Un id per càmera: festival + escenari + posició (si es repeteix, amb número)
+// Un id per càmera: festival + `uid` fix de les dades (així canviar el nom de la posició no perd l'estat ni el lloc).
+// Sense `uid`: escenari + posició (si es repeteix, amb número)
 for (const s of MC) {
   const seen = {};
-  for (const c of s.cams || []) { let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
+  for (const c of s.cams || []) { if (c.uid) { c.id = (FEST.key + '-' + mcSlug(c.uid)).slice(0, 76); continue; } let id = (FEST.key + '-' + mcSlug(s.stage) + '-' + mcSlug(c.pos || c.cam)).slice(0, 76); seen[id] = (seen[id] || 0) + 1; c.id = seen[id] > 1 ? id + '-' + seen[id] : id; }
 }
 let mcState = {}, mcFilter = '', mcTimer = 0, mcErr = '', mcAt = 0;
 // Diversos dies: l'estat (grabando, SSD…) va per dia. Per defecte, el dia del festival d'avui (abans, el 1r; després, l'últim)
@@ -6038,7 +6057,7 @@ function mc3dCams() {
   const { T, camsG, P, s } = mc3d;
   for (const o of [...camsG.children]) { camsG.remove(o); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }
   const UP = new T.Vector3(0, 1, 0), tube = new T.CylinderGeometry(1, 1, 1, 6, 1, true);
-  mc3d.pos = {}; mc3d.recMats = [];
+  mc3d.pos = {};
   for (const c of s.cams || []) {
     const q = mcPosOf(c, s.scene3d);
     if (!q) continue;
@@ -6067,28 +6086,13 @@ function mc3dCams() {
     const fp = [];
     for (let i = 0; i < 4; i++) fp.push(top, cor[i], cor[(i + 1) % 4]);
     const fgm = new T.BufferGeometry().setFromPoints(fp);
-    const fm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .22 : rec ? .18 : .09, side: T.DoubleSide, depthWrite: false });
+    const fm = new T.MeshBasicMaterial({ color: col, transparent: true, opacity: sel ? .22 : rec ? .2 : .09, side: T.DoubleSide, depthWrite: false });
     camsG.add(new T.Mesh(fgm, fm));
-    if (rec) mc3d.recMats.push([fm, lm]);
   }
   mc3d.camSig = mc3dSig();
-  mc3dPulse();
 }
 const mc3dSig = () => mc3d ? JSON.stringify([(mc3d.s.cams || []).map(c => [mcPosOf(c, mc3d.s.scene3d), (mcState[mcKey(c)] || {}).st === 'grabando']), mcEd && mcEd.sel, mc3d.focus]) : '';
-// Les que graven: el con batega en vermell (20 fps, només amb la pestanya a la vista; quiet amb «Reducir movimiento»)
-function mc3dPulse() {
-  const m = mc3d;
-  if (!m || m.pulsing || !m.recMats.length || RM.matches) return;
-  m.pulsing = true;
-  const tick = () => {
-    if (!mc3d || mc3d !== m || !m.recMats.length) { m.pulsing = false; return; }
-    if (document.hidden || TAB !== 'multi') { setTimeout(tick, 1000); return; }
-    const k = .5 + .5 * Math.sin(performance.now() / 260);
-    for (const [fm, lm] of m.recMats) { fm.opacity = .1 + .28 * k; lm.opacity = .55 + .45 * k; }
-    mc3dDraw(); setTimeout(tick, 50);
-  };
-  tick();
-}
+// Les que graven: con vermell quiet al 3D (el que batega és el número, amb CSS: no gasta bateria redibuixant el 3D)
 // Toca una càmera: la vista hi vola i el seu con s'encén
 function mc3dFocus(c) {
   if (!mc3d || mcEd) return;
@@ -6166,6 +6170,9 @@ async function mc3dAttach() {
       ren.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
       mc3d = { T, ren, cam: new T.PerspectiveCamera(32, 1.5, .3, 900), ...MC3D_HOME, pts: [] };
       mc3dTouch(ren.domElement);
+      // iOS pot treure la targeta gràfica a l'app (a fons, poca memòria): es torna a muntar sola quan torna
+      ren.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); document.querySelector('#multi .on3d')?.classList.remove('on3d'); });
+      ren.domElement.addEventListener('webglcontextrestored', () => { try { mc3d.ren.dispose(); } catch (er) {} mc3d = null; if (TAB === 'multi') mc3dAttach(); });
     }
     if (mc3d.stage !== s.stage || mc3d.look !== look) {
       if (mc3d.scene) mc3d.scene.traverse(o => { o.geometry && o.geometry.dispose(); const mt = o.material; if (mt) { mt.map && mt.map.dispose(); mt.dispose(); } });
@@ -6181,7 +6188,7 @@ async function mc3dAttach() {
   wrap.classList.add('on3d'); wrap.dataset.look = look;
   wrap.classList.toggle('mcediting', !!mcEd);
   const lb = wrap.querySelector('[data-mc3d="look"]'); if (lb) lb.textContent = look === 'plano' ? 'Vista noche' : 'Vista plano';
-  mc3dCams(); mc3dEdPaint();
+  mc3dCams(); mc3dEdPaint(); mc3dFoldPaint();
   if (!mc3dShown && !RM.matches) mc3dReveal(); else mc3dDraw();
   mc3dShown = true;
 }
@@ -6351,6 +6358,32 @@ function mc3dEdPaint() {
   box.querySelector('[data-mced="orig"]').hidden = !c || !(mcEd.draft[c.id] || (mcState[mcPosKey(c)] || {}).note);
   box.querySelector('.mcedn').textContent = n ? `${n} sin guardar` : '';
 }
+// «Ocultar 3D»: durant el show, la llista de càmeres queda a dalt (es recorda en aquest mòbil)
+const MC_FOLD = FEST.key + '-mc-fold-v1';
+let mcFold = false;
+try { mcFold = !!localStorage.getItem(MC_FOLD); } catch (e) {}
+function mc3dFoldPaint() {
+  const w = document.querySelector('#multi .mcplan'); if (!w) return;
+  w.classList.toggle('mcfold', mcFold);
+  const b = w.querySelector('[data-mc3d="fold"]'); if (b) b.textContent = mcFold ? 'Ver 3D' : 'Ocultar 3D';
+  if (mcFold && mcEd) mc3dEdit(false);
+}
+// Historial: qui ha canviat què (els últims 80 canvis d'estat o SSD, del servidor)
+async function mcLog() {
+  const box = document.getElementById('mcLog'), btn = document.getElementById('mcLogBtn');
+  if (!mcLive()) { box.innerHTML = '<li class="note">Sin servidor no hay historial.</li>'; return; }
+  btn.disabled = true;
+  try {
+    const r = await fetchT(PUSH.url + '/mclog', { cache: 'no-store' }, 8000);
+    if (!r.ok) throw new Error(r.status);
+    const names = {};
+    for (const [, c] of mcAll()) { names[c.id] = c.pos || c.cam; for (let d = 0; d < NDAYS; d++) names[c.id + '-d' + (d + 1)] = (c.pos || c.cam) + (NDAYS > 1 ? ' · ' + (DAYS[d].name || `Día ${d + 1}`) : ''); }
+    const log = ((await r.json()).log || []).filter(x => names[x.id]);
+    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sin montar')}</b>${x.ssd ? ` <small>· SSD ${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Alguien')}</span></li>`).join('') : '<li class="note">Aún no hay cambios.</li>';
+    btn.textContent = 'Actualizar historial';
+  } catch (e) { box.innerHTML = '<li class="note">Sin conexión: no se ha podido cargar.</li>'; }
+  btn.disabled = false;
+}
 function mc3dEdit(on) {
   mcEd = on ? { sel: '', draft: {} } : null;
   const w = document.querySelector('#multi .mcplan'); if (w) w.classList.toggle('mcediting', !!mcEd);
@@ -6361,7 +6394,8 @@ document.getElementById('multi').addEventListener('click', e => {
   if (!t || !mc3d) return;
   e.stopPropagation();
   const a = t.dataset.mc3d, b = t.dataset.mced;
-  if (a === 'home') mc3dGo(MC3D_HOME);
+  if (a === 'fold') { mcFold = !mcFold; try { localStorage.setItem(MC_FOLD, mcFold ? '1' : ''); } catch (er) {} mc3dFoldPaint(); if (!mcFold) mc3dDraw(); }
+  else if (a === 'home') mc3dGo(MC3D_HOME);
   else if (a === 'look') { mcLook = mc3dLook() === 'plano' ? 'noche' : 'plano'; try { localStorage.setItem(MC3D_LK, mcLook); } catch (er) {} mc3dAttach(); }
   else if (a === 'edit') mc3dEdit(true);
   else if (t.dataset.mcsel) { const c = mc3d.byKey[t.dataset.mcsel]; if (c) { mcEd.sel = c.id; mc3dCams(); mc3dEdPaint(); mc3dDraw(); } }
@@ -6399,6 +6433,10 @@ document.getElementById('multi').addEventListener('input', e => {
 });
 const mcSq = cs => (cs || []).filter(Boolean).map(c => `<i style="--sc:${mcCol(c)}"></i>`).join('');
 const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
+// Toc a la pastilla de la fila: el següent estat lògic (Recogida només des de la fitxa)
+const MC_NEXT = { '': 'montada', montada: 'grabando', grabando: 'parada', parada: 'grabando', recogida: 'montada' };
+const mcByKey = {};
+const mcPrevSt = c => { if (NDAYS < 2 || mcDay < 1) return ''; const p = mcState[c.id + '-d' + mcDay] || {}; return p.st && p.st !== 'recogida' ? p : ''; };
 const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
 let mcOpen = null;
 function mcRender() {
@@ -6408,13 +6446,14 @@ function mcRender() {
   chips.hidden = MC.length < 2;
   chips.innerHTML = MC.length < 2 ? '' : [['', 'Todos'], ...MC.map(s => [s.stage, s.stage])].map(([v, t]) => `<button type="button" role="tab" data-mcfilt="${html(v)}" aria-selected="${v === mcFilter}">${html(t)}</button>`).join('');
   const list = MC.filter(s => !mcFilter || s.stage === mcFilter);
+  for (const [, c] of mcAll()) mcByKey[mcKey(c)] = c;
   document.getElementById('mcBody').innerHTML = list.map(s => {
     const zones = [];
     for (const r of s.rider || []) { let z = zones.find(x => x[0] === r.z); if (!z) zones.push(z = [r.z, []]); z[1].push(r); }
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
       ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Toca una cámara para ir a ella (otra vez: su ficha) · un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
-        <div class="mctools"><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
+        <div class="mctools"><button type="button" class="btn" data-mc3d="fold">Ocultar 3D</button><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
         <div class="mced" hidden>
           <div class="edtabs mcsel" role="tablist" aria-label="Cámara">${(s.cams || []).map((c, i) => `<button type="button" role="tab" data-mcsel="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}"><i class="mcn">${i + 1}</i>${html(c.pos || c.cam)}</button>`).join('')}</div>
           <p class="note mcedw"></p>
@@ -6428,8 +6467,9 @@ function mcRender() {
       ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
       ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
         <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
-        <span class="mcs"><b></b><span class="ssd"></span></span>
+        <span class="mcs"><button type="button" class="mcnext" data-mcnext="${mcKey(c)}"></button><span class="ssd"></span><span class="rt"></span></span>
       </li>`).join('')}
+      ${NDAYS > 1 && mcDay > 0 && (s.cams || []).length ? `<li class="mcsame" data-mcsame="${html(s.stage)}" hidden><button type="button" class="btn">Igual que el ${html(DAYS[mcDay - 1].name || 'día anterior')}</button><span class="note">Las que seguían montadas pasan a «Montada», con su SSD.</span></li>` : ''}
     </ul>
     ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario.</p>'}
     ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
@@ -6453,8 +6493,15 @@ function mcPaint() {
   for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
     const s = mcState[el.dataset.mcid] || {};
     el.dataset.st = s.st || '';
-    el.querySelector('.mcs b').textContent = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    const nx = el.querySelector('.mcnext'), lab = s.st === 'grabando' ? 'REC' : mcStName(s.st) || 'Sin montar';
+    nx.textContent = lab; nx.setAttribute('aria-label', `${lab}. Tocar: ${mcStName(MC_NEXT[s.st || '']) || 'REC'}`);
     el.querySelector('.mcs .ssd').textContent = s.ssd || '';
+    // Temps en l'estat: «REC 1 h 52» (amb límit de targeta/bateria a les dades: groc al 80 %, vermell en passar-lo)
+    const c = mcByKey[el.dataset.mcid], rt = el.querySelector('.mcs .rt'), since = s.since || 0;
+    const min = since && (s.st === 'grabando' || s.st === 'parada') ? Math.max(0, Math.floor((Date.now() - since) / 60000)) : -1;
+    rt.textContent = min < 0 ? '' : (s.st === 'grabando' ? 'REC ' : 'parada ') + (min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`);
+    const lim = c && +c.lim, frac = s.st === 'grabando' && lim && min >= 0 ? min / lim : 0;
+    el.dataset.lim = frac >= 1 ? 'over' : frac >= .8 ? 'warn' : '';
   }
   for (const h of document.querySelectorAll('[data-mcsum]')) {
     const st = MC.find(s => s.stage === h.dataset.mcsum), cams = st && st.cams || [], n = cams.length;
@@ -6467,15 +6514,21 @@ function mcPaint() {
     const st = MC.find(s => s.stage === el.dataset.mcstats), cams = st && st.cams || [], cnt = k => cams.filter(c => ((mcState[mcKey(c)] || {}).st || '') === k).length;
     el.innerHTML = [['grabando', 'REC'], ['montada', 'Montadas'], ['parada', 'Paradas'], ['', 'Sin montar']].map(([k, l]) => `<span class="${k === 'grabando' && cnt(k) ? 'rec' : ''}"><b>${cnt(k)}</b>${l}</span>`).join('');
   }
+  for (const el of document.querySelectorAll('[data-mcsame]')) {
+    const st = MC.find(s => s.stage === el.dataset.mcsame), cams = st && st.cams || [];
+    el.hidden = !(cams.some(c => mcPrevSt(c)) && !cams.some(c => (mcState[mcKey(c)] || {}).st));
+  }
   if (mc3d && mc3d.wrap && document.body.contains(mc3d.wrap) && mc3dSig() !== mc3d.camSig) { mc3dCams(); mc3dEdPaint(); mc3dDraw(); }
   const msg = document.getElementById('mcMsg');
-  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : mcErr;
+  const nOut = Object.keys(mcOut).length;
+  msg.textContent = !mcLive() ? 'Sin servidor: lo que marques solo se ve en este móvil.' : nOut ? `${nOut} ${nOut === 1 ? 'cambio' : 'cambios'} sin enviar: se enviarán solos cuando haya conexión.` : mcErr;
   msg.hidden = !msg.textContent;
   if (mcOpen) {
     const s = mcState[mcOpen] || {};
     for (const b of document.querySelectorAll('#mcSheetSt [data-mcst]')) b.setAttribute('aria-pressed', b.dataset.mcst === s.st);
     for (const [i, f] of [['mcSsd', 'ssd'], ['mcNote', 'note']]) { const el = document.getElementById(i); if (el !== document.activeElement) el.value = s[f] || ''; }
-    document.getElementById('mcSheetBy').textContent = s.at ? 'Último cambio: ' + mcAgo(s) : '';
+    document.getElementById('mcSheetBy').textContent = (s.at ? 'Último cambio: ' + mcAgo(s) : '') + (mcWho() ? '' : (s.at ? ' · ' : '') + 'Elige «Soy…» en Ajustes para que se vea tu nombre.');
+    document.getElementById('mcSheetClr').hidden = !s.st;
   }
 }
 // Fitxa d'una càmera (a sobre de tot, com «Mis artistas»)
@@ -6497,7 +6550,10 @@ function mcOpenSheet(id) {
 function mcSaveFields() {
   if (!mcOpen) return;
   const s = mcState[mcOpen] || {}, ssd = document.getElementById('mcSsd').value.trim(), note = document.getElementById('mcNote').value.trim();
-  if (ssd !== (s.ssd || '') || note !== (s.note || '')) mcSet(mcOpen, { ssd, note });
+  const p = {};
+  if (ssd !== (s.ssd || '')) p.ssd = ssd;
+  if (note !== (s.note || '')) p.note = note;
+  if (Object.keys(p).length) mcSet(mcOpen, p);
 }
 function mcCloseSheet() {
   const id = mcOpen;
@@ -6513,36 +6569,67 @@ document.getElementById('mcDone2').addEventListener('click', mcCloseSheet);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !mcSheet.hidden) mcCloseSheet(); });
 mcSheet.addEventListener('click', e => {
   const b = e.target.closest('[data-mcst]');
-  if (b && mcOpen) { const cur = (mcState[mcOpen] || {}).st; mcSet(mcOpen, { st: cur === b.dataset.mcst ? '' : b.dataset.mcst }); }
+  if (b && mcOpen) { if ((mcState[mcOpen] || {}).st !== b.dataset.mcst) mcSet(mcOpen, { st: b.dataset.mcst }); return; }  // tornar a tocar el mateix no l'esborra
+  if (e.target.id === 'mcSheetClr' && mcOpen) mcSet(mcOpen, { st: '' });
 });
 mcSheet.addEventListener('change', e => { if (e.target.matches('input')) mcSaveFields(); });
+// Es desa també mentre s'escriu (0,6 s quiet) i si el mòbil es bloqueja o l'app va a fons
+let mcType = 0;
+mcSheet.addEventListener('input', e => { if (e.target.matches('input')) { clearTimeout(mcType); mcType = setTimeout(mcSaveFields, 600); } });
+addEventListener('pagehide', () => mcSaveFields());
+document.addEventListener('visibilitychange', () => { if (document.hidden) mcSaveFields(); else mcFlush(); });
+addEventListener('online', () => mcFlush());
 mcSheet.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
 function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
+// Canvis que encara no han arribat al servidor (sense cobertura): es guarden al mòbil i es tornen a enviar sols
+// (cada 15 s amb la pestanya oberta, en tornar la connexió i en tornar a l'app). Mentrestant es veu el valor d'aquest mòbil.
+const MC_OB = FEST.key + '-mc-out-v1';
+let mcOut = {}, mcTouched = {}, mcFlushing = null;
+try { mcOut = JSON.parse(localStorage.getItem(MC_OB) || '{}') || {}; } catch (e) {}
+const mcSaveOut = () => { try { localStorage.setItem(MC_OB, JSON.stringify(mcOut)); } catch (e) {} };
+const mcWho = () => (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
+function mcFlush() {
+  if (!mcLive() || mcFlushing || !Object.keys(mcOut).length) return mcFlushing || Promise.resolve();
+  mcFlushing = (async () => {
+    for (const id of Object.keys(mcOut)) {
+      const patch = mcOut[id];
+      try {
+        const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, ...patch }) }, 8000);
+        if (!r.ok && r.status !== 400) throw new Error(r.status);
+        const j = await r.json().catch(() => ({}));
+        if (mcOut[id] === patch) { delete mcOut[id]; if (j.mc && mcState[id]) mcState[id] = { ...mcState[id], ...j.mc }; }
+        mcErr = '';
+      } catch (e) { mcErr = 'Sin conexión: los cambios se enviarán solos.'; break; }
+    }
+    mcSaveOut(); mcSaveLocal(); mcFlushing = null; mcPaint();
+  })();
+  return mcFlushing;
+}
 async function mcPull() {
   if (!mcLive()) return;
+  await mcFlush();
+  const t0 = Date.now();
   try {
     const r = await fetchT(PUSH.url + '/mc', { cache: 'no-store' }, 8000);
     if (!r.ok) throw new Error(r.status);
     const j = await r.json();
-    // El que s'acaba de canviar en aquest mòbil i encara no ha arribat al servidor es manté
-    const keep = Object.fromEntries(Object.entries(mcState).filter(([, s]) => s.pending));
+    // Es manté el que aquest mòbil encara no ha enviat i el que s'ha tocat mentre arribava la resposta
+    const keep = Object.fromEntries(Object.entries(mcState).filter(([id]) => mcOut[id] || (mcTouched[id] || 0) >= t0));
     mcState = { ...(j.mc || {}), ...keep };
-    mcErr = ''; mcAt = Date.now(); mcSaveLocal();
+    if (!Object.keys(mcOut).length) mcErr = '';
+    mcAt = Date.now(); mcSaveLocal();
   } catch (e) { mcErr = 'Sin conexión: puede que no sea lo último.'; }
   mcPaint();
 }
-async function mcSet(id, patch) {
-  const who = (typeof person === 'function' && YO && YO !== '-' && person(YO)) ? person(YO).n : '';
-  const s = { ...(mcState[id] || {}), ...patch, who, at: Date.now(), pending: true };
-  mcState[id] = s; mcSaveLocal(); mcPaint();
-  if (!mcLive()) { delete s.pending; mcSaveLocal(); return; }
-  try {
-    const r = await fetchT(PUSH.url + '/mc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, st: s.st || '', ssd: s.ssd || '', note: s.note || '', who }) }, 8000);
-    if (!r.ok) throw new Error(r.status);
-    if (mcState[id] === s) delete s.pending;
-    mcErr = '';
-  } catch (e) { mcErr = 'No se ha podido guardar. Revisa la conexión y vuelve a tocar.'; if (mcState[id] === s) delete s.pending; }
-  mcSaveLocal(); mcPaint();
+// Només s'envien els camps que canvien (així dos mòbils que toquen la mateixa càmera no es trepitgen)
+function mcSet(id, patch) {
+  const who = mcWho(), now = Date.now(), cur = mcState[id] || {};
+  const s = { ...cur, ...patch, who, at: now };
+  if ('st' in patch && patch.st !== cur.st) s.since = now;
+  mcState[id] = s; mcTouched[id] = now; mcSaveLocal();
+  if (mcLive()) { mcOut[id] = { ...(mcOut[id] || {}), ...patch, who }; mcSaveOut(); }
+  mcPaint();
+  return mcFlush();
 }
 function mcShow(on) {
   clearInterval(mcTimer); mcTimer = 0;
@@ -6555,6 +6642,20 @@ function mcShow(on) {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && TAB === 'multi') mcPull(); });
 document.getElementById('multi').addEventListener('click', e => {
+  const nx = e.target.closest('[data-mcnext]');
+  if (nx) {
+    const id = nx.dataset.mcnext, c = mcByKey[id], prev = (mcState[id] || {}).st || '', next = MC_NEXT[prev];
+    mcSet(id, { st: next });
+    toast(`<b>${html(c ? c.pos || c.cam : '')}</b>: ${next === 'grabando' ? 'REC' : mcStName(next)}`, 'info', { label: 'Deshacer', fn: () => mcSet(id, { st: prev }) }, 4000);
+    return;
+  }
+  const sm = e.target.closest('[data-mcsame] button');
+  if (sm) {
+    const st = MC.find(s => s.stage === sm.parentNode.dataset.mcsame);
+    for (const c of st ? st.cams || [] : []) { const p = mcPrevSt(c); if (p && !(mcState[mcKey(c)] || {}).st) mcSet(mcKey(c), { st: 'montada', ...(p.ssd ? { ssd: p.ssd } : {}) }); }
+    return;
+  }
+  if (e.target.id === 'mcLogBtn') { mcLog(); return; }
   const dy = e.target.closest('[data-mcday]');
   if (dy) { mcDay = +dy.dataset.mcday; mcDayPicked = true; mcRender(); return; }
   const f = e.target.closest('[data-mcfilt]');
