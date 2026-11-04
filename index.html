@@ -1933,8 +1933,7 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .wrap > section:not(.admin):not(.tools) { padding-top: 20px;
   background: var(--plus) 0 0 no-repeat, var(--plus) 100% 0 no-repeat, linear-gradient(var(--hair), var(--hair)) 0 5px / 100% 1px no-repeat; }
 .wrap > section h2 { letter-spacing: -.005em; }
-.wrap > section h2::after { content: " ↓"; font: 300 .72em/1 var(--mono); color: var(--muted); letter-spacing: 0; vertical-align: .08em; }
-.wrap > section .shead h2::after, #horario > h2::after { white-space: nowrap; }
+/* (04-11, UI) sense fletxa «↓» als títols ni creus «+» (semblava massa plantilla). Les creus: regla «--plus: none» al final */
 /* etiquetes petites en mono, com «11:00 A 23:00 H» del cartell */
 .brandline { font-family: var(--mono); font-weight: 500; font-size: 10px; letter-spacing: .06em; }
 .brandline b { font-weight: 700; }
@@ -1944,7 +1943,6 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .sn, .mascot .mk, .upnext li.grp, .upnext .where, .blk .t, .legend { font-family: var(--mono); }
 .row .sn { font-size: 10px; font-weight: 500; letter-spacing: .06em; }
 .mascot .mk { font-size: 10px; font-weight: 500; letter-spacing: .08em; color: var(--ink); }
-.mascot .mk::after { content: " ↓"; color: var(--muted); }
 .upnext li.grp b { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .upnext li.grp span { color: var(--muted); font-size: 11px; }
 /* «Ahora suena»: targeta quadrada amb vora blanca fina, creus i una mica de llum des de dalt (el feix del cartell) */
@@ -1994,6 +1992,8 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
+/* (04-11, UI) sense creus «+»: els fons que les fan servir queden buits. Per tornar-les, treure aquesta regla */
+:root:root, html:root[data-theme] { --plus: none; --plus-dim: none; --plus-w: none; }
 `;
 // Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
 // el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
@@ -2249,6 +2249,8 @@ const lblD = t => {
   const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
   return `${x && x.name ? x.name.split(' ')[0] : new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(t).replace(/^./, c => c.toUpperCase())} ${lbl(t)}`;
 };
+// «a las 11:00» o, si és un altre dia de calendari que «ref» (festivals de diversos dies), «el domingo a las 11:00»
+const lblW = (a, ref) => NDAYS > 1 && fmtD.format(a) !== fmtD.format(ref) ? `el ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'long' }).format(a)} a las ${lbl(a)}` : `a las ${lbl(a)}`;
 const html = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const esc = html;
 // El CSS ja posa les majúscules (així VoiceOver no llegeix els noms com a sigles)
@@ -2631,12 +2633,12 @@ function rowHTML(s, t) {
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
-      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Después: cierra el escenario'}</div></div>
+      <div class="after">${nxt ? `Después: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">${lblW(nxt.a, t)}</span>` : 'Después: cierra el escenario'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
-      <div class="dj">Abre a las ${lbl(nxt.a)}</div>
+      <div class="dj">Abre ${lblW(nxt.a, t)}</div>
       <div class="after">Primero: ${imp(nxt.t)}<b>${deco(nxt.n)}</b></div></div>
     ${document.getElementById('mascot').hidden ? `<div class="right"><div class="left"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>` : ''}`, null];  // amb la targeta «Quedan» a la vista, el compte enrere ja hi és
   return ['closed', '', null];
@@ -2651,7 +2653,7 @@ function rowMine(s, t) {
   if (cur) return ['live', `${logo}
     <div class="mid"><div class="sn">${s.name}</div>
       <div class="dj${impc(cur.t)}">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>${fxTags(cur)}${chgTag(cur)}
-      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">a las ${lbl(nxt.a)}</span>` : 'Es tu último aquí'}</div></div>
+      <div class="after">${nxt ? `Tu siguiente aquí: ${imp(nxt.t)}<b>${deco(nxt.n)}</b>&nbsp;<span class="when">${lblW(nxt.a, t)}</span>` : 'Es tu último aquí'}</div></div>
     <div class="right"><div class="left"><span>quedan</span><b>${dur(cur.b - t)}</b></div>${star(cur)}</div>
     <div class="bar"><div></div></div>`, cur];
   if (nxt) return ['idle mine', `${logo}
@@ -2710,7 +2712,7 @@ function upHTML(t) {
   }
   let out = '', last = null;
   for (const x of list.slice(0, 6)) {
-    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b>${x.a - t < 1440 * MIN ? `<span>${inDur(x.a - t)}</span>` : ''}</li>`; last = x.a; }
+    if (x.a !== last) { out += `<li class="grp"><b>${NDAYS > 1 && dayAt(x.a) !== dayAt(t) ? lblD(x.a) : lbl(x.a)}</b>${x.a - t < 180 * MIN ? `<span>${inDur(x.a - t)}</span>` : ''}</li>`; last = x.a; }
     out += `<li class="it${favs.has(x.id) ? ' fav' : ''}" style="--sc:${x.s.color}">
     <img class="logo stlogo" src="img/${x.s.id}.png" alt="">
     <div class="who"><span class="nmc${impc(x.t)}">${imp(x.t)}${deco(x.n)}</span><span class="where">${x.s.name}</span>${fxTags(x)}${chgTag(x)}</div>
@@ -3017,8 +3019,7 @@ function tick(force) {
   if (!ms.hidden) {
     const pct = Math.min(100, Math.max(0, (t - T0) / (TEND - T0) * 100));
     const mh = during
-      ? `<span class="mk">Quedan</span><span class="mbig">${dur(dEnd - t)} <small>${dEnd < TEND ? 'hoy' : 'de festival'}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
-        + `<span class="msub">Hasta las ${lbl(dEnd)}</span>`
+      ? `<span class="mk">${dEnd < TEND ? 'Fin del día' : 'Fin del festival'}</span><span class="mbig">${lbl(dEnd)} <small>en ${dur(dEnd - t)}</small></span><span class="mprog" role="img" aria-label="${Math.round(pct)} %"><i style="width:${pct.toFixed(1)}%"></i></span>`
       : gap >= 0
       ? `<span class="mk">Quedan</span><span class="mbig">${dur(DAYS[gap].t0 - t)}</span><span class="msub">Vuelve a abrir a las ${lbl(DAYS[gap].t0)}${DAYS[gap].name ? ` · ${html(DAYS[gap].name)}` : ''}</span>`
       : t < T0
@@ -3441,9 +3442,9 @@ function tvRender(t) {
     const list = SETS[s.id], cur = list.find(x => t >= x.a && t < x.b), nxt = list.find(x => x.a >= (cur ? cur.b : t));
     const head = `${bandImg(cur, 'tlogo') || `<img src="img/${s.id}.png" alt="">`}<div style="min-width:0"><div class="tsn">${html(s.name)}</div>`;
     if (cur) return `<div class="tvcard live"${stc(s)}>${head}<div class="tdj">${imp(cur.t)}${deco(cur.n)}${cur.sub ? ` <span class="sub">${html(cur.sub)}</span>` : ''}</div>
-      ${fxTags(cur)}<div class="taf">${nxt ? `Después: <b>${deco(nxt.n)}</b> a las ${lbl(nxt.a)}` : 'Después: cierra el escenario'}</div></div>
+      ${fxTags(cur)}<div class="taf">${nxt ? `Después: <b>${deco(nxt.n)}</b> ${lblW(nxt.a, t)}` : 'Después: cierra el escenario'}</div></div>
       <div class="tleft"><span>quedan</span><b>${dur(cur.b - t)}</b></div><div class="tbar"><i style="width:${((t - cur.a) / (cur.b - cur.a) * 100).toFixed(1)}%"></i></div></div>`;
-    if (nxt) return `<div class="tvcard idle"${stc(s)}>${head}<div class="tdj">Abre a las ${lbl(nxt.a)}</div><div class="taf">Primero: <b>${deco(nxt.n)}</b></div></div>
+    if (nxt) return `<div class="tvcard idle"${stc(s)}>${head}<div class="tdj">Abre ${lblW(nxt.a, t)}</div><div class="taf">Primero: <b>${deco(nxt.n)}</b></div></div>
       <div class="tleft"><span>abre en</span><b>${dur(nxt.a - t)}</b></div></div>`;
     return `<div class="tvcard closed"${stc(s)}>${head}<div class="tdj">Cerrado</div></div></div>`;
   }).join('');
@@ -5742,7 +5743,7 @@ function holaPaint() {
   if (k === holaKey) return;
   holaKey = k;
   if (!ppl.length) {
-    if (!taskOn()) return holaTeams('¿De qué equipo eres?', 'Aún no hay equipo cargado. Cuando lo carguen, aquí podrás elegir tu nombre.');
+    if (!taskOn()) return holaTeams('¿De qué equipo eres?', 'Elígelo y, cuando la organización publique las tareas, aquí podrás elegir tu nombre.');
     document.getElementById('holaT').textContent = 'Aún no hay tareas';
     document.getElementById('holaSub').textContent = navigator.onLine ? 'Cuando la organización las publique, saldrán aquí.' : 'Sin conexión: se cargarán al volver la red.';
     holaBody.innerHTML = '';
