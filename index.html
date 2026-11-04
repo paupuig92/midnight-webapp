@@ -2037,16 +2037,16 @@ FEST.multicam = [
       { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
-    // Mides del stage plot (vista de dalt): carpa 64×32 m. Cada càmera: at3d: [x, y, z]
+    // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
-      tent: { len: 64, wid: 32, h: 14, wall: 4 },
-      stage: { x0: -26, x1: -16, wid: 21.6, h: 1.4 },
-      screen: { x: -24.5, wid: 19, h: 8.5 },
+      tent: { len: 64, wid: 32, h: 13 },
+      stage: { x0: -26, x1: -16, wid: 22, h: 1.6 },
+      screen: { x: -24.5, wid: 15.3, z0: 2.7, h: 5.7 },
       booth: { x: -18.6, l: 3.4, w: 1.3, h: 1.1 },
-      barrier: { x: -13.8, wid: 28 },
-      triangles: [[-15.8, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8.1, 'ambar'], [16.1, 'ambar']],
+      barrier: { x: -13.8, wid: 28.8 },
+      triangles: [[-16, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8, 'ambar'], [16, 'ambar']],
       platform: { x: 0, s: 3.5, h: 0.7 },
-      foh: { x0: 26.4, x1: 31, wid: 8 },
+      foh: { x0: 27.5, x1: 31.5, wid: 7.4 },
     },
     rider: [] },
 ];
@@ -5807,7 +5807,7 @@ function mc3dLoad() {
 }
 // Color CSS (també var(--…)) → color que entén three.js
 function mcCss(c) {
-  const el = document.createElement('i'); el.style.color = c; document.body.appendChild(el);
+  const el = document.createElement('i'), host = document.getElementById('multi') || document.body; el.style.color = c; host.appendChild(el);
   const v = getComputedStyle(el).color; el.remove(); return v || '#888';
 }
 // Posició d'una càmera: la que s'està movent (sense desar) > la desada per l'equip > la del festival
@@ -5879,18 +5879,16 @@ function mc3dBuild(T, sc, pal) {
     bars(segs, pal.glow ? .12 : .09, color);
     if (pal.glow) bars(segs, .5, color, { transparent: true, opacity: .15, blending: T.AdditiveBlending, depthWrite: false });
   };
-  // Carpa: contorn d'estadi (rectangle amb dos semicercles), paret recta i coberta per facetes (com al plànol)
+  // Carpa: contorn d'estadi (rectangle + dos semicercles). Perfil de cúpula tret de la vista frontal del plànol:
+  // [fracció de l'amplada, alçada en fracció de t.h]. Paret baixa (~3 m) i coberta que puja per facetes fins al carener.
   const t = sc.tent, L = t.len, W = t.wid, R = W / 2, half = L / 2 - R;
-  const NP = 72, prof = [[1, 0], [1, t.wall], [.96, t.wall + 3], [.84, t.wall + 6], [.64, t.h - 2], [.34, t.h - .5], [0, t.h]];
-  const outline = [], per = 2 * (2 * half) + 2 * Math.PI * R;
-  for (let i = 0; i < NP; i++) {
-    let s = i / NP * per, x, y;
-    if (s < 2 * half) { x = -half + s; y = -R; }
-    else if ((s -= 2 * half) < Math.PI * R) { const a = -Math.PI / 2 + s / R; x = half + R * Math.cos(a); y = R * Math.sin(a); }
-    else if ((s -= Math.PI * R) < 2 * half) { x = half - s; y = R; }
-    else { s -= 2 * half; const a = Math.PI / 2 + s / R; x = -half + R * Math.cos(a); y = R * Math.sin(a); }
-    outline.push([x, y, Math.max(-half, Math.min(half, x))]);
-  }
+  const prof = (t.prof || [[1, 0], [.95, .25], [.88, .38], [.81, .52], [.72, .65], [.61, .74], [.5, .82], [.36, .92], [0, 1]]).map(([r, z]) => [r, z * t.h]);
+  // Costelles: cada 4 m als costats rectes i cada 15° als extrems (com al plànol). [x, y, centre]
+  const outline = [], rib = t.rib || 4, capN = 12;
+  const side = (y, x0, x1) => { const n = Math.max(1, Math.round(Math.abs(x1 - x0) / rib)); for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * i / n; outline.push([x, y, x]); } };
+  const cap = (cx, a0) => { for (let i = 0; i < capN; i++) { const a = a0 + Math.PI * i / capN; outline.push([cx + R * Math.cos(a), R * Math.sin(a), cx]); } };
+  side(-R, -half, half); cap(half, -Math.PI / 2); side(R, half, -half); cap(-half, Math.PI / 2);
+  const NP = outline.length;
   // Terra: la forma de la carpa, amb la llum de l'escenari escampada i una graella de 4 m
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
   const g = cv.getContext('2d'), gr = g.createRadialGradient(40, 128, 8, 40, 128, 470);
@@ -5899,22 +5897,24 @@ function mc3dBuild(T, sc, pal) {
   g.strokeStyle = pal.grid; g.lineWidth = 1;
   for (let m = 0; m <= L; m += 4) { const x = Math.round(m / L * 512) + .5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
   for (let m = 0; m <= W; m += 4) { const y = Math.round(m / W * 256) + .5; g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke(); }
-  const shp = new T.Shape(outline.map(([x, y]) => new T.Vector2(x, -y)));
+  const fine = [];
+  for (let i = 0; i < 96; i++) { const a = i / 96 * 2 * Math.PI, cx = Math.cos(a) >= 0 ? half : -half; fine.push(new T.Vector2(cx + R * Math.cos(a), -R * Math.sin(a))); }
+  const shp = new T.Shape(fine);
   const fg = new T.ShapeGeometry(shp, 1), uv = fg.attributes.uv, pos = fg.attributes.position;
   for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + L / 2) / L, (pos.getY(i) + R) / W);
   const ftx = new T.CanvasTexture(cv); ftx.colorSpace = T.SRGBColorSpace; ftx.anisotropy = 4;
   const floor = new T.Mesh(fg, new T.MeshBasicMaterial({ map: ftx }));
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
-  const at = (i, k) => { const [x, y, cx] = outline[i % NP], [r, z] = prof[k]; return P(cx + (x - cx) * r, y * r, z); };
-  const tent = [];
-  for (let i = 0; i < NP; i++) for (let k = 0; k < prof.length - 1; k++) {
-    if (i % 2 === 0 || k < 1) tent.push([at(i, k), at(i, k + 1)]);    // costelles (i pals de la paret)
-    if (k > 0) tent.push([at(i, k), at(i + 1, k)]);                    // anelles
+  const at = (i, k) => { const [x, y, cx] = outline[(i + NP) % NP], [r, z] = prof[k]; return P(cx + (x - cx) * r, y * r, z); };
+  const tent = [], K = prof.length - 1;
+  for (let i = 0; i < NP; i++) for (let k = 0; k < K; k++) {
+    tent.push([at(i, k), at(i, k + 1)]);                       // costelles fins al carener
+    if (k < K) tent.push([at(i, k), at(i + 1, k)]);            // anelles (la de terra inclosa)
   }
-  for (let i = 0; i < NP; i++) tent.push([at(i, 0), at(i + 1, 0)]);    // base
-  bars(tent, .06, pal.tent);
+  tent.push([P(-half, 0, t.h), P(half, 0, t.h)]);              // carener
+  bars(tent, .055, pal.tent);
   // Escenari: tarima, bastida (gris) i pantalla LED amb la seva quadrícula
-  const st = sc.stage, s2 = st.wid / 2, sh = st.h, sw = sc.screen.wid / 2, sx = sc.screen.x, top3 = sh + sc.screen.h;
+  const st = sc.stage, s2 = st.wid / 2, sh = st.h, sw = sc.screen.wid / 2, sx = sc.screen.x, sz = sc.screen.z0 || sh, top3 = sz + sc.screen.h;
   box(st.x0, st.x1, -s2, s2, 0, sh, pal.stage);
   const scaf = [];
   for (let x = st.x0; x <= st.x1 + .01; x += 2.5) for (let y = -s2; y <= s2 + .01; y += 2.7) scaf.push([P(x, y, 0), P(x, y, sh)]);
@@ -5925,12 +5925,12 @@ function mc3dBuild(T, sc, pal) {
   for (let y = -sw; y <= sw + .01; y += 2) scaf.push([P(sx - 1.4, y, sh), P(sx - 1.4, y, top3 + .5)]);  // bastida de darrere la pantalla
   for (let z = sh; z <= top3 + .6; z += 2) scaf.push([P(sx - 1.4, -sw, z), P(sx - 1.4, sw, z)]);
   bars(scaf, .045, pal.scaf);
-  box(sx - .3, sx, -sw, sw, sh, top3, pal.screen, pal.glow ? {} : { transparent: true, opacity: .18 });
+  box(sx - .3, sx, -sw, sw, sz, top3, pal.screen, pal.glow ? {} : { transparent: true, opacity: .18 });
   const led = [];
-  for (let y = -sw; y <= sw + .01; y += sc.screen.wid / 8) led.push([P(sx + .02, y, sh), P(sx + .02, y, top3)]);
-  for (let z = sh; z <= top3 + .01; z += sc.screen.h / 5) led.push([P(sx + .02, -sw, z), P(sx + .02, sw, z)]);
+  for (let y = -sw; y <= sw + .01; y += sc.screen.wid / 8) led.push([P(sx + .02, y, sz), P(sx + .02, y, top3)]);
+  for (let z = sz; z <= top3 + .01; z += sc.screen.h / 5) led.push([P(sx + .02, -sw, z), P(sx + .02, sw, z)]);
   bars(led, .035, pal.glow ? '#b9c6ff' : pal.screen);
-  if (pal.glow) box(sx - .1, sx + .6, -sw - .8, sw + .8, sh - .5, top3 + .8, '#9fb4ff', { transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false });
+  if (pal.glow) box(sx - .1, sx + .6, -sw - .8, sw + .8, sz - .5, top3 + .8, '#9fb4ff', { transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false });
   const bo = sc.booth;
   box(bo.x - bo.w / 2, bo.x + bo.w / 2, -bo.l / 2, bo.l / 2, sh, sh + bo.h, pal.desk);
   // Tanques: la de davant de l'escenari i la U del FOH (negres i reixades, com al plànol)
@@ -5952,26 +5952,32 @@ function mc3dBuild(T, sc, pal) {
   box(pf.x - ps, pf.x + ps, -ps, ps, pf.h - .08, pf.h, pal.stage);
   bars(pfs, .05, pal.scaf);
   glow([[P(pf.x - ps + .3, -ps + .3, pf.h), P(pf.x - ps + .3, -ps + .3, pf.h + 1.6)], [P(pf.x + ps - .3, ps - .3, pf.h), P(pf.x + ps - .3, ps - .3, pf.h + 1.6)]], pal.dot2);
-  // Pòrtics (un per triangle): potes verdes als costats, bigues vermelles cap al mig, travesser de dalt
-  // i el triangle penjat (cap per avall) amb els focus. A dalt de tot, la biga central de punta a punta.
-  const legs = [], rafs = [], spine = [], drops = [], cyan = [], mag = [];
-  const legY = R - 1.4, legH = t.wall + 3.5, topZ = t.h - 1.8, tw = 3;
+  // Rigging (mides de la vista frontal i de dalt del plànol, escalables amb sc.rig):
+  // - a cada triangle, un truss vermell de travès a dalt i el triangle penjat (cap per avall) amb focus cian
+  // - entre triangles, als dos costats, truss verds en diagonal amb una pota que baixa, amb focus magenta
+  // - una biga central de punta a punta i un truss perimetral a l'alçada de la paret
+  const rg = { top: .87, half: 6.3, triTop: .7, triBot: .29, triHalf: 3.05, gOut: R - 4.2, gIn: 5.8, gLow: .52, gHigh: .79, gFoot: .23, ...(sc.rig || {}) };
+  const legs = [], rafs = [], spine = [], drops = [], cyan = [], mag = [], peri = [];
+  const zTop = rg.top * t.h;
   for (const [x, col] of sc.triangles) {
-    for (const sgn of [-1, 1]) {
-      const f = P(x, sgn * legY, 0), k = P(x, sgn * legY, legH), r = P(x, sgn * tw, topZ);
-      ladder(f, k, .45, legs); ladder(k, r, .45, rafs);
-      along(f.clone().setY(1.2), k, 1.6, mag); along(k, r, 1.6, mag);
-    }
-    ladder(P(x, -tw, topZ), P(x, tw, topZ), .45, rafs);
-    const s = 3.8, tz = topZ - 1.4, c = col === 'blanco' ? pal.triW : !col || col === 'ambar' ? pal.tri : col;
-    const A = P(x, -s, tz), B = P(x, s, tz), C = P(x, 0, tz - 2 * s * .866);
+    ladder(P(x, -rg.half, zTop), P(x, rg.half, zTop), .45, rafs);
+    const c = col === 'blanco' ? pal.triW : !col || col === 'ambar' ? pal.tri : col;
+    const A = P(x, -rg.triHalf, rg.triTop * t.h), B = P(x, rg.triHalf, rg.triTop * t.h), C = P(x, 0, rg.triBot * t.h);
     glow([[A, B], [B, C], [C, A]], c);
-    along(A, B, 1.25, cyan); along(B, C, 1.25, cyan); along(C, A, 1.25, cyan);
-    drops.push([P(x, -tw, topZ), A], [P(x, tw, topZ), B]);
+    along(A, B, 1.1, cyan); along(B, C, 1.1, cyan); along(C, A, 1.1, cyan);
+    drops.push([P(x, -rg.triHalf + .6, zTop), P(x, -rg.triHalf + .6, rg.triTop * t.h)], [P(x, rg.triHalf - .6, zTop), P(x, rg.triHalf - .6, rg.triTop * t.h)]);
   }
-  const xs = sc.triangles.map(q => q[0]);
-  if (xs.length) ladder(P(Math.min(...xs) - 4, 0, topZ + .5), P(Math.max(...xs) + 6, 0, topZ + .5), .45, spine);
-  bars(legs, .05, pal.leg); bars(rafs, .05, pal.raf); bars(spine, .05, pal.spine); bars(drops, .03, pal.raf);
+  const xs = sc.triangles.map(q => q[0]).sort((a, b) => a - b);
+  const greens = sc.greens || xs.slice(1).map((x, i) => (x + xs[i]) / 2);
+  for (const x of greens) for (const sg of [-1, 1]) {
+    const lo = P(x, sg * rg.gOut, rg.gLow * t.h), hi = P(x, sg * rg.gIn, rg.gHigh * t.h), foot = P(x, sg * rg.gOut, rg.gFoot * t.h);
+    ladder(lo, hi, .45, legs); ladder(foot, lo, .45, legs);
+    along(lo, hi, 1.4, mag); along(foot, lo, 1.4, mag);
+    drops.push([hi, P(x, sg * rg.gIn, zTop + .4)]);
+  }
+  if (xs.length) ladder(P(xs[0] + 1, 0, zTop), P((sc.foh ? sc.foh.x1 : xs[xs.length - 1] + 6) - 3, 0, zTop), .4, spine);
+  for (const sg of [-1, 1]) ladder(P(xs[0] - 1, sg * (R - 1.1), .25 * t.h), P(half, sg * (R - 1.1), .25 * t.h), .3, peri);
+  bars(legs, .05, pal.leg); bars(rafs, .05, pal.raf); bars(spine, .045, pal.spine); bars(drops, .03, pal.raf); bars(peri, .035, pal.spine);
   dots(cyan, .16, pal.dot1); dots(mag, .13, pal.dot2);
   // Les càmeres van en un grup a part (es refà quan es mouen)
   const camsG = new T.Group(); scene.add(camsG);
@@ -6028,7 +6034,7 @@ function mc3dPinsPos() {
     el.classList.toggle('sel', !!(mcEd && mcEd.sel === c.id));
   }
 }
-const MC3D_HOME = { az: 2.35, pol: .98, rad: 84, tx: 0, tz: 0 };
+const MC3D_HOME = { az: -.8, pol: .98, rad: 84, tx: 0, tz: 0 };  // com la isomètrica del plànol: escenari a dalt a la dreta
 const mc3dClamp = m => {
   const t = m.s.scene3d.tent;
   m.rad = Math.max(10, Math.min(130, m.rad)); m.pol = Math.max(.12, Math.min(1.45, m.pol));

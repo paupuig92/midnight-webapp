@@ -205,16 +205,16 @@ FEST.multicam = [
       { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
-    // Mides del stage plot (vista de dalt): carpa 64×32 m. Cada càmera: at3d: [x, y, z]
+    // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
-      tent: { len: 64, wid: 32, h: 14, wall: 4 },
-      stage: { x0: -26, x1: -16, wid: 21.6, h: 1.4 },
-      screen: { x: -24.5, wid: 19, h: 8.5 },
+      tent: { len: 64, wid: 32, h: 13 },
+      stage: { x0: -26, x1: -16, wid: 22, h: 1.6 },
+      screen: { x: -24.5, wid: 15.3, z0: 2.7, h: 5.7 },
       booth: { x: -18.6, l: 3.4, w: 1.3, h: 1.1 },
-      barrier: { x: -13.8, wid: 28 },
-      triangles: [[-15.8, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8.1, 'ambar'], [16.1, 'ambar']],
+      barrier: { x: -13.8, wid: 28.8 },
+      triangles: [[-16, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8, 'ambar'], [16, 'ambar']],
       platform: { x: 0, s: 3.5, h: 0.7 },
-      foh: { x0: 26.4, x1: 31, wid: 8 },
+      foh: { x0: 27.5, x1: 31.5, wid: 7.4 },
     },
     rider: [] },
 ];
