@@ -208,6 +208,12 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))
+# Llibreries de vendor/ (three.js per a la vista 3D de «Cámaras»): només si el festival en fa servir (FEST.multicam[].scene3d)
+USES3D = "scene3d:" in src
+if (OUT / "vendor").exists():
+    shutil.rmtree(OUT / "vendor")
+if USES3D:
+    shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*"))
 # Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
 for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
@@ -249,7 +255,7 @@ _imgs = sorted(f for f in IMG.iterdir() if f.is_file() and not f.name.startswith
 version = hashlib.sha1((page + page_ca).encode() + b"".join(f.name.encode() + f.read_bytes() for f in _imgs)).hexdigest()[:8]
 (OUT / "sw.js").write_text(f"""const VERSION = 'bitp-{version}';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
-  {json.dumps(sorted(IMGURL + f.name for f in _imgs if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp") or f.name in _fontfiles))[1:-1]}];
+  {json.dumps(sorted(IMGURL + f.name for f in _imgs if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp") or f.name in _fontfiles) + (["vendor/three-0.170.0.module.min.js"] if USES3D else []))[1:-1]}];
 
 // cache: 'reload' salta la cache HTTP de GitHub Pages (10 min): així la versió nova no es guarda amb fitxers vells
 self.addEventListener('install', e => {{

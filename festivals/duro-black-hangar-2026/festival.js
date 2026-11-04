@@ -193,16 +193,29 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 //          { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'], ok: 'Uri' }
 // Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Amb diversos dies, l'estat (grabando, SSD…) va per dia.
 // Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
-// plan (opcional) = plànol vist des de dalt (img/…) i a cada càmera at: [x %, y %] = on va al plànol.
+// plan (opcional) = imatge de l'escenari (img/…, p. ex. la il·lustració isomètrica) i a cada càmera at: [x %, y %] = on va a la imatge.
+// carpa-3d.webp: il·lustració feta amb Nano Banana 2.1 (Higgsfield) a partir de la vista isomètrica del stage plot (04-11).
 // PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
 FEST.multicam = [
-  { stage: 'Black Hangar', plan: 'img/plano-hangar.svg',
+  { stage: 'Black Hangar', plan: 'img/carpa-3d.webp',
     cams: [
-      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [24.5, 45.5] },
-      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [18.1, 49.9] },
-      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [94.3, 42.7] },
-      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [94.3, 57.9] },
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
+    // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
+    // Mides del stage plot (vista de dalt): carpa 64×32 m. Cada càmera: at3d: [x, y, z]
+    scene3d: {
+      tent: { len: 64, wid: 32, h: 14, wall: 4 },
+      stage: { x0: -26, x1: -16, wid: 21.6, h: 1.4 },
+      screen: { x: -24.5, wid: 19, h: 8.5 },
+      booth: { x: -18.6, l: 3.4, w: 1.3, h: 1.1 },
+      barrier: { x: -13.8, wid: 28 },
+      triangles: [[-15.8, 'ambar'], [-8, 'ambar'], [0, 'blanco'], [8.1, 'ambar'], [16.1, 'ambar']],
+      platform: { x: 0, s: 3.5, h: 0.7 },
+      foh: { x0: 26.4, x1: 31, wid: 8 },
+    },
     rider: [] },
 ];
 /* ==== /FESTIVAL ==== */
