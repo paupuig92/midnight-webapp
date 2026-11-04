@@ -6233,10 +6233,8 @@ function xlRows(X, ws) {
 let xlsxLib = null;
 const loadXlsx = () => xlsxLib || (xlsxLib = new Promise((ok, no) => {
   const sc = document.createElement('script');
-  sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-  // Empremta del fitxer: si algú el canviés a jsDelivr, el navegador no l'executaria
-  sc.integrity = 'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw';
-  sc.crossOrigin = 'anonymous';
+  // SheetJS servida des de la mateixa web (vendor/): la de jsDelivr (0.18.5) era vella i amb errors de seguretat coneguts
+  sc.src = 'vendor/xlsx-0.20.3.full.min.js';
   sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; no(new Error('xlsx')); };
   document.head.appendChild(sc);
 }));
