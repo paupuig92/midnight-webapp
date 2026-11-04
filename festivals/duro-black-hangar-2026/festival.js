@@ -193,8 +193,16 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 //          { z: 'Cabina', n: 1, what: 'Regleta de 3', where: 'en cabina', c: ['morado'], ok: 'Uri' }
 // Colors: morado, rojo, amarillo, naranja, verde, azul, negro. Amb diversos dies, l'estat (grabando, SSD…) va per dia.
 // Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
-// PENDENT (04-11): en Pau ha de passar les càmeres i el rider del Black Hangar.
+// plan (opcional) = plànol vist des de dalt (img/…) i a cada càmera at: [x %, y %] = on va al plànol.
+// PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
 FEST.multicam = [
-  { stage: 'Black Hangar', cams: [], rider: [] },
+  { stage: 'Black Hangar', plan: 'img/plano-hangar.svg',
+    cams: [
+      { c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [24.5, 45.5] },
+      { c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [18.1, 49.9] },
+      { c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [94.3, 42.7] },
+      { c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [94.3, 57.9] },
+    ],
+    rider: [] },
 ];
 /* ==== /FESTIVAL ==== */
