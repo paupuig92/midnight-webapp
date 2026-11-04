@@ -74,6 +74,15 @@ if not IMG.is_dir():
     IMG = ROOT / "img"
 print("Imatges:", IMG.relative_to(ROOT))
 
+# Archivo (Google Fonts) és la lletra per defecte: si el festival en porta de pròpies (theme --display i --body), no es baixa.
+# Una connexió externa menys abans de la primera pintada (rendiment, 04-11-2026)
+_first = lambda v: (v or "").split(",")[0].strip().strip('"\'').lower()
+_th = FEST.get("theme", {})
+if _th.get("--display") and _th.get("--body") and "archivo" not in (_first(_th.get("--display")), _first(_th.get("--body")), _first(_th.get("--title")), _first(_th.get("--cond")), _first(_th.get("--mono"))):
+    head = "\n".join(l for l in head.splitlines() if "fonts.googleapis.com" not in l and "fonts.gstatic.com" not in l)
+    CSP = CSP.replace(" https://fonts.googleapis.com", "").replace(" https://fonts.gstatic.com", "")
+    print("Lletres: només les del festival (sense Google Fonts)")
+
 # Colors i lletres del festival ja al <head>: si no, el primer instant es veuen els colors per defecte (els del Bass)
 def _css(v): return str(v).replace("<", "")
 _vars = {"--accent": FEST.get("accent"), "--accent-rgb": FEST.get("accentRgb"), "--accent-dim": FEST.get("accentDim"),
@@ -341,7 +350,9 @@ self.addEventListener('fetch', e => {{
   if (url.searchParams.has('t')) return;
   // Vídeos (el banner): directe de la xarxa. L'iPhone els demana a trossos (Range) i una còpia sencera de la cache no la reprodueix; sense xarxa es veu el pòster
   if (url.pathname.endsWith('.mp4')) return;
-  // La pàgina: primer la xarxa (màxim 1,5 s) perquè surti la versió nova; sense cobertura o si falla, la còpia guardada
+  // La pàgina: la còpia guardada a l'acte (s'obre a l'instant, amb o sense cobertura) i es refresca en segon pla.
+  // Les versions noves arriben pel sw.js nou (es mira cada vegada que s'obre l'app): es posa al dia sola o surt «Actualizar» (04-11-2026)
+  // Sense còpia (primera vegada): la xarxa
   if (e.request.mode === 'navigate') {{
     // Cada idioma, la seva còpia. Adreces sense «.html» (Cloudflare Pages redirigeix ca.html → ca; GitHub serveix totes dues)
     const page = /[/]ca([.]html)?$/.test(url.pathname) ? 'ca' : './';
@@ -353,9 +364,9 @@ self.addEventListener('fetch', e => {{
         else if (hit) return hit;   // un error del servidor (404, 5xx) no ha de guanyar a la còpia guardada
         return res;
       }});
-      const slow = new Promise(r => setTimeout(() => r(hit), 1500));
-      try {{ return (await Promise.race([net, hit ? slow : net])) || await net; }}
-      catch (err) {{ return hit || Response.error(); }}
+      if (hit) {{ e.waitUntil(net.catch(() => {{}})); return hit; }}
+      try {{ return await net; }}
+      catch (err) {{ return Response.error(); }}
     }}));
     return;
   }}

@@ -2137,13 +2137,17 @@ if (FEST.bannerAnim) document.querySelectorAll('img.banner, .tvinfo > img').forE
 });
 // Les animacions només corren quan es veuen i amb l'app oberta (bateria)
 if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
-  document.querySelectorAll('.banim, #mecanic, #mascot').forEach(el => io.observe(el));
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    e.target.classList.toggle('off', !e.isIntersecting);
+    // El vídeo del banner també: fora de la vista (avall o en una altra pestanya) no es descodifica (rendiment, 04-11-2026)
+    if (e.target.tagName === 'VIDEO' && e.target.autoplay) e.isIntersecting && !document.hidden ? e.target.play().catch(() => {}) : e.target.pause();
+  }));
+  document.querySelectorAll('.banim, #mecanic, #mascot, video.banner, .tvinfo > video').forEach(el => io.observe(el));
 }
 document.addEventListener('visibilitychange', () => {
   document.documentElement.classList.toggle('off', document.hidden);
   // el vídeo del banner: aturat en segon pla (bateria) i en marxa en tornar
-  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay ? v.pause() : v.play().catch(() => {}));
+  document.querySelectorAll('video.banner, .tvinfo > video').forEach(v => document.hidden || !v.autoplay || v.classList.contains('off') ? v.pause() : v.play().catch(() => {}));
 });
 // Il·lustracions (FEST.deco): les que no hi són, simplement no surten
 const DECO = FEST.deco || {};
@@ -2165,7 +2169,14 @@ if ((FEST.css || (FEST.light && FEST.lightCss)) && !document.querySelector('styl
 // Hora local (Europe/Madrid) → instant. Si aquella nit es canvia l'hora, les 2:xx passen dues vegades:
 // "02:30a" és la primera, "02:30b" (o sense lletra) la segona.
 const fmtWall = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+// Les dues funcions es criden milers de cops (horari, editor, tasques) i Intl és lent: es guarden els resultats (rendiment, 04-11-2026)
+const wallMemo = new Map(), tMemo = new Map();
 function wallOf(ms) {
+  let w = wallMemo.get(ms);
+  if (w === undefined) { w = wallRaw(ms); if (wallMemo.size > 5000) wallMemo.clear(); wallMemo.set(ms, w); }
+  return w;
+}
+function wallRaw(ms) {
   const p = Object.fromEntries(fmtWall.formatToParts(ms).map(x => [x.type, +x.value]));
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
 }
@@ -2173,6 +2184,12 @@ const START_M = (([h, m]) => h * 60 + m)(FEST.start.split(':').map(Number));
 // Festivals de diversos dies (FEST.days): «2/11:00» = les 11:00 del 2n dia; «11:00» sol = el 1r
 const NDAYS = Math.max(1, (FEST.days || []).length);
 function T(s) {
+  const k = String(s);
+  let v = tMemo.get(k);
+  if (v === undefined) { v = tRaw(k); if (tMemo.size > 5000) tMemo.clear(); tMemo.set(k, v); }
+  return v;
+}
+function tRaw(s) {
   const m = String(s).match(/^(?:(\d)\/)?(\d{1,2}):(\d{2})([ab]?)$/);
   if (!m) return NaN;
   const dd = m[1] ? +m[1] - 1 : 0, h = +m[2], mi = +m[3], f = m[4];
@@ -4414,12 +4431,18 @@ const code = t => {
   const s0 = hm(t), s = DST && s0.startsWith('02:') ? s0 + (t < DUP ? 'a' : 'b') : s0;
   return NDAYS < 2 ? s : dpre(Math.max(0, DAYS.findIndex(x => T(dpre(x.d) + s) === t))) + s;
 };
-const TIMES = [];
-for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
-  const c = code(t);
-  if (!TIMES.some(([k]) => k === c)) TIMES.push([c, NDAYS > 1 ? `${(x.name || `Día ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]);
+// Només fa falta a l'editor: es prepara el primer cop que s'obre (rendiment, 04-11-2026)
+let TIMES0 = null;
+function times() {
+  if (TIMES0) return TIMES0;
+  const L = [], seen = new Set();
+  for (const x of DAYS) for (let t = x.t0; t <= x.tend0 + 55 * MIN; t += 5 * MIN) {
+    const c = code(t);
+    if (!seen.has(c)) { seen.add(c); L.push([c, NDAYS > 1 ? `${(x.name || `Día ${x.d + 1}`).split(' ')[0]} ${lbl(t)}` : lbl(t)]); }
+  }
+  return TIMES0 = L;
 }
-const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${TIMES.map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+const timeSel = (cls, v, who) => `<select class="${cls}" aria-label="${cls === 'a' ? 'Empieza' : 'Acaba'}: ${esc(who || 'actuación nueva')}">${times().map(([c, l]) => `<option value="${c}"${c === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 
 function rawNow() {
   const raw = {};
@@ -4429,7 +4452,7 @@ function rawNow() {
 // Editor: una llista curta per escenari; en tocar una actuació s'obre amb tots els camps (hores, nom, importància, subtítol, efectes)
 let edOpen = -1;
 const edBase = r => { const l = baseRaw && baseRaw[edStage]; const o = Array.isArray(l) ? l.find(x => x.id === r.id) : null; return o ? norm(o) !== norm(r) : true; };
-const lblOf = c => (TIMES.find(([k]) => k === c) || [c, c])[1];
+const lblOf = c => (times().find(([k]) => k === c) || [c, c])[1];
 function edHead(r, i) {
   const fx = normFx(r.fx);
   return `<span class="edt">${lblOf(r.a)}–${lblOf(r.b)}</span><span class="edn">${r.n ? html(r.n) : '<i>Sin nombre</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sin publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
@@ -4617,8 +4640,8 @@ document.getElementById('edAdd').addEventListener('click', () => {
   const list = draft.sets[edStage];
   const last = list[list.length - 1];
   const a = last ? last.b : FEST.start;
-  const ia = TIMES.findIndex(([c]) => c === a);
-  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (TIMES[Math.min(ia + 12, TIMES.length - 1)] || TIMES[12])[0], n: '', t: 0, sub: '', fx: [] });
+  const ia = times().findIndex(([c]) => c === a);
+  list.push({ id: `${edStage}-n${Date.now().toString(36)}`, a, b: (times()[Math.min(ia + 12, times().length - 1)] || times()[12])[0], n: '', t: 0, sub: '', fx: [] });
   markDirty();
   renderEditor(list.length - 1);
   const rows = document.querySelectorAll('#edRows .n');
