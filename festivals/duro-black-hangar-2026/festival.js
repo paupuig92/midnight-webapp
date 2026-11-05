@@ -204,7 +204,7 @@ FEST.multicam = [
       { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
       { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
-    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD, pwr: 'bat' si va amb bateria).
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD en GB).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {

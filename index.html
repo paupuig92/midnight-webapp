@@ -2443,7 +2443,7 @@ FEST.multicam = [
       { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
       { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
-    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD, pwr: 'bat' si va amb bateria).
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD en GB).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
@@ -6980,29 +6980,29 @@ const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
 const MC_NEXT = { '': 'montada', montada: 'grabando', grabando: 'parada', parada: 'grabando', recogida: 'montada' };
 const mcByKey = {};
 // Límit real de gravació per model (05-11, fonts oficials; vegeu MC_LIM_SRC). Minuts fins que alguna cosa para la càmera:
-// tarjeta/SSD (mbps o minPerGB), calor (heat) o bateria (bat, només si la càmera porta pwr: 'bat'). Per càmera: gb (mida), pwr: 'red'|'bat', lim (a mà, guanya).
+// tarjeta/SSD (mbps o minPerGB) o calor (heat). Totes van a corrent (en Pau, 05-11): la bateria no compta. Per càmera: gb (mida), lim (a mà, guanya).
 // sure: false = valor sense font oficial (es diu a la fitxa).
 const MC_MODELS = [
-  // BRAW 12:1 Ultra HD 25p: 157 min per 256 GB (taula oficial del manual de les Pocket) → 0,613 min/GB. Corrent 12 V: sense bateria pròpia.
-  { re: /micro|black\s*studio|studio\s*cam/i, name: 'Blackmagic Micro Studio 4K G2', minPerGB: 157 / 256, gb: 2000, media: 'SSD', heat: 0, bat: 0,
-    info: 'BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Va a 12 V: sin batería, no para por tiempo ni calor.' },
-  // 4K DCI 25p BRAW 12:1: 149 min per 256 GB. LP-E6: Blackmagic no publica minuts (el grip de 2 bateries «més de 2 h»).
-  { re: /pocket\s*(cinema\s*)?4k|bmpcc|black.*pocket/i, name: 'Blackmagic Pocket 4K', minPerGB: 149 / 256, gb: 2000, media: 'SSD', heat: 0, bat: 50, batSure: false,
-    info: 'BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Con una LP-E6 ~45–60 min (Blackmagic no da la cifra). Con corriente, sin límite.' },
-  // Bitrate màxim oficial 120 Mbps (4K 4:3, «alto»). Bateria: 240 min oficials però a 1080p24 amb pantalla apagada; a 4K DJI no ho publica.
-  { re: /action\s*6/i, name: 'DJI Osmo Action 6', mbps: 120, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
-    info: 'Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica. Tiempo por calor: no publicado.' },
-  // Bitrate màxim oficial 180 Mbps. Bateria 240 min (4) / 210 min (4P), també a 1080p24.
-  { re: /pocket\s*4\s*p|pocket\s*4\s*pro/i, name: 'DJI Osmo Pocket 4P', mbps: 180, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
-    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 210 min solo a 1080p; a 4K no lo publica.' },
-  { re: /pocket\s*4/i, name: 'DJI Osmo Pocket 4', mbps: 180, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
-    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica.' },
+  // BRAW 12:1 Ultra HD 25p: 157 min per 256 GB (taula oficial del manual de les Pocket) → 0,613 min/GB. 
+  { re: /micro|black\s*studio|studio\s*cam/i, name: 'Blackmagic Micro Studio 4K G2', minPerGB: 157 / 256, gb: 2000, media: 'SSD', heat: 0,
+    info: 'BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Sin límite por toma ni por calor.' },
+  // 4K DCI 25p BRAW 12:1: 149 min per 256 GB.
+  { re: /pocket\s*(cinema\s*)?4k|bmpcc|black.*pocket/i, name: 'Blackmagic Pocket 4K', minPerGB: 149 / 256, gb: 2000, media: 'SSD', heat: 0,
+    info: 'BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Sin límite por toma.' },
+  // Bitrate màxim oficial 120 Mbps (4K 4:3, «alto»).
+  { re: /action\s*6/i, name: 'DJI Osmo Action 6', mbps: 120, gb: 256, media: 'tarjeta', heat: 0,
+    info: 'Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
+  // Bitrate màxim oficial 180 Mbps.
+  { re: /pocket\s*4\s*p|pocket\s*4\s*pro/i, name: 'DJI Osmo Pocket 4P', mbps: 180, gb: 256, media: 'tarjeta', heat: 0,
+    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
+  { re: /pocket\s*4/i, name: 'DJI Osmo Pocket 4', mbps: 180, gb: 256, media: 'tarjeta', heat: 0,
+    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
   // Sony help guide (Auto Power OFF Temp. = High, 25 °C, 4K 59.94p 150M). Límit de producte 13 h per presa.
-  { re: /fx\s*3/i, name: 'Sony FX3', heat: 90, bat: 0,
+  { re: /fx\s*3/i, name: 'Sony FX3', heat: 90,
     info: 'Con «Auto Power OFF Temp.» en High: ~90 min en 4K (Sony, a 25 °C y 4K 60p). En Standard solo ~30 min. Máximo 13 h por toma.' },
-  { re: /a7\s*s\s*(iii|3|m3)/i, name: 'Sony A7S III', heat: 90, bat: 0,
+  { re: /a7\s*s\s*(iii|3|m3)/i, name: 'Sony A7S III', heat: 90,
     info: 'Con «Auto Power OFF Temp.» en High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).' },
-  { re: /a7\s*(iv|4|m4)/i, name: 'Sony A7 IV', heat: 120, bat: 0,
+  { re: /a7\s*(iv|4|m4)/i, name: 'Sony A7 IV', heat: 120,
     info: '~120 min en 4K a 25 °C; a 40 °C solo ~30 min (Sony). Pon «Auto Power OFF Temp.» en High.' },
 ];
 const mcModel = c => c && MC_MODELS.find(m => m.re.test(c.cam || '')) || null;
@@ -7016,7 +7016,6 @@ function mcLim(c) {
   const card = m.minPerGB ? gb * m.minPerGB : m.mbps ? gb * 8000 / m.mbps / 60 : 0;
   if (card) out.push({ min: Math.floor(card * .98 / 5) * 5, why: `${m.media} ${gb >= 1000 ? gb / 1000 + ' TB' : gb + ' GB'}`, sure: true });
   if (m.heat) out.push({ min: m.heat, why: 'calor', sure: true });
-  if (c.pwr === 'bat' && m.bat) out.push({ min: m.bat, why: 'batería', sure: m.batSure !== false });
   out.sort((a, b) => a.min - b.min);
   return out[0] || null;
 }
