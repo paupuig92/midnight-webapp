@@ -6992,11 +6992,11 @@ const MC_MODELS = [
   // Bitrate màxim oficial 120 Mbps (4K 4:3, «alto»).
   { re: /action\s*6/i, name: 'DJI Osmo Action 6', mbps: 120, gb: 256, media: 'tarjeta', heat: 0,
     info: 'Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
-  // Bitrate màxim oficial 180 Mbps.
-  { re: /pocket\s*4\s*p|pocket\s*4\s*pro/i, name: 'DJI Osmo Pocket 4P', mbps: 180, gb: 256, media: 'tarjeta', heat: 0,
-    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
-  { re: /pocket\s*4/i, name: 'DJI Osmo Pocket 4', mbps: 180, gb: 256, media: 'tarjeta', heat: 0,
-    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). DJI no publica tiempo máximo por calor.' },
+  // Bitrate màxim oficial 180 Mbps, però un clip real (DURO X, 11-10, 4K 16:9 25p, HEVC 10 bits) fa 43,2 Mbps (17,2 GB en 53 min; el 24 % és una pista de depuració «dbgi» de DJI) → 50 Mbps amb marge.
+  { re: /pocket\s*4\s*p|pocket\s*4\s*pro/i, name: 'DJI Osmo Pocket 4P', mbps: 50, gb: 256, media: 'tarjeta', heat: 0,
+    info: 'Tarjeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (medido: 43 Mbps en un clip real 4K 25p de DURO X; calculado a 50 Mbps por margen). DJI no publica tiempo máximo por calor.' },
+  { re: /pocket\s*4/i, name: 'DJI Osmo Pocket 4', mbps: 50, gb: 256, media: 'tarjeta', heat: 0,
+    info: 'Tarjeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (medido: 43 Mbps en un clip real 4K 25p de DURO X; calculado a 50 Mbps por margen). DJI no publica tiempo máximo por calor.' },
   // Sony help guide (Auto Power OFF Temp. = High, 25 °C, 4K 59.94p 150M). Límit de producte 13 h per presa.
   { re: /fx\s*3/i, name: 'Sony FX3', heat: 90,
     info: 'Con «Auto Power OFF Temp.» en High: ~90 min en 4K (Sony, a 25 °C y 4K 60p). En Standard solo ~30 min. Máximo 13 h por toma.' },
