@@ -1198,22 +1198,6 @@ html[data-theme="light"] #sol { --sol-gold: #ec9512; --sol-blue: #3d63d6; }
 .soltimes li.m b { font-size: var(--fs-s); }
 .solalert { margin-top: 18px; }
 .solalmsg:empty { display: none; }
-/* Contrallum per càmera (amb les posicions de «Cámaras») */
-#sol { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
-.solcams { overflow: hidden; border: 1px solid var(--line, var(--rule)); border-radius: var(--r-card, 14px); background: var(--panel); }
-.solcams .ori { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; font: 600 var(--fs-s)/1.35 var(--body); color: var(--muted); }
-.solcams .ori b { color: var(--ink); }
-.solcams .ori .row2 { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-.solcams .ori input { width: 84px; min-height: 44px; padding: 0 10px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: 16px var(--mono); }
-.solcams .ori .btn { min-height: 44px; padding: 0 12px; font-size: var(--fs-xs); }
-.solcams .cam { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 2px 10px; padding: 10px 16px; border-top: 1px solid var(--sol-hair); }
-.solcams .cam > i { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--muted)); }
-.solcams .cam span { font: 700 var(--fs-s)/1.25 var(--body); color: var(--ink); }
-.solcams .cam em { grid-column: 2 / -1; font: 500 var(--fs-xs)/1.35 var(--mono); font-style: normal; color: var(--muted); }
-.solcams .cam b { font: 700 var(--fs-xs)/1.2 var(--mono); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
-.solcams .cam.hot b { color: var(--sol-gold); }
-.solcams .cam.now { background: color-mix(in srgb, var(--sol-gold) 12%, transparent); }
-.solcams .foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--sol-hair); font: 500 var(--fs-xs)/1.4 var(--body); color: var(--muted); }
 /* Sol amb la càmera (realitat augmentada): el camí del sol dibuixat sobre la imatge. Sense càmera, sobre un cel dibuixat.
    Sobre la càmera el tema no compta: vidre fosc i text blanc (com les apps de foto), així es llegeix sobre qualsevol fons */
 body.aron { overflow: hidden; }
@@ -1525,6 +1509,16 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 .tqmap { position: relative; height: min(62vh, 560px); min-height: 380px; overflow: hidden; background: var(--bg); touch-action: pan-y; color: var(--ink); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .tqmap .ly { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tqmap #tqRad img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap #tqOsm img { position: absolute; display: block; width: 256px; height: 256px; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap #tqOsm { filter: saturate(.55) contrast(.92); }
+.tqmap #tqOsm.dark { filter: invert(1) hue-rotate(180deg) brightness(.82) contrast(.88) saturate(.45); }
+.tqmap #tqOsm[hidden] { display: none; }
+.tqmap .tqosmattr { position: absolute; z-index: 4; right: 12px; bottom: 74px; padding: 1px 6px; border-radius: 6px; font: 600 9px var(--mono, monospace); color: var(--muted); background: color-mix(in srgb, var(--panel) 80%, transparent); pointer-events: none; }
+.tqmap .tqosmattr[hidden] { display: none; }
+.tqmap .tqnow { position: absolute; z-index: 5; right: 10px; top: 214px; width: 62px; padding: 7px 0 6px; display: grid; justify-items: center; gap: 2px; border-radius: 14px; border: 1px solid var(--rule); color: var(--ink); cursor: pointer; font: 700 10px var(--body); background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.tqmap .tqnow svg { width: 20px; height: 20px; }
+.tqmap .tqnow:active { transform: scale(.96); }
+.tqzoom .tqroads[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .tqmap .tqheat { opacity: .8; }
 .tqmap .rd { opacity: 0; transition: opacity .25s; }
 .tqmap .rd.on { opacity: .85; }
@@ -1823,10 +1817,6 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
       <select id="solAlert"><option value="0">No avisar</option><option value="10">10 min antes</option><option value="20">20 min antes</option><option value="30">30 min antes</option><option value="45">45 min antes</option></select>
     </label>
     <p class="note solalmsg" id="solAlMsg"></p>
-    <div id="solCams" hidden>
-      <h3>Cámaras y contraluz</h3>
-      <div class="solcams" id="solCamsB"></div>
-    </div>
     <p class="note solfoot">Hora dorada: el sol entre −4° y 6°. Hora azul: entre −6° y −4°. Calculado en el móvil, sin conexión. Tu ubicación solo se usa en este móvil: no se envía a ningún sitio.</p>
     <div class="solar nocam" id="solAr" role="dialog" aria-modal="true" aria-labelledby="solArT" hidden>
       <video id="solArV" playsinline muted autoplay aria-hidden="true"></video>
@@ -1861,6 +1851,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <div class="tqhero">
       <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de lluvia y nubes alrededor del festival">
         <canvas class="ly" id="tqBase" aria-hidden="true"></canvas>
+        <div class="ly" id="tqOsm" aria-hidden="true"></div>
         <canvas class="ly tqheat" id="tqHeat" aria-hidden="true"></canvas>
         <div class="ly" id="tqRad"></div>
         <svg class="rings" id="tqRings" aria-hidden="true"></svg>
@@ -1871,7 +1862,9 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
           <button type="button" role="tab" data-ly="clouds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 18h11a3.8 3.8 0 00.5-7.6A5.5 5.5 0 007.4 9.8 4.1 4.1 0 006.5 18z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.2A4 4 0 0121 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Nubes</span></button>
           <button type="button" role="tab" data-ly="windy"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Windy</span></button>
         </div>
-        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Acercar">+</button><button type="button" id="tqZout" aria-label="Alejar">−</button></div>
+        <button type="button" class="tqnow" id="tqNowBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ahora</button>
+        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Acercar">+</button><button type="button" id="tqZout" aria-label="Alejar">−</button><button type="button" id="tqRoads" class="tqroads" aria-label="Carreteras" aria-pressed="true" title="Carreteras"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20L9 4h6l5 16M12 6v2.5M12 11v2.5M12 16v2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <span class="tqosmattr" id="tqOsmAttr">© OpenStreetMap</span>
         <div class="tqleg" id="tqLeg" aria-hidden="true"></div>
         <div class="tqbar" id="tqBar">
           <button type="button" id="tqPlay" aria-label="Reproducir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
@@ -1892,7 +1885,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <h3>Días del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
     <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (carreteras) y <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> (sin conexión). La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
@@ -4305,7 +4298,6 @@ function solPaint(force) {
   document.getElementById('solPhase').innerHTML = today ? solPhase(t) : solPhaseDay();
   if (today) solCount(t); else solCountDay(td, t);
   solChart(t); solTimes(today ? t : 0); solDial(); solDaysUi();
-  try { solCams(today ? t : 0); } catch (e) { document.getElementById('solCams').hidden = true; }
   solAlertMsg();
   solMin = Math.floor(t / MIN);
 }
@@ -4334,72 +4326,7 @@ function solCountDay(td, t) {
 function solPhaseDay() {
   return `Planificando: <b>${html(solDayName(solPick))}</b> · las horas de abajo son de ese día`;
 }
-// --- Contrallum per càmera: amb la direcció de cada càmera (pestanya «Cámaras») i cap on mira l'escenari, les hores en què el sol
-// baix (0°–35°) entra dins del camp de visió (més 10° de marge: el reflex arriba abans). Cap on mira l'escenari no surt del 3D
-// (no sap on és el nord): algú ho mesura un cop amb la brúixola i es comparteix amb l'equip pel servidor (/mc, id «…-sol-<escenari>-pos»)
-const SOL_OK = FEST.key + '-sol-ori-v1';
-let solOri = {}, solOriEd = '';
-try { solOri = JSON.parse(localStorage.getItem(SOL_OK) || '{}') || {}; } catch (e) {}
-const solOriId = st => (FEST.key + '-sol-' + mcSlug(st)).slice(0, 72) + '-pos';
-function solOriOf(st) {
-  try { const x = mcState[solOriId(st)], v = x && x.note !== '' ? +x.note : NaN; if (Number.isFinite(v)) return ((Math.round(v) % 360) + 360) % 360; } catch (e) {}
-  return Number.isFinite(solOri[st]) ? solOri[st] : null;
-}
-function solOriSave(st, v) {
-  v = ((Math.round(v) % 360) + 360) % 360;
-  solOri[st] = v; solOriEd = '';
-  try { localStorage.setItem(SOL_OK, JSON.stringify(solOri)); } catch (e) {}
-  try { mcSet(solOriId(st), { note: String(v) }); } catch (e) {}
-  solPaint();
-}
-function solCams(t) {
-  const box = document.getElementById('solCams'), L = MC.filter(s => (s.cams || []).some(c => c.at3d));
-  box.hidden = !L.length;
-  if (!L.length) return;
-  const D = solD, SA = D.S.map(([ti, al]) => [ti, al, SUN.pos(ti, D.lat, D.lon).az]);
-  let h = '';
-  for (const s of L) {
-    const o = solOriOf(s.stage), nm = L.length > 1 ? `<b>${html(s.stage)}</b>: ` : '';
-    h += `<div class="ori" data-st="${html(s.stage)}">`;
-    if (o === null || solOriEd === s.stage) h += `<span>${nm}¿Hacia dónde mira el escenario? Ponte entre el público mirando al escenario y toca «Medir» (con la brújula activada), o escribe los grados.</span>
-      <div class="row2"><button class="btn" type="button" data-act="medir">Medir con la brújula</button><input type="number" inputmode="numeric" min="0" max="359" placeholder="°" aria-label="Grados hacia el escenario" value="${o ?? ''}"><button class="btn" type="button" data-act="ok">Guardar</button></div>`;
-    else h += `<span>${nm}Del público al escenario: <b>${o}° ${solCard(o)}</b></span><button type="button" class="linkbtn" data-act="cambiar">Cambiar</button>`;
-    h += '</div>';
-    if (o === null) continue;
-    for (const c of s.cams || []) {
-      if (!c.at3d) continue;
-      let yaw = null;
-      try { const ps = mcPosOf(c, s.scene3d); if (ps && Number.isFinite(ps.yaw)) yaw = ps.yaw; } catch (e) {}
-      if (yaw === null) yaw = c.aim ? c.aim[0] : 180;
-      // 3D: x al llarg (escenari a −x), y d'un costat a l'altre; yaw 180 = mira cap a l'escenari
-      const bc = ((o + 180 - yaw) % 360 + 360) % 360, half = mcFov(c) / 2 + 10, W = [];
-      let st = null;
-      for (const [ti, al, az] of SA) {
-        const hot = al > -.5 && al < 35 && Math.abs(solWrap(az - bc)) < half;
-        if (hot && st === null) st = ti; else if (!hot && st !== null) { W.push([st, ti]); st = null; }
-      }
-      if (st !== null) W.push([st, D.b]);
-      const on = t && W.some(([a, b]) => t >= a && t <= b);
-      h += `<div class="cam${W.length ? ' hot' : ''}${on ? ' now' : ''}" style="--c:${mcCol(c.c)}"><i></i><span>${html(c.pos || c.cam)}</span><b>${W.length ? W.map(([a, b]) => `${hm(a)}–${hm(b)}`).join('<br>') : 'Sin sol de cara'}</b>`
-        + `<em>Mira a ${Math.round(bc)}° ${solCard(bc)}${W.length ? ` · contraluz${on ? ' ahora' : ''}` : ''}</em></div>`;
-    }
-  }
-  h += '<p class="foot">Aproximado: la dirección de cada cámara sale de «Cámaras». Bajo techo solo cuenta si el sol entra por una abertura.</p>';
-  document.getElementById('solCamsB').innerHTML = h;
-}
-document.getElementById('solCamsB').addEventListener('click', e => {
-  const b = e.target.closest('[data-act]'), box = b && b.closest('.ori');
-  if (!box) return;
-  const st = box.dataset.st, act = b.dataset.act, msg = document.getElementById('solMsg');
-  if (act === 'cambiar') { solOriEd = st; return solPaint(); }
-  if (act === 'medir') {
-    if (solHead === null) { msg.textContent = 'Activa la brújula (botón de arriba), ponte entre el público y apunta el móvil hacia el escenario.'; return; }
-    msg.textContent = ''; return solOriSave(st, solHead);
-  }
-  const v = +box.querySelector('input').value;
-  if (box.querySelector('input').value === '' || !Number.isFinite(v)) return;
-  solOriSave(st, v);
-});
+// «Cámaras y contraluz» (orientació de l'escenari + hores de sol de cara per càmera): tret el 05-11 (en Pau: «es pot eliminar»)
 // Avís abans de l'hora daurada de la tarde (dies del festival, ubicació del festival): l'envia el servidor d'avisos
 const solAl = document.getElementById('solAlert');
 solAl.value = String([10, 20, 30, 45].includes(prefs.sol) ? prefs.sol : 0);
@@ -7499,6 +7426,7 @@ addEventListener('online', mkFlush);
 // Ubicació: la de la pestanya Sol (solWhere). Sense cobertura es veu l'última previsió desada.
 const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN, TQ_RETRY = 2 * MIN;
 let tq = null, tqBusy = false, tqFail = 0, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+const TQ_ZMAX = 11;  // el radar (zoom 7) s'amplia ×16 com a molt; les carreteres d'OSM ja es veuen bé
 let tqLy = 'radar', tqGrid = null, tqGridBusy = false, tqH = 0, tqView = null, tqField = null, tqPos = 0;
 try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
 try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts) tqGrid = v; } catch (e) {}
@@ -7680,10 +7608,28 @@ function tqLayout() {
     return r < 30 || r > Math.max(W, H) * .8 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx - r * .707 - 3).toFixed(1)}" y="${(cy + r * .707 + 11).toFixed(1)}" text-anchor="end">${km} km</text>`; }).join('')
     + `<circle class="pulse" cx="${cx}" cy="${cy}" r="6"/><circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
   for (const id of ['tqHeat', 'tqBase']) { const c = document.getElementById(id), dpr = Math.min(2, devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
-  document.getElementById('tqZin').disabled = tqZ >= 10; document.getElementById('tqZout').disabled = tqZ <= 6;
+  document.getElementById('tqZin').disabled = tqZ >= TQ_ZMAX; document.getElementById('tqZout').disabled = tqZ <= 6;
   tqBaseDraw();
+  tqOsmDraw();
   return tqView;
 }
+// Carreteres (05-11, en Pau: «alguna carretera per ubicar-nos»): rajoles d'OpenStreetMap (gratuïtes, sense clau, ús lleuger; atribució obligatòria).
+// Van a sobre del mapa propi, que queda de reserva si una rajola no arriba (sense cobertura). Es pot amagar amb el botó de la carretera.
+const TQ_OSMK = 'midnight-tiempo-osm';
+let tqRoads = true; try { tqRoads = localStorage.getItem(TQ_OSMK) !== '0'; } catch (e) {}
+function tqOsmDraw() {
+  const g = tqView, box = document.getElementById('tqOsm'), at = document.getElementById('tqOsmAttr');
+  document.getElementById('tqRoads').setAttribute('aria-pressed', String(tqRoads));
+  box.hidden = at.hidden = !tqRoads || !ONLINE;
+  if (box.hidden || !g) { box.innerHTML = ''; return; }
+  const k = `${g.z}|${g.left}|${g.top}|${g.W}|${g.H}`;
+  if (box.dataset.k === k) return;
+  box.dataset.k = k;
+  box.innerHTML = tqTiles(g.z, TQ_TILE, g.left, g.top, g.W, g.H).map(p => `<img alt="" src="https://tile.openstreetmap.org/${g.z}/${p.x}/${p.y}.png" style="left:${p.l}px;top:${p.t}px" decoding="async">`).join('');
+}
+// Una rajola que no arriba (sense cobertura, servidor caigut) s'esborra: així no queden icones d'imatge trencada ni vores
+document.addEventListener('error', e => { const t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('#tqOsm, #tqRad')) t.remove(); }, true);
+document.getElementById('tqRoads').addEventListener('click', () => { tqRoads = !tqRoads; try { localStorage.setItem(TQ_OSMK, tqRoads ? '1' : '0'); } catch (e) {} const b = document.getElementById('tqOsm'); b.dataset.k = ''; tqOsmDraw(); });
 // Mapa de fons propi (05-11; abans CARTO, que ara demana clau): costa, fronteres, rius i poblacions de Natural Earth
 // (domini públic, retallat al NE de la península per build_web.py des de vendor/mapa-base.json), pintat amb els colors del festival
 const TQ_MAP = /*MAPA*/null/*MAPA*/;
@@ -7694,6 +7640,7 @@ function tqBaseDraw() {
   if (!g) return;
   const cs = getComputedStyle(document.documentElement), bg = tqHex(cs.getPropertyValue('--bg'), [5, 6, 8]), ink = tqHex(cs.getPropertyValue('--ink'), [245, 245, 245]);
   const light = (bg[0] + bg[1] + bg[2]) / 3 > 128, rgb = (a, al = 1) => `rgba(${a.join(',')},${al})`;
+  document.getElementById('tqOsm').classList.toggle('dark', !light);
   const sea = tqMix(tqMix(bg, [40, 90, 150], light ? .14 : .22), ink, .02), land = tqMix(bg, ink, light ? .05 : .075);
   ctx.fillStyle = rgb(TQ_MAP ? sea : land); ctx.fillRect(0, 0, g.W, g.H);
   if (!TQ_MAP) return;
@@ -7743,7 +7690,7 @@ async function tqRadar(force) {
   const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = size > 256 ? 512 : 256;
   const T = tqTiles(zr, size, g.left, g.top, g.W, g.H), F = tqRad.radar.past;
   document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
-    `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
+    `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i >= tqI - 2 ? 'eager' : 'lazy'}" decoding="async">`).join('')}</div>`).join('');
   if (tqLy === 'radar') tqBarSetup();
 }
 
@@ -7994,7 +7941,7 @@ function tqGo(i) {
   const x = S[tqPos];
   document.getElementById('tqSlide').value = tqPos;
   if (x.r !== undefined) tqI = x.r;
-  for (const d of document.querySelectorAll('#tqRad .rd')) d.classList.toggle('on', tqLy === 'radar' && x.r !== undefined && +d.dataset.i === x.r);
+  for (const d of document.querySelectorAll('#tqRad .rd')) { const on = tqLy === 'radar' && x.r !== undefined && +d.dataset.i === x.r; d.classList.toggle('on', on); if (on || (x.r !== undefined && +d.dataset.i === x.r + 1)) for (const im of d.querySelectorAll('img[loading="lazy"]')) im.loading = 'eager'; }
   if (x.h !== undefined) { tqH = x.h; tqFieldBuild(); } else tqHeat();
   const d = Math.round((x.t - Date.now()) / MIN);
   document.getElementById('tqTs').innerHTML = `${hm(x.t)}<small>${x.r !== undefined ? (d >= -10 ? 'radar · ahora' : `radar · hace ${-d} min`) : `previsión · ${d < 60 ? 'ahora' : '+' + Math.round(d / 60) + ' h'}`}</small>`;
@@ -8042,7 +7989,41 @@ function tqSetLayer(ly) {
   tqBarSetup();
 }
 document.getElementById('tqLayers').addEventListener('click', e => { const b = e.target.closest('[data-ly]'); if (b && b.dataset.ly !== tqLy) tqSetLayer(b.dataset.ly); });
-function tqZoom(dz) { const z = Math.max(6, Math.min(10, tqZ + dz)); if (z === tqZ) return; tqZ = z; tqRedraw(); }
+function tqZoom(dz) { const z = Math.max(6, Math.min(TQ_ZMAX, tqZ + dz)); if (z === tqZ) return; tqZ = z; tqRedraw(); }
+// Zoom amb dos dits (05-11): mentre es pessiga, les capes s'escalen amb CSS; en deixar anar, es redibuixa al nivell més proper
+{
+  const map = document.getElementById('tqMap'), lys = () => map.querySelectorAll('#tqBase, #tqOsm, #tqHeat, #tqRad, #tqRings');
+  let P = null;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  map.addEventListener('touchstart', e => {
+    if (e.touches.length !== 2) return;
+    const r = map.getBoundingClientRect();
+    P = { d: dist(e.touches), x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top, s: 1 };
+  }, { passive: true });
+  map.addEventListener('touchmove', e => {
+    if (!P || e.touches.length !== 2) return;
+    e.preventDefault();
+    P.s = Math.max(.4, Math.min(2.5, dist(e.touches) / P.d));
+    for (const el of lys()) { el.style.transformOrigin = `${P.x}px ${P.y}px`; el.style.transform = `scale(${P.s})`; }
+  }, { passive: false });
+  const end = () => {
+    if (!P) return;
+    const dz = Math.round(Math.log2(P.s)); P = null;
+    for (const el of lys()) { el.style.transform = ''; el.style.transformOrigin = ''; }
+    if (dz) tqZoom(dz);
+  };
+  map.addEventListener('touchend', e => { if (e.touches.length < 2) end(); });
+  map.addEventListener('touchcancel', end);
+  // Ordinador: la roda del ratolí
+  let wT = 0;
+  map.addEventListener('wheel', e => { if (!e.ctrlKey && Math.abs(e.deltaY) < 20) return; e.preventDefault(); if (Date.now() - wT < 250) return; wT = Date.now(); tqZoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
+}
+// «Ahora»: la barra de temps torna a l'últim radar (o a l'hora actual de la previsió) i para la reproducció
+document.getElementById('tqNowBtn').addEventListener('click', () => {
+  tqStop();
+  const S = tqSteps(); if (!S.length) return;
+  tqGo(tqLy === 'radar' ? Math.max(0, tqRadN() - 1) : Math.max(0, S.findIndex(x => x.t + 3600000 > Date.now())));
+});
 document.getElementById('tqZin').addEventListener('click', () => tqZoom(1));
 document.getElementById('tqZout').addEventListener('click', () => tqZoom(-1));
 function tqRedraw() {
