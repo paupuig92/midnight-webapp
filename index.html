@@ -1466,7 +1466,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
 .ptr.go svg { animation: ptrspin .8s linear infinite; }
 @keyframes ptrspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
-/* ==== MOMENTOS (04-11-2026): botó «Momento» a Horarios i Cámaras, marques per a l'edició ==== */
+/* ==== MOMENTOS (04-11-2026): botó «Marcar momento» dins de l'app Momentos (des del 05-11; abans flotava a Horarios), marques per a l'edició ==== */
 .mkfab { position: fixed; z-index: 12; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0;
   background: var(--accent); color: var(--accent-ink); font: 800 var(--fs-m)/1 var(--body); letter-spacing: .01em; cursor: pointer;
@@ -1475,12 +1475,15 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
 .mkfab:active { transform: scale(.94); }
 .mkfab .mkn { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font: 800 11px/20px var(--mono, var(--body)); text-align: center; }
 .mkfab .mkn:empty { display: none; }
-body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkfab, body.tvon .mkfab, body.aron .mkfab, body.locked .mkfab { display: none !important; }
+.mkfab { display: none !important; }  /* 05-11: en Pau no vol el botó a Horarios (es tocava sense voler): ara és dins de l'app Momentos */
+.mkbig { width: 100%; min-height: 64px; margin: 6px 0 14px; font-size: var(--fs-l); gap: 10px; }
+.mkbig svg { width: 22px; height: 22px; }
 .mkpop { position: fixed; z-index: 13; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 136px);
   max-width: 520px; margin: 0 auto; padding: 14px 14px 12px; border-radius: var(--r-card, 14px); background: var(--panel); color: var(--ink);
   border: 1.5px solid var(--accent); box-shadow: 0 14px 40px rgba(0, 0, 0, .55); }
 .mkpop[hidden] { display: none !important; }
-body:not([data-tab="ahora"]):not([data-tab="multi"]) .mkpop, body.locked .mkpop { display: none !important; }
+body.locked:not(.mkopen) .mkpop { display: none !important; }
+.mkpop { z-index: 25; }
 .mkpop .mkh { display: flex; align-items: baseline; gap: 10px; margin: 0 34px 2px 0; font: 800 var(--fs-l)/1.2 var(--body); }
 .mkpop .mkh b { font: 700 var(--fs-l)/1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
 .mkpop .mkwho { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-s); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1522,52 +1525,47 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 #tiempo .tqsrc { margin: 0 0 14px; }
 .tqhero { width: 100vw; margin-left: calc(50% - 50vw); }
 @media (min-width: 720px) { .tqhero { width: auto; margin-left: 0; } .tqhero .tqmap { border-radius: 18px; } }
-.tqmap { position: relative; height: min(62vh, 560px); min-height: 380px; overflow: hidden; background: #0b0d12; touch-action: pan-y; color: #fff; }
+.tqmap { position: relative; height: min(62vh, 560px); min-height: 380px; overflow: hidden; background: var(--bg); touch-action: pan-y; color: var(--ink); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .tqmap .ly { position: absolute; inset: 0; width: 100%; height: 100%; }
-.tqmap #tqBase img, .tqmap #tqRad img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
-.tqmap #tqBase { filter: saturate(.6); }
-.tqmap .tqheat { opacity: .72; mix-blend-mode: normal; }
+.tqmap #tqRad img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.tqmap .tqheat { opacity: .8; }
 .tqmap .rd { opacity: 0; transition: opacity .25s; }
 .tqmap .rd.on { opacity: .85; }
-.tqmap #tqPc { pointer-events: none; }
-.tqmap .tqwin { border: 0; background: #0b0d12; z-index: 3; }
+.tqmap .tqwin { border: 0; background: var(--bg); z-index: 3; }
 .tqmap .tqwin iframe { width: 100%; height: 100%; border: 0; display: block; }
 .tqmap svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.tqmap svg.rings circle.r { fill: none; stroke: rgba(255,255,255,.4); stroke-width: 1; stroke-dasharray: 3 4; }
-.tqmap svg.rings text { fill: rgba(255,255,255,.8); font: 700 10px var(--mono, monospace); paint-order: stroke; stroke: rgba(0,0,0,.65); stroke-width: 3px; }
-.tqmap svg.rings circle.pin { fill: var(--now, #e0162b); stroke: #fff; stroke-width: 2.5; }
+.tqmap svg.rings circle.r { fill: none; stroke: color-mix(in srgb, var(--ink) 35%, transparent); stroke-width: 1; stroke-dasharray: 3 4; }
+.tqmap svg.rings text { fill: color-mix(in srgb, var(--ink) 75%, transparent); font: 700 10px var(--mono, monospace); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
+.tqmap svg.rings circle.pin { fill: var(--now, #e0162b); stroke: var(--bg); stroke-width: 2.5; }
 .tqmap svg.rings circle.pulse { fill: none; stroke: var(--now, #e0162b); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: tqPulse 2.4s ease-out infinite; }
 @keyframes tqPulse { from { transform: scale(1); opacity: .9; } to { transform: scale(4); opacity: 0; } }
-.tqglass { background: rgba(14, 16, 22, .62); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); border: 1px solid rgba(255,255,255,.12); }
 .tqtop { position: absolute; z-index: 4; left: 12px; top: 12px; right: 84px; }
-.tqpill { display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 999px; font-size: var(--fs-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqpill { display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 999px; font-size: var(--fs-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); border: 1px solid var(--rule); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
 .tqpill b { font: 800 var(--fs-l) var(--display); }
-.tqpill span { color: rgba(255,255,255,.75); overflow: hidden; text-overflow: ellipsis; }
+.tqpill span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .tqlayers { position: absolute; z-index: 5; right: 10px; top: 10px; display: grid; gap: 6px; }
-.tqlayers button { display: grid; justify-items: center; gap: 2px; width: 62px; padding: 8px 0 6px; border-radius: 14px; color: rgba(255,255,255,.85); cursor: pointer; font: 700 10px var(--body);
-  background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
+.tqlayers button { display: grid; justify-items: center; gap: 2px; width: 62px; padding: 8px 0 6px; border-radius: 14px; color: var(--ink); cursor: pointer; font: 700 10px var(--body); background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); border: 1px solid var(--rule); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
 .tqlayers button svg { width: 22px; height: 22px; }
-.tqlayers button[aria-selected="true"] { background: #fff; color: #0b0d12; border-color: #fff; }
-.tqzoom { position: absolute; z-index: 4; left: 12px; top: 58px; display: grid; border-radius: 12px; overflow: hidden; background: rgba(14,16,22,.62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.12); }
-.tqzoom button { width: 40px; height: 40px; border: 0; background: none; color: #fff; font: 600 22px/1 var(--body); cursor: pointer; }
-.tqzoom button + button { border-top: 1px solid rgba(255,255,255,.12); }
+.tqlayers button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tqzoom { position: absolute; z-index: 4; left: 12px; top: 58px; display: grid; border-radius: 12px; overflow: hidden; background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); border: 1px solid var(--rule); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
+.tqzoom button { width: 40px; height: 40px; border: 0; background: none; color: var(--ink); font: 600 22px/1 var(--body); cursor: pointer; }
+.tqzoom button + button { border-top: 1px solid var(--rule); }
 .tqzoom button:disabled { opacity: .35; }
 .tqleg { position: absolute; z-index: 4; left: 12px; right: 12px; bottom: 74px; display: flex; align-items: center; justify-content: flex-start; }
-.tqleg .bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; font: 700 9px/18px var(--mono, monospace); color: rgba(0,0,0,.75); box-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.tqleg .bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; font: 700 9px/18px var(--mono, monospace); color: rgba(0,0,0,.75); border: 1px solid var(--rule); }
 .tqleg .bar span { padding: 0 5px; min-width: 18px; text-align: center; }
-.tqleg .u { margin-left: 6px; font: 700 10px var(--mono, monospace); color: #fff; text-shadow: 0 1px 3px #000; }
-.tqbar { position: absolute; z-index: 5; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 16px;
-  background: rgba(14,16,22,.7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.12); }
+.tqleg .u { margin-left: 6px; padding: 1px 6px; border-radius: 6px; font: 700 10px var(--mono, monospace); color: var(--ink); background: color-mix(in srgb, var(--panel) 80%, transparent); }
+.tqbar { position: absolute; z-index: 5; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 16px; background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); border: 1px solid var(--rule); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
 .tqbar[hidden] { display: none; }
-.tqbar button { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #fff; color: #0b0d12; display: grid; place-items: center; cursor: pointer; }
+.tqbar button { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--ink); color: var(--bg); display: grid; place-items: center; cursor: pointer; }
 .tqbar button svg { width: 18px; height: 18px; }
 .tqtl { flex: 1; min-width: 0; position: relative; }
-.tqtl input { width: 100%; margin: 0; accent-color: #fff; }
-.tqticks { position: relative; height: 12px; font: 700 9px/12px var(--mono, monospace); color: rgba(255,255,255,.6); }
+.tqtl input { width: 100%; margin: 0; accent-color: var(--ink); }
+.tqticks { position: relative; height: 12px; font: 700 9px/12px var(--mono, monospace); color: var(--muted); }
 .tqticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 .tqts { flex: none; min-width: 64px; text-align: right; font: 700 var(--fs-s)/1.15 var(--mono, monospace); }
-.tqts small { display: block; font-size: 10px; color: rgba(255,255,255,.65); }
-.tqmap .msg { position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 80%; margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(14,16,22,.8); text-align: center; font-size: var(--fs-s); }
+.tqts small { display: block; font-size: 10px; color: var(--muted); }
+.tqmap .msg { position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 80%; margin: 0; padding: 10px 14px; border-radius: 12px; text-align: center; font-size: var(--fs-s); background: color-mix(in srgb, var(--panel) 82%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); border: 1px solid var(--rule); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
 .tqmap .msg[hidden] { display: none; }
 .tqmap.windy .tqtop, .tqmap.windy .tqzoom, .tqmap.windy .tqleg, .tqmap.windy .tqbar, .tqmap.windy svg.rings { display: none; }
 .tqnow { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; padding: 18px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
@@ -1621,7 +1619,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 .aphead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .aphead .apsub { color: var(--muted); font: 700 var(--fs-s) var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
 .appgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
-.apptile { --ac: var(--accent); position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ai go" "b b" "big big" "sm sm"; align-content: start; gap: 2px 10px;
+.apptile { --ac: var(--accent); position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ai go" "b b" "big big" "sm sm" "dots dots"; align-content: start; gap: 2px 10px;
   min-height: 168px; padding: 14px 14px 16px; text-align: left; overflow: hidden; isolation: isolate; border-radius: 20px;
   border: 1px solid color-mix(in srgb, var(--ac) 22%, var(--rule)); color: var(--ink); cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent;
   background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--ac) 16%, transparent), transparent 60%), var(--panel);
@@ -1838,21 +1836,20 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   <section id="apps" aria-labelledby="appsH">
     <div class="aphead"><h2 id="appsH">Apps</h2><span class="apsub" id="apSub"></span></div>
     <div class="appgrid">
-      <button type="button" class="apptile w" data-tab="multi" id="tabMulti" hidden style="--ac:#ff3b3b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Multicams</b><span class="big" id="ap-multi-big">—</span><small id="ap-multi">Dónde va cada cámara y quién graba</small><span class="dots" id="ap-multi-dots" aria-hidden="true"></span><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real con fotogramas, destello y pitido para sincronizar cámaras</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-tab="tiempo" id="tabTiempo" style="--ac:#4b9bff"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Tiempo</b><span class="big" id="ap-tiempo-big">—</span><small id="ap-tiempo">Lluvia: radar y previsión</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-tab="sol" id="tabSol" style="--ac:#f2a93b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>Sol</b><span class="big" id="ap-sol-big">—</span><small id="ap-sol">Luz, hora dorada y brújula</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real con fotogramas, destello y pitido para sincronizar cámaras</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-app="mk" style="--ac:#ffd23b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Momentos</b><span class="big" id="ap-mk-big">0</span><small id="ap-mk">Marcas para la edición</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button type="button" class="apptile" data-tab="mapa" id="tabMapa" hidden style="--ac:#3ddc97"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Mapa</b><span class="big" id="ap-mapa-big">GPS</span><small>El recinto y dónde estás</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-tab="multi" id="tabMulti" hidden style="--ac:#ff3b3b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Multicams</b><span class="big" id="ap-multi-big">—</span><small id="ap-multi">Dónde va cada cámara y quién graba</small><span class="dots" id="ap-multi-dots" aria-hidden="true"></span><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile w" data-tab="mapa" id="tabMapa" hidden style="--ac:#3ddc97"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Mapa</b><span class="big" id="ap-mapa-big">GPS</span><small>El recinto y dónde estás</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
     </div>
   </section>
   <section id="tiempo" aria-labelledby="tqH">
     <div class="tqhero">
       <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de lluvia y nubes alrededor del festival">
-        <div class="ly" id="tqBase"></div>
+        <canvas class="ly" id="tqBase" aria-hidden="true"></canvas>
         <canvas class="ly tqheat" id="tqHeat" aria-hidden="true"></canvas>
         <div class="ly" id="tqRad"></div>
-        <canvas class="ly" id="tqPc" aria-hidden="true"></canvas>
         <svg class="rings" id="tqRings" aria-hidden="true"></svg>
         <div class="ly tqwin" id="tqWin" hidden></div>
         <div class="tqtop"><span class="tqpill"><b id="tqPillT">—</b><span id="tqPillN"></span></span></div>
@@ -1880,7 +1877,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <h3>Días del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
     <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ECMWF, ICON, AROME) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ECMWF, ICON, AROME) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
@@ -2197,6 +2194,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <button class="btn" id="mkListX2" type="button">Listo</button>
   </header>
   <div class="body">
+    <button type="button" class="btn primary mkbig" id="mkBig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg>Marcar momento</button>
     <p class="note" id="mkListInfo"></p>
     <div class="edtabs" id="mkDays" role="tablist" aria-label="Día" hidden></div>
     <div class="edtabs" id="mkWhoF" role="tablist" aria-label="De quién"></div>
@@ -7280,7 +7278,7 @@ document.getElementById('multi').addEventListener('keydown', e => { if ((e.key =
 // ==== /MULTICÁMARA ====
 
 // ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
-// Botó «Momento» a Horarios i Cámaras: guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
+// Botó «Marcar momento» dins de l'app Momentos (05-11: a Horarios es tocava sense voler): guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
 // Es comparteixen per al servidor d'avisos (POST/GET /mk) i s'exporten amb timecode d'hora del dia per a DaVinci (EDL),
 // Final Cut (FCPXML) o Excel (CSV). Sense servidor (artifact) o sense cobertura: queden al mòbil i s'envien després.
 const MKK = FEST.key + '-mk-v1';
@@ -7343,6 +7341,7 @@ function mkTap() {
   try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
   anim(document.getElementById('mkFab'), [{ transform: 'scale(.86)' }, { transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 320 });
   mkOpen(m, live);
+  if (!document.getElementById('mkList').hidden) mkRenderList();
   mkFlush();
 }
 function mkOpen(m, live) {
@@ -7362,14 +7361,16 @@ function mkOpen(m, live) {
   const note = document.getElementById('mkPopNote');
   note.value = m.note || '';
   pop.hidden = false;
+  document.getElementById('mkPopAll').hidden = !document.getElementById('mkList').hidden;
   anim(pop, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 220 });
   mkArm();
 }
 // El quadre marxa sol als 8 s sense tocar-lo (per poder seguir gravant); mentre s'escriu la nota no
 function mkArm() { clearTimeout(mkPopT); mkPopT = setTimeout(() => { if (document.activeElement !== document.getElementById('mkPopNote')) mkClose(); else mkArm(); }, 8000); }
 function mkClose() { clearTimeout(mkPopT); document.getElementById('mkPop').hidden = true; mkCur = null; }
-function mkChanged(m) { m.v = (m.v || 0) + 1; m.sent = false; mkSave(); clearTimeout(mkChanged.t); mkChanged.t = setTimeout(mkFlush, 600); }
+function mkChanged(m) { m.v = (m.v || 0) + 1; m.sent = false; mkSave(); if (!document.getElementById('mkList').hidden) mkRenderList(); clearTimeout(mkChanged.t); mkChanged.t = setTimeout(mkFlush, 600); }
 document.getElementById('mkFab').addEventListener('click', mkTap);
+document.getElementById('mkBig').addEventListener('click', mkTap);
 document.getElementById('mkPopX').addEventListener('click', mkClose);
 document.getElementById('mkPop').addEventListener('pointerdown', mkArm);
 document.getElementById('mkPopTags').addEventListener('click', e => {
@@ -7410,17 +7411,17 @@ function mkRenderList() {
   document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
     const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
     return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
-  }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Momento» en Horarios o Cámaras mientras graba.</li>';
+  }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Marcar momento» justo cuando pase algo.</li>';
   for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
 }
 function mkOpenList() {
   const sh = document.getElementById('mkList');
   if (mkDayF < 0 && NDAYS > 1) mkDayF = dayAt(now());
-  sh.hidden = false; document.body.classList.add('locked');
+  sh.hidden = false; document.body.classList.add('locked', 'mkopen');
   anim(sh, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
   mkRenderList(); mkPull(); mkFlush();
 }
-function mkCloseList() { document.getElementById('mkList').hidden = true; document.body.classList.remove('locked'); }
+function mkCloseList() { mkClose(); document.getElementById('mkList').hidden = true; document.body.classList.remove('locked', 'mkopen'); }
 document.getElementById('mkListX').addEventListener('click', mkCloseList);
 document.getElementById('mkListX2').addEventListener('click', mkCloseList);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('mkList').hidden) mkCloseList(); });
@@ -7633,16 +7634,54 @@ function tqLayout() {
   const w = tqWhere(), [px, py] = tqWorld(w.lat, w.lon, tqZ);
   // El punt del festival una mica per sobre del centre (a baix hi ha la barra de temps)
   tqView = { W, H, w, z: tqZ, left: Math.round(px - W / 2), top: Math.round(py - H * .44) };
-  const light = document.documentElement.dataset.theme === 'light' ? 'light_all' : 'dark_all';
-  document.getElementById('tqBase').innerHTML = tqTiles(tqZ, TQ_TILE, tqView.left, tqView.top, W, H).map((p, i) =>
-    `<img alt="" src="https://${'abcd'[i % 4]}.basemaps.cartocdn.com/${light}/${tqZ}/${p.x}/${p.y}@2x.png" style="left:${p.l}px;top:${p.t}px;width:${TQ_TILE}px;height:${TQ_TILE}px">`).join('');
   const mpp = 156543.034 * Math.cos(w.lat * Math.PI / 180) / 2 ** tqZ, cx = px - tqView.left, cy = py - tqView.top;
   document.getElementById('tqRings').innerHTML = [10, 25, 50, 100, 200].map(km => { const r = km * 1000 / mpp;
-    return r < 30 || r > Math.max(W, H) * .8 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx + r * .707 + 3).toFixed(1)}" y="${(cy - r * .707 - 3).toFixed(1)}">${km} km</text>`; }).join('')
+    return r < 30 || r > Math.max(W, H) * .8 ? '' : `<circle class="r" cx="${cx}" cy="${cy}" r="${r.toFixed(1)}"/><text x="${(cx - r * .707 - 3).toFixed(1)}" y="${(cy + r * .707 + 11).toFixed(1)}" text-anchor="end">${km} km</text>`; }).join('')
     + `<circle class="pulse" cx="${cx}" cy="${cy}" r="6"/><circle class="pin" cx="${cx}" cy="${cy}" r="6"/>`;
-  for (const id of ['tqHeat', 'tqPc']) { const c = document.getElementById(id), dpr = Math.min(2, devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
+  for (const id of ['tqHeat', 'tqBase']) { const c = document.getElementById(id), dpr = Math.min(2, devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
   document.getElementById('tqZin').disabled = tqZ >= 10; document.getElementById('tqZout').disabled = tqZ <= 6;
+  tqBaseDraw();
   return tqView;
+}
+// Mapa de fons propi (05-11; abans CARTO, que ara demana clau): costa, fronteres, rius i poblacions de Natural Earth
+// (domini públic, retallat al NE de la península per build_web.py des de vendor/mapa-base.json), pintat amb els colors del festival
+const TQ_MAP = /*MAPA*/null/*MAPA*/;
+function tqHex(v, fb) { const m = /^#([0-9a-f]{6})$/i.exec(String(v).trim()); return m ? [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16)) : fb; }
+const tqMix = (a, b, k) => a.map((x, i) => Math.round(x + (b[i] - x) * k));
+function tqBaseDraw() {
+  const g = tqView, c = document.getElementById('tqBase'), ctx = c.getContext('2d');
+  if (!g) return;
+  const cs = getComputedStyle(document.documentElement), bg = tqHex(cs.getPropertyValue('--bg'), [5, 6, 8]), ink = tqHex(cs.getPropertyValue('--ink'), [245, 245, 245]);
+  const light = (bg[0] + bg[1] + bg[2]) / 3 > 128, rgb = (a, al = 1) => `rgba(${a.join(',')},${al})`;
+  const sea = tqMix(tqMix(bg, [40, 90, 150], light ? .14 : .22), ink, .02), land = tqMix(bg, ink, light ? .05 : .075);
+  ctx.fillStyle = rgb(TQ_MAP ? sea : land); ctx.fillRect(0, 0, g.W, g.H);
+  if (!TQ_MAP) return;
+  const P = ([lon, lat]) => { const [x, y] = tqWorld(lat, lon, g.z); return [x - g.left, y - g.top]; };
+  const path = (pts, close) => { ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath(); };
+  ctx.fillStyle = rgb(land); ctx.strokeStyle = rgb(ink, light ? .28 : .22); ctx.lineWidth = 1;
+  for (const r of TQ_MAP.land) { path(r, true); ctx.fill(); }
+  // la costa: el contorn de la terra, menys les vores tallades del rectangle
+  const [X0, Y0, X1, Y1] = TQ_MAP.bbox, edge = p => Math.abs(p[0] - X0) < 1e-3 || Math.abs(p[0] - X1) < 1e-3 || Math.abs(p[1] - Y0) < 1e-3 || Math.abs(p[1] - Y1) < 1e-3;
+  for (const r of TQ_MAP.land) { ctx.beginPath(); let on = false; for (let i = 0; i <= r.length; i++) { const p = r[i % r.length], q = r[(i + r.length - 1) % r.length], [x, y] = P(p); if (i && !(edge(p) && edge(q))) { on ? ctx.lineTo(x, y) : (ctx.moveTo(...P(q)), ctx.lineTo(x, y)); on = true; } else on = false; } ctx.stroke(); }
+  ctx.strokeStyle = rgb([70, 140, 220], light ? .35 : .3); ctx.lineWidth = 1;
+  for (const l of TQ_MAP.rv) { path(l); ctx.stroke(); }
+  ctx.strokeStyle = rgb(ink, light ? .22 : .16); ctx.setLineDash([3, 3]);
+  for (const l of TQ_MAP.b1) { path(l); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.strokeStyle = rgb(ink, light ? .45 : .38); ctx.lineWidth = 1.4;
+  for (const l of TQ_MAP.b0) { path(l); ctx.stroke(); }
+  // Poblacions: segons el zoom, de més grans a més petites, sense trepitjar-se ni tapar els controls
+  const min = { 6: 300000, 7: 120000, 8: 40000, 9: 15000, 10: 0 }[g.z] ?? 0, boxes = [[0, 0, 200, 110], [g.W - 80, 0, g.W, 230], [0, g.H - 120, g.W, g.H]];
+  const cx0 = g.W / 2, cy0 = g.H * .44;
+  ctx.font = `600 11px ${cs.getPropertyValue('--body') || 'sans-serif'}`; ctx.textBaseline = 'middle';
+  for (const [n, lon, lat, pop] of TQ_MAP.pl) {
+    if (pop < min) continue;
+    const [x, y] = P([lon, lat]); if (x < 4 || y < 4 || x > g.W - 4 || y > g.H - 4) continue;
+    const w = ctx.measureText(n).width, b = [x - 4, y - 8, x + 8 + w, y + 8];
+    if (Math.hypot(x - cx0, y - cy0) < 14 || (b[0] < cx0 + 10 && b[2] > cx0 - 10 && b[1] < cy0 + 10 && b[3] > cy0 - 10) || boxes.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1])) continue;
+    boxes.push(b);
+    ctx.fillStyle = rgb(ink, .55); ctx.beginPath(); ctx.arc(x, y, pop >= 300000 ? 3 : 2, 0, 7); ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = rgb(land, .85); ctx.strokeText(n, x + 6, y); ctx.fillStyle = rgb(ink, pop >= 100000 ? .78 : .6); ctx.fillText(n, x + 6, y);
+  }
 }
 
 // --- Capa Lluvia: radar de RainViewer (passat, cada 10 min)
@@ -7812,6 +7851,8 @@ function tqShow(on) {
   tqTimer = setInterval(() => { if (document.hidden) return; tqFetch(); tqRadar(); tqGridFetch(); }, 5 * MIN);
 }
 document.addEventListener('visibilitychange', () => { if (tqOn && !document.hidden) { tqFetch(); tqRadar(); tqGridFetch(); } });
+// Canvi de tema (Ajustes → Tema): el mapa de fons i la previsió es tornen a pintar amb els colors nous
+new MutationObserver(() => { if (tqOn) { tqBaseDraw(); tqHeat(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(tqRedraw, 300); } });
 // ==== /TIEMPO ====
 
@@ -7836,19 +7877,17 @@ let apSolK = '', apSolD = null;
 function appsPaint() {
   const t = now();
   document.getElementById('apSub').textContent = `${FEST.name} · ${hm(t)}`;
-  // Sense mapa, Momentos ocupa tota la fila (no queda una fitxa sola a mitja amplada)
-  document.querySelector('#apps [data-app="mk"]').classList.toggle('w', document.getElementById('tabMapa').hidden);
   // Momentos
   const L = mkList(), n = L.length, last = L[L.length - 1];
   document.getElementById('ap-mk-big').textContent = String(n);
-  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Toca «Momento» en Horarios o Multicams';
+  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Marcas para la edición';
   // Multicams: quantes graven i un punt per càmera
   const cams = MC.flatMap(sx => sx.cams || []);
   if (cams.length) {
     const st = c => (mcState[mcKey(c)] || {}).st || '', rec = cams.filter(c => st(c) === 'grabando').length, up = cams.filter(c => st(c) === 'montada').length;
-    document.getElementById('ap-multi-big').innerHTML = rec ? `● ${rec} REC` : `${up}<small>/${cams.length} montadas</small>`;
+    document.getElementById('ap-multi-big').innerHTML = rec ? `● ${rec} REC` : `${up}<small>/${cams.length}</small>`;
     if (rec) document.getElementById('ap-multi-big').style.color = 'var(--now)'; else document.getElementById('ap-multi-big').style.color = '';
-    document.getElementById('ap-multi').textContent = rec ? `${rec} grabando · ${up} montadas · ${cams.length} cámaras` : `${cams.length} cámaras · toca para ver dónde va cada una`;
+    document.getElementById('ap-multi').textContent = rec ? `${rec} grabando · ${up} montadas` : 'montadas';
     document.getElementById('ap-multi-dots').innerHTML = cams.map(c => `<i class="${st(c)}" title="${esc(c.pos || c.cam || '')}"></i>`).join('');
   }
   // Tiempo

@@ -29,14 +29,18 @@ push_f = CONF / "push.json"
 push = json.loads(push_f.read_text()) if push_f.is_file() else None
 src = src.replace("/*PUSH*/null/*PUSH*/", json.dumps({"url": push["url"], "public": push["public"]}) if push else "null")
 src = src.replace("/*ADMIN*/null/*ADMIN*/", "true" if push else "null")
+# Mapa de fons de la pestanya Tiempo (costa, fronteres, rius i poblacions de Natural Earth, domini públic)
+_mapa = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor", "mapa-base.json")
+if os.path.exists(_mapa):
+    src = src.replace("/*MAPA*/null/*MAPA*/", open(_mapa, encoding="utf-8").read().strip())
 # Content-Security-Policy: segona capa per si mai s'hi colés codi estrany. La pàgina només pot parlar amb ella mateixa
 # i amb el servidor d'avisos, i només pot carregar lletres de Google Fonts (la llibreria d'Excel ara és a vendor/, a la mateixa web).
-# Pestanya Tiempo (04-11): previsió d'Open-Meteo, radar de RainViewer, mapa de fons de CARTO i el widget de Windy (iframe).
+# Pestanya Tiempo (04-11): previsió d'Open-Meteo, radar de RainViewer, mapa de fons propi (vendor/mapa-base.json) i el widget de Windy (iframe).
 import re
 PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
 CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
-       "img-src 'self' data: blob: https://tilecache.rainviewer.com https://*.basemaps.cartocdn.com " + PUSH_ORIGIN + "; media-src 'self' data: blob:; "
+       "img-src 'self' data: blob: https://tilecache.rainviewer.com " + PUSH_ORIGIN + "; media-src 'self' data: blob:; "
        "connect-src 'self' https://api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
@@ -223,7 +227,7 @@ shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*
 USES3D = "scene3d:" in src
 if (OUT / "vendor").exists():
     shutil.rmtree(OUT / "vendor")
-shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*", *(() if USES3D else ("three-*",))))
+shutil.copytree(ROOT / "vendor", OUT / "vendor", ignore=shutil.ignore_patterns(".*", "mapa-base.json", *(() if USES3D else ("three-*",))))  # el mapa ja va dins de l'index.html
 # Icona Midnight App (icons/make_icon.swift la genera a partir de la de la Midnight Suite)
 for s in (32, 180, 192, 512):
     shutil.copy(ROOT / "icons" / f"icon-{s}.png", OUT / f"icon-{s}.png")
