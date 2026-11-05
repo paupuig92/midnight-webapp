@@ -960,7 +960,7 @@ body[data-tab="mapa"] .wrap > :not(#mapa) { display: none !important; }
 /* Multicámara (FEST.multicam): posicions de càmera per escenari + material sumat. Només consulta */
 body[data-tab="multi"] .wrap > :not(#multi) { display: none !important; }
 body[data-tab="multi"] #multi { display: block !important; }
-#multi { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
+#multi, #mcCamSheet { --mc-morado: #9b5cff; --mc-rojo: #e8343a; --mc-amarillo: #f5c518; --mc-naranja: #ff8a1f; --mc-verde: #2fbf55; --mc-azul: #2f7bff; --mc-negro: #6b6e75; }
 #multi .edtabs { margin-top: 14px; }
 #multi .mcmsg { margin: 8px 0 0; }
 /* Les càmeres: com «A continuación» (vora del color de la càmera, nom gran en majúscules) */
@@ -1043,7 +1043,22 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
-#mcSheet, #incSheet { z-index: 20; }
+#mcSheet, #incSheet, #mcCamSheet { z-index: 20; }
+#mcCamSheet { z-index: 21; }
+#multi li.mcadd { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 12px 0 4px; border: 0; }
+#multi li.mcadd .btn { min-height: 44px; padding: 0 14px; font-size: var(--fs-s); }
+#multi li.mcadd .note { margin: 0; }
+#multi li.mcadd .linkbtn { padding: 0 2px; min-height: 36px; }
+#mcSheet .mcsheeted { width: 100%; margin-top: 18px; min-height: 44px; font-size: var(--fs-s); }
+#mcCamSheet .body h3 { margin: 18px 0 8px; font: 800 12px/1.2 var(--display); font-stretch: 112%; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#mcCamSheet input { width: 100%; box-sizing: border-box; font: 16px var(--body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; min-height: 46px; padding: 0 12px; }
+#mcCamSheet .edtabs { margin: 0; }
+#mcCamSheet .mccols { display: flex; flex-wrap: wrap; gap: 10px; }
+#mcCamSheet .mccols button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--bg); background: var(--sc); box-shadow: 0 0 0 1.5px var(--line); cursor: pointer; padding: 0; }
+#mcCamSheet .mccols button[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+#mcCamSheet .mcdel { width: 100%; margin-top: 22px; min-height: 44px; border-color: var(--now); color: var(--now); }
+#mcCamSheet .mcdel.sure { background: var(--now); color: #fff; }
+#mcCamSheet .mcerr { color: var(--now); }
 /* Incidències */
 #inc .shead { align-items: center; }
 #inc .incgo { min-height: 40px; padding: 0 14px; font-size: var(--fs-s); }
@@ -2142,8 +2157,35 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <input type="text" id="mcNote" maxlength="140" placeholder="Batería, tarjeta, encuadre…" autocomplete="off" enterkeyhint="done">
     <p class="note mcby" id="mcSheetBy"></p>
     <button type="button" class="linkbtn" id="mcSheetClr" hidden>Quitar estado (vuelve a «Sin montar»)</button>
+    <button type="button" class="btn mcsheeted" id="mcSheetEd">Editar cámara (nombre, óptica, color…)</button>
   </div>
   <div class="foot"><button class="btn primary" id="mcDone" type="button">Listo</button></div>
+</div>
+
+<div class="sheet" id="mcCamSheet" role="dialog" aria-modal="true" aria-labelledby="mcCamH" hidden>
+  <header>
+    <h2 id="mcCamH">Añadir cámara</h2>
+    <button class="btn" id="mcCamX" type="button">Cancelar</button>
+  </header>
+  <div class="body">
+    <p class="note" id="mcCamInfo"></p>
+    <h3><label for="mcCamPos">Posición</label></h3>
+    <input type="text" id="mcCamPos" maxlength="30" placeholder="Cenital, General 1, Cabina…" autocomplete="off" enterkeyhint="next">
+    <h3><label for="mcCamCam">Cámara</label></h3>
+    <input type="text" id="mcCamCam" maxlength="30" placeholder="Black Micro G2, DJI Action 6…" autocomplete="off" list="mcCamList" enterkeyhint="next">
+    <datalist id="mcCamList"></datalist>
+    <h3><label for="mcCamOpt">Óptica</label></h3>
+    <input type="text" id="mcCamOpt" maxlength="14" placeholder="6mm, 24-70mm…" autocomplete="off" enterkeyhint="next">
+    <h3><label for="mcCamLim">Límite de grabación (min)</label></h3>
+    <input type="number" id="mcCamLim" min="1" max="9999" step="1" inputmode="numeric" placeholder="Tarjeta o batería: avisa al 80 %">
+    <h3>Color</h3>
+    <div class="mccols" id="mcCamCol" role="group" aria-label="Color"></div>
+    <div id="mcCamStW"><h3>Escenario</h3><div class="edtabs" id="mcCamSt" role="group" aria-label="Escenario"></div></div>
+    <div id="mcCamDayW"><h3>Día</h3><div class="edtabs" id="mcCamDay" role="group" aria-label="Día"></div></div>
+    <p class="note mcby" id="mcCamWhere"></p>
+    <button type="button" class="btn mcdel" id="mcCamDel" hidden>Quitar cámara</button>
+  </div>
+  <div class="foot"><button class="btn primary" id="mcCamOk" type="button">Guardar</button></div>
 </div>
 
 <div class="sheet" id="incSheet" role="dialog" aria-modal="true" aria-labelledby="incSheetH" hidden>
@@ -2434,14 +2476,21 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 // Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
 // plan (opcional) = imatge de l'escenari (img/…, p. ex. la il·lustració isomètrica) i a cada càmera at: [x %, y %] = on va a la imatge.
 // carpa-3d.webp: il·lustració feta amb Nano Banana 2.1 (Higgsfield) a partir de la vista isomètrica del stage plot (04-11).
-// PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
+// days (opcional) = només aquests dies (1 = dissabte, 2 = diumenge). Sense days, tots els dies.
+// Dissabte (Universo Makina, 05-11, en Pau): triple cabina al mig de la pista (la plataforma de x = 0) → cenital, 2 generals i 1 general tancada.
+//   Posicions i càmeres PROVISIONALS: l'equip les mou i les completa des de l'app («Editar cámaras»).
+// Diumenge: les 4 del primer Duro (PROVISIONALS, en Pau encara no sap les d'aquest).
 FEST.multicam = [
   { stage: 'Black Hangar', plan: 'img/carpa-3d.webp',
     cams: [
-      { uid: 'black-hangar-cabina', c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
-      { uid: 'black-hangar-cabina-cenital', c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
-      { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
+      { uid: 'makina-cenital', days: [1], c: 'azul', pos: 'Cenital cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at3d: [0, 0, 8], aim: [0, -90] },
+      { uid: 'makina-general-1', days: [1], c: 'naranja', pos: 'General 1', cam: '', opt: '', at3d: [-3.5, -2.5, 3], aim: [35, -18] },
+      { uid: 'makina-general-2', days: [1], c: 'verde', pos: 'General 2', cam: '', opt: '', at3d: [3.5, 2.5, 3], aim: [-145, -18] },
+      { uid: 'makina-general-cerrada', days: [1], c: 'rojo', pos: 'General cerrada', cam: '', opt: '', at3d: [7, 0, 2.6], aim: [180, -8] },
+      { uid: 'black-hangar-cabina', days: [2], c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { uid: 'black-hangar-cabina-cenital', days: [2], c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { uid: 'black-hangar-foh-abierta', days: [2], c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-cerrada', days: [2], c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
     // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD en GB).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
@@ -6391,6 +6440,45 @@ if (mcFilter && !MC.some(s => s.stage === mcFilter)) mcFilter = '';
 try { localStorage.removeItem(FEST.key + '-mc-carga-v1'); } catch (e) {}  // marques de «Material» (checklist treta el 05-11)
 const mcLive = () => ONLINE && PUSH && PUSH.url;
 document.getElementById('tabMulti').hidden = !MC.length;
+// --- Càmeres que l'equip afegeix, canvia o treu des de l'app («Editar cámaras», 05-11) ---
+// Es desen al servidor com una entrada més de /mc (com les posicions): id «<càmera>-def», nota
+// «1|escenari|dia|color|posició|càmera|òptica|límit» (dia: buit = tots, 1, 2…; «x» = treta). Així no cal tocar el servidor.
+// Les del festival (FEST.multicam) són la base: una «-def» seva les canvia o les amaga; una «-def» sense base és una càmera nova.
+const MC_BASE = MC.map(s => (s.cams || []).slice());
+const MC_COLS = ['morado', 'rojo', 'amarillo', 'naranja', 'verde', 'azul', 'negro'];
+const mcDefKey = id => id + '-def';
+const mcClean = (s, n) => String(s || '').replace(/[|<>\u0000-\u001f]/g, '').trim().slice(0, n);
+function mcDefParse(note) {
+  const a = String(note || '').split('|');
+  if (a[0] !== '1' || a.length < 8) return null;
+  const lim = parseInt(a[7], 10);
+  return { stage: a[1], day: a[2], f: { c: a[3], pos: a[4], cam: a[5], opt: a[6], lim: lim > 0 ? lim : 0 } };
+}
+const mcDefNote = (stage, day, f) => ['1', mcSlug(stage), day, mcClean(f.c, 10), mcClean(f.pos, 30), mcClean(f.cam, 30), mcClean(f.opt, 14), +f.lim > 0 ? Math.min(9999, Math.round(+f.lim)) : ''].join('|');
+const mcDefsNow = () => Object.keys(mcState).filter(k => k.endsWith('-def') && (mcState[k] || {}).note).sort().map(k => k + '=' + mcState[k].note).join('\n');
+let mcDefSig = null, mcHidden = [];
+const mcOnDay = (days, day) => NDAYS < 2 || !days || !days.length || days.includes(day);
+// Dia d'una «-def»: buit = el de les dades (o tots), «0» = tots els dies, «1», «2»… = només aquest
+const mcDefDays = (d, base) => d.day === '' ? base : d.day === '0' ? null : [+d.day];
+function mcMerge() {
+  const defs = {};
+  for (const k of Object.keys(mcState)) if (k.endsWith('-def')) { const d = mcDefParse((mcState[k] || {}).note); if (d) defs[k.slice(0, -4)] = d; }
+  const day = mcDay + 1;
+  mcHidden = [];
+  MC.forEach((s, i) => {
+    const sl = mcSlug(s.stage), ids = new Set(MC_BASE[i].map(c => c.id));
+    const base = MC_BASE[i].map(c => {
+      const d = defs[c.id];
+      if (!d) return mcOnDay(c.days, day) ? c : null;
+      if (d.day === 'x') { if (mcOnDay(c.days, day)) mcHidden.push([s, c]); return null; }
+      return mcOnDay(mcDefDays(d, c.days), day) ? { ...c, ...d.f, id: c.id, edited: true } : null;
+    });
+    const added = Object.keys(defs).filter(id => !ids.has(id) && defs[id].stage === sl && defs[id].day !== 'x' && mcOnDay(mcDefDays(defs[id], null), day)).sort()
+      .map(id => ({ id, added: true, ...defs[id].f, day: defs[id].day }));
+    s.cams = [...base.filter(Boolean), ...added];
+  });
+  mcDefSig = mcDefsNow();
+}
 
 // «2x Brazo grande» → [2, 'Brazo grande']
 const mcCount = a => { const m = /^\s*(\d+)\s*[x×]\s*(.+)$/i.exec(a) || /^(.+?)\s*[x×]\s*(\d+)\s*$/i.exec(a); return m ? (/^\d+$/.test(m[1]) ? [+m[1], m[2].trim()] : [+m[2], m[1].trim()]) : [1, a.trim()]; };
@@ -6927,8 +7015,8 @@ async function mcLog() {
   } catch (e) { box.innerHTML = '<li class="note">Sin conexión: no se ha podido cargar.</li>'; }
   btn.disabled = false;
 }
-function mc3dEdit(on) {
-  mcEd = on ? { sel: '', draft: {} } : null;
+function mc3dEdit(on, sel = '') {
+  mcEd = on ? { sel, draft: {} } : null;
   const w = document.querySelector('#multi .mcplan'); if (w) w.classList.toggle('mcediting', !!mcEd);
   if (mc3d) { mc3dCams(); mc3dEdPaint(); mc3dDraw(); }
 }
@@ -7024,6 +7112,7 @@ const mcPrevSt = c => { if (NDAYS < 2 || mcDay < 1) return ''; const p = mcState
 const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
 let mcOpen = null;
 function mcRender() {
+  mcMerge();
   const days = document.getElementById('mcDays'), chips = document.getElementById('mcChips');
   days.hidden = NDAYS < 2;
   if (NDAYS > 1) days.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-mcday="${x.d}" aria-selected="${x.d === mcDay}">${(DECO.days || [])[x.d] ? `<img class="dlogo" src="${DECO.days[x.d]}" alt="">` : ''}${html(x.name || `Día ${x.d + 1}`)}</button>`).join('');
@@ -7037,7 +7126,7 @@ function mcRender() {
     return `<ul class="upnext mccams">
       <li class="grp"><b>${html(s.stage)}</b><span class="mcsum" data-mcsum="${html(s.stage)}"></span></li>
       ${s.plan ? `<li class="mcplan"${s.scene3d ? ` data-scene="${html(s.stage)}"` : ''}><div class="mc3dbox"><img src="${html(s.plan)}" alt="${html(s.stage)}: dónde va cada cámara">${(s.cams || []).map((c, i) => c.at || s.scene3d ? `<button type="button" class="mcpin${c.at ? '' : ' nopos'}" data-mcid="${mcKey(c)}" style="${c.at ? `left:${+c.at[0]}%;top:${+c.at[1]}%;` : ''}--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}" aria-label="${html(c.pos || c.cam)}">${i + 1}</button>` : '').join('')}</div>${s.scene3d ? `<p class="note mchint">Toca una cámara para ir a ella (otra vez: su ficha) · un dedo gira · dos dedos acercan y mueven · doble toque para volver.</p>
-        <div class="mctools"><button type="button" class="btn" data-mc3d="fold">Ocultar 3D</button><button type="button" class="btn" data-mc3d="edit">Mover cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
+        <div class="mctools"><button type="button" class="btn" data-mc3d="fold">Ocultar 3D</button><button type="button" class="btn" data-mc3d="edit">Editar cámaras</button><button type="button" class="btn" data-mc3d="look">Vista plano</button><button type="button" class="btn" data-mc3d="home">Centrar</button></div>
         <div class="mced" hidden>
           <div class="edtabs mcsel" role="tablist" aria-label="Cámara">${(s.cams || []).map((c, i) => `<button type="button" role="tab" data-mcsel="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--muted)'}"><i class="mcn">${i + 1}</i>${html(c.pos || c.cam)}</button>`).join('')}</div>
           <p class="note mcedw"></p>
@@ -7053,9 +7142,10 @@ function mcRender() {
         <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt, mcLim(c) && 'máx.\u00a0' + mcDur(mcLim(c).min)].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
         <span class="mcs"><button type="button" class="mcnext" data-mcnext="${mcKey(c)}"></button><span class="ssd"></span><span class="rt"></span></span>
       </li>`).join('')}
+      <li class="mcadd"><button type="button" class="btn" data-mcadd="${html(s.stage)}">+ Añadir cámara</button>${mcHidden.filter(([h]) => h === s).length ? `<span class="note">Quitadas: ${mcHidden.filter(([h]) => h === s).map(([, c]) => `<button type="button" class="linkbtn" data-mcback="${html(c.id)}">↺ ${html(c.pos || c.cam)}</button>`).join(' ')}</span>` : ''}</li>
       ${NDAYS > 1 && mcDay > 0 && (s.cams || []).length ? `<li class="mcsame" data-mcsame="${html(s.stage)}" hidden><button type="button" class="btn">Igual que el ${html(DAYS[mcDay - 1].name || 'día anterior')}</button><span class="note">Las que seguían montadas pasan a «Montada», con su SSD.</span></li>` : ''}
     </ul>
-    ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario.</p>'}
+    ${(s.cams || []).length ? '' : '<p class="note mcempty">Aún no hay cámaras para este escenario: toca «Añadir cámara».</p>'}
     ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
     ${s.note ? `<p class="note mcnote">⚠️ ${html(s.note)}</p>` : ''}`;
   }).join('');
@@ -7069,6 +7159,7 @@ function mcAgo(s) {
 }
 // Pinta l'estat (també el de la fitxa oberta, sense trepitjar el que s'hi escriu)
 function mcPaint() {
+  if (mcDefSig !== null && mcDefsNow() !== mcDefSig) { if (document.getElementById('mcBody').childElementCount) return mcRender(); mcMerge(); }
   for (const el of document.querySelectorAll('#mcBody .mcpin')) { const s = mcState[el.dataset.mcid] || {}; el.dataset.st = s.st || ''; }
   for (const el of document.querySelectorAll('#mcBody li[data-mcid]')) {
     const s = mcState[el.dataset.mcid] || {};
@@ -7163,6 +7254,125 @@ addEventListener('pagehide', () => mcSaveFields());
 document.addEventListener('visibilitychange', () => { if (document.hidden) mcSaveFields(); else mcFlush(); });
 addEventListener('online', () => mcFlush());
 mcSheet.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+// --- Fitxa «Añadir / Editar cámara»: qualsevol de l'equip, sense contrasenya (com la resta de Multicams) ---
+const mcCam = document.getElementById('mcCamSheet');
+let mcCamEd = null;  // { id, stage, base, c, day, col, sure }
+const mcCamV = id => document.getElementById(id);
+function mcCamPaint() {
+  const e = mcCamEd; if (!e) return;
+  mcCamV('mcCamCol').innerHTML = MC_COLS.map(k => `<button type="button" data-mccol="${k}" style="--sc:${mcCol(k)}" aria-pressed="${e.col === k}" aria-label="${k}"></button>`).join('');
+  mcCamV('mcCamStW').hidden = MC.length < 2 || !!e.base;
+  mcCamV('mcCamSt').innerHTML = MC.map(s => `<button type="button" data-mccst="${html(s.stage)}" aria-selected="${s.stage === e.stage}">${html(s.stage)}</button>`).join('');
+  mcCamV('mcCamDayW').hidden = NDAYS < 2;
+  mcCamV('mcCamDay').innerHTML = NDAYS < 2 ? '' : [['', 'Todos los días'], ...DAYS.map(x => [String(x.d + 1), x.name || `Día ${x.d + 1}`])].map(([v, l]) => `<button type="button" data-mccday="${v}" aria-selected="${v === e.day}">${html(l)}</button>`).join('');
+  const s = MC.find(x => x.stage === e.stage);
+  mcCamV('mcCamWhere').textContent = !mcLive() ? 'Sin servidor: la cámara solo se verá en este móvil.' : s && s.scene3d ? (e.id ? 'Para moverla: «Editar cámaras» en el 3D.' : 'Al guardar, colócala en el 3D: arrástrala por el suelo.') : 'Lo verá todo el equipo en unos segundos.';
+  const del = mcCamV('mcCamDel'); del.hidden = !e.id; del.classList.toggle('sure', !!e.sure);
+  del.textContent = e.sure ? 'Toca otra vez para quitarla' : 'Quitar cámara';
+}
+function mcCamOpen(stage, c) {
+  const base = c ? MC_BASE.flat().find(x => x.id === c.id) : null;
+  const d = c ? mcDefParse((mcState[mcDefKey(c.id)] || {}).note) : null;
+  const day = d && d.day !== '' ? (d.day === '0' ? '' : d.day) : c ? (base && base.days && base.days.length === 1 && NDAYS > 1 ? String(base.days[0]) : '') : NDAYS > 1 ? String(mcDay + 1) : '';
+  mcCamEd = { id: c ? c.id : '', stage, base, day, col: c ? c.c || '' : MC_COLS[(MC.find(s => s.stage === stage)?.cams || []).length % MC_COLS.length], sure: false };
+  mcCamV('mcCamH').textContent = c ? 'Editar cámara' : 'Añadir cámara';
+  mcCamV('mcCamInfo').textContent = c ? `${stage}${c.added ? ' · añadida desde la app' : ''}` : `${stage}: aparecerá en la lista y en el 3D para todo el equipo.`;
+  mcCamV('mcCamPos').value = c ? c.pos || '' : '';
+  mcCamV('mcCamCam').value = c ? c.cam || '' : '';
+  mcCamV('mcCamOpt').value = c ? c.opt || '' : '';
+  mcCamV('mcCamLim').value = c && +c.lim ? +c.lim : '';
+  mcCamV('mcCamList').innerHTML = [...new Set(MC_BASE.flat().concat(MC.flatMap(s => s.cams || [])).map(x => x.cam).filter(Boolean))].map(v => `<option value="${html(v)}">`).join('');
+  mcCamV('mcCamPos').classList.remove('mcerr');
+  mcCamPaint();
+  mcCam.hidden = false;
+  anim(mcCam, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  document.body.classList.add('locked');
+  if (!c) setTimeout(() => mcCamV('mcCamPos').focus(), 280);
+}
+function mcCamClose() {
+  mcCamEd = null; mcCam.hidden = true;
+  if (mcSheet.hidden) document.body.classList.remove('locked');
+}
+// Esborra tot el que penja d'una càmera afegida (estat de cada dia, posició i definició): així no omple el servidor
+function mcCamWipe(id) {
+  const ks = [id, ...Array.from({ length: NDAYS }, (_, d) => id + '-d' + (d + 1))];
+  for (const k of ks) if (mcState[k] && (mcState[k].st || mcState[k].ssd || mcState[k].note)) mcSet(k, { st: '', ssd: '', note: '' });
+  if ((mcState[id + '-pos'] || {}).note) mcSet(id + '-pos', { note: '' });
+  mcSet(mcDefKey(id), { note: '' });
+}
+function mcCamSave() {
+  const e = mcCamEd; if (!e) return;
+  const f = { pos: mcCamV('mcCamPos').value, cam: mcCamV('mcCamCam').value, opt: mcCamV('mcCamOpt').value, lim: mcCamV('mcCamLim').value, c: e.col };
+  if (!mcClean(f.pos, 30) && !mcClean(f.cam, 30)) { mcCamV('mcCamPos').classList.add('mcerr'); mcCamV('mcCamPos').focus(); toast('Ponle un nombre a la posición.', 'info'); return; }
+  const b = e.base, bday = b && b.days && b.days.length === 1 && NDAYS > 1 ? String(b.days[0]) : '';
+  // Una del festival que passa a «Todos los días» (a les dades només en tenia un): «0»
+  const day = b && e.day === '' && b.days && b.days.length ? '0' : e.day;
+  const id = e.id || (FEST.key + '-n' + Date.now().toString(36)).slice(0, 60), note = mcDefNote(e.stage, day, f);
+  // Una del festival que torna a ser igual que a les dades: s'esborra la «-def» (no ocupa lloc al servidor)
+  const same = b && (note === mcDefNote(e.stage, bday, b) || (day === '' && note === mcDefNote(e.stage, '', b)));
+  const prev = (mcState[mcDefKey(id)] || {}).note || '';
+  const want = same ? '' : note;
+  if (want !== prev) mcSet(mcDefKey(id), { note: want });
+  const isNew = !e.id, s = MC.find(x => x.stage === e.stage);
+  if (!isNew && mcOpen) { const cc = (s && s.cams || []).find(x => x.id === id); if (cc) document.getElementById('mcSheetH').textContent = cc.pos || cc.cam; }
+  mcCamClose();
+  if (isNew) {
+    if (mcFilter && mcFilter !== e.stage) { mcFilter = e.stage; mcRender(); }
+    if (NDAYS > 1 && e.day && +e.day !== mcDay + 1) { mcDay = +e.day - 1; mcDayPicked = true; mcRender(); }
+    toast(`<b>${html(mcClean(f.pos, 30) || mcClean(f.cam, 30))}</b> añadida`, 'info', { label: 'Deshacer', fn: () => mcCamWipe(id) }, 5000);
+    if (s && s.scene3d && mc3d && !mcFold) {
+      mc3dEdit(true, id);
+      document.querySelector('#multi .mcplan')?.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' });
+    }
+  } else toast('Cámara guardada', 'info');
+}
+function mcCamDelete() {
+  const e = mcCamEd; if (!e || !e.id) return;
+  if (!e.sure) { e.sure = true; mcCamPaint(); setTimeout(() => { if (mcCamEd === e) { e.sure = false; mcCamPaint(); } }, 3500); return; }
+  const id = e.id, s = MC.find(x => x.stage === e.stage), c = (s && s.cams || []).find(x => x.id === id), name = c ? c.pos || c.cam : '';
+  const prev = (mcState[mcDefKey(id)] || {}).note || '';
+  mcCamClose();
+  if (mcOpen) mcCloseSheet();
+  if (e.base) {
+    // Una del festival no s'esborra: s'amaga (es pot recuperar amb «↺» a sota de la llista)
+    const d = mcDefParse(prev), f = d ? d.f : e.base;
+    mcSet(mcDefKey(id), { note: mcDefNote(e.stage, 'x', f) });
+    toast(`<b>${html(name)}</b> quitada`, 'info', { label: 'Deshacer', fn: () => mcSet(mcDefKey(id), { note: prev }) }, 5000);
+  } else {
+    const keep = { def: prev, pos: (mcState[id + '-pos'] || {}).note || '' };
+    mcCamWipe(id);
+    toast(`<b>${html(name)}</b> quitada`, 'info', { label: 'Deshacer', fn: () => { mcSet(mcDefKey(id), { note: keep.def }); if (keep.pos) mcSet(id + '-pos', { note: keep.pos }); } }, 5000);
+  }
+}
+mcCam.addEventListener('click', e => {
+  const t = e.target.closest('[data-mccol], [data-mccst], [data-mccday]');
+  if (t && mcCamEd) {
+    if (t.dataset.mccol) mcCamEd.col = t.dataset.mccol;
+    else if (t.dataset.mccst) mcCamEd.stage = t.dataset.mccst;
+    else mcCamEd.day = t.dataset.mccday;
+    mcCamPaint(); return;
+  }
+  if (e.target.id === 'mcCamOk') mcCamSave();
+  else if (e.target.id === 'mcCamX') mcCamClose();
+  else if (e.target.id === 'mcCamDel') mcCamDelete();
+});
+mcCam.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.stopPropagation(); mcCamClose(); }
+  if (e.key === 'Enter' && e.target.matches('input')) { const n = { mcCamPos: 'mcCamCam', mcCamCam: 'mcCamOpt', mcCamOpt: 'mcCamLim' }[e.target.id]; if (n) mcCamV(n).focus(); else e.target.blur(); }
+});
+mcCamV('mcSheetEd').addEventListener('click', () => {
+  const [s, c] = mcAll().find(([, c]) => mcKey(c) === mcOpen) || [];
+  if (c) mcCamOpen(s.stage, c);
+});
+document.getElementById('multi').addEventListener('click', e => {
+  const a = e.target.closest('[data-mcadd]');
+  if (a) { mcCamOpen(a.dataset.mcadd, null); return; }
+  const r = e.target.closest('[data-mcback]');
+  if (r) { const id = r.dataset.mcback, prev = (mcState[mcDefKey(id)] || {}).note || '', d = mcDefParse(prev), b = MC_BASE.flat().find(x => x.id === id);
+    // Torna com estava abans de treure-la (amb els canvis que tenia, si en tenia)
+    const keep = d && b && (d.f.pos !== (b.pos || '') || d.f.cam !== (b.cam || '') || d.f.opt !== (b.opt || '') || d.f.c !== (b.c || '') || (+d.f.lim || 0) !== (+b.lim || 0));
+    mcSet(mcDefKey(id), { note: keep ? mcDefNote(MC.find(s => MC_BASE[MC.indexOf(s)].includes(b)).stage, '', d.f) : '' }); }
+});
 function mcSaveLocal() { try { localStorage.setItem(MC_SK, JSON.stringify(mcState)); } catch (e) {} }
 // Canvis que encara no han arribat al servidor (sense cobertura): es guarden al mòbil i es tornen a enviar sols
 // (cada 15 s amb la pestanya oberta, en tornar la connexió i en tornar a l'app). Mentrestant es veu el valor d'aquest mòbil.
@@ -7185,6 +7395,7 @@ function mcFlush() {
       } catch (e) { mcErr = 'Sin conexión: los cambios se enviarán solos.'; break; }
     }
     mcSaveOut(); mcSaveLocal(); mcFlushing = null; mcPaint();
+    if (!mcErr && Object.keys(mcOut).length) setTimeout(mcFlush, 0);  // el que s'ha tocat mentre s'enviava (p. ex. treure una càmera = 3 canvis)
   })();
   return mcFlushing;
 }
@@ -8125,6 +8336,7 @@ function appsPaint() {
   document.getElementById('ap-mk-big').textContent = String(n);
   document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Marcas para la edición';
   // Multicams: quantes graven i un punt per càmera
+  if (mcDefSig === null) { if (NDAYS > 1 && !mcDayPicked) mcDay = mcToday(); mcMerge(); }
   const cams = MC.flatMap(sx => sx.cams || []);
   if (cams.length) {
     const st = c => (mcState[mcKey(c)] || {}).st || '', rec = cams.filter(c => st(c) === 'grabando').length, up = cams.filter(c => st(c) === 'montada').length;
