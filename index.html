@@ -1578,6 +1578,15 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 .tqnow .kv span { color: var(--muted); }
 .tqnow .kv b { color: var(--ink); }
 .arw { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+.tqlive { display: grid; grid-template-columns: 112px 1fr; gap: 14px; align-items: center; margin-bottom: 12px; padding: 14px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
+.tqlive.rain { border-color: color-mix(in srgb, #0099cc 70%, var(--rule)); background: color-mix(in srgb, #0099cc 14%, var(--panel)); }
+.tqlive canvas { width: 112px; height: 112px; border-radius: 10px; display: block; }
+.tqlive .tx { display: grid; gap: 3px; min-width: 0; }
+.tqlive .k { font: 700 10px/1.2 var(--mono, monospace); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.tqlive .k i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--now); margin-right: 5px; vertical-align: 1px; }
+.tqlive b { font: 800 clamp(19px, 5.6vw, 24px)/1.1 var(--display); }
+.tqlive .s { color: var(--muted); font-size: var(--fs-s); line-height: 1.3; }
+.tqlive .s.eta { color: var(--ink); font-weight: 700; }
 .tqal { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
 .tqal li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fill, rgba(255,255,255,.06)); font-size: var(--fs-s); line-height: 1.35; }
 .tqal li.warn { background: color-mix(in srgb, var(--fav) 18%, transparent); }
@@ -1875,6 +1884,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     </div>
     <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
     <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
+    <div class="tqlive" id="tqLive" hidden></div>
     <div class="tqnow" id="tqNow" hidden></div>
     <ul class="tqal" id="tqAl"></ul>
     <h3>Previsión por horas</h3>
@@ -7625,6 +7635,7 @@ function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
   const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
   document.getElementById('tqPillN').textContent = where === 'tu ubicación' ? 'Tu ubicación' : FEST.name;
+  tqLivePaint();
   if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
   const ago = Math.round((Date.now() - tq.at) / MIN);
   src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
@@ -7636,16 +7647,17 @@ function tqPaint() {
   const M15 = tq.m && tq.m.minutely_15 ? tq.m.minutely_15 : null;
   const m15 = M15 ? M15.time.map(s => { const p = tqPick('minutely_15', s * 1000); return { t: s * 1000, mm: p ? p.v : 0 }; }).filter(x => x.t + 15 * MIN > t)
     : tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
-  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50 || (h.mn >= 3 && h.my / h.mn >= 0.5), raining = (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
+  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50 || (h.mn >= 3 && h.my / h.mn >= 0.5), rv = tqLvOk(), raining = rv ? rv.here >= TQ_DBZ : (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
   let big, sub;
-  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
+  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = rv && rv.stop ? (tqLvIn(rv, rv.stop) <= 2 ? 'Según el radar, puede parar en cualquier momento' : `Según el radar, puede parar hacia las ${hm(rv.t + rv.stop * MIN)}`) : stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
   else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
-    if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
+    if (rv && rv.eta) { const m = tqLvIn(rv, rv.eta); if (m <= 2) { big = 'Lluvia inminente'; sub = 'Según el radar, puede empezar en cualquier momento'; } else { big = `Lluvia en ~${Math.max(5, Math.round(m / 5) * 5)} min`; sub = `Según el radar · hacia las ${hm(rv.t + rv.eta * MIN)}`; } }
+    else if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
     else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.mn ? ` · ${rh.my} de ${rh.mn} modelos` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
-    else { big = 'Sin lluvia'; sub = 'en las próximas 48 h'; } }
+    else { big = 'Sin lluvia'; sub = rv && rv.near && rv.near.km <= 25 ? `según los modelos · el radar ve lluvia a ${Math.max(1, Math.round(rv.near.km))} km` : 'en las próximas 48 h'; } }
   nowEl.innerHTML = `<span class="ic" aria-hidden="true">${raining ? '🌧️' : ic}</span><span class="tp rain">${big}</span><span class="ds">${sub}</span>`
     + `<div class="kv"><span>Ahora <b>${ds}</b></span>${tqSrcTxt(H, t)}<span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
-  const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1);
+  const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1) || !!(rv && rv.eta && rv.eta <= 60);
   if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}. Ten a mano fundas y bolsas.`]); }
   if (raining || soon) al.push(['bad', '🎥', 'Protege cámaras, brazos y material: fundas, bolsas y toallas.']);
   const tot = next.reduce((s2, h) => s2 + h.mm, 0); if (tot >= 5) al.push(['bad', '🌧️', `${tot.toFixed(0)} mm previstos en 12 h: lluvia fuerte.`]);
@@ -7766,12 +7778,128 @@ async function tqRadar(force) {
     } catch (e) { if (!tqRad) { if (tqLy === 'radar') { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; } return; } }
   }
   if (tqLy === 'radar') msg.hidden = true;
+  tqLive();
   // RainViewer només fins al zoom 7: a zoom més alt es fan servir les rajoles de 512 px, ampliades
   const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = size > 256 ? 512 : 256;
   const T = tqTiles(zr, size, g.left, g.top, g.W, g.H), F = tqRad.radar.past;
   document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
     `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i === tqI ? 'eager' : 'lazy'}">`).join('')}</div>`).join('');
   if (tqLy === 'radar') tqBarSetup();
+}
+
+// --- Pluja en temps real (05-11, en Pau: «i també la pluja a temps real»): es llegeixen els píxels de l'últim radar de RainViewer
+// (CORS obert, zoom 7 ≈ 0,9 km/píxel, sense suavitzar) en un quadrat de ±60 px (~55 km) al voltant del punt del festival.
+// Color → dBZ amb la paleta «Universal Blue» (l'única de l'API gratuïta); pluja = ≥ 15 dBZ (~0,3 mm/h). Moviment: es compara el fotograma
+// de fa 20 min amb l'últim (desplaçament que més coincideix) i s'extrapola en línia recta fins a 2 h → «Llega en ~X min» (aproximat).
+// Cap petició al nostre servidor; es refresca amb el mateix rellotge de 5 min de Tiempo (el radar canvia cada 10 min).
+const TQ_UB = ['63615914','66635a19','69665c1e','6c685d24','6f6b5f29','726e612e','75706234','78736439','7c75653e','7f786744','827b6949','857d6a4e','88806c54','8b826d59','8e856f5e','92887164','9e93756e','aa9e7978','b6a97e82','c2b4828c','cec08796','d2c48ba0','d6c88faa','dacc93b4','ded097be','88ddeeff','6cd1ebff','51c5e8ff','36bae5ff','1baee2ff','00a3e0ff','009ad5ff','0091caff','0088bfff','007fb4ff','0077aaff','0070a3ff','00699cff','006295ff','005b8eff','005588ff','005180ff','004e78ff','004a70ff','004768ff','ffee00ff','ffe000ff','ffd200ff','ffc500ff','ffb700ff','ffaa00ff','ff9f00ff','ff9500ff','ff8b00ff','ff8100ff','ff4400ff','f23600ff','e62800ff','d91b00ff','cd0d00ff','c10000ff','a80000ff','8f0000ff','760000ff','5d0000ff','ffaaffff','ff9fffff','ff95ffff','ff8bffff','ff81ffff','ff77ffff','ff6cffff','ff62ffff','ff58ffff','ff4effff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','ffffffff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','00ff00ff','cfffff00','ceffff0c','cdffff19','ccffff26','cbffff33','cbffff3f','caffff4c','c9ffff59','c8ffff66','c7ffff72','c7ffff7f','c6ffff8c','c5ffff99','c4ffffa5','c3ffffb2','c3ffffbf','c2ffffcc','c1ffffd8','c0ffffe5','bffffff2','bfffffff','b8f8ffff','b2f2ffff','abebffff','a5e5ffff','9fdfffff','98d8ffff','92d2ffff','8bcbffff','85c5ffff','7fbfffff','78b8ffff','72b2ffff','6babffff','65a5ffff','5f9fffff','5b9bffff','5898ffff','5595ffff','5292ffff','4f8fffff','4b8bffff','4888ffff','4585ffff','4282ffff','3f7fffff','3b7bffff','3878ffff','3575ffff','3272ffff','2f6fffff','2b6bffff','2868ffff','2565ffff','2262ffff','1f5fffff','1b5bffff','1858ffff','1555ffff','1252ffff','0f4fffff','0c4bffff','0948ffff','0645ffff','0242ffff','003fffff','003bffff','0038ffff','0035ffff','0032ffff','002fffff','002bffff','0028ffff','0025ffff','0022ffff','001fffff','001bffff','0018ffff','0015ffff','0012ffff','000fffff','000cffff','0009ffff','0006ffff','0002ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff','0000ffff'].map(h => [0, 2, 4, 6].map(i => parseInt(h.slice(i, i + 2), 16)));
+const TQ_LR = 60, TQ_DBZ = 15, tqDbzC = new Map();
+function tqDbz(r, g, b, a) {
+  if (a < 8) return -99;
+  const k = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0; let v = tqDbzC.get(k);
+  if (v === undefined) { let m = 1e9; TQ_UB.forEach((c, i) => { const d = (c[0] - r) ** 2 + (c[1] - g) ** 2 + (c[2] - b) ** 2 + (c[3] - a) ** 2; if (d < m) { m = d; v = i - 10; } }); tqDbzC.set(k, v); }
+  return v;
+}
+const tqMmh = z => z < 10 ? 0 : Math.pow(Math.pow(10, z / 10) / 200, 1 / 1.6);
+const tqInt = z => z >= 45 ? 'Tormenta / lluvia muy fuerte' : z >= 35 ? 'Lluvia fuerte' : z >= 25 ? 'Lluvia moderada' : 'Lluvia débil';
+const tqImg = u => new Promise((ok, ko) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = () => ko(new Error('img')); i.src = u; });
+let tqLv = null, tqLvBusy = false;
+async function tqLvGrid(f, w) {
+  const z = 7, [px, py] = tqWorld(w.lat, w.lon, z), S = 2 * TQ_LR + 1, x0 = Math.round(px) - TQ_LR, y0 = Math.round(py) - TQ_LR;
+  const c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d', { willReadFrequently: true });
+  await Promise.all(tqTiles(z, 256, x0, y0, S, S).map(async p => g.drawImage(await tqImg(`${tqRad.host}${f.path}/256/${z}/${p.x}/${p.y}/2/0_0.png`), p.l, p.t)));
+  const d = g.getImageData(0, 0, S, S).data, out = new Float32Array(S * S);
+  for (let i = 0; i < S * S; i++) out[i] = tqDbz(d[i * 4], d[i * 4 + 1], d[i * 4 + 2], d[i * 4 + 3]);
+  return out;
+}
+function tqLvRead(G, times, w) {
+  const S = 2 * TQ_LR + 1, c = TQ_LR, L = G[G.length - 1], km = 40075.017 * Math.cos(w.lat * Math.PI / 180) / (2 ** 7 * 256);
+  const at = (A, x, y) => { x = Math.round(x); y = Math.round(y); return x < 0 || y < 0 || x >= S || y >= S ? -99 : A[y * S + x]; };
+  const maxIn = (A, cx, cy, r) => { let m = -99; for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r) m = Math.max(m, at(A, cx + dx, cy + dy)); return m; };
+  const here = maxIn(L, c, c, 2);
+  // la pluja més propera (taques d'almenys 4 píxels, per no fer cas de soroll)
+  let near = null;
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    if (L[y * S + x] < TQ_DBZ) continue;
+    let n = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(L, x + dx, y + dy) >= TQ_DBZ) n++;
+    const d = Math.hypot(x - c, y - c); if (n >= 4 && (!near || d < near.d)) near = { d, x, y };
+  }
+  // moviment: el desplaçament que fa coincidir més la pluja de fa ~20 min amb l'última
+  let mv = null;
+  if (G.length >= 2) {
+    const A = G[0], dt = (times[times.length - 1] - times[0]) / MIN, P = [];
+    for (let i = 0; i < S * S; i++) if (A[i] >= TQ_DBZ) P.push(i);
+    const Q = L.reduce((n, v) => n + (v >= TQ_DBZ ? 1 : 0), 0);
+    if (P.length >= 25 && Q >= 25 && dt > 0) {
+      const st = Math.max(1, Math.floor(P.length / 1500)), M = Math.min(20, Math.ceil(dt * 0.6) + 2);
+      let best = 0, bx = 0, by = 0;
+      for (let dy = -M; dy <= M; dy++) for (let dx = -M; dx <= M; dx++) {
+        let n = 0, k = 0;
+        for (let j = 0; j < P.length; j += st) { k++; const x = P[j] % S + dx, y = Math.floor(P[j] / S) + dy; if (x >= 0 && y >= 0 && x < S && y < S && L[y * S + x] >= TQ_DBZ) n++; }
+        const sc = n / k; if (sc > best) { best = sc; bx = dx; by = dy; }
+      }
+      if (best >= 0.3) mv = { vx: bx / dt, vy: by / dt, kmh: Math.hypot(bx, by) / dt * km * 60, dir: (Math.atan2(bx, -by) * 180 / Math.PI + 360) % 360, q: best };
+    }
+  }
+  // quan arriba (o quan para), seguint la pluja cap enrere en línia recta
+  let eta = null, stop = null;
+  if (mv && Math.hypot(mv.vx, mv.vy) > 0.02) for (let t = 5; t <= 120; t += 5) {
+    const v = maxIn(L, c - mv.vx * t, c - mv.vy * t, 2);
+    if (here < TQ_DBZ && v >= TQ_DBZ) { eta = t; break; }
+    if (here >= TQ_DBZ && v < TQ_DBZ) { stop = t; break; }
+  }
+  return { t: times[times.length - 1], S, L, here, mm: tqMmh(here), km, near: near && { km: near.d * km, dir: (Math.atan2(near.x - c, -(near.y - c)) * 180 / Math.PI + 360) % 360, z: maxIn(L, near.x, near.y, 3) },
+    mv, eta, stop, w };
+}
+async function tqLive() {
+  if (!tqRad || tqLvBusy) return;
+  const F = tqRad.radar.past, w = tqWhere(), key = tqKey(w) + '|' + F[F.length - 1].path;
+  if (tqLv && tqLv.key === key && !tqLv.err) return;
+  tqLvBusy = true;
+  try { const fr = F.slice(-3); const G = await Promise.all(fr.map(f => tqLvGrid(f, w))); tqLv = { key, ...tqLvRead(G, fr.map(f => f.time * 1000), w) }; }
+  catch (e) { if (tqLv) tqLv.err = 1; }
+  tqLvBusy = false;
+  tqPaint();
+  if (TAB === 'apps' && typeof appsPaint === 'function') appsPaint();
+}
+const tqLvIn = (v, m) => Math.round((v.t + m * MIN - Date.now()) / MIN);
+const tqLvOk = () => tqLv && !tqLv.err && Date.now() - tqLv.t < 40 * MIN && tqKey(tqLv.w) === tqKey(tqWhere()) ? tqLv : null;
+function tqLivePaint() {
+  const el = document.getElementById('tqLive'), v = tqLv;
+  if (!v || tqKey(v.w) !== tqKey(tqWhere())) { el.hidden = true; return; }
+  const ago = Math.round((Date.now() - v.t) / MIN), rain = v.here >= TQ_DBZ, dn = d => tqDir(d), lines = [];
+  let big;
+  if (rain) {
+    big = 'Llueve ahora en el recinto';
+    lines.push(`${tqInt(v.here)} · ~${v.mm < 1 ? v.mm.toFixed(1).replace('.', ',') : Math.round(v.mm)} mm/h`);
+    if (v.stop) { const m = tqLvIn(v, v.stop); lines.push(['eta', m <= 2 ? 'Puede parar en cualquier momento' : `Puede parar en ~${m} min (hacia las ${hm(v.t + v.stop * MIN)})`]); }
+  } else if (v.near && v.near.km <= 55) {
+    big = v.near.km < 4 ? 'Lluvia muy cerca' : `Lluvia a ${Math.round(v.near.km)} km al ${dn(v.near.dir)}`;
+    lines.push(tqInt(v.near.z));
+    if (v.eta) { const m = tqLvIn(v, v.eta); lines.push(['eta', m <= 2 ? 'Puede llegar en cualquier momento' : `Llega en ~${m} min (hacia las ${hm(v.t + v.eta * MIN)})`]); }
+    else if (v.mv) lines.push('Por ahora no viene hacia el recinto');
+  } else big = 'Sin lluvia en 50 km';
+  if (!rain && v.here >= 10) lines.push('Ecos muy débiles encima: quizá llovizna');
+  if (v.mv && v.mv.kmh >= 3 && (rain || (v.near && v.near.km <= 55))) lines.push(`Se mueve hacia el ${dn(v.mv.dir)} a ${Math.round(v.mv.kmh)} km/h`);
+  el.hidden = false; el.classList.toggle('rain', rain || !!v.eta);
+  el.innerHTML = `<canvas width="${v.S}" height="${v.S}" aria-hidden="true"></canvas><div class="tx"><span class="k"><i></i>Radar · ${ago < 1 ? 'ahora' : `hace ${ago} min`}${v.err ? ' · sin conexión' : ''}</span><b>${big}</b>`
+    + lines.map(l => Array.isArray(l) ? `<span class="s ${l[0]}">${l[1]}</span>` : `<span class="s">${l}</span>`).join('') + '</div>';
+  // mini radar: pluja real al voltant, anells de 10 i 25 km, el recinte i la fletxa del moviment
+  const cv = el.querySelector('canvas'), g = cv.getContext('2d'), S = v.S, c = TQ_LR, cs = getComputedStyle(document.documentElement);
+  const bg = tqHex(cs.getPropertyValue('--bg'), [5, 6, 8]), ink = tqHex(cs.getPropertyValue('--ink'), [245, 245, 245]), light = (bg[0] + bg[1] + bg[2]) / 3 > 128;
+  g.fillStyle = `rgb(${tqMix(bg, ink, light ? .06 : .08).join(',')})`; g.fillRect(0, 0, S, S);
+  if (TQ_MAP) { const [px, py] = tqWorld(v.w.lat, v.w.lon, 7), x0 = Math.round(px) - c, y0 = Math.round(py) - c; g.strokeStyle = `rgba(${ink.join(',')},.3)`; g.lineWidth = .7;
+    for (const r of TQ_MAP.land) { g.beginPath(); r.forEach(([lo, la], i) => { const [x, y] = tqWorld(la, lo, 7); i ? g.lineTo(x - x0, y - y0) : g.moveTo(x - x0, y - y0); }); g.closePath(); g.stroke(); } }
+  const img = g.getImageData(0, 0, S, S);
+  for (let i = 0; i < S * S; i++) { const z = v.L[i]; if (z < TQ_DBZ) continue; const col = tqColor(TQ_RAIN, tqMmh(z)); img.data.set([col[0], col[1], col[2], 255], i * 4); }
+  g.putImageData(img, 0, 0);
+  g.strokeStyle = `rgba(${ink.join(',')},.35)`; g.lineWidth = .8; g.setLineDash([2, 2]);
+  for (const r of [10, 25]) { g.beginPath(); g.arc(c, c, r / v.km, 0, 7); g.stroke(); }
+  g.setLineDash([]);
+  if (v.mv && v.mv.kmh >= 3) { const a = v.mv.dir * Math.PI / 180, L = 26, ex = c + Math.sin(a) * L, ey = c - Math.cos(a) * L;
+    g.strokeStyle = `rgb(${ink.join(',')})`; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(c - Math.sin(a) * L * .4, c + Math.cos(a) * L * .4); g.lineTo(ex, ey);
+    g.moveTo(ex - Math.sin(a - .5) * 8, ey + Math.cos(a - .5) * 8); g.lineTo(ex, ey); g.lineTo(ex - Math.sin(a + .5) * 8, ey + Math.cos(a + .5) * 8); g.stroke(); }
+  g.fillStyle = '#ff3b30'; g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.arc(c, c, 3.5, 0, 7); g.fill(); g.stroke();
 }
 
 // --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
@@ -7963,9 +8091,10 @@ function appsPaint() {
   }
   // Tiempo
   if (tq && tq.d && tq.d.current) { const c = tq.d.current, [e, ds] = tqCode(c.weather_code, c.is_day);
-    document.getElementById('ap-tiempo-big').textContent = `${(c.precipitation || 0) >= 0.1 ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
+    const rv = tqLvOk(), wet = rv ? rv.here >= TQ_DBZ : (c.precipitation || 0) >= 0.1;
+    document.getElementById('ap-tiempo-big').textContent = `${wet ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
     const nx = tqHours().find(h => h.t > Date.now() && h.t < Date.now() + 6 * 3600000 && h.pp >= 50);
-    document.getElementById('ap-tiempo').textContent = nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
+    document.getElementById('ap-tiempo').textContent = rv && rv.here >= TQ_DBZ ? 'Llueve ahora (radar)' : rv && rv.eta ? (tqLvIn(rv, rv.eta) <= 2 ? 'Lluvia inminente (radar)' : `Lluvia en ~${tqLvIn(rv, rv.eta)} min (radar)`) : nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
   else if (!tqBusy) tqFetch();
   // Sol: el proper canvi de llum
   if (typeof solDay === 'function' && typeof SOL_EV === 'object') {
