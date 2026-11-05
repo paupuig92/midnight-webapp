@@ -1599,6 +1599,13 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 .tqlive b { font: 800 clamp(19px, 5.6vw, 24px)/1.1 var(--display); }
 .tqlive .s { color: var(--muted); font-size: var(--fs-s); line-height: 1.3; }
 .tqlive .s.eta { color: var(--ink); font-weight: 700; }
+.tqpl { margin: -4px 0 12px; padding: 12px 14px; border-radius: var(--r-card, 14px); background: var(--panel); border: 1px solid var(--rule); }
+.tqpl .k { font: 700 10px/1.2 var(--mono, monospace); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.tqpl ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.tqpl li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: baseline; font-size: var(--fs-s); }
+.tqpl li span { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; }
+.tqpl li b { font-variant-numeric: tabular-nums; text-align: right; }
+.tqpl li b.wet { color: #36bae5; }
 .tqal { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
 .tqal li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--fill, rgba(255,255,255,.06)); font-size: var(--fs-s); line-height: 1.35; }
 .tqal li.warn { background: color-mix(in srgb, var(--fav) 18%, transparent); }
@@ -1897,6 +1904,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
     <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
     <div class="tqlive" id="tqLive" hidden></div>
+    <div class="tqpl" id="tqPl" hidden></div>
     <div class="tqnow" id="tqNow" hidden></div>
     <ul class="tqal" id="tqAl"></ul>
     <h3>Previsión por horas</h3>
@@ -7753,6 +7761,7 @@ async function tqFetch(force) {
   } catch (x) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
   tqBusy = false;
   tqPaint();
+  tqPlFetch();
   if (TAB === 'apps' && typeof appsPaint === 'function') appsPaint();
 }
 // El model més fi que té dades per a aquesta hora (o per a aquest quart d'hora)
@@ -7788,7 +7797,7 @@ function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
   const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
   document.getElementById('tqPillN').textContent = where === 'tu ubicación' ? 'Tu ubicación' : FEST.name;
-  tqLivePaint();
+  tqLivePaint(); tqPlPaint();
   if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
   const ago = Math.round((Date.now() - tq.at) / MIN);
   src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
@@ -8053,6 +8062,55 @@ function tqLivePaint() {
     g.strokeStyle = `rgb(${ink.join(',')})`; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(c - Math.sin(a) * L * .4, c + Math.cos(a) * L * .4); g.lineTo(ex, ey);
     g.moveTo(ex - Math.sin(a - .5) * 8, ey + Math.cos(a - .5) * 8); g.lineTo(ex, ey); g.lineTo(ex - Math.sin(a + .5) * 8, ey + Math.cos(a + .5) * 8); g.stroke(); }
   g.fillStyle = '#ff3b30'; g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.arc(c, c, 3.5, 0, 7); g.fill(); g.stroke();
+}
+
+// --- Pluviòmetres de Meteocat (05-11, idea d'en Pau): pluja MESURADA a les estacions XEMA més properes (només a Catalunya).
+// Dades obertes de la Generalitat (Socrata, sense clau, CORS obert): estacions «yqwd-vj5e» (es desen 7 dies) i lectures «nzvn-apee»
+// (variable 35 = precipitació en mm per 30 min, hora UTC; arriben amb ~1 h de retard). 3 estacions a ≤ 20 km. Cada 15 min com a molt.
+const TQ_SOC = 'https://analisi.transparenciacatalunya.cat/resource/', TQPK = 'midnight-tiempo-pluvi-v1', TQEK = 'midnight-xema-est-v1';
+let tqPl = null, tqPlBusy = false;
+try { const v = JSON.parse(localStorage.getItem(TQPK) || 'null'); if (v && v.st) tqPl = v; } catch (e) {}
+async function tqPlFetch(force) {
+  const w = tqWhere(), k = tqKey(w);
+  if (tqPlBusy || (!force && tqPl && tqPl.k === k && Date.now() - tqPl.at < 15 * MIN)) return;
+  // fora de Catalunya, ni ho provem
+  if (w.lat < 40.4 || w.lat > 42.95 || w.lon < 0.1 || w.lon > 3.4) { tqPl = null; tqPlPaint(); return; }
+  tqPlBusy = true;
+  try {
+    let E = null; try { E = JSON.parse(localStorage.getItem(TQEK) || 'null'); } catch (e) {}
+    if (!E || Date.now() - E.at > 7 * 86400000) {
+      const r = await tqJson(`${TQ_SOC}yqwd-vj5e.json?$select=codi_estacio,nom_estacio,latitud,longitud&nom_estat_ema=Operativa&$limit=1000`, 12000);
+      E = { at: Date.now(), s: r.map(x => [x.codi_estacio, x.nom_estacio, +x.latitud, +x.longitud]) };
+      try { localStorage.setItem(TQEK, JSON.stringify(E)); } catch (e) {}
+    }
+    const kmTo = s => Math.hypot((s[2] - w.lat) * 111.2, (s[3] - w.lon) * 111.2 * Math.cos(w.lat * Math.PI / 180));
+    const near = E.s.map(s => ({ c: s[0], n: s[1], km: kmTo(s) })).filter(s => s.km <= 20).sort((a, b) => a.km - b.km).slice(0, 3);
+    if (!near.length) { tqPl = { k, at: Date.now(), st: [] }; }
+    else {
+      const since = new Date(Date.now() - 26 * 3600000).toISOString().slice(0, 19);
+      const q = `$select=codi_estacio,data_lectura,valor_lectura&$where=${encodeURIComponent(`codi_variable='35' AND codi_estacio in(${near.map(s => `'${s.c}'`).join(',')}) AND data_lectura > '${since}'`)}&$order=data_lectura DESC&$limit=500`;
+      const R = await tqJson(`${TQ_SOC}nzvn-apee.json?${q}`, 12000);
+      tqPl = { k, at: Date.now(), st: near.map(s => {
+        const L = R.filter(x => x.codi_estacio === s.c).map(x => ({ t: Date.parse(x.data_lectura + 'Z'), v: +x.valor_lectura || 0 }));
+        if (!L.length) return null;
+        const last = Math.max(...L.map(x => x.t));
+        // «hoy» = des de les 00:00 d'aquí (aprox. amb el rellotge del mòbil)
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        return { n: s.n, km: s.km, end: last + 30 * MIN, h1: L.filter(x => x.t > last - 60 * MIN).reduce((a, x) => a + x.v, 0), day: L.filter(x => x.t >= today.getTime()).reduce((a, x) => a + x.v, 0) };
+      }).filter(Boolean) };
+    }
+    try { localStorage.setItem(TQPK, JSON.stringify(tqPl)); } catch (e) {}
+  } catch (e) { if (tqPl) tqPl.err = 1; }
+  tqPlBusy = false;
+  tqPlPaint();
+}
+function tqPlPaint() {
+  const el = document.getElementById('tqPl'), P = tqPl;
+  if (!P || !P.st || !P.st.length || P.k !== tqKey(tqWhere())) { el.hidden = true; return; }
+  const end = Math.max(...P.st.map(s => s.end)), mm = v => v < 0.05 ? '0' : v.toFixed(1).replace('.', ',');
+  el.hidden = false;
+  el.innerHTML = `<span class="k">Pluviómetros Meteocat · lluvia medida hasta las ${hm(end)}${P.err ? ' · sin conexión' : ''}</span><ul>`
+    + P.st.map(s => `<li><div>${esc(s.n)} <span>${s.km < 1 ? '<1' : Math.round(s.km)} km</span></div><b class="${s.h1 >= 0.1 ? 'wet' : ''}">${mm(s.h1)} mm <span>última hora</span></b><b class="${s.day >= 0.1 ? 'wet' : ''}">${mm(s.day)} mm <span>hoy</span></b></li>`).join('') + '</ul>';
 }
 
 // --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
