@@ -1,4 +1,4 @@
-const VERSION = 'bitp-7c4990c2';
+const VERSION = 'bitp-693f8ed7';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/duro-black-hangar-2026/Anybody.woff2", "img/duro-black-hangar-2026/MartianMono.woff2", "img/duro-black-hangar-2026/NimbusSanL-Bold.woff2", "img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2", "img/duro-black-hangar-2026/NimbusSanL-Regu.woff2", "img/duro-black-hangar-2026/banner.jpg", "img/duro-black-hangar-2026/carpa-3d.webp", "img/duro-black-hangar-2026/deco-dome-light.webp", "img/duro-black-hangar-2026/deco-dome.webp", "img/duro-black-hangar-2026/deco-floor-light.webp", "img/duro-black-hangar-2026/deco-floor.webp", "img/duro-black-hangar-2026/hangar.png", "img/duro-black-hangar-2026/logo-240.png", "img/duro-black-hangar-2026/logo-blackhangar.png", "img/duro-black-hangar-2026/logo-duro.png", "img/duro-black-hangar-2026/logo-makina.png", "vendor/three-0.170.0.module.min.js"];
 
