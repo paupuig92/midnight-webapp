@@ -89,6 +89,12 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - ✓ al mòbil + servidor d'avisos (`POST/GET /done`, taula `done`) → **Vista global** a Organización (persona × hora, verd fet / vermell tard).
 - Avisos de tasques: `subs.yo` + `subs.tb` (Configuración → «Avisarme de mis tareas»); el cron llegeix `tasks.json`. Cal `push/instala.sh` després de publicar el worker.
 
+## Fotos de perfil (des del 05-11-2026)
+- Ajustes → «Poner foto de perfil» (només si has triat «Soy…» i hi ha servidor). Editor: arrossegar + zoom (lliscador o dos dits), cercle de vista prèvia. Es retalla al mòbil a 160×160 JPEG (~5–10 KB).
+- Servidor: taula `av` (k = clau de la persona, img, at), `POST /av` (img buida = treure-la), `GET /av`, `GET /avimg?k=&t=` (JPEG, memòria cau `immutable`: la `t` canvia quan canvia la foto). `/live` porta la part `av` = només `{ persona: hora }`, i només quan ja es pregunta per una altra cosa. Les fotos NO s'esborren en canviar de festival (la gent és la mateixa). Cal `push/instala.sh`.
+- Surten a: cares de «¿Quién eres?» i barra de cares, perfil de dalt i d'Ajustes, vista global, capçalera de la graella d'equip, incidències i Momentos. Si la foto no carrega, queda la inicial. Cache al mòbil: `midnight-av-v1`.
+- Sense PIN (com «Soy…»): qui tria un nom pot canviar la foto d'aquella persona.
+
 ## Pendent
 - Post-festival (24-10 ja passat): treure el cron del servidor, esborrar les dades dels mòbils, revocar els tokens de GitHub i Cloudflare (el de Cloudflare caduca sol ~21-11).
 - Per al proper festival: fer l'app genèrica (dades i colors per festival), canviar `END` del servidor.

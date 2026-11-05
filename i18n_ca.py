@@ -882,6 +882,22 @@ PAIRS = [
     ("'Esta versión de la app no tiene servidor de avisos.'", "'Aquesta versió de l’app no té servidor d’avisos.'"),
     ("'Para recibirlo, activa «Recibir notificaciones» en Ajustes.'", "'Per rebre’l, activa «Rebre notificacions» a Ajustos.'"),
     ("`Te avisaremos ${prefs.sol} min antes, los días del festival.`", "`T’avisarem ${prefs.sol} min abans, els dies del festival.`"),
+    # --- Fotos de perfil (05-11-2026) ---
+    ('<span id="avPickT">Poner foto de perfil</span>', '<span id="avPickT">Posar foto de perfil</span>'),
+    ("? 'Cambiar foto' : 'Poner foto de perfil'", "? 'Canviar la foto' : 'Posar foto de perfil'"),
+    ('type="button" hidden>Quitar foto</button>', 'type="button" hidden>Treure la foto</button>'),
+    ('<h2 id="avSheetH">Tu foto</h2>', '<h2 id="avSheetH">La teva foto</h2>'),
+    ('aria-label="Arrastra para encuadrar"', 'aria-label="Arrossega per enquadrar"'),
+    ('Arrastra para centrar tu cara. La verá todo el equipo en Tareas, incidencias y Momentos.', 'Arrossega per centrar la cara. La veurà tot l’equip a Tasques, incidències i Moments.'),
+    ('id="avSave" type="button">Guardar foto</button>', 'id="avSave" type="button">Desar la foto</button>'),
+    ("b.textContent = 'Guardando…';", "b.textContent = 'Desant…';"),
+    ("b.textContent = 'Guardar foto';", "b.textContent = 'Desar la foto';"),
+    ("'Foto guardada: ya la ve todo el equipo.'", "'Foto desada: ja la veu tot l’equip.'"),
+    ("toast('Foto quitada.')", "toast('Foto treta.')"),
+    ("'No se ha podido abrir la foto.'", "'No s’ha pogut obrir la foto.'"),
+    ("'No se ha podido guardar. Prueba otra vez.'", "'No s’ha pogut desar. Torna-ho a provar.'"),
+    ("'Sin conexión: prueba cuando vuelva la red.'", "'Sense connexió: prova-ho quan torni la xarxa.'"),
+    ("'Sin conexión: no se ha podido quitar.'", "'Sense connexió: no s’ha pogut treure.'"),
 ]
 
 

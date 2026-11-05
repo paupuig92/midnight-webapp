@@ -1050,7 +1050,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
-#mcSheet, #incSheet { z-index: 20; }
+#mcSheet, #incSheet, #avSheet { z-index: 20; }
 /* Incidències */
 #inc .shead { align-items: center; }
 #inc .incgo { min-height: 40px; padding: 0 14px; font-size: var(--fs-s); }
@@ -1367,6 +1367,18 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
 .face.other b { border: 1.5px dashed var(--line); background: transparent !important; }
 .mwho .mav .ico { margin: 0; width: 18px; height: 18px; color: var(--muted); }
 .mwho:not([hidden]) { border: 0; border-radius: 12px; background: var(--fill); }
+/* Fotos de perfil (05-11-2026): la foto tapa la inicial; si no carrega, queda la inicial */
+.face b, .mwho .mav, .avs { position: relative; overflow: hidden; }
+.avimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.face.on b:has(.avimg) { padding: 0; }
+.avs { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; vertical-align: -6px; background: var(--fill-2); color: var(--ink); font: 800 11px/1 var(--display); }
+.tgh .avs { width: 20px; height: 20px; margin-right: 4px; font-size: 10px; vertical-align: -5px; }
+.cgrp > .avset:not([hidden]) { display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap; align-items: center; }
+.avset .btn { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
+.avcrop { display: grid; place-items: center; margin: 4px auto 14px; width: min(78vw, 340px); aspect-ratio: 1; }
+.avcrop canvas { width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 18px; background: var(--fill); }
+.avzoom { display: flex; align-items: center; gap: 12px; max-width: 340px; margin: 0 auto 8px; font-weight: 700; color: var(--muted); }
+.avzoom input { flex: 1; accent-color: var(--accent); }
 .mwho.card { border-radius: var(--r-card); background: var(--fill); }
 /* Targetes de «Ahora suena»: totes iguals (fons, vora de l'escenari, 14 px) i el temps a la mateixa línia que «Después» */
 .row { background: var(--panel); border: 0; border-radius: var(--r-card); padding: 12px 12px 0 13px; margin-bottom: 6px; overflow: hidden;
@@ -2009,6 +2021,10 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <label><input type="radio" name="prof" value="video"> Vídeo</label>
         <label><input type="radio" name="prof" value="foto"> Foto</label>
       </div>
+      <div class="avset" id="avSet" hidden>
+        <label class="btn" id="avPickL"><input type="file" id="avFile" accept="image/*" hidden><span id="avPickT">Poner foto de perfil</span></label>
+        <button class="btn quiet" id="avDel" type="button" hidden>Quitar foto</button>
+      </div>
       <div id="yoGrp" class="yogrp" hidden data-off>
         <h3 class="ch">Soy…</h3>
         <select class="yosel" id="yoSel" aria-label="Quién eres"></select>
@@ -2158,6 +2174,20 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <p class="hint" id="incMsg" hidden></p>
   </div>
   <div class="foot"><button class="btn primary" id="incSend" type="button">Enviar</button></div>
+</div>
+
+<div class="sheet" id="avSheet" role="dialog" aria-modal="true" aria-labelledby="avSheetH" hidden>
+  <header>
+    <h2 id="avSheetH">Tu foto</h2>
+    <button class="btn" id="avX" type="button">Cancelar</button>
+  </header>
+  <div class="body">
+    <div class="avcrop"><canvas id="avCv" width="600" height="600" aria-label="Arrastra para encuadrar"></canvas></div>
+    <label class="avzoom"><span>Zoom</span><input type="range" id="avZoom" min="1" max="4" step="0.01" value="1"></label>
+    <p class="note">Arrastra para centrar tu cara. La verá todo el equipo en Tareas, incidencias y Momentos.</p>
+    <p class="hint" id="avMsg" hidden></p>
+  </div>
+  <div class="foot"><button class="btn primary" id="avSave" type="button">Guardar foto</button></div>
 </div>
 
 <nav class="tabbar" id="tabbar" aria-label="Secciones">
@@ -5361,6 +5391,8 @@ function applyTasks(d) {
   const pe = person(YO);
   if (pe && pe.e && pe.e !== PROF) setProf(pe.e);
   if (!holaPick) holaPaint();
+  // Fotos de perfil: ara que se sap qui és l'equip, botó d'Ajustes i (si encara no s'han demanat) les fotos
+  if (typeof avPaintSet === 'function' && whoReady) { paintWho(); avPaintSet(); try { if (!liveP.includes('av') && liveParts().includes('av')) setTimeout(() => livePull(true), liveBusy ? 2500 : 0); } catch (e) {} }
 }
 
 // --- Llegir l'equip i les tasques tal com els escriu l'organització ---
@@ -5526,6 +5558,7 @@ function setYo(k) {
   try { localStorage.setItem(YOK, YO); } catch (e) {}
   planAll = false;
   paintWho();
+  if (typeof avPaintSet === 'function') avPaintSet();
   paintYo();
   renderPlan(true);
   tgScrolled = false;
@@ -5659,7 +5692,7 @@ function renderTg(force) {
   const d = doneAll || {};
   const isDone = (k, id) => k === YO ? DONE.has(id) : !!(d[k] && d[k][id]);
   const cols = team ? [...(me ? [me] : []), ...TASKS.people.filter(p => p !== me)].filter(p => TASKS.list.some(x => x.p.includes(p.k))) : [me];
-  const key = [team, YO, TASKS.updated, Math.floor(t / MIN), [...DONE].join(), JSON.stringify(d).length].join('|');
+  const key = [team, YO, TASKS.updated, Math.floor(t / MIN), [...DONE].join(), JSON.stringify(d).length, JSON.stringify(AV)].join('|');
   if (!force && key === tgKey) return;
   tgKey = key;
   document.getElementById('tgTeam').setAttribute('aria-pressed', team);
@@ -5680,7 +5713,7 @@ function renderTg(force) {
   let hl = '';
   for (let h = H0; h <= H1; h += 3600000) hl += `<i class="hl" style="top:${yy(h)}px"></i>`;
   const colW = [], longs = [];
-  let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
+  let g = `<div class="tgh"></div>${cols.map(p => `<div class="tgh${p === me ? ' me' : ''}">${avSm(p)}${html(p.n)}</div>`).join('')}<div class="gut" style="height:${HT}px">${gut}</div>`;
   const stOf = (ok, a, e, cue) => ok ? 'done' : t >= e ? (cue ? 'past' : 'late') : t >= a ? 'now' : '';
   let shortN = 0;
   cols.forEach((p, ci) => {
@@ -6303,7 +6336,7 @@ function renderGlobal() {
     const m = TASKS.list.filter(x => x.p.includes(p.k));
     return { p, n: m.length, ok: m.filter(x => isDone(p.k, x.id)).length, late: m.filter(x => !isDone(p.k, x.id) && t >= tkEnd(x)).length };
   }).filter(s => s.n);
-  let out = `<div class="gvppl">${stats.map(s => `<button type="button" class="gvp${s.late ? ' late' : ''}" data-gv="${s.p.k}" aria-pressed="${gvWho === s.p.k}">${html(s.p.n)} <b>${s.ok}/${s.n}</b>${s.late ? ` <i>${s.late} tarde</i>` : ''}</button>`).join('')}</div>`;
+  let out = `<div class="gvppl">${stats.map(s => `<button type="button" class="gvp${s.late ? ' late' : ''}" data-gv="${s.p.k}" aria-pressed="${gvWho === s.p.k}">${avSm(s.p)}${html(s.p.n)} <b>${s.ok}/${s.n}</b>${s.late ? ` <i>${s.late} tarde</i>` : ''}</button>`).join('')}</div>`;
   if (gvWho) out += `<button type="button" class="linkbtn" data-gv="">Ver a todo el equipo</button>`;
   if (!doneAll) out += `<p class="note">${PUSH && PUSH.url ? 'Cargando lo que ya está hecho…' : 'Sin servidor: aquí no se ve lo que está hecho.'}</p>`;
   let h = '', rows = '';
@@ -6341,7 +6374,7 @@ function holaPaint() {
   const ppl = TASKS.people;
   if (holaPick) { holaKey = ''; return holaTeams(`${person(holaPick).n}, ¿de qué equipo eres?`, 'Para saber qué enseñarte.'); }
   // Només repinta si ha canviat alguna cosa (no perdre el focus de VoiceOver)
-  const k = [PROF, YO, holaForce, holaDept, TASKS.updated, ppl.length, navigator.onLine].join('|');
+  const k = [PROF, YO, holaForce, holaDept, TASKS.updated, ppl.length, navigator.onLine, JSON.stringify(AV)].join('|');
   if (k === holaKey) return;
   holaKey = k;
   if (!ppl.length) {
@@ -6357,7 +6390,7 @@ function holaPaint() {
   if (!depts.some(d => d[0] === holaDept)) holaDept = PROF && depts.some(d => d[0] === PROF) ? PROF : (depts.find(d => d[2].length) || depts[0])[0];
   const [dv, dt, dp] = depts.find(d => d[0] === holaDept);
   const tabs = `<div class="holadept" role="group" aria-label="Departamento">${depts.map(([e, t, g]) => `<button type="button" data-hola="d:${e}" aria-pressed="${e === holaDept}">${t}${g.length ? `<small>${g.length}</small>` : ''}</button>`).join('')}</div>`;
-  const faces = dp.length ? `<div class="holafaces">${dp.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-hola="p:${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${html(p.n.slice(0, 1).toUpperCase())}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')}</div>`
+  const faces = dp.length ? `<div class="holafaces">${dp.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-hola="p:${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${faceIn(p)}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')}</div>`
     : `<p class="note holaempty">Aún no hay nadie de ${html(dt)} en la lista. Lo añade la organización en «Equipo».</p><div class="holagrid holamini">${holaBtn('o:' + dv, `Entrar como ${html(dt)} (solo horarios)`)}</div>`;
   holaBody.innerHTML = tabs + faces
     + `<div class="holagrid holamini">${holaForce && person(YO) ? holaBtn('x', `Seguir como ${html(person(YO).n)}`) : ''}${holaBtn('o:', 'Solo horarios, sin tareas')}</div>`;
@@ -6374,19 +6407,139 @@ holaBody.addEventListener('click', e => {
   if (pe && pe.e) { if (pe.e !== PROF) setProf(pe.e); setYo(k); return holaApply(); }
   holaPick = k; holaPaint();
 });
+// ==== FOTOS DE PERFIL ==== (05-11-2026)
+// Cadascú posa la seva a Ajustes (quadrat de 160 px, JPEG ~8 KB, fet al mòbil). El servidor només guarda una per persona.
+// /live porta { persona: hora del canvi }; la foto es baixa amb una URL que porta aquesta hora, i el navegador la guarda per sempre.
+const AVK = 'midnight-av-v1';
+var AV = {};
+try { AV = JSON.parse(localStorage.getItem(AVK) || '{}') || {}; } catch (e) {}
+const avUrl = k => AV && AV[k] && PUSH && PUSH.url ? `${PUSH.url}/avimg?k=${encodeURIComponent(k)}&t=${AV[k]}` : '';
+// Dins d'una rodona: la inicial i, a sobre, la foto (si no carrega, s'esborra i queda la inicial)
+function faceIn(p) { const u = avUrl(p.k); return html(p.n.slice(0, 1).toUpperCase()) + (u ? `<img class="avimg" src="${u}" alt="" decoding="async">` : ''); }
+const avSm = p => `<b class="avs" aria-hidden="true">${faceIn(p)}</b>`;
+// Per nom (incidències, momentos: guarden el nom, no la clau)
+function avBy(name) { const k = nk(name || ''), p = k && (person(k) || TASKS.people.find(q => q.n === name)); return p ? avSm(p) : ''; }
+document.addEventListener('error', e => { if (e.target.classList && e.target.classList.contains('avimg')) e.target.remove(); }, true);
+function avApply(m) {
+  if (!m || typeof m !== 'object' || Array.isArray(m)) return;
+  const s = JSON.stringify(m);
+  if (s === JSON.stringify(AV)) return;
+  AV = m;
+  try { localStorage.setItem(AVK, s); } catch (e) {}
+  avRepaint();
+}
+function avRepaint() {
+  paintWho(); holaPaint(); renderTg(true); incPaint(); avPaintSet();
+  if (!document.getElementById('pGlobal').hidden) renderGlobal();
+  if (!document.getElementById('mkList').hidden && typeof mkPaint === 'function') mkPaint();
+}
+function avPaintSet() {
+  const avSet = document.getElementById('avSet'), pe = YO && YO !== '-' ? person(YO) : null;
+  avSet.hidden = !pe || !PUSH || !PUSH.url;
+  if (avSet.hidden) return;
+  document.getElementById('avPickT').textContent = AV[pe.k] ? 'Cambiar foto' : 'Poner foto de perfil';
+  document.getElementById('avDel').hidden = !AV[pe.k];
+}
+async function avSend(img) {
+  const r = await fetchT(`${PUSH.url}/av`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: YO, img }) }, 10000);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || !d.ok) throw new Error(d.error || r.status);
+  const m = { ...AV };
+  if (img) m[YO] = d.at; else delete m[YO];
+  avApply(m);
+}
+// Editor: arrossegar per encuadrar, zoom amb el lliscador o amb dos dits
+const avSheet = document.getElementById('avSheet'), avCv = document.getElementById('avCv'), avZoom = document.getElementById('avZoom');
+let avImg = null, avZ = 1, avX = 0, avY = 0;   // avX/avY: centre del retall, en píxels de la imatge
+const avBase = () => avCv.width / Math.min(avImg.width, avImg.height);   // escala perquè el costat curt ompli el quadrat
+function avClamp() {
+  const half = avCv.width / 2 / (avBase() * avZ);
+  avX = Math.min(avImg.width - half, Math.max(half, avX));
+  avY = Math.min(avImg.height - half, Math.max(half, avY));
+}
+function avDraw(ctx = avCv.getContext('2d'), W = avCv.width, ring = true) {
+  if (!avImg) return;
+  avClamp();
+  const k = avBase() * avZ * W / avCv.width;
+  ctx.clearRect(0, 0, W, W);
+  ctx.drawImage(avImg, W / 2 - avX * k, W / 2 - avY * k, avImg.width * k, avImg.height * k);
+  if (!ring) return;
+  // Fora del cercle, enfosquit: així es veu com quedarà la rodona
+  ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.rect(0, 0, W, W); ctx.arc(W / 2, W / 2, W / 2 - 6, 0, Math.PI * 2, true); ctx.fill('evenodd');
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(W / 2, W / 2, W / 2 - 6, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+}
+function avMsg(t) { const m = document.getElementById('avMsg'); m.hidden = !t; m.textContent = t || ''; m.classList.toggle('bad', !!t); }
+document.getElementById('avFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    // Una còpia petita (1024 px) per no carregar el mòbil amb una foto de 12 MP mentre s'arrossega
+    const k = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    avImg = c; avZ = 1; avZoom.value = 1;
+    // Retrat: la cara sol ser al terç de dalt
+    avX = c.width / 2; avY = c.height > c.width ? c.height * .38 : c.height / 2;
+    avMsg(''); avSheet.hidden = false; avDraw();
+    anim(avSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+  } catch (err) { toast('No se ha podido abrir la foto.'); }
+  finally { URL.revokeObjectURL(url); }
+});
+const avPts = new Map();
+let avPinch = 0;
+avCv.addEventListener('pointerdown', e => { avCv.setPointerCapture(e.pointerId); avPts.set(e.pointerId, [e.clientX, e.clientY]); avPinch = 0; });
+avCv.addEventListener('pointermove', e => {
+  const old = avPts.get(e.pointerId);
+  if (!old || !avImg) return;
+  const pts = [...avPts.values()];
+  avPts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (avPts.size === 2) {
+    const [a, b] = [...avPts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (avPinch) { avZ = Math.min(4, Math.max(1, avZ * d / avPinch)); avZoom.value = avZ; }
+    avPinch = d;
+  } else if (pts.length === 1) {
+    const css = avCv.getBoundingClientRect().width / avCv.width, k = avBase() * avZ * css;
+    avX -= (e.clientX - old[0]) / k; avY -= (e.clientY - old[1]) / k;
+  }
+  avDraw();
+});
+for (const ev of ['pointerup', 'pointercancel']) avCv.addEventListener(ev, e => { avPts.delete(e.pointerId); avPinch = 0; });
+avZoom.addEventListener('input', () => { avZ = +avZoom.value; avDraw(); });
+const avClose = () => { avSheet.hidden = true; avImg = null; };
+document.getElementById('avX').addEventListener('click', avClose);
+document.getElementById('avSave').addEventListener('click', async () => {
+  if (!avImg || !person(YO)) return avClose();
+  const b = document.getElementById('avSave');
+  const c = document.createElement('canvas'); c.width = c.height = 160;
+  avDraw(c.getContext('2d'), 160, false);
+  let img = '';
+  for (const q of [.82, .7, .55]) { img = c.toDataURL('image/jpeg', q); if (img.length < 28000) break; }
+  b.disabled = true; b.textContent = 'Guardando…';
+  try { await avSend(img); avClose(); toast('Foto guardada: ya la ve todo el equipo.'); }
+  catch (err) { avMsg(navigator.onLine ? 'No se ha podido guardar. Prueba otra vez.' : 'Sin conexión: prueba cuando vuelva la red.'); }
+  b.disabled = false; b.textContent = 'Guardar foto';
+});
+document.getElementById('avDel').addEventListener('click', async () => {
+  try { await avSend(''); toast('Foto quitada.'); } catch (err) { toast('Sin conexión: no se ha podido quitar.'); }
+});
+// ==== /FOTOS DE PERFIL ====
+
 // Perfil a dalt (barra fina i capçalera): nom + equip; un toc porta a canviar-lo
 var whoReady = false;  // tick() hi passa abans que existeixin faceHue i companyia
 function paintWho() {
   if (!whoReady) return;
   const pe = YO && YO !== '-' ? person(YO) : null;
-  const key = [PROF, YO, pe && pe.n].join('|');
+  const key = [PROF, YO, pe && pe.n, pe && AV[pe.k]].join('|');
   if (paintWho.k === key) return;
   paintWho.k = key;
   for (const el of document.querySelectorAll('.mwho')) {
     el.classList.toggle('none', !PROF);
     const av = el.querySelector('.mav');
     av.style.setProperty('--h', pe ? faceHue(pe.k) : 20);
-    if (pe || PROF) av.textContent = pe ? pe.n.slice(0, 1).toUpperCase() : '?'; else av.innerHTML = ICO.user;
+    if (pe) av.innerHTML = faceIn(pe); else if (PROF) av.textContent = '?'; else av.innerHTML = ICO.user;
     el.querySelector('.mwn').textContent = pe ? pe.n.split(/\s+/)[0] : PROF ? (el.classList.contains('card') ? 'Elige tu nombre' : '¿Quién?') : el.classList.contains('card') ? 'Sin perfil' : 'Perfil';
     el.querySelector('.mwd').textContent = PROF ? (el.classList.contains('big') ? WHO_L[PROF] : WHO_S[PROF]) : el.classList.contains('card') ? 'Solo horarios' : '';
     el.setAttribute('aria-label', pe ? `Perfil: ${pe.n}, ${WHO_L[PROF] || ''}. Cambiar` : 'Elegir perfil');
@@ -6401,10 +6554,10 @@ function paintFaces() {
   const box = document.getElementById('faces');
   if (!box) return;
   const ppl = TASKS.people, same = ppl.filter(p => p.e && p.e === PROF), list = same.length ? same : ppl.filter(p => !p.e || p.e === PROF);
-  const key = [PROF, YO, list.map(p => p.k).join()].join('|');
+  const key = [PROF, YO, list.map(p => p.k + (AV[p.k] || '')).join()].join('|');
   if (box.dataset.k === key) return;
   box.dataset.k = key;
-  box.innerHTML = list.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-face="${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${html(p.n.slice(0, 1).toUpperCase())}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')
+  box.innerHTML = list.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-face="${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${faceIn(p)}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')
     + `<button type="button" class="face other" data-face="+"><b>⋯</b><span>${html(WHO_S[PROF] || 'Equipo')}</span></button>`;
   box.querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
@@ -6415,7 +6568,7 @@ document.getElementById('faces').addEventListener('click', e => {
   if (f !== YO) { setYo(f); paintFaces(); paintTabs(); }
 });
 holaPaint();
-whoReady = true; paintWho();
+whoReady = true; paintWho(); avPaintSet();
 
 // ==== MULTICÁMARA ==== (pestanya «Cámaras», des del 04-11-2026)
 // Les posicions i el material són a FEST.multicam (al bloc del festival). L'estat de cada càmera (montada, grabando…, SSD i nota)
@@ -7410,7 +7563,7 @@ function mkRenderList() {
     : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
   document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
     const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
-    return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
+    return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${avBy(m.who)}${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
   }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Marcar momento» justo cuando pase algo.</li>';
   for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
 }
@@ -8020,7 +8173,7 @@ const incWho = () => (typeof mcWho === 'function' && mcWho()) || (PROF ? WHO_L[P
 const incAgo = at => { const m = Math.max(0, Math.round((Date.now() - at) / MIN)); return m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m}${NB}min` : new Date(at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' }); };
 function incLi(x) {
   return `<li class="${x.urg && !x.st ? 'urg' : ''}" data-n="${x.n}">
-    <div class="ih"><span>${x.urg && !x.st ? '<span class="ut">URGENTE</span> ' : ''}<b>${html(x.who || 'Alguien')}</b> · ${incAgo(x.at)}</span></div>
+    <div class="ih"><span>${x.urg && !x.st ? '<span class="ut">URGENTE</span> ' : ''}${avBy(x.who)}<b>${html(x.who || 'Alguien')}</b> · ${incAgo(x.at)}</span></div>
     <div class="it">${html(x.txt)}</div>
     ${x.st ? `<div class="ok">✓ Resuelta${x.sby ? ' por ' + html(x.sby) : ''} · ${incAgo(x.sat)}</div>` : ''}
     <div class="ia">${x.img ? '<button type="button" class="btn quiet" data-incimg>Ver foto</button>' : ''}<button type="button" class="btn${x.st ? ' quiet' : ''}" data-incst="${x.st ? '' : 'ok'}">${x.st ? 'Reabrir' : 'Resuelta'}</button></div>
@@ -8156,6 +8309,8 @@ function liveParts() {
   if (MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
   if ((taskOn() && YO && YO !== '-') || tgTeam || !document.getElementById('pGlobal').hidden) p.push('done');
   if (!document.getElementById('mkList').hidden) p.push('mk');
+  // Fotos de perfil: només { persona: hora } (unes desenes de bytes) i només quan ja es pregunta per una altra cosa
+  if (p.length && TASKS.people.length) p.push('av');
   return p.join(',');
 }
 async function livePull(force) {
@@ -8176,6 +8331,7 @@ async function livePull(force) {
     else if (p.includes('mc')) { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } }
     if (d.done) { doneApply(d.done); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
     if (d.mk) mkApply(d.mk);
+    if (d.av) avApply(d.av);
   } catch (e) {
     liveV = '';
     if (p.includes('mc')) { mcErr = 'Sin conexión: puede que no sea lo último.'; mcPaint(); }
