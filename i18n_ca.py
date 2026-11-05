@@ -631,8 +631,8 @@ PAIRS = [
     ('role="tablist" aria-label="Día"', 'role="tablist" aria-label="Dia"'),
     ("`Día ${x.d + 1}`", "`Dia ${x.d + 1}`"),
     ("`Día ${dayAt(t) + 1}`", "`Dia ${dayAt(t) + 1}`"),
-    ("<span id=\"tkDays\" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día.</span>",
-     "<span id=\"tkDays\" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia.</span>"),
+    ("<span id=\"tkDays\" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día, o «2/10:30» delante de la hora.</span>",
+     "<span id=\"tkDays\" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia, o «2/10:30» davant de l’hora.</span>"),
     # Tema (Ajustes → Tema), només festivals amb FEST.light
     ('aria-pressed="false">Claro</button>', 'aria-pressed="false">Clar</button>'),
     ('aria-pressed="false">Oscuro</button>', 'aria-pressed="false">Fosc</button>'),

@@ -982,7 +982,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi li.mcsame { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
 #multi li.mcsame[hidden] { display: none; }
 #multi li.mcsame .note { margin: 0; }
-#multi .mclog li { grid-template-columns: 4em minmax(0, 1fr) auto; gap: 10px; }
+#multi .mcl.mclog li { grid-template-columns: 4.5em minmax(0, 1fr) auto; gap: 10px; }  /* més específic que «.mcl li» (2.6em), que anava darrere i guanyava */
 #multi .mclog .who { color: var(--muted); font-size: var(--fs-xs); }
 #multi .mcplan.mcfold .mc3dbox, #multi .mcplan.mcfold .mchint, #multi .mcplan.mcfold .mced, #multi .mcfold .mctools .btn:not([data-mc3d="fold"]) { display: none; }
 #multi li.it[data-st="recogida"] { opacity: .55; }
@@ -2014,7 +2014,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <details class="tktx"><summary>Tareas como texto</summary>
         <label for="tkList">Tareas (una por línea: hora, tarea y @quién)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Montar cámaras @audiovisual&#10;18:30 Grabar la entrada de Catarres @Marc @Laia&#10;20:00-20:30 Cambiar baterías @Marc&#10;23:00 Foto de grupo @todos" spellcheck="false"></textarea>
-        <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.<span id="tkDays" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día.</span></p>
+        <p class="note edhelp">«- tarea» (con guion delante) = sin hora, para hacer durante el día. @nombre = una persona · @grupo = todos los de ese grupo · @todos = todo el equipo. Una línea con solo «@Marc» vale para las tareas de debajo que no digan quién. De 6:00 a 12:00 es el montaje (antes de abrir). También puedes pegar de un Excel: hora, tarea, quién.<span id="tkDays" hidden> Con varios días, escribe «# Domingo» (o el día que sea) encima de las tareas de ese día, o «2/10:30» delante de la hora.</span></p>
         </details>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Guardar y publicar</button></div>
@@ -3927,8 +3927,8 @@ function tvRender(t) {
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
   const up = [...ALL, ...GONE].filter(x => x.a > t && (tvStage ? x.s.id === tvStage : inNext(x))).sort((x, y) => x.a - y.a).slice(0, 12);
-  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lbl(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
-    : `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
+  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblD(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
+    : `<li><span class="tt">${lblD(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No quedan más actuaciones.</li>';
   // Només els que hi caben sencers (en una tele no es pot fer scroll)
   const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
@@ -5520,8 +5520,11 @@ function parseTasks(src, people) {
     if (!line) continue;
     const cm = line.match(/^\[\s*([a-záéíóú]*)\s*\]$/i);
     if (cm) { const k = cm[1].toLowerCase(); if (k && !TK_COL[k]) warn.push(`Color desconocido: «${cm[1]}» (${Object.keys(TK_COL).join(', ')})`); col = TK_COL[k] ? k : ''; continue; }
-    let lc = col;
+    let lc = col, ld = tday;
     line = line.replace(/\s*\[\s*([a-záéíóú]+)\s*\]\s*$/i, (w, k) => TK_COL[k.toLowerCase()] ? (lc = k.toLowerCase(), '') : w);
+    // «2/10:30 Tasca» = dia 2, com a l'horari (NDAYS > 1); si no, s'avisa com una hora rara
+    const dm = NDAYS > 1 && line.match(/^([1-9])\/(?=\d)/);
+    if (dm && +dm[1] <= NDAYS) { ld = +dm[1] - 1; line = line.slice(dm[0].length); }
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
@@ -5539,8 +5542,8 @@ function parseTasks(src, people) {
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = ta ? taskTime(ta, tday) : null;
-    let b = ta && tb ? taskTime(tb, tday) : 0;
+    const a = ta ? taskTime(ta, ld) : null;
+    let b = ta && tb ? taskTime(tb, ld) : 0;
     if (a !== null && !Number.isFinite(a)) { bad++; warn.push(`Hora rara: «${line.slice(0, 40)}»`); continue; }
     if (!text) { bad++; warn.push(`Falta la tarea: «${line.slice(0, 40)}»`); continue; }
     // Un final que no s'entén («19») o al revés («19:00-18:00») no es perd en silenci; «04:00-06:00» és de la mateixa nit
@@ -7668,8 +7671,8 @@ addEventListener('online', mkFlush);
 // radar de RainViewer (pluja real de les últimes 2 h, fins al zoom 7); capa «Windy» = el widget oficial gratuït (embed.windy.com) dins l'app.
 // Barra de temps de la capa Lluvia: primer el radar (passat) i després la previsió (futur), seguits.
 // Ubicació: la de la pestanya Sol (solWhere). Sense cobertura es veu l'última previsió desada.
-const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN;
-let tq = null, tqBusy = false, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN, TQ_RETRY = 2 * MIN;
+let tq = null, tqBusy = false, tqFail = 0, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
 let tqLy = 'radar', tqGrid = null, tqGridBusy = false, tqH = 0, tqView = null, tqField = null, tqPos = 0;
 try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
 try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts) tqGrid = v; } catch (e) {}
@@ -7737,6 +7740,7 @@ function tqEnsPack(d) {
 async function tqFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
+  if (!force && Date.now() - tqFail < TQ_RETRY) return tqPaint();  // acaba de fallar: no insistim (bateria, dades i límits d'Open-Meteo)
   tqBusy = true;
   const ll = `latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`, tz = '&timezone=Europe%2FMadrid&timeformat=unixtime';
   const u = `https://api.open-meteo.com/v1/forecast?${ll}`
@@ -7757,8 +7761,8 @@ async function tqFetch(force) {
     if (r2.status === 'fulfilled' && r2.value && r2.value.hourly) try { e = { at: Date.now(), ...tqEnsPack(r2.value) }; } catch (x) {}
     tq = { k, at: Date.now(), d, m, e };
     try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (x) {}
-    tq.err = '';
-  } catch (x) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
+    tq.err = ''; tqFail = 0;
+  } catch (x) { tqFail = Date.now(); if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
   tqBusy = false;
   tqPaint();
   tqPlFetch();
@@ -8068,11 +8072,12 @@ function tqLivePaint() {
 // Dades obertes de la Generalitat (Socrata, sense clau, CORS obert): estacions «yqwd-vj5e» (es desen 7 dies) i lectures «nzvn-apee»
 // (variable 35 = precipitació en mm per 30 min, hora UTC; arriben amb ~1 h de retard). 3 estacions a ≤ 20 km. Cada 15 min com a molt.
 const TQ_SOC = 'https://analisi.transparenciacatalunya.cat/resource/', TQPK = 'midnight-tiempo-pluvi-v1', TQEK = 'midnight-xema-est-v1';
-let tqPl = null, tqPlBusy = false;
+let tqPl = null, tqPlBusy = false, tqPlFail = 0;
 try { const v = JSON.parse(localStorage.getItem(TQPK) || 'null'); if (v && v.st) tqPl = v; } catch (e) {}
 async function tqPlFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqPlBusy || (!force && tqPl && tqPl.k === k && Date.now() - tqPl.at < 15 * MIN)) return;
+  if (!force && Date.now() - tqPlFail < TQ_RETRY) return;
   // fora de Catalunya, ni ho provem
   if (w.lat < 40.4 || w.lat > 42.95 || w.lon < 0.1 || w.lon > 3.4) { tqPl = null; tqPlPaint(); return; }
   tqPlBusy = true;
@@ -8100,7 +8105,8 @@ async function tqPlFetch(force) {
       }).filter(Boolean) };
     }
     try { localStorage.setItem(TQPK, JSON.stringify(tqPl)); } catch (e) {}
-  } catch (e) { if (tqPl) tqPl.err = 1; }
+    tqPlFail = 0;
+  } catch (e) { tqPlFail = Date.now(); if (tqPl) tqPl.err = 1; }
   tqPlBusy = false;
   tqPlPaint();
 }
