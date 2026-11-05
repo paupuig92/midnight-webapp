@@ -760,7 +760,7 @@ PAIRS = [
     ('<h3><label for="mcCamCam">Cámara</label></h3>', '<h3><label for="mcCamCam">Càmera</label></h3>'),
     ('<h3><label for="mcCamOpt">Óptica</label></h3>', '<h3><label for="mcCamOpt">Òptica</label></h3>'),
     ('<h3><label for="mcCamLim">Límite de grabación (min)</label></h3>', '<h3><label for="mcCamLim">Límit de gravació (min)</label></h3>'),
-    ('placeholder="Tarjeta o batería: avisa al 80 %"', 'placeholder="Targeta o bateria: avisa al 80 %"'),
+    ('placeholder="Vacío = según el modelo (tarjeta o SSD)"', 'placeholder="Buit = segons el model (targeta o SSD)"'),
     ('<h3>Escenario</h3><div class="edtabs" id="mcCamSt"', '<h3>Escenari</h3><div class="edtabs" id="mcCamSt"'),
     ('<h3>Día</h3><div class="edtabs" id="mcCamDay"', '<h3>Dia</h3><div class="edtabs" id="mcCamDay"'),
     ('id="mcCamDel" hidden>Quitar cámara<', 'id="mcCamDel" hidden>Treure la càmera<'),
@@ -893,6 +893,22 @@ PAIRS = [
     ("'Esta versión de la app no tiene servidor de avisos.'", "'Aquesta versió de l’app no té servidor d’avisos.'"),
     ("'Para recibirlo, activa «Recibir notificaciones» en Ajustes.'", "'Per rebre’l, activa «Rebre notificacions» a Ajustos.'"),
     ("`Te avisaremos ${prefs.sol} min antes, los días del festival.`", "`T’avisarem ${prefs.sol} min abans, els dies del festival.`"),
+    # --- Multicams: límit real de REC per model (05-11) ---
+    ('BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Sin límite por toma ni por calor.', 'BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Sense límit per presa ni per calor.'),
+    ('BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Sin límite por toma.', 'BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Sense límit per presa.'),
+    ('Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). DJI no publica tiempo máximo por calor.', 'Targeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el màxim). DJI no publica temps màxim per calor.'),
+    ('Tarjeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (medido: 43 Mbps en un clip real 4K 25p de DURO X; calculado a 50 Mbps por margen). DJI no publica tiempo máximo por calor.', 'Targeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (mesurat: 43 Mbps en un clip real 4K 25p de DURO X; calculat a 50 Mbps per marge). DJI no publica temps màxim per calor.'),
+    ('Tarjeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (medido: 43 Mbps en un clip real 4K 25p de DURO X; calculado a 50 Mbps por margen). DJI no publica tiempo máximo por calor.', 'Targeta: 256 GB ≈ 11 h · 512 GB ≈ 22 h (mesurat: 43 Mbps en un clip real 4K 25p de DURO X; calculat a 50 Mbps per marge). DJI no publica temps màxim per calor.'),
+    ('Con «Auto Power OFF Temp.» en High: ~90 min en 4K (Sony, a 25 °C y 4K 60p). En Standard solo ~30 min. Máximo 13 h por toma.', 'Amb «Auto Power OFF Temp.» a High: ~90 min en 4K (Sony, a 25 °C i 4K 60p). A Standard només ~30 min. Màxim 13 h per presa.'),
+    ('Con «Auto Power OFF Temp.» en High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).', 'Amb «Auto Power OFF Temp.» a High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).'),
+    ('~120 min en 4K a 25 °C; a 40 °C solo ~30 min (Sony). Pon «Auto Power OFF Temp.» en High.', '~120 min en 4K a 25 °C; a 40 °C només ~30 min (Sony). Posa «Auto Power OFF Temp.» a High.'),
+    ("why: 'puesto a mano'", "why: 'posat a mà'"),
+    ("why: 'calor'", "why: 'calor'"),
+    ("media: 'tarjeta'", "media: 'targeta'"),
+    ("'máx.\\u00a0' + mcDur(", "'màx.\\u00a0' + mcDur("),
+    ('`<b>REC máx. ${mcDur(L.min)}</b>', '`<b>REC màx. ${mcDur(L.min)}</b>'),
+    ("', aprox.'}) · aviso al 80 %`", "', aprox.'}) · avís al 80 %`"),
+    ("'<b>Sin límite conocido</b>'", "'<b>Sense límit conegut</b>'"),
 ]
 
 

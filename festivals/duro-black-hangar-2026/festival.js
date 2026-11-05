@@ -208,10 +208,10 @@ FEST.multicam = [
       { uid: 'makina-general-cerrada', days: [1], c: 'rojo', pos: 'General cerrada', cam: '', opt: '', at3d: [7, 0, 2.6], aim: [180, -8] },
       { uid: 'black-hangar-cabina', days: [2], c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
       { uid: 'black-hangar-cabina-cenital', days: [2], c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { uid: 'black-hangar-foh-abierta', days: [2], c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-abierta', days: [2], c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
       { uid: 'black-hangar-foh-cerrada', days: [2], c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
-    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts de targeta/bateria (avís al 80 %; el de la DJI és provisional).
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD en GB).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
