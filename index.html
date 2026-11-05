@@ -2133,6 +2133,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   </header>
   <div class="body">
     <p class="note" id="mcSheetInfo"></p>
+    <p class="note mclim" id="mcSheetLim" hidden></p>
     <h3>Estado</h3>
     <div class="row2" id="mcSheetSt" role="group" aria-label="Estado"></div>
     <h3><label for="mcSsd">SSD</label></h3>
@@ -2439,10 +2440,10 @@ FEST.multicam = [
     cams: [
       { uid: 'black-hangar-cabina', c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
       { uid: 'black-hangar-cabina-cenital', c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
       { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
-    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts de targeta/bateria (avís al 80 %; el de la DJI és provisional).
+    // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts a mà (si no, surt de MC_MODELS segons el model; gb = mida de targeta/SSD, pwr: 'bat' si va amb bateria).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
     // Mides del stage plot (vistes de dalt i frontal): carpa 64×32 m, 13 m d'alt (perfil de cúpula a mc3dBuild, o tent.prof). Cada càmera: at3d: [x, y, z]
     scene3d: {
@@ -6978,6 +6979,48 @@ const mcStName = v => (MC_ST.find(x => x[0] === v) || [, ''])[1];
 // Toc a la pastilla de la fila: el següent estat lògic (Recogida només des de la fitxa)
 const MC_NEXT = { '': 'montada', montada: 'grabando', grabando: 'parada', parada: 'grabando', recogida: 'montada' };
 const mcByKey = {};
+// Límit real de gravació per model (05-11, fonts oficials; vegeu MC_LIM_SRC). Minuts fins que alguna cosa para la càmera:
+// tarjeta/SSD (mbps o minPerGB), calor (heat) o bateria (bat, només si la càmera porta pwr: 'bat'). Per càmera: gb (mida), pwr: 'red'|'bat', lim (a mà, guanya).
+// sure: false = valor sense font oficial (es diu a la fitxa).
+const MC_MODELS = [
+  // BRAW 12:1 Ultra HD 25p: 157 min per 256 GB (taula oficial del manual de les Pocket) → 0,613 min/GB. Corrent 12 V: sense bateria pròpia.
+  { re: /micro|black\s*studio|studio\s*cam/i, name: 'Blackmagic Micro Studio 4K G2', minPerGB: 157 / 256, gb: 2000, media: 'SSD', heat: 0, bat: 0,
+    info: 'BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Va a 12 V: sin batería, no para por tiempo ni calor.' },
+  // 4K DCI 25p BRAW 12:1: 149 min per 256 GB. LP-E6: Blackmagic no publica minuts (el grip de 2 bateries «més de 2 h»).
+  { re: /pocket\s*(cinema\s*)?4k|bmpcc|black.*pocket/i, name: 'Blackmagic Pocket 4K', minPerGB: 149 / 256, gb: 2000, media: 'SSD', heat: 0, bat: 50, batSure: false,
+    info: 'BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Con una LP-E6 ~45–60 min (Blackmagic no da la cifra). Con corriente, sin límite.' },
+  // Bitrate màxim oficial 120 Mbps (4K 4:3, «alto»). Bateria: 240 min oficials però a 1080p24 amb pantalla apagada; a 4K DJI no ho publica.
+  { re: /action\s*6/i, name: 'DJI Osmo Action 6', mbps: 120, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
+    info: 'Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica. Tiempo por calor: no publicado.' },
+  // Bitrate màxim oficial 180 Mbps. Bateria 240 min (4) / 210 min (4P), també a 1080p24.
+  { re: /pocket\s*4\s*p|pocket\s*4\s*pro/i, name: 'DJI Osmo Pocket 4P', mbps: 180, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
+    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 210 min solo a 1080p; a 4K no lo publica.' },
+  { re: /pocket\s*4/i, name: 'DJI Osmo Pocket 4', mbps: 180, gb: 256, media: 'tarjeta', heat: 0, bat: 0,
+    info: 'Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica.' },
+  // Sony help guide (Auto Power OFF Temp. = High, 25 °C, 4K 59.94p 150M). Límit de producte 13 h per presa.
+  { re: /fx\s*3/i, name: 'Sony FX3', heat: 90, bat: 0,
+    info: 'Con «Auto Power OFF Temp.» en High: ~90 min en 4K (Sony, a 25 °C y 4K 60p). En Standard solo ~30 min. Máximo 13 h por toma.' },
+  { re: /a7\s*s\s*(iii|3|m3)/i, name: 'Sony A7S III', heat: 90, bat: 0,
+    info: 'Con «Auto Power OFF Temp.» en High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).' },
+  { re: /a7\s*(iv|4|m4)/i, name: 'Sony A7 IV', heat: 120, bat: 0,
+    info: '~120 min en 4K a 25 °C; a 40 °C solo ~30 min (Sony). Pon «Auto Power OFF Temp.» en High.' },
+];
+const mcModel = c => c && MC_MODELS.find(m => m.re.test(c.cam || '')) || null;
+// Minuts màxims de REC i què el limita: { min, why, sure }
+function mcLim(c) {
+  if (!c) return null;
+  if (+c.lim > 0) return { min: +c.lim, why: 'puesto a mano', sure: true };
+  const m = mcModel(c);
+  if (!m) return null;
+  const gb = +c.gb || m.gb, out = [];
+  const card = m.minPerGB ? gb * m.minPerGB : m.mbps ? gb * 8000 / m.mbps / 60 : 0;
+  if (card) out.push({ min: Math.floor(card * .98 / 5) * 5, why: `${m.media} ${gb >= 1000 ? gb / 1000 + ' TB' : gb + ' GB'}`, sure: true });
+  if (m.heat) out.push({ min: m.heat, why: 'calor', sure: true });
+  if (c.pwr === 'bat' && m.bat) out.push({ min: m.bat, why: 'batería', sure: m.batSure !== false });
+  out.sort((a, b) => a.min - b.min);
+  return out[0] || null;
+}
+const mcDur = m => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h` + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') : '')).replace(/ /g, '\u00a0');
 const mcPrevSt = c => { if (NDAYS < 2 || mcDay < 1) return ''; const p = mcState[c.id + '-d' + mcDay] || {}; return p.st && p.st !== 'recogida' ? p : ''; };
 const mcAll = () => MC.flatMap(s => (s.cams || []).map(c => [s, c]));
 let mcOpen = null;
@@ -7008,7 +7051,7 @@ function mcRender() {
         </div>` : ''}</li>` : ''}
       ${(s.cams || []).length ? `<li class="mcstats" data-mcstats="${html(s.stage)}"></li>` : ''}
       ${(s.cams || []).map((c, i) => `<li class="it" role="button" tabindex="0" data-mcid="${mcKey(c)}" style="--sc:${c.c ? mcCol(c.c) : 'var(--line)'}">
-        <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
+        <span class="who"><span class="nmc">${s.plan ? `<i class="mcn">${i + 1}</i>` : ''}${html(c.pos || c.cam || '')}</span><span class="cm">${html([c.cam, c.opt, mcLim(c) && 'máx.\u00a0' + mcDur(mcLim(c).min)].filter(Boolean).join(' · '))}</span>${(c.acc || []).length ? `<span class="acc">${html(c.acc.join(' · '))}</span>` : ''}</span>
         <span class="mcs"><button type="button" class="mcnext" data-mcnext="${mcKey(c)}"></button><span class="ssd"></span><span class="rt"></span></span>
       </li>`).join('')}
       ${NDAYS > 1 && mcDay > 0 && (s.cams || []).length ? `<li class="mcsame" data-mcsame="${html(s.stage)}" hidden><button type="button" class="btn">Igual que el ${html(DAYS[mcDay - 1].name || 'día anterior')}</button><span class="note">Las que seguían montadas pasan a «Montada», con su SSD.</span></li>` : ''}
@@ -7038,7 +7081,7 @@ function mcPaint() {
     const c = mcByKey[el.dataset.mcid], rt = el.querySelector('.mcs .rt'), since = s.since || 0;
     const min = since && (s.st === 'grabando' || s.st === 'parada') ? Math.max(0, Math.floor((Date.now() - since) / 60000)) : -1;
     rt.textContent = min < 0 ? '' : (s.st === 'grabando' ? 'REC ' : 'parada ') + (min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`);
-    const lim = c && +c.lim, frac = s.st === 'grabando' && lim && min >= 0 ? min / lim : 0;
+    const L = mcLim(c), lim = L && L.min, frac = s.st === 'grabando' && lim && min >= 0 ? min / lim : 0;
     el.dataset.lim = frac >= 1 ? 'over' : frac >= .8 ? 'warn' : '';
   }
   for (const h of document.querySelectorAll('[data-mcsum]')) {
@@ -7078,6 +7121,9 @@ function mcOpenSheet(id) {
   if (mc3d && mc3d.s === s && mc3d.focus !== c.id) mc3dFocus(c);
   document.getElementById('mcSheetH').textContent = c.pos || c.cam;
   document.getElementById('mcSheetInfo').textContent = [s.stage, NDAYS > 1 ? DAYS[mcDay].name : '', [c.cam, c.opt].filter(Boolean).join(' '), (c.acc || []).join(', ')].filter(Boolean).join(' · ');
+  { const L = mcLim(c), m = mcModel(c), el = document.getElementById('mcSheetLim');
+    el.hidden = !L && !m;
+    el.innerHTML = !L && !m ? '' : `${L ? `<b>REC máx. ${mcDur(L.min)}</b> (${html(L.why)}${L.sure ? '' : ', aprox.'}) · aviso al 80 %` : '<b>Sin límite conocido</b>'}${m && !(+c.lim > 0) ? `<br>${html(m.info)}` : ''}`; }
   document.getElementById('mcSheetSt').innerHTML = MC_ST.map(([v, t]) => `<button type="button" class="btn" data-mcst="${v}" aria-pressed="false">${t}</button>`).join('');
   mcSheet.hidden = false;
   anim(mcSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });

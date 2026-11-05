@@ -866,6 +866,23 @@ PAIRS = [
     ("'Esta versión de la app no tiene servidor de avisos.'", "'Aquesta versió de l’app no té servidor d’avisos.'"),
     ("'Para recibirlo, activa «Recibir notificaciones» en Ajustes.'", "'Per rebre’l, activa «Rebre notificacions» a Ajustos.'"),
     ("`Te avisaremos ${prefs.sol} min antes, los días del festival.`", "`T’avisarem ${prefs.sol} min abans, els dies del festival.`"),
+    # --- Multicams: límit real de REC per model (05-11) ---
+    ('BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Va a 12 V: sin batería, no para por tiempo ni calor.', 'BRAW 12:1 UHD 25p ≈ 20 h en SSD de 2 TB. Va a 12 V: sense bateria, no para per temps ni per calor.'),
+    ('BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Con una LP-E6 ~45–60 min (Blackmagic no da la cifra). Con corriente, sin límite.', 'BRAW 12:1 4K 25p ≈ 19 h en SSD de 2 TB. Amb una LP-E6 ~45–60 min (Blackmagic no en dona la xifra). Amb corrent, sense límit.'),
+    ('Tarjeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica. Tiempo por calor: no publicado.', 'Targeta: 256 GB ≈ 4 h 35 · 512 GB ≈ 9 h 15 (a 120 Mbps, el màxim). Bateria: DJI dona 240 min només a 1080p; a 4K no ho publica. Temps per calor: no publicat.'),
+    ('Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 210 min solo a 1080p; a 4K no lo publica.', 'Targeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el màxim). Bateria: DJI dona 210 min només a 1080p; a 4K no ho publica.'),
+    ('Tarjeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el máximo). Batería: DJI da 240 min solo a 1080p; a 4K no lo publica.', 'Targeta: 256 GB ≈ 3 h 05 · 512 GB ≈ 6 h 10 (a 180 Mbps, el màxim). Bateria: DJI dona 240 min només a 1080p; a 4K no ho publica.'),
+    ('Con «Auto Power OFF Temp.» en High: ~90 min en 4K (Sony, a 25 °C y 4K 60p). En Standard solo ~30 min. Máximo 13 h por toma.', 'Amb «Auto Power OFF Temp.» a High: ~90 min en 4K (Sony, a 25 °C i 4K 60p). A Standard només ~30 min. Màxim 13 h per presa.'),
+    ('Con «Auto Power OFF Temp.» en High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).', 'Amb «Auto Power OFF Temp.» a High: ~90 min en 4K a 25 °C, ~60 min a 40 °C (Sony, 4K 60p).'),
+    ('~120 min en 4K a 25 °C; a 40 °C solo ~30 min (Sony). Pon «Auto Power OFF Temp.» en High.', '~120 min en 4K a 25 °C; a 40 °C només ~30 min (Sony). Posa «Auto Power OFF Temp.» a High.'),
+    ("why: 'puesto a mano'", "why: 'posat a mà'"),
+    ("why: 'calor'", "why: 'calor'"),
+    ("why: 'batería'", "why: 'bateria'"),
+    ("media: 'tarjeta'", "media: 'targeta'"),
+    ("'máx.\\u00a0' + mcDur(", "'màx.\\u00a0' + mcDur("),
+    ('`<b>REC máx. ${mcDur(L.min)}</b>', '`<b>REC màx. ${mcDur(L.min)}</b>'),
+    ("', aprox.'}) · aviso al 80 %`", "', aprox.'}) · avís al 80 %`"),
+    ("'<b>Sin límite conocido</b>'", "'<b>Sense límit conegut</b>'"),
 ]
 
 
