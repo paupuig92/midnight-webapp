@@ -7686,8 +7686,10 @@ async function tqRadar(force) {
   }
   if (tqLy === 'radar') msg.hidden = true;
   tqLive();
-  // RainViewer només fins al zoom 7: a zoom més alt es fan servir les rajoles de 512 px, ampliades
-  const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = size > 256 ? 512 : 256;
+  // RainViewer gratuït només fins al zoom 7, i NOMÉS rajoles de 256 px: les de 512 px (que es fan amb dades del zoom 8) arriben
+  // amb columnes buides (la «franja sense núvols» que va veure en Pau el 05-11). Ara sempre 256 px del zoom 7, ampliades amb CSS,
+  // les mateixes que llegeix la targeta de pluja en temps real (que sí que anava bé).
+  const zr = Math.min(7, tqZ), size = TQ_TILE * 2 ** (tqZ - zr), rs = 256;
   const T = tqTiles(zr, size, g.left, g.top, g.W, g.H), F = tqRad.radar.past;
   document.getElementById('tqRad').innerHTML = F.map((f, i) => `<div class="ly rd${i === tqI ? ' on' : ''}" data-i="${i}">${T.map(p =>
     `<img alt="" src="${tqRad.host}${f.path}/${rs}/${zr}/${p.x}/${p.y}/2/1_1.png" style="left:${p.l}px;top:${p.t}px;width:${size}px;height:${size}px" loading="${i >= tqI - 2 ? 'eager' : 'lazy'}" decoding="async">`).join('')}</div>`).join('');
@@ -7995,11 +7997,15 @@ function tqZoom(dz) { const z = Math.max(6, Math.min(TQ_ZMAX, tqZ + dz)); if (z 
   const map = document.getElementById('tqMap'), lys = () => map.querySelectorAll('#tqBase, #tqOsm, #tqHeat, #tqRad, #tqRings');
   let P = null;
   const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  // El mapa sempre queda centrat al festival: el pessic també s'amplia des del punt del festival (no des dels dits),
+  // així en deixar anar no hi ha salt. iOS ignora «user-scalable=no»: es frena el zoom de la pàgina sencera.
+  for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) map.addEventListener(ev, e => e.preventDefault(), { passive: false });
   map.addEventListener('touchstart', e => {
-    if (e.touches.length !== 2) return;
-    const r = map.getBoundingClientRect();
-    P = { d: dist(e.touches), x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top, s: 1 };
-  }, { passive: true });
+    if (e.touches.length !== 2 || !tqView) return;
+    e.preventDefault();
+    tqStop();
+    P = { d: dist(e.touches), x: tqView.W / 2, y: tqView.H * .44, s: 1 };
+  }, { passive: false });
   map.addEventListener('touchmove', e => {
     if (!P || e.touches.length !== 2) return;
     e.preventDefault();
@@ -8008,7 +8014,8 @@ function tqZoom(dz) { const z = Math.max(6, Math.min(TQ_ZMAX, tqZ + dz)); if (z 
   }, { passive: false });
   const end = () => {
     if (!P) return;
-    const dz = Math.round(Math.log2(P.s)); P = null;
+    // n'hi ha prou amb obrir o tancar una mica (×1,3) per canviar un nivell
+    const l = Math.log2(P.s), dz = l > 0 ? Math.floor(l + .63) : -Math.floor(-l + .63); P = null;
     for (const el of lys()) { el.style.transform = ''; el.style.transformOrigin = ''; }
     if (dz) tqZoom(dz);
   };
