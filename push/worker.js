@@ -89,23 +89,19 @@ const MAX_MK = 4000;
 // tothom les veu a la pestanya Tareas i les poden donar per resoltes. Avís push als mòbils amb «Avisarme de incidencias».
 const MAX_INC = 300, INC_IMG = 260000;
 const okIncImg = s => typeof s === 'string' && s.length <= INC_IMG && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s);
-// Fotos de perfil (05-11-2026): cadascú posa la seva (JPEG quadrat petit, fet al mòbil). /live només porta { persona: hora };
-// la foto va a part (GET /avimg?k=&t=, memòria cau per sempre): un mòbil només la baixa quan algú la canvia
-const MAX_AV = 300, AV_IMG = 30000;
-const okAvImg = s => typeof s === 'string' && s.length <= AV_IMG && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s);
 function dueInc(sub, list, from, to) {
   if (!sub.inc || !list) return [];
   return list.filter(x => x.at > from && x.at <= to && !x.st).map(x => ({
-    title: x.urg ? 'Incidència URGENT' : 'Incidència', body: `${x.who || 'Algú'}: ${x.txt}`.slice(0, 180), tag: `inc-${x.n}`,
+    title: x.urg ? 'Incidencia URGENTE' : 'Incidencia', body: `${x.who || 'Alguien'}: ${x.txt}`.slice(0, 180), tag: `inc-${x.n}`,
   }));
 }
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], av: ['av', 30, 10 * MIN], avall: ['avall', 300, 10 * MIN], avimg: ['avimg', 1500, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const SLOW_AT = 70000;   // peticions al dia (de les 100.000 del pla gratuït) a partir de les quals els mòbils van a poc a poc
-const LIVE_PARTS = ['inc', 'mc', 'done', 'mk', 'av'];
+const LIVE_PARTS = ['inc', 'mc', 'done', 'mk'];
 const errStatus = r => r.error === 'slow' || r.error === 'full' ? 429 : r.error ? 400 : 200;
 
 // Sessió de l'organització: «caducitat.signatura». Si es canvia la contrasenya, totes les sessions velles deixen de valer.
@@ -233,8 +229,8 @@ function dueTasks(sub, list, from, to) {
     // Cues (tasques de menys de 5 min, com tkCue() de l'app): surten a la llista però no s'avisen (recuperat el 04-11)
     if (x.b > x.a && x.b - x.a < 5 * MIN) continue;
     const pre = x.a - sub.tb * MIN;
-    if (pre > from && pre <= to) items.push({ title: `Tasca · d’aquí a ${sub.tb} min`, body: x.t, tag: `tk-${x.id}@${x.a}:pre` });
-    if (x.a > from && x.a <= to) items.push({ title: 'Tasca · ara', body: x.t, tag: `tk-${x.id}@${x.a}:go` });
+    if (pre > from && pre <= to) items.push({ title: `Tarea · en ${sub.tb} min`, body: x.t, tag: `tk-${x.id}@${x.a}:pre` });
+    if (x.a > from && x.a <= to) items.push({ title: 'Tarea · ahora', body: x.t, tag: `tk-${x.id}@${x.a}:go` });
   }
   return items;
 }
@@ -247,8 +243,8 @@ function dueFor(sub, all, from, to) {
     const x = all[id];
     if (!x) continue;
     const pre = x.a - sub.before * MIN;
-    if (pre > from && pre <= to) items.push({ title: `${x.n} · d’aquí a ${sub.before} min`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:pre` });
-    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · comença ara`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:go` });
+    if (pre > from && pre <= to) items.push({ title: `${x.n} · en ${sub.before} min`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:pre` });
+    if (x.a > from && x.a <= to) items.push({ title: `${x.n} · empieza ahora`, body: x.note ? `${x.stage} · ${x.note}` : x.stage, tag: `${id}@${x.a}:go` });
   }
   return items;
 }
@@ -259,7 +255,7 @@ function dueSol(sub, from, to) {
   if (!(sub.sol > 0)) return items;
   for (const x of CARTEL.sol || []) {
     const pre = x.t - sub.sol * MIN;
-    if (pre > from && pre <= to) items.push({ title: `Hora daurada · d’aquí a ${sub.sol} min`, body: `Posta del sol a les ${x.set}.`, tag: `sol@${x.t}` });
+    if (pre > from && pre <= to) items.push({ title: `Hora dorada · en ${sub.sol} min`, body: `Puesta de sol a las ${x.set}.`, tag: `sol@${x.t}` });
   }
   return items;
 }
@@ -346,7 +342,7 @@ export class Store {
     if (!this.sql.exec('PRAGMA table_info(mc)').toArray().some(c => c.name === 'since')) this.sql.exec('ALTER TABLE mc ADD COLUMN since INTEGER NOT NULL DEFAULT 0');
     this.sql.exec(`CREATE TABLE IF NOT EXISTS inc (n INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, who TEXT NOT NULL, txt TEXT NOT NULL, urg INTEGER NOT NULL, img TEXT NOT NULL, st TEXT NOT NULL, sby TEXT NOT NULL, sat INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mk (id TEXT PRIMARY KEY, uid TEXT NOT NULL, t INTEGER NOT NULL, s TEXT NOT NULL, n TEXT NOT NULL, k TEXT NOT NULL, note TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
-    this.sql.exec(`CREATE TABLE IF NOT EXISTS av (k TEXT PRIMARY KEY, img TEXT NOT NULL, at INTEGER NOT NULL)`);
+    this.sql.exec('DROP TABLE IF EXISTS av');  // fotos de perfil (05-11, mig dia): tretes el mateix dia per decisió d'en Pau
     this.sql.exec(`CREATE TABLE IF NOT EXISTS mclog (n INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL, st TEXT NOT NULL, ssd TEXT NOT NULL, who TEXT NOT NULL, at INTEGER NOT NULL)`);
     // Columnes noves (tasques): qui és el mòbil i quants minuts abans vol l'avís de les seves tasques
     const cols = this.sql.exec('PRAGMA table_info(subs)').toArray().map(c => c.name);
@@ -401,9 +397,6 @@ export class Store {
     } else if (name === 'inc') {
       v = this.sql.exec("SELECT n, at, who, txt, urg, img <> '' AS img, st, sby, sat FROM inc ORDER BY n DESC LIMIT 60").toArray()
         .map(r => ({ ...r, urg: !!r.urg, img: !!r.img }));
-    } else if (name === 'av') {
-      v = {};
-      for (const r of this.sql.exec('SELECT k, at FROM av').toArray()) v[r.k] = r.at;
     } else if (name === 'done') {
       v = {};
       for (const r of this.sql.exec('SELECT who, id, at FROM done').toArray()) (v[r.who] = v[r.who] || {})[r.id] = r.at;
@@ -571,26 +564,6 @@ export class Store {
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return new Response(bytes, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=31536000, immutable' } });
     }
-    // Foto de perfil: k = la persona (com «Soy…»); img buida = treure-la
-    if (url.pathname === '/av') {
-      const k = cleanYo(b.k);
-      if (!k) return json({ error: 'bad' }, 400);
-      if (!b.img) { this.sql.exec('DELETE FROM av WHERE k = ?', k); this.touch('av'); return json({ ok: true }); }
-      if (!okAvImg(b.img)) return json({ error: 'bad' }, 400);
-      if (!this.sql.exec('SELECT k FROM av WHERE k = ?', k).toArray().length && this.full('av', MAX_AV)) return json({ error: 'full' }, 429);
-      const at = Date.now();
-      this.sql.exec('INSERT INTO av (k, img, at) VALUES (?, ?, ?) ON CONFLICT(k) DO UPDATE SET img = excluded.img, at = excluded.at', k, b.img, at);
-      this.touch('av');
-      return json({ ok: true, at });
-    }
-    if (url.pathname === '/avall') return json({ av: this.part('av') });
-    if (url.pathname === '/avimg') {
-      const r = this.sql.exec('SELECT img FROM av WHERE k = ?', cleanYo(url.searchParams.get('k') || '')).toArray()[0];
-      if (!r) return new Response('', { status: 404 });
-      const bin = atob(r.img.slice(r.img.indexOf(',') + 1)), bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return new Response(bytes, { headers: { 'content-type': 'image/jpeg' } });
-    }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
     if (url.pathname === '/doneall') return json({ done: this.part('done') });
 
@@ -631,8 +604,8 @@ export class Store {
           const team = newNotice ? cleanTeam(fresh.noticeTeam) : '';
           const ev = {
             stamp: sch.stamp, notice: sch.notice, key: sch.key, at: now, silent: !newNotice && !schedChanged, team, sched: schedChanged,
-            title: newNotice ? 'Avís de l’organització' : 'Canvi d’horari',
-            body: newNotice ? sch.notice.slice(0, 180) : 'L’organització ha canviat l’horari.',
+            title: newNotice ? 'Aviso de la organización' : 'Cambio de horario',
+            body: newNotice ? sch.notice.slice(0, 180) : 'La organización ha cambiado el horario.',
           };
           this.put('last', ev);
           if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint, team FROM subs WHERE changes = 1').toArray()) if (!team || sub.team === team || schedChanged) targets.set(sub.id, sub.endpoint);
@@ -650,7 +623,7 @@ export class Store {
       const last = this.get('last');
       if (sub.changes && last && last.at && !last.silent && b.now - last.at < 15 * MIN) {
         if (!last.team || sub.team === last.team) items.push({ title: last.title, body: last.body, tag: 'org-' + last.stamp });
-        else if (last.sched) items.push({ title: 'Canvi d’horari', body: 'L’organització ha canviat l’horari.', tag: 'org-' + last.stamp });
+        else if (last.sched) items.push({ title: 'Cambio de horario', body: 'La organización ha cambiado el horario.', tag: 'org-' + last.stamp });
       }
       return json({ items });
     }
@@ -706,19 +679,6 @@ export default {
         const rl = await callStore(env, '/rl', lim('incimg'));
         if (rl.error) return json(rl, 429, origin);
         const r = await store(env).fetch('https://store/incimg?n=' + encodeURIComponent(String(url.searchParams.get('n') || '').slice(0, 12)));
-        return new Response(r.body, { status: r.status, headers: { 'content-type': 'image/jpeg', 'cache-control': r.status === 200 ? 'public, max-age=31536000, immutable' : 'no-store', ...cors(origin) } });
-      }
-      // Fotos de perfil
-      if (req.method === 'POST' && url.pathname === '/av') {
-        const r = await callStore(env, '/av', { ...(await body()), ...lim('av') });
-        return json(r, errStatus(r), origin);
-      }
-      if (req.method === 'GET' && url.pathname === '/av') { const r = await callStore(env, '/avall', lim('avall')); return json(r, errStatus(r), origin); }
-      // La URL porta l'hora del canvi (t): si canvia la foto, canvia la URL. Per això es pot guardar per sempre
-      if (req.method === 'GET' && url.pathname === '/avimg') {
-        const rl = await callStore(env, '/rl', lim('avimg'));
-        if (rl.error) return json(rl, 429, origin);
-        const r = await store(env).fetch('https://store/avimg?k=' + encodeURIComponent(String(url.searchParams.get('k') || '').slice(0, 40)));
         return new Response(r.body, { status: r.status, headers: { 'content-type': 'image/jpeg', 'cache-control': r.status === 200 ? 'public, max-age=31536000, immutable' : 'no-store', ...cors(origin) } });
       }
       // Una sola pregunta periòdica (incidències, càmeres, ✓, momentos)

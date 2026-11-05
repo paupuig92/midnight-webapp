@@ -41,7 +41,7 @@ PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
 CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
        "img-src 'self' data: blob: https://tilecache.rainviewer.com " + PUSH_ORIGIN + "; media-src 'self' data: blob:; "
-       "connect-src 'self' https://api.open-meteo.com https://ensemble-api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
+       "connect-src 'self' https://api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
@@ -200,7 +200,7 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(self)
 /
   Cache-Control: no-cache
 /ca
@@ -336,7 +336,7 @@ self.addEventListener('push', e => {{
     // Prova demanada des de Configuración (la pàgina hi deixa la marca abans de demanar-la)
     const test = await metaGet('test', 0);
     if (test && Date.now() - test < 3 * 60000) {{
-      items.push({{ title: 'Midnight · prova', body: 'Les notificacions arriben també amb el mòbil bloquejat ✓', tag: 'prueba-' + test }});
+      items.push({{ title: 'Midnight · prueba', body: 'Las notificaciones llegan también con el móvil bloqueado ✓', tag: 'prueba-' + test }});
       await metaPut('test', 0);
     }}
     try {{
@@ -351,7 +351,7 @@ self.addEventListener('push', e => {{
     await metaPut('shown', [...shown, ...fresh.map(i => i.tag)].slice(-200));
     // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
     if (!fresh.length) fresh = [items.length ? items[items.length - 1]
-      : {{ title: 'Midnight', body: got ? 'Obre l’app per veure el teu horari.' : 'Sense connexió: obre l’app per veure el teu horari.', tag: 'midnight' }}];
+      : {{ title: 'Midnight', body: got ? 'Abre la app para ver tu horario.' : 'Sin conexión: abre la app para ver tu horario.', tag: 'midnight' }}];
     await Promise.all(fresh.slice(0, 4).map(i => self.registration.showNotification(i.title, {{ body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' }})));
   }})());
 }});
