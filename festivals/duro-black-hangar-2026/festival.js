@@ -195,14 +195,21 @@ html[data-theme="light"] .wrap::after { background: linear-gradient(to bottom, t
 // Compte: build_web.py busca el final de FEST amb la clau i el punt i coma, no els escriguis junts aquí.
 // plan (opcional) = imatge de l'escenari (img/…, p. ex. la il·lustració isomètrica) i a cada càmera at: [x %, y %] = on va a la imatge.
 // carpa-3d.webp: il·lustració feta amb Nano Banana 2.1 (Higgsfield) a partir de la vista isomètrica del stage plot (04-11).
-// PROVISIONAL (04-11): les 4 càmeres del Black Hangar del primer Duro; en Pau encara no sap les posicions d'aquest.
+// days (opcional) = només aquests dies (1 = dissabte, 2 = diumenge). Sense days, tots els dies.
+// Dissabte (Universo Makina, 05-11, en Pau): triple cabina al mig de la pista (la plataforma de x = 0) → cenital, 2 generals i 1 general tancada.
+//   Posicions i càmeres PROVISIONALS: l'equip les mou i les completa des de l'app («Editar cámaras»).
+// Diumenge: les 4 del primer Duro (PROVISIONALS, en Pau encara no sap les d'aquest).
 FEST.multicam = [
   { stage: 'Black Hangar', plan: 'img/carpa-3d.webp',
     cams: [
-      { uid: 'black-hangar-cabina', c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
-      { uid: 'black-hangar-cabina-cenital', c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
-      { uid: 'black-hangar-foh-abierta', c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
-      { uid: 'black-hangar-foh-cerrada', c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
+      { uid: 'makina-cenital', days: [1], c: 'azul', pos: 'Cenital cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at3d: [0, 0, 8], aim: [0, -90] },
+      { uid: 'makina-general-1', days: [1], c: 'naranja', pos: 'General 1', cam: '', opt: '', at3d: [-3.5, -2.5, 3], aim: [35, -18] },
+      { uid: 'makina-general-2', days: [1], c: 'verde', pos: 'General 2', cam: '', opt: '', at3d: [3.5, 2.5, 3], aim: [-145, -18] },
+      { uid: 'makina-general-cerrada', days: [1], c: 'rojo', pos: 'General cerrada', cam: '', opt: '', at3d: [7, 0, 2.6], aim: [180, -8] },
+      { uid: 'black-hangar-cabina', days: [2], c: 'verde', pos: 'Cabina', cam: 'Black Micro G2', opt: '6mm', acc: ['Trípode'], at: [79, 38], at3d: [-18.6, 0, 2.6] },
+      { uid: 'black-hangar-cabina-cenital', days: [2], c: 'azul', pos: 'Cabina cenital', cam: 'Black Micro G2', opt: '6mm', acc: ['Brazo grande'], at: [80.7, 19.4], at3d: [-24, 0, 10.6] },
+      { uid: 'black-hangar-foh-abierta', days: [2], c: 'naranja', pos: 'FOH abierta', cam: 'DJI Action 6', opt: '', lim: 120, acc: ['Brazo mediano'], at: [19.3, 75], at3d: [27.4, -2.8, 2.4] },
+      { uid: 'black-hangar-foh-cerrada', days: [2], c: 'rojo', pos: 'FOH cerrada', cam: 'Black Studio', opt: '50mm', acc: ['Brazo grande'], at: [25.9, 79.3], at3d: [29.6, 2.8, 2.4] },
     ],
     // uid = identificador fix (no el canviïs: hi van lligats l'estat i la posició). lim = minuts de targeta/bateria (avís al 80 %; el de la DJI és provisional).
     // 3D (three.js, es gira amb el dit). Metres: x al llarg (escenari a -x, FOH a +x), y d'un costat a l'altre, z amunt.
