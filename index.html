@@ -1603,6 +1603,11 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 .tqtab .pp.z { color: var(--muted); font-weight: 400; opacity: .55; }
 .tqtab .cc { margin: 3px 4px; border-radius: 5px; background: rgba(200, 205, 215, calc(var(--cc) * .55)); color: var(--ink); }
 .tqtab .tp2 { color: var(--muted); }
+.tqtab .md { margin: 3px 4px; border-radius: 5px; font: 700 11px var(--mono, monospace); color: var(--ink); background: rgba(0, 153, 204, calc(var(--md, 0) * .7)); }
+.tqtab .md.z { color: var(--muted); opacity: .55; font-weight: 400; background: none; }
+.tqfest .pr { grid-row: span 3; font: 800 22px/1 var(--display); font-style: normal; font-variant-numeric: tabular-nums; min-width: 58px; text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--fill, rgba(255,255,255,.06)); }
+.tqfest .pr.ok { color: #3ecf6e; } .tqfest .pr.warn { color: var(--fav); } .tqfest .pr.bad { color: var(--now); }
+.tqfest .ens { color: var(--ink) !important; }
 .tqfest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .tqfest li { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); }
 .tqfest li .e { grid-row: span 2; font-size: 34px; }
@@ -1877,7 +1882,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <h3>Días del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
     <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ECMWF, ICON, AROME) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…); «Prob.» = % de las 91 simulaciones de ECMWF e ICON con lluvia; «Modelos» = cuántos de 7 modelos ven lluvia · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>cámara</span></h2>
@@ -7531,35 +7536,91 @@ function tqColor(sc, v) {
 const tqRgb = c => `rgb(${c.join(',')})`;
 
 // --- Previsió del punt (ara, avisos, taula per hores, dies del festival)
+// Precisió (05-11, en Pau: «el més precís possible, hem de saber si plou als festivals»):
+// 1) La pluja surt del model de més resolució que cobreix el lloc (AROME HD 1,3 km de Météo-France: Catalunya, València, nord;
+//    si no, HARMONIE 2 km / 5,5 km, ICON-EU 7 km, ECMWF 9 km…). Abans era el «best_match» d'Open-Meteo, que aquí donava ICON-EU (7 km).
+// 2) «Modelos»: quants dels 7 models veuen pluja a cada hora (si hi coincideixen, és més fiable).
+// 3) Probabilitat real = % de les 91 simulacions dels conjunts ECMWF (51) i ICON-EU (40) que donen pluja (≥ 0,1 mm a l'hora).
+//    Als dies del festival: % de simulacions amb ≥ 0,5 mm i ≥ 2 mm en tot l'horari. El conjunt pesa ~200 KB: es baixa cada hora com a molt
+//    i només se'n desen els recomptes. Tot va directe del mòbil a Open-Meteo (gratuït), sense passar pel servidor d'avisos.
+const TQ_MOD = [['meteofrance_arome_france_hd', 'AROME 1,3 km'], ['dmi_harmonie_arome_europe', 'HARMONIE 2 km'], ['knmi_harmonie_arome_europe', 'HARMONIE 5,5 km'],
+  ['icon_eu', 'ICON-EU 7 km'], ['ecmwf_ifs', 'ECMWF 9 km'], ['ukmo_global_deterministic_10km', 'UKMO 10 km'], ['gfs_seamless', 'GFS 13 km']];
+const TQ_ENS_AGE = 60 * MIN;
+async function tqJson(u, ms) { const r = await fetchT(u, { cache: 'no-store' }, ms); if (!r.ok) throw new Error(r.status); return r.json(); }
+// Del conjunt només es guarden recomptes: per hora (simulacions amb pluja / vàlides) i per dia del festival
+function tqEnsPack(d) {
+  const h = d.hourly, ks = Object.keys(h).filter(k => k.startsWith('precipitation')), time = h.time.map(s => s * 1000);
+  const w = time.map((_, i) => ks.reduce((n, k) => n + ((h[k][i] ?? 0) >= 0.1 ? 1 : 0), 0));
+  const n = time.map((_, i) => ks.reduce((c, k) => c + (h[k][i] == null ? 0 : 1), 0));
+  const fd = DAYS.map(dd => {
+    const a = dd.t0, b = tqFestEnd(dd), I = time.map((t, i) => t >= a && t < b ? i : -1).filter(i => i >= 0);
+    if (!I.length) return null;
+    // només les simulacions que arriben a tot l'horari del dia
+    const ok = ks.filter(k => I.every(i => h[k][i] != null)); if (ok.length < 10) return null;
+    const sum = ok.map(k => I.reduce((s2, i) => s2 + h[k][i], 0));
+    return { n: ok.length, p05: Math.round(sum.filter(x => x >= 0.5).length / ok.length * 100), p2: Math.round(sum.filter(x => x >= 2).length / ok.length * 100),
+      t: I.filter(i => w[i] / Math.max(1, n[i]) >= 0.3).map(i => time[i]) };
+  });
+  return { time, w, n, fd };
+}
 async function tqFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
   tqBusy = true;
-  const u = `https://api.open-meteo.com/v1/forecast?latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`
+  const ll = `latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`, tz = '&timezone=Europe%2FMadrid&timeformat=unixtime';
+  const u = `https://api.open-meteo.com/v1/forecast?${ll}`
     + '&current=temperature_2m,precipitation,weather_code,cloud_cover,is_day'
     + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover,is_day'
-    + '&minutely_15=precipitation&forecast_minutely_15=12&timezone=Europe%2FMadrid&timeformat=unixtime&forecast_days=16&wind_speed_unit=kmh';
+    + `&minutely_15=precipitation&forecast_minutely_15=12${tz}&forecast_days=16&wind_speed_unit=kmh`;
+  const um = `https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation&minutely_15=precipitation&forecast_minutely_15=24`
+    + `&models=${TQ_MOD.map(m => m[0]).join(',')}${tz}&forecast_days=16`;
+  const needE = force || !tq || !tq.e || tq.k !== k || Date.now() - tq.e.at > TQ_ENS_AGE;
+  const ue = `https://ensemble-api.open-meteo.com/v1/ensemble?${ll}&hourly=precipitation&models=ecmwf_ifs025,icon_eu_eps${tz}&forecast_days=16`;
+  const [r0, r1, r2] = await Promise.allSettled([tqJson(u, 12000), tqJson(um, 12000), needE ? tqJson(ue, 20000) : Promise.resolve(null)]);
   try {
-    const r = await fetchT(u, { cache: 'no-store' }, 12000);
-    if (!r.ok) throw new Error(r.status);
-    const d = await r.json();
-    if (!d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
-    tq = { k, at: Date.now(), d };
-    try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (e) {}
+    const d = r0.status === 'fulfilled' ? r0.value : null;
+    if (!d || !d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
+    const old = tq && tq.k === k ? tq : null;
+    const m = r1.status === 'fulfilled' && r1.value && r1.value.hourly ? r1.value : (old && old.m) || null;
+    let e = old && old.e || null;
+    if (r2.status === 'fulfilled' && r2.value && r2.value.hourly) try { e = { at: Date.now(), ...tqEnsPack(r2.value) }; } catch (x) {}
+    tq = { k, at: Date.now(), d, m, e };
+    try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (x) {}
     tq.err = '';
-  } catch (e) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
+  } catch (x) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
   tqBusy = false;
   tqPaint();
   if (TAB === 'apps' && typeof appsPaint === 'function') appsPaint();
 }
+// El model més fi que té dades per a aquesta hora (o per a aquest quart d'hora)
+function tqPick(blk, t) {
+  const B = tq && tq.m && tq.m[blk]; if (!B) return null;
+  const i = B.time.indexOf(Math.round(t / 1000)); if (i < 0) return null;
+  for (const [id, nm] of TQ_MOD) { const v = (B[`precipitation_${id}`] || [])[i]; if (v != null) return { v, nm }; }
+  return null;
+}
 function tqHours() {
   const h = tq && tq.d && tq.d.hourly;
   if (!h) return [];
-  return h.time.map((s, i) => ({ t: s * 1000, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i],
-    cc: h.cloud_cover[i] ?? 0, day: h.is_day[i] }));
+  const M = tq.m && tq.m.hourly, E = tq.e, ei = E ? new Map(E.time.map((t, i) => [t, i])) : null;
+  return h.time.map((s, i) => {
+    const t = s * 1000, o = { t, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i], cc: h.cloud_cover[i] ?? 0, day: h.is_day[i], src: '' };
+    if (M) { const j = M.time.indexOf(s);
+      if (j >= 0) { let n = 0, y = 0, first = null;
+        for (const [id, nm] of TQ_MOD) { const v = (M[`precipitation_${id}`] || [])[j]; if (v == null) continue; n++; if (v >= 0.1) y++; if (!first) first = { v, nm }; }
+        if (first) { o.mm = first.v; o.src = first.nm; } o.mn = n; o.my = y; } }
+    if (ei && ei.has(t)) { const j = ei.get(t); if (E.n[j] >= 10) { o.pp = Math.round(E.w[j] / E.n[j] * 100); o.ens = 1; } }
+    return o;
+  });
 }
 const tqFestEnd = d => NDAYS > 1 ? d.tend0 : TEND;
 const tqInFest = t => DAYS.some(d => t >= d.t0 && t < tqFestEnd(d));
+// Quin model fa servir i com de segur és (per a la línia de sota del resum)
+function tqSrcTxt(H, t) {
+  const h = H.find(x => x.t <= t && t < x.t + 3600000) || H.find(x => x.t > t);
+  if (!h || !h.src) return '';
+  return `<span>Modelo <b>${h.src}</b></span>${h.mn ? `<span>Coinciden <b>${h.my ? `${h.my} de ${h.mn} modelos en lluvia` : `${h.mn} modelos: seco`}</b></span>` : ''}`;
+}
 function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
   const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
@@ -7572,16 +7633,18 @@ function tqPaint() {
   document.getElementById('tqPillT').textContent = `${ic} ${tqDeg(c.temperature_2m)}`;
   nowEl.hidden = false;
   // El resum és la pluja: si plou, quan para; si no, quan comença
-  const m15 = tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
-  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50, raining = (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
+  const M15 = tq.m && tq.m.minutely_15 ? tq.m.minutely_15 : null;
+  const m15 = M15 ? M15.time.map(s => { const p = tqPick('minutely_15', s * 1000); return { t: s * 1000, mm: p ? p.v : 0 }; }).filter(x => x.t + 15 * MIN > t)
+    : tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
+  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50 || (h.mn >= 3 && h.my / h.mn >= 0.5), raining = (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
   let big, sub;
   if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
   else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
     if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
-    else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
+    else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.mn ? ` · ${rh.my} de ${rh.mn} modelos` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
     else { big = 'Sin lluvia'; sub = 'en las próximas 48 h'; } }
   nowEl.innerHTML = `<span class="ic" aria-hidden="true">${raining ? '🌧️' : ic}</span><span class="tp rain">${big}</span><span class="ds">${sub}</span>`
-    + `<div class="kv"><span>Ahora <b>${ds}</b></span><span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
+    + `<div class="kv"><span>Ahora <b>${ds}</b></span>${tqSrcTxt(H, t)}<span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
   const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1);
   if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}. Ten a mano fundas y bolsas.`]); }
   if (raining || soon) al.push(['bad', '🎥', 'Protege cámaras, brazos y material: fundas, bolsas y toallas.']);
@@ -7597,8 +7660,13 @@ function tqPaint() {
     if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
     const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds2] = tqCode(worst.c, 1);
     const pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), cc = Math.round(L.reduce((s, h) => s + h.cc, 0) / L.length), W = L.filter(h => h.mm >= 0.1 || h.pp >= 50);
-    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sin lluvia prevista';
-    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
+    const fe = tq.e && tq.e.fd && tq.e.fd[d.d], ft = fe ? fe.t.filter(x => x >= a && x < b) : [];
+    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : ft.length ? `más probable de ${hm(ft[0])} a ${hm(ft[ft.length - 1] + 3600000)}`
+      : fe && fe.p05 >= 20 ? 'la hora aún es incierta' : 'sin lluvia prevista';
+    const cls = fe ? (fe.p05 >= 50 ? 'bad' : fe.p05 >= 20 ? 'warn' : 'ok') : '';
+    const big = fe ? `<em class="pr ${cls}">${fe.p05} %</em>` : '';
+    const ens = fe ? `<span class="ens">${fe.p05} % de probabilidad de lluvia en el horario del festival (${fe.p2} % de más de 2 mm) · ${fe.n} simulaciones</span>` : '';
+    return `<li>${big || `<span class="e" aria-hidden="true">${e}</span>`}<b>${esc(name)} · ${hm(a)}–${hm(b)}</b>${ens}<span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
   }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
 }
 // Taula per hores (com la de Windy): 48 h, files fixes a l'esquerra, colors de temperatura i vent
@@ -7611,10 +7679,11 @@ function tqTable(H, t) {
     const [e] = tqCode(h.c, h.day), now = h.t <= t && t < h.t + 3600000;
     return `<div class="col${dn && i ? ' dn' : ''}${tqInFest(h.t) ? ' fest' : ''}${now ? ' nowc' : ''}"><span class="dd">${dn ? esc(day) : ''}</span><span class="hh">${hm(h.t).slice(0, 2)}</span><span class="e">${e}</span>`
       + `<span class="mm"${h.mm >= 0.1 ? ` style="background:${tqRgb(tqColor(TQ_RAIN, h.mm))}"` : ''}>${h.mm >= 0.1 ? h.mm.toFixed(1) : ''}</span><span class="pp${h.pp < 20 ? ' z' : ''}">${h.pp}%</span>`
+      + `<span class="md${h.my ? '' : ' z'}"${h.mn ? ` style="--md:${h.my / h.mn}"` : ''}>${h.mn ? `${h.my}/${h.mn}` : ''}</span>`
       + `<span class="cc" style="--cc:${h.cc / 100}">${Math.round(h.cc)}</span><span class="tp2">${tqDeg(h.tp)}</span></div>`;
   }).join('');
   const box = document.getElementById('tqTab'), sc = box.querySelector('.sc'), x = sc ? sc.scrollLeft : 0;
-  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
+  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Modelos</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
   box.querySelector('.sc').scrollLeft = x;
 }
 
@@ -7707,6 +7776,8 @@ async function tqRadar(force) {
 
 // --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
 const TQ_N = 7;
+// Al mapa també mana el model fi: Météo-France (AROME 1,3 km a prop, ARPEGE més lluny); on no n'hi ha, el best_match
+const tqMix2 = (h, v) => { const a = h[`${v}_meteofrance_seamless`] || [], b = h[`${v}_best_match`] || h[v] || []; return b.map((x, i) => a[i] ?? x); };
 async function tqGridFetch(force) {
   const g = tqView; if (!g) return;
   const k = `${g.z}|${g.left}|${g.top}|${g.W}|${g.H}`;
@@ -7715,14 +7786,14 @@ async function tqGridFetch(force) {
   const pts = [];
   for (let j = 0; j < TQ_N; j++) for (let i = 0; i < TQ_N; i++) { const x = -0.1 * g.W + i * 1.2 * g.W / (TQ_N - 1), y = -0.1 * g.H + j * 1.2 * g.H / (TQ_N - 1); pts.push([x, y, ...tqLatLon(g.left + x, g.top + y, g.z)]); }
   const u = `https://api.open-meteo.com/v1/forecast?latitude=${pts.map(p => p[2].toFixed(3)).join(',')}&longitude=${pts.map(p => p[3].toFixed(3)).join(',')}`
-    + '&hourly=precipitation,cloud_cover&forecast_hours=48&past_hours=1&timeformat=unixtime&wind_speed_unit=kmh&timezone=Europe%2FMadrid';
+    + '&hourly=precipitation,cloud_cover&models=meteofrance_seamless,best_match&forecast_hours=48&past_hours=1&timeformat=unixtime&wind_speed_unit=kmh&timezone=Europe%2FMadrid';
   try {
     const r = await fetchT(u, { cache: 'no-store' }, 15000);
     if (!r.ok) throw new Error(r.status);
     let d = await r.json(); if (!Array.isArray(d)) d = [d];
     if (d.length !== pts.length || !d[0].hourly) throw new Error('mal');
     tqGrid = { k, at: Date.now(), time: d[0].hourly.time.map(s => s * 1000), pts: pts.map(p => [p[0], p[1]]),
-      P: d.map(x => x.hourly.precipitation), C: d.map(x => x.hourly.cloud_cover) };
+      P: d.map(x => tqMix2(x.hourly, 'precipitation')), C: d.map(x => tqMix2(x.hourly, 'cloud_cover')) };
     try { localStorage.setItem(TQGK, JSON.stringify(tqGrid)); } catch (e) {}
     const now0 = Date.now(); tqH = Math.max(0, tqGrid.time.findIndex(x => x + 3600000 > now0));
   } catch (e) { if (!tqGrid && tqLy === 'clouds') { const msg = document.getElementById('tqMsg'); msg.hidden = false; msg.textContent = 'Sin conexión: la previsión del mapa necesita internet.'; } }

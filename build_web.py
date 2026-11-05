@@ -41,7 +41,7 @@ PUSH_ORIGIN = re.match(r"https?://[^/]+", push["url"]).group(0) if push else ""
 CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
        "img-src 'self' data: blob: https://tilecache.rainviewer.com " + PUSH_ORIGIN + "; media-src 'self' data: blob:; "
-       "connect-src 'self' https://api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
+       "connect-src 'self' https://api.open-meteo.com https://ensemble-api.open-meteo.com https://api.rainviewer.com " + PUSH_ORIGIN + "; frame-src https://embed.windy.com; "
        "manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
 print("Notificacions amb el mòbil bloquejat:", "activades (" + push["url"] + ")" if push else "desactivades (falta instal·lar el servidor: push/instala.sh)")
 # Data de la versió (surt sota «Actualizar la app»)
