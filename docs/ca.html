@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tilecache.rainviewer.com https://midnight-push.midnightgroup.workers.dev; media-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://ensemble-api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com https://midnight-push.midnightgroup.workers.dev; frame-src https://embed.windy.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tilecache.rainviewer.com https://midnight-push.midnightgroup.workers.dev; media-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com https://midnight-push.midnightgroup.workers.dev; frame-src https://embed.windy.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#050608">
@@ -1006,7 +1006,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi li.mcsame { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
 #multi li.mcsame[hidden] { display: none; }
 #multi li.mcsame .note { margin: 0; }
-#multi .mclog li { grid-template-columns: 4em minmax(0, 1fr) auto; gap: 10px; }
+#multi .mcl.mclog li { grid-template-columns: 4.5em minmax(0, 1fr) auto; gap: 10px; }  /* més específic que «.mcl li» (2.6em), que anava darrere i guanyava */
 #multi .mclog .who { color: var(--muted); font-size: var(--fs-xs); }
 #multi .mcplan.mcfold .mc3dbox, #multi .mcplan.mcfold .mchint, #multi .mcplan.mcfold .mced, #multi .mcfold .mctools .btn:not([data-mc3d="fold"]) { display: none; }
 #multi li.it[data-st="recogida"] { opacity: .55; }
@@ -1021,13 +1021,6 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mcl .sq { display: inline-flex; gap: 3px; }
 #multi .mcl .sq i { width: 10px; height: 10px; border-radius: 2px; background: var(--sc); }
 #multi .mcl .ok { color: var(--accent); font: 600 11px var(--mono, var(--body)); text-transform: uppercase; }
-#multi .mcl button.mcck { all: unset; display: contents; cursor: pointer; }
-#multi .mcl li.ck { cursor: pointer; }
-#multi .mcl li.ck .box { width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 4px; display: grid; place-items: center; align-self: center; font: 800 14px/1 var(--body); color: var(--accent-ink); }
-#multi .mcl li.ck[aria-checked="true"] { color: var(--muted); }
-#multi .mcl li.ck[aria-checked="true"] .t { text-decoration: line-through; }
-#multi .mcl li.ck[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); }
-#multi .mcl li.ck[aria-checked="true"] .box::after { content: "✓"; }
 #multi .mcnote { margin: 14px 0 0; }
 #multi li.mcstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 4px 0 12px; border-bottom: 1px solid var(--rule); }
 #multi li.mcstats span { display: flex; flex-direction: column; gap: 4px; font: 600 10.5px/1.2 var(--mono, var(--body)); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
@@ -1074,7 +1067,7 @@ body[data-tab="multi"] #multi { display: block !important; }
 #multi .mch2 { margin-top: 40px; }
 #multi .mcempty { margin: 6px 0 0; }
 /* Fitxa d'una càmera (a sobre, com «Mis artistas») */
-#mcSheet, #incSheet, #avSheet { z-index: 20; }
+#mcSheet, #incSheet { z-index: 20; }
 /* Incidències */
 #inc .shead { align-items: center; }
 #inc .incgo { min-height: 40px; padding: 0 14px; font-size: var(--fs-s); }
@@ -1392,17 +1385,8 @@ body:not([data-tab="ahora"]) #goNow2 { display: none; }
 .mwho .mav .ico { margin: 0; width: 18px; height: 18px; color: var(--muted); }
 .mwho:not([hidden]) { border: 0; border-radius: 12px; background: var(--fill); }
 /* Fotos de perfil (05-11-2026): la foto tapa la inicial; si no carrega, queda la inicial */
-.face b, .mwho .mav, .avs { position: relative; overflow: hidden; }
-.avimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.face.on b:has(.avimg) { padding: 0; }
 .avs { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; vertical-align: -6px; background: var(--fill-2); color: var(--ink); font: 800 11px/1 var(--display); }
 .tgh .avs { width: 20px; height: 20px; margin-right: 4px; font-size: 10px; vertical-align: -5px; }
-.cgrp > .avset:not([hidden]) { display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap; align-items: center; }
-.avset .btn { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
-.avcrop { display: grid; place-items: center; margin: 4px auto 14px; width: min(78vw, 340px); aspect-ratio: 1; }
-.avcrop canvas { width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 18px; background: var(--fill); }
-.avzoom { display: flex; align-items: center; gap: 12px; max-width: 340px; margin: 0 auto 8px; font-weight: 700; color: var(--muted); }
-.avzoom input { flex: 1; accent-color: var(--accent); }
 .mwho.card { border-radius: var(--r-card); background: var(--fill); }
 /* Targetes de «Ahora suena»: totes iguals (fons, vora de l'escenari, 14 px) i el temps a la mateixa línia que «Después» */
 .row { background: var(--panel); border: 0; border-radius: var(--r-card); padding: 12px 12px 0 13px; margin-bottom: 6px; overflow: hidden;
@@ -1541,6 +1525,7 @@ body.locked:not(.mkopen) .mkpop { display: none !important; }
 #mkList .mkl .tm { font: 700 var(--fs-m)/1.1 var(--mono, var(--body)); font-variant-numeric: tabular-nums; }
 #mkList .mkl .tx { min-width: 0; }
 #mkList .mkl .tx b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mkList .mkl .tx .avs { display: inline-grid; }  /* la rodona de qui ho ha marcat, en línia (la regla «.tx b» la feia saltar de línia) */
 #mkList .mkl .tx small { display: block; color: var(--muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #mkList .mkl .tg { display: inline-block; padding: 1px 7px; margin-right: 6px; border-radius: 999px; font: 800 10px/16px var(--body); text-transform: uppercase; letter-spacing: .04em; background: color-mix(in srgb, var(--mkc) 30%, transparent); color: var(--ink); }
 #mkList .mkl .del { width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
@@ -1655,11 +1640,6 @@ body[data-tab="tiempo"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) 
 .tqtab .pp.z { color: var(--muted); font-weight: 400; opacity: .55; }
 .tqtab .cc { margin: 3px 4px; border-radius: 5px; background: rgba(200, 205, 215, calc(var(--cc) * .55)); color: var(--ink); }
 .tqtab .tp2 { color: var(--muted); }
-.tqtab .md { margin: 3px 4px; border-radius: 5px; font: 700 11px var(--mono, monospace); color: var(--ink); background: rgba(0, 153, 204, calc(var(--md, 0) * .7)); }
-.tqtab .md.z { color: var(--muted); opacity: .55; font-weight: 400; background: none; }
-.tqfest .pr { grid-row: span 3; font: 800 22px/1 var(--display); font-style: normal; font-variant-numeric: tabular-nums; min-width: 58px; text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--fill, rgba(255,255,255,.06)); }
-.tqfest .pr.ok { color: #3ecf6e; } .tqfest .pr.warn { color: var(--fav); } .tqfest .pr.bad { color: var(--now); }
-.tqfest .ens { color: var(--ink) !important; }
 .tqfest { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .tqfest li { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--rule); }
 .tqfest li .e { grid-row: span 2; font-size: 34px; }
@@ -1946,7 +1926,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <h3>Días del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
     <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…); «Prob.» = % de las 91 simulaciones de ECMWF e ICON con lluvia; «Modelos» = cuántos de 7 modelos ven lluvia · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
+    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>. La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
     <h2 id="mcH">Multi<span>càmera</span></h2>
@@ -1959,10 +1939,6 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <p class="note">Qui ha canviat què (estat i SSD), el més nou a dalt.</p>
     <ul class="mcl mclog" id="mcLog"></ul>
     <button type="button" class="btn" id="mcLogBtn">Veure l’historial</button>
-    <h2 class="mch2">Material</h2>
-    <p class="note">Tot sumat<span id="mcMatFor"></span>. Marca el que ja està carregat (només en aquest mòbil).</p>
-    <ul class="mcl" id="mcMat"></ul>
-    <button type="button" class="linkbtn" id="mcClear" hidden>Treure totes les marques</button>
   </section>
 
   <section id="mapa" hidden>
@@ -2048,7 +2024,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <details class="tktx"><summary>Tasques com a text</summary>
         <label for="tkList">Tasques (una per línia: hora, tasca i @qui)</label>
         <textarea id="tkList" class="tkta" rows="12" placeholder="10:00 Muntar càmeres @audiovisual&#10;18:30 Gravar l’entrada dels Catarres @Marc @Laia&#10;20:00-20:30 Canviar bateries @Marc&#10;23:00 Foto de grup @tothom" spellcheck="false"></textarea>
-        <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.<span id="tkDays" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia.</span></p>
+        <p class="note edhelp">«- tasca» (amb guionet al davant) = sense hora, per fer durant el dia. @nom = una persona · @grup = tots els d’aquell grup · @tothom = tot l’equip. Una línia amb només «@Marc» val per a les tasques de sota que no diguin qui. De 6:00 a 12:00 és el muntatge (abans d’obrir). També pots enganxar d’un Excel: hora, tasca, qui.<span id="tkDays" hidden> Amb diversos dies, escriu «# Domingo» (o el dia que sigui) a sobre de les tasques d’aquell dia, o «2/10:30» davant de l’hora.</span></p>
         </details>
         <div class="note" id="tkInfo"></div>
         <div class="edbar sticky"><button type="button" class="btn primary" id="tkSave">Desar i publicar</button></div>
@@ -2077,10 +2053,6 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <label><input type="radio" name="prof" value="mkt"> Màrqueting</label>
         <label><input type="radio" name="prof" value="video"> Vídeo</label>
         <label><input type="radio" name="prof" value="foto"> Foto</label>
-      </div>
-      <div class="avset" id="avSet" hidden>
-        <label class="btn" id="avPickL"><input type="file" id="avFile" accept="image/*" hidden><span id="avPickT">Posar foto de perfil</span></label>
-        <button class="btn quiet" id="avDel" type="button" hidden>Treure la foto</button>
       </div>
       <div id="yoGrp" class="yogrp" hidden data-off>
         <h3 class="ch">Sóc…</h3>
@@ -2231,20 +2203,6 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <p class="hint" id="incMsg" hidden></p>
   </div>
   <div class="foot"><button class="btn primary" id="incSend" type="button">Enviar</button></div>
-</div>
-
-<div class="sheet" id="avSheet" role="dialog" aria-modal="true" aria-labelledby="avSheetH" hidden>
-  <header>
-    <h2 id="avSheetH">La teva foto</h2>
-    <button class="btn" id="avX" type="button">Cancelar</button>
-  </header>
-  <div class="body">
-    <div class="avcrop"><canvas id="avCv" width="600" height="600" aria-label="Arrossega per enquadrar"></canvas></div>
-    <label class="avzoom"><span>Zoom</span><input type="range" id="avZoom" min="1" max="4" step="0.01" value="1"></label>
-    <p class="note">Arrossega per centrar la cara. La veurà tot l’equip a Tasques, incidències i Moments.</p>
-    <p class="hint" id="avMsg" hidden></p>
-  </div>
-  <div class="foot"><button class="btn primary" id="avSave" type="button">Desar la foto</button></div>
 </div>
 
 <nav class="tabbar" id="tabbar" aria-label="Seccions">
@@ -3830,7 +3788,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '05/11 12:53';
+const BUILD = '05/11 17:15';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
@@ -3961,8 +3919,8 @@ function tvRender(t) {
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
   const up = [...ALL, ...GONE].filter(x => x.a > t && (tvStage ? x.s.id === tvStage : inNext(x))).sort((x, y) => x.a - y.a).slice(0, 12);
-  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lbl(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancel·lat</span></span></li>`
-    : `<li><span class="tt">${lbl(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Canvi</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
+  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblD(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancel·lat</span></span></li>`
+    : `<li><span class="tt">${lblD(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Canvi</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No queden més actuacions.</li>';
   // Només els que hi caben sencers (en una tele no es pot fer scroll)
   const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
@@ -5448,8 +5406,7 @@ function applyTasks(d) {
   const pe = person(YO);
   if (pe && pe.e && pe.e !== PROF) setProf(pe.e);
   if (!holaPick) holaPaint();
-  // Fotos de perfil: ara que se sap qui és l'equip, botó d'Ajustes i (si encara no s'han demanat) les fotos
-  if (typeof avPaintSet === 'function' && whoReady) { paintWho(); avPaintSet(); try { if (!liveP.includes('av') && liveParts().includes('av')) setTimeout(() => livePull(true), liveBusy ? 2500 : 0); } catch (e) {} }
+  if (whoReady) paintWho();
 }
 
 // --- Llegir l'equip i les tasques tal com els escriu l'organització ---
@@ -5554,8 +5511,11 @@ function parseTasks(src, people) {
     if (!line) continue;
     const cm = line.match(/^\[\s*([a-záéíóú]*)\s*\]$/i);
     if (cm) { const k = cm[1].toLowerCase(); if (k && !TK_COL[k]) warn.push(`Color desconocido: «${cm[1]}» (${Object.keys(TK_COL).join(', ')})`); col = TK_COL[k] ? k : ''; continue; }
-    let lc = col;
+    let lc = col, ld = tday;
     line = line.replace(/\s*\[\s*([a-záéíóú]+)\s*\]\s*$/i, (w, k) => TK_COL[k.toLowerCase()] ? (lc = k.toLowerCase(), '') : w);
+    // «2/10:30 Tasca» = dia 2, com a l'horari (NDAYS > 1); si no, s'avisa com una hora rara
+    const dm = NDAYS > 1 && line.match(/^([1-9])\/(?=\d)/);
+    if (dm && +dm[1] <= NDAYS) { ld = +dm[1] - 1; line = line.slice(dm[0].length); }
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
@@ -5573,8 +5533,8 @@ function parseTasks(src, people) {
       toks = [...m[3].matchAll(TOK)].map(x => x[1]);
       text = m[3].replace(TOK, '').replace(/\s{2,}/g, ' ').replace(/[\s,;·–-]+$/, '').trim();
     }
-    const a = ta ? taskTime(ta, tday) : null;
-    let b = ta && tb ? taskTime(tb, tday) : 0;
+    const a = ta ? taskTime(ta, ld) : null;
+    let b = ta && tb ? taskTime(tb, ld) : 0;
     if (a !== null && !Number.isFinite(a)) { bad++; warn.push(`Hora estranya: «${line.slice(0, 40)}»`); continue; }
     if (!text) { bad++; warn.push(`Falta la tasca: «${line.slice(0, 40)}»`); continue; }
     // Un final que no s'entén («19») o al revés («19:00-18:00») no es perd en silenci; «04:00-06:00» és de la mateixa nit
@@ -5615,7 +5575,6 @@ function setYo(k) {
   try { localStorage.setItem(YOK, YO); } catch (e) {}
   planAll = false;
   paintWho();
-  if (typeof avPaintSet === 'function') avPaintSet();
   paintYo();
   renderPlan(true);
   tgScrolled = false;
@@ -5749,7 +5708,7 @@ function renderTg(force) {
   const d = doneAll || {};
   const isDone = (k, id) => k === YO ? DONE.has(id) : !!(d[k] && d[k][id]);
   const cols = team ? [...(me ? [me] : []), ...TASKS.people.filter(p => p !== me)].filter(p => TASKS.list.some(x => x.p.includes(p.k))) : [me];
-  const key = [team, YO, TASKS.updated, Math.floor(t / MIN), [...DONE].join(), JSON.stringify(d).length, JSON.stringify(AV)].join('|');
+  const key = [team, YO, TASKS.updated, Math.floor(t / MIN), [...DONE].join(), JSON.stringify(d).length].join('|');
   if (!force && key === tgKey) return;
   tgKey = key;
   document.getElementById('tgTeam').setAttribute('aria-pressed', team);
@@ -6431,7 +6390,7 @@ function holaPaint() {
   const ppl = TASKS.people;
   if (holaPick) { holaKey = ''; return holaTeams(`${person(holaPick).n}, de quin equip ets?`, 'Per saber què ensenyar-te.'); }
   // Només repinta si ha canviat alguna cosa (no perdre el focus de VoiceOver)
-  const k = [PROF, YO, holaForce, holaDept, TASKS.updated, ppl.length, navigator.onLine, JSON.stringify(AV)].join('|');
+  const k = [PROF, YO, holaForce, holaDept, TASKS.updated, ppl.length, navigator.onLine].join('|');
   if (k === holaKey) return;
   holaKey = k;
   if (!ppl.length) {
@@ -6464,132 +6423,18 @@ holaBody.addEventListener('click', e => {
   if (pe && pe.e) { if (pe.e !== PROF) setProf(pe.e); setYo(k); return holaApply(); }
   holaPick = k; holaPaint();
 });
-// ==== FOTOS DE PERFIL ==== (05-11-2026)
-// Cadascú posa la seva a Ajustes (quadrat de 160 px, JPEG ~8 KB, fet al mòbil). El servidor només guarda una per persona.
-// /live porta { persona: hora del canvi }; la foto es baixa amb una URL que porta aquesta hora, i el navegador la guarda per sempre.
-const AVK = 'midnight-av-v1';
-var AV = {};
-try { AV = JSON.parse(localStorage.getItem(AVK) || '{}') || {}; } catch (e) {}
-const avUrl = k => AV && AV[k] && PUSH && PUSH.url ? `${PUSH.url}/avimg?k=${encodeURIComponent(k)}&t=${AV[k]}` : '';
-// Dins d'una rodona: la inicial i, a sobre, la foto (si no carrega, s'esborra i queda la inicial)
-function faceIn(p) { const u = avUrl(p.k); return html(p.n.slice(0, 1).toUpperCase()) + (u ? `<img class="avimg" src="${u}" alt="" decoding="async">` : ''); }
+// Rodones amb la inicial (les fotos de perfil del 05-11 es van treure el mateix dia: no aportaven res, decisió d'en Pau)
+function faceIn(p) { return html(p.n.slice(0, 1).toUpperCase()); }
 const avSm = p => `<b class="avs" aria-hidden="true">${faceIn(p)}</b>`;
 // Per nom (incidències, momentos: guarden el nom, no la clau)
 function avBy(name) { const k = nk(name || ''), p = k && (person(k) || TASKS.people.find(q => q.n === name)); return p ? avSm(p) : ''; }
-document.addEventListener('error', e => { if (e.target.classList && e.target.classList.contains('avimg')) e.target.remove(); }, true);
-function avApply(m) {
-  if (!m || typeof m !== 'object' || Array.isArray(m)) return;
-  const s = JSON.stringify(m);
-  if (s === JSON.stringify(AV)) return;
-  AV = m;
-  try { localStorage.setItem(AVK, s); } catch (e) {}
-  avRepaint();
-}
-function avRepaint() {
-  paintWho(); holaPaint(); renderTg(true); incPaint(); avPaintSet();
-  if (!document.getElementById('pGlobal').hidden) renderGlobal();
-  if (!document.getElementById('mkList').hidden && typeof mkPaint === 'function') mkPaint();
-}
-function avPaintSet() {
-  const avSet = document.getElementById('avSet'), pe = YO && YO !== '-' ? person(YO) : null;
-  avSet.hidden = !pe || !PUSH || !PUSH.url;
-  if (avSet.hidden) return;
-  document.getElementById('avPickT').textContent = AV[pe.k] ? 'Canviar la foto' : 'Posar foto de perfil';
-  document.getElementById('avDel').hidden = !AV[pe.k];
-}
-async function avSend(img) {
-  const r = await fetchT(`${PUSH.url}/av`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: YO, img }) }, 10000);
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok || !d.ok) throw new Error(d.error || r.status);
-  const m = { ...AV };
-  if (img) m[YO] = d.at; else delete m[YO];
-  avApply(m);
-}
-// Editor: arrossegar per encuadrar, zoom amb el lliscador o amb dos dits
-const avSheet = document.getElementById('avSheet'), avCv = document.getElementById('avCv'), avZoom = document.getElementById('avZoom');
-let avImg = null, avZ = 1, avX = 0, avY = 0;   // avX/avY: centre del retall, en píxels de la imatge
-const avBase = () => avCv.width / Math.min(avImg.width, avImg.height);   // escala perquè el costat curt ompli el quadrat
-function avClamp() {
-  const half = avCv.width / 2 / (avBase() * avZ);
-  avX = Math.min(avImg.width - half, Math.max(half, avX));
-  avY = Math.min(avImg.height - half, Math.max(half, avY));
-}
-function avDraw(ctx = avCv.getContext('2d'), W = avCv.width, ring = true) {
-  if (!avImg) return;
-  avClamp();
-  const k = avBase() * avZ * W / avCv.width;
-  ctx.clearRect(0, 0, W, W);
-  ctx.drawImage(avImg, W / 2 - avX * k, W / 2 - avY * k, avImg.width * k, avImg.height * k);
-  if (!ring) return;
-  // Fora del cercle, enfosquit: així es veu com quedarà la rodona
-  ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.rect(0, 0, W, W); ctx.arc(W / 2, W / 2, W / 2 - 6, 0, Math.PI * 2, true); ctx.fill('evenodd');
-  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(W / 2, W / 2, W / 2 - 6, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-}
-function avMsg(t) { const m = document.getElementById('avMsg'); m.hidden = !t; m.textContent = t || ''; m.classList.toggle('bad', !!t); }
-document.getElementById('avFile').addEventListener('change', async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (!f) return;
-  const url = URL.createObjectURL(f);
-  try {
-    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
-    // Una còpia petita (1024 px) per no carregar el mòbil amb una foto de 12 MP mentre s'arrossega
-    const k = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
-    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
-    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    avImg = c; avZ = 1; avZoom.value = 1;
-    // Retrat: la cara sol ser al terç de dalt
-    avX = c.width / 2; avY = c.height > c.width ? c.height * .38 : c.height / 2;
-    avMsg(''); avSheet.hidden = false; avDraw();
-    anim(avSheet, [{ opacity: 0, translate: '0 24px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
-  } catch (err) { toast('No s’ha pogut obrir la foto.'); }
-  finally { URL.revokeObjectURL(url); }
-});
-const avPts = new Map();
-let avPinch = 0;
-avCv.addEventListener('pointerdown', e => { avCv.setPointerCapture(e.pointerId); avPts.set(e.pointerId, [e.clientX, e.clientY]); avPinch = 0; });
-avCv.addEventListener('pointermove', e => {
-  const old = avPts.get(e.pointerId);
-  if (!old || !avImg) return;
-  const pts = [...avPts.values()];
-  avPts.set(e.pointerId, [e.clientX, e.clientY]);
-  if (avPts.size === 2) {
-    const [a, b] = [...avPts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-    if (avPinch) { avZ = Math.min(4, Math.max(1, avZ * d / avPinch)); avZoom.value = avZ; }
-    avPinch = d;
-  } else if (pts.length === 1) {
-    const css = avCv.getBoundingClientRect().width / avCv.width, k = avBase() * avZ * css;
-    avX -= (e.clientX - old[0]) / k; avY -= (e.clientY - old[1]) / k;
-  }
-  avDraw();
-});
-for (const ev of ['pointerup', 'pointercancel']) avCv.addEventListener(ev, e => { avPts.delete(e.pointerId); avPinch = 0; });
-avZoom.addEventListener('input', () => { avZ = +avZoom.value; avDraw(); });
-const avClose = () => { avSheet.hidden = true; avImg = null; };
-document.getElementById('avX').addEventListener('click', avClose);
-document.getElementById('avSave').addEventListener('click', async () => {
-  if (!avImg || !person(YO)) return avClose();
-  const b = document.getElementById('avSave');
-  const c = document.createElement('canvas'); c.width = c.height = 160;
-  avDraw(c.getContext('2d'), 160, false);
-  let img = '';
-  for (const q of [.82, .7, .55]) { img = c.toDataURL('image/jpeg', q); if (img.length < 28000) break; }
-  b.disabled = true; b.textContent = 'Desant…';
-  try { await avSend(img); avClose(); toast('Foto desada: ja la veu tot l’equip.'); }
-  catch (err) { avMsg(navigator.onLine ? 'No s’ha pogut desar. Torna-ho a provar.' : 'Sense connexió: prova-ho quan torni la xarxa.'); }
-  b.disabled = false; b.textContent = 'Desar la foto';
-});
-document.getElementById('avDel').addEventListener('click', async () => {
-  try { await avSend(''); toast('Foto treta.'); } catch (err) { toast('Sense connexió: no s’ha pogut treure.'); }
-});
-// ==== /FOTOS DE PERFIL ====
 
 // Perfil a dalt (barra fina i capçalera): nom + equip; un toc porta a canviar-lo
 var whoReady = false;  // tick() hi passa abans que existeixin faceHue i companyia
 function paintWho() {
   if (!whoReady) return;
   const pe = YO && YO !== '-' ? person(YO) : null;
-  const key = [PROF, YO, pe && pe.n, pe && AV[pe.k]].join('|');
+  const key = [PROF, YO, pe && pe.n].join('|');
   if (paintWho.k === key) return;
   paintWho.k = key;
   for (const el of document.querySelectorAll('.mwho')) {
@@ -6611,7 +6456,7 @@ function paintFaces() {
   const box = document.getElementById('faces');
   if (!box) return;
   const ppl = TASKS.people, same = ppl.filter(p => p.e && p.e === PROF), list = same.length ? same : ppl.filter(p => !p.e || p.e === PROF);
-  const key = [PROF, YO, list.map(p => p.k + (AV[p.k] || '')).join()].join('|');
+  const key = [PROF, YO, list.map(p => p.k).join()].join('|');
   if (box.dataset.k === key) return;
   box.dataset.k = key;
   box.innerHTML = list.map(p => `<button type="button" class="face${p.k === YO ? ' on' : ''}" data-face="${p.k}" aria-pressed="${p.k === YO}"><b style="--h:${faceHue(p.k)}">${faceIn(p)}</b><span>${html(p.n.split(/\s+/)[0])}</span></button>`).join('')
@@ -6625,14 +6470,14 @@ document.getElementById('faces').addEventListener('click', e => {
   if (f !== YO) { setYo(f); paintFaces(); paintTabs(); }
 });
 holaPaint();
-whoReady = true; paintWho(); avPaintSet();
+whoReady = true; paintWho();
 
 // ==== MULTICÁMARA ==== (pestanya «Cámaras», des del 04-11-2026)
 // Les posicions i el material són a FEST.multicam (al bloc del festival). L'estat de cada càmera (montada, grabando…, SSD i nota)
-// el comparteix tot l'equip a través del servidor d'avisos (POST/GET /mc), sense contrasenya. Les marques de «Material» són només d'aquest mòbil.
+// el comparteix tot l'equip a través del servidor d'avisos (POST/GET /mc), sense contrasenya. (La llista «Material» es va treure el 05-11.)
 const MC = Array.isArray(FEST.multicam) ? FEST.multicam : [];
 const MC_ST = [['montada', 'Muntada'], ['grabando', 'Gravant'], ['parada', 'Parada'], ['recogida', 'Recollida']];
-const MC_CK = FEST.key + '-mc-carga-v1', MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
+const MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
 const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
 // Un id per càmera: festival + `uid` fix de les dades (així canviar el nom de la posició no perd l'estat ni el lloc).
@@ -6649,21 +6494,12 @@ const mcKey = c => NDAYS > 1 ? c.id + '-d' + (mcDay + 1) : c.id;
 try { mcState = JSON.parse(localStorage.getItem(MC_SK) || '{}') || {}; } catch (e) {}
 try { mcFilter = localStorage.getItem(MC_FK) || ''; } catch (e) {}
 if (mcFilter && !MC.some(s => s.stage === mcFilter)) mcFilter = '';
-let mcCk = {};
-try { mcCk = JSON.parse(localStorage.getItem(MC_CK) || '{}') || {}; } catch (e) {}
+try { localStorage.removeItem(FEST.key + '-mc-carga-v1'); } catch (e) {}  // marques de «Material» (checklist treta el 05-11)
 const mcLive = () => ONLINE && PUSH && PUSH.url;
 document.getElementById('tabMulti').hidden = !MC.length;
 
 // «2x Brazo grande» → [2, 'Brazo grande']
 const mcCount = a => { const m = /^\s*(\d+)\s*[x×]\s*(.+)$/i.exec(a) || /^(.+?)\s*[x×]\s*(\d+)\s*$/i.exec(a); return m ? (/^\d+$/.test(m[1]) ? [+m[1], m[2].trim()] : [+m[2], m[1].trim()]) : [1, a.trim()]; };
-function mcMaterial(list) {
-  const g = { cam: new Map(), opt: new Map(), acc: new Map(), pow: new Map() }, add = (m, k, n) => { if (k) m.set(k, (m.get(k) || 0) + n); };
-  for (const s of list) {
-    for (const c of s.cams || []) { add(g.cam, c.cam, 1); add(g.opt, c.opt, 1); for (const a of c.acc || []) { const [n, k] = mcCount(a); add(g.acc, k, n); } }
-    for (const r of s.rider || []) add(g.pow, r.what, +r.n || 1);
-  }
-  return [['cam', 'Càmeres'], ['opt', 'Òptiques'], ['acc', 'Accessoris'], ['pow', 'Corrent i àudio']].map(([k, t]) => [k, t, [...g[k]].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]).filter(x => x[2].length);
-}
 // --- Vista 3D (FEST.multicam[].scene3d): la carpa modelada amb three.js a partir de les mides del stage plot ---
 // Es carrega només quan s'obre la pestanya (vendor/three…, ~170 kB comprimit). Mentre carrega, o si el mòbil no pot fer WebGL,
 // es veu la il·lustració (plan) amb els punts. Es dibuixa només quan cal (en girar o en canviar la mida): no gasta bateria parat.
@@ -7288,10 +7124,6 @@ function mcRender() {
     ${zones.length ? `<ul class="mcl">${zones.map(([z, rs]) => `<li class="grp">${html(z)}</li>${rs.map(r => `<li><span class="n">${+r.n || 1}×</span><span>${html(r.what)}${r.where ? ` <small>· ${html(r.where)}</small>` : ''}</span><span>${r.ok ? `<span class="ok">✓ ${html(r.ok)}</span> ` : ''}<span class="sq">${mcSq(r.c)}</span></span></li>`).join('')}`).join('')}</ul>` : ''}
     ${s.note ? `<p class="note mcnote">⚠️ ${html(s.note)}</p>` : ''}`;
   }).join('');
-  document.getElementById('mcMatFor').textContent = mcFilter ? ' · ' + mcFilter : (MC.length > 1 ? ' · tots els escenaris' : '');
-  const mat = mcMaterial(list), pre = mcSlug(mcFilter || 'todo');
-  document.getElementById('mcMat').innerHTML = mat.map(([k, t, rows]) => `<li class="grp">${t}</li>${rows.map(([name, n]) => { const id = pre + ':' + k + ':' + mcSlug(name); return `<li class="ck" role="checkbox" tabindex="0" data-mcck="${html(id)}" aria-checked="${!!mcCk[id]}"><span class="n">${n}×</span><span class="t">${html(name)}</span><span class="box"></span></li>`; }).join('')}`).join('');
-  document.getElementById('mcClear').hidden = !Object.keys(mcCk).length;
   mcPaint();
   if (TAB === 'multi') mc3dAttach();
 }
@@ -7480,11 +7312,8 @@ document.getElementById('multi').addEventListener('click', e => {
   if (f) { mcFilter = f.dataset.mcfilt; try { localStorage.setItem(MC_FK, mcFilter); } catch (er) {} mcRender(); return; }
   const c = e.target.closest('[data-mcid]');
   if (c) { mcOpenSheet(c.dataset.mcid); return; }
-  const k = e.target.closest('[data-mcck]');
-  if (k) { const id = k.dataset.mcck; if (mcCk[id]) delete mcCk[id]; else mcCk[id] = 1; k.setAttribute('aria-checked', !!mcCk[id]); try { localStorage.setItem(MC_CK, JSON.stringify(mcCk)); } catch (er) {} document.getElementById('mcClear').hidden = !Object.keys(mcCk).length; return; }
-  if (e.target.id === 'mcClear') { mcCk = {}; try { localStorage.removeItem(MC_CK); } catch (er) {} mcRender(); }
 });
-document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid], li[data-mcck]')) { e.preventDefault(); e.target.click(); } });
+document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid]')) { e.preventDefault(); e.target.click(); } });
 // ==== /MULTICÁMARA ====
 
 // ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
@@ -7702,8 +7531,8 @@ addEventListener('online', mkFlush);
 // radar de RainViewer (pluja real de les últimes 2 h, fins al zoom 7); capa «Windy» = el widget oficial gratuït (embed.windy.com) dins l'app.
 // Barra de temps de la capa Lluvia: primer el radar (passat) i després la previsió (futur), seguits.
 // Ubicació: la de la pestanya Sol (solWhere). Sense cobertura es veu l'última previsió desada.
-const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN;
-let tq = null, tqBusy = false, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
+const TQK = 'midnight-tiempo-v2', TQGK = 'midnight-tiempo-grid-v2', TQLK = 'midnight-tiempo-capa', TQ_AGE = 15 * MIN, TQ_RETRY = 2 * MIN;
+let tq = null, tqBusy = false, tqFail = 0, tqTimer = 0, tqRad = null, tqRadAt = 0, tqI = 0, tqPlayT = 0, tqZ = 8, tqOn = false;
 let tqLy = 'radar', tqGrid = null, tqGridBusy = false, tqH = 0, tqView = null, tqField = null, tqPos = 0;
 try { const v = JSON.parse(localStorage.getItem(TQK) || 'null'); if (v && v.d && v.d.hourly) tq = v; } catch (e) {}
 try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts) tqGrid = v; } catch (e) {}
@@ -7744,33 +7573,15 @@ const tqRgb = c => `rgb(${c.join(',')})`;
 // Precisió (05-11, en Pau: «el més precís possible, hem de saber si plou als festivals»):
 // 1) La pluja surt del model de més resolució que cobreix el lloc (AROME HD 1,3 km de Météo-France: Catalunya, València, nord;
 //    si no, HARMONIE 2 km / 5,5 km, ICON-EU 7 km, ECMWF 9 km…). Abans era el «best_match» d'Open-Meteo, que aquí donava ICON-EU (7 km).
-// 2) «Modelos»: quants dels 7 models veuen pluja a cada hora (si hi coincideixen, és més fiable).
-// 3) Probabilitat real = % de les 91 simulacions dels conjunts ECMWF (51) i ICON-EU (40) que donen pluja (≥ 0,1 mm a l'hora).
-//    Als dies del festival: % de simulacions amb ≥ 0,5 mm i ≥ 2 mm en tot l'horari. El conjunt pesa ~200 KB: es baixa cada hora com a molt
-//    i només se'n desen els recomptes. Tot va directe del mòbil a Open-Meteo (gratuït), sense passar pel servidor d'avisos.
+// 2) Pluja mesurada: pluviòmetres de Meteocat (més avall). El recompte de «Modelos» i el conjunt de 91 simulacions (~200 KB/h)
+//    es van treure el 05-11 (en Pau: «Meteocat + la més precisa»). Tot va directe del mòbil a Open-Meteo (gratuït), sense passar pel servidor.
 const TQ_MOD = [['meteofrance_arome_france_hd', 'AROME 1,3 km'], ['dmi_harmonie_arome_europe', 'HARMONIE 2 km'], ['knmi_harmonie_arome_europe', 'HARMONIE 5,5 km'],
   ['icon_eu', 'ICON-EU 7 km'], ['ecmwf_ifs', 'ECMWF 9 km'], ['ukmo_global_deterministic_10km', 'UKMO 10 km'], ['gfs_seamless', 'GFS 13 km']];
-const TQ_ENS_AGE = 60 * MIN;
 async function tqJson(u, ms) { const r = await fetchT(u, { cache: 'no-store' }, ms); if (!r.ok) throw new Error(r.status); return r.json(); }
-// Del conjunt només es guarden recomptes: per hora (simulacions amb pluja / vàlides) i per dia del festival
-function tqEnsPack(d) {
-  const h = d.hourly, ks = Object.keys(h).filter(k => k.startsWith('precipitation')), time = h.time.map(s => s * 1000);
-  const w = time.map((_, i) => ks.reduce((n, k) => n + ((h[k][i] ?? 0) >= 0.1 ? 1 : 0), 0));
-  const n = time.map((_, i) => ks.reduce((c, k) => c + (h[k][i] == null ? 0 : 1), 0));
-  const fd = DAYS.map(dd => {
-    const a = dd.t0, b = tqFestEnd(dd), I = time.map((t, i) => t >= a && t < b ? i : -1).filter(i => i >= 0);
-    if (!I.length) return null;
-    // només les simulacions que arriben a tot l'horari del dia
-    const ok = ks.filter(k => I.every(i => h[k][i] != null)); if (ok.length < 10) return null;
-    const sum = ok.map(k => I.reduce((s2, i) => s2 + h[k][i], 0));
-    return { n: ok.length, p05: Math.round(sum.filter(x => x >= 0.5).length / ok.length * 100), p2: Math.round(sum.filter(x => x >= 2).length / ok.length * 100),
-      t: I.filter(i => w[i] / Math.max(1, n[i]) >= 0.3).map(i => time[i]) };
-  });
-  return { time, w, n, fd };
-}
 async function tqFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqBusy || (!force && tq && tq.k === k && Date.now() - tq.at < TQ_AGE)) return tqPaint();
+  if (!force && Date.now() - tqFail < TQ_RETRY) return tqPaint();  // acaba de fallar: no insistim (bateria, dades i límits d'Open-Meteo)
   tqBusy = true;
   const ll = `latitude=${w.lat.toFixed(4)}&longitude=${w.lon.toFixed(4)}`, tz = '&timezone=Europe%2FMadrid&timeformat=unixtime';
   const u = `https://api.open-meteo.com/v1/forecast?${ll}`
@@ -7779,20 +7590,16 @@ async function tqFetch(force) {
     + `&minutely_15=precipitation&forecast_minutely_15=12${tz}&forecast_days=16&wind_speed_unit=kmh`;
   const um = `https://api.open-meteo.com/v1/forecast?${ll}&hourly=precipitation&minutely_15=precipitation&forecast_minutely_15=24`
     + `&models=${TQ_MOD.map(m => m[0]).join(',')}${tz}&forecast_days=16`;
-  const needE = force || !tq || !tq.e || tq.k !== k || Date.now() - tq.e.at > TQ_ENS_AGE;
-  const ue = `https://ensemble-api.open-meteo.com/v1/ensemble?${ll}&hourly=precipitation&models=ecmwf_ifs025,icon_eu_eps${tz}&forecast_days=16`;
-  const [r0, r1, r2] = await Promise.allSettled([tqJson(u, 12000), tqJson(um, 12000), needE ? tqJson(ue, 20000) : Promise.resolve(null)]);
+  const [r0, r1] = await Promise.allSettled([tqJson(u, 12000), tqJson(um, 12000)]);
   try {
     const d = r0.status === 'fulfilled' ? r0.value : null;
     if (!d || !d.hourly || !Array.isArray(d.hourly.time)) throw new Error('mal');
     const old = tq && tq.k === k ? tq : null;
     const m = r1.status === 'fulfilled' && r1.value && r1.value.hourly ? r1.value : (old && old.m) || null;
-    let e = old && old.e || null;
-    if (r2.status === 'fulfilled' && r2.value && r2.value.hourly) try { e = { at: Date.now(), ...tqEnsPack(r2.value) }; } catch (x) {}
-    tq = { k, at: Date.now(), d, m, e };
+    tq = { k, at: Date.now(), d, m };
     try { localStorage.setItem(TQK, JSON.stringify(tq)); } catch (x) {}
-    tq.err = '';
-  } catch (x) { if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
+    tq.err = ''; tqFail = 0;
+  } catch (x) { tqFail = Date.now(); if (tq) tq.err = 'sin conexión'; else tq = { err: 'sin conexión' }; }
   tqBusy = false;
   tqPaint();
   tqPlFetch();
@@ -7808,14 +7615,11 @@ function tqPick(blk, t) {
 function tqHours() {
   const h = tq && tq.d && tq.d.hourly;
   if (!h) return [];
-  const M = tq.m && tq.m.hourly, E = tq.e, ei = E ? new Map(E.time.map((t, i) => [t, i])) : null;
+  const M = tq.m && tq.m.hourly;
   return h.time.map((s, i) => {
     const t = s * 1000, o = { t, tp: h.temperature_2m[i], pp: h.precipitation_probability[i] ?? 0, mm: h.precipitation[i] ?? 0, c: h.weather_code[i], cc: h.cloud_cover[i] ?? 0, day: h.is_day[i], src: '' };
     if (M) { const j = M.time.indexOf(s);
-      if (j >= 0) { let n = 0, y = 0, first = null;
-        for (const [id, nm] of TQ_MOD) { const v = (M[`precipitation_${id}`] || [])[j]; if (v == null) continue; n++; if (v >= 0.1) y++; if (!first) first = { v, nm }; }
-        if (first) { o.mm = first.v; o.src = first.nm; } o.mn = n; o.my = y; } }
-    if (ei && ei.has(t)) { const j = ei.get(t); if (E.n[j] >= 10) { o.pp = Math.round(E.w[j] / E.n[j] * 100); o.ens = 1; } }
+      if (j >= 0) for (const [id, nm] of TQ_MOD) { const v = (M[`precipitation_${id}`] || [])[j]; if (v != null) { o.mm = v; o.src = nm; break; } } }
     return o;
   });
 }
@@ -7825,7 +7629,7 @@ const tqInFest = t => DAYS.some(d => t >= d.t0 && t < tqFestEnd(d));
 function tqSrcTxt(H, t) {
   const h = H.find(x => x.t <= t && t < x.t + 3600000) || H.find(x => x.t > t);
   if (!h || !h.src) return '';
-  return `<span>Modelo <b>${h.src}</b></span>${h.mn ? `<span>Coinciden <b>${h.my ? `${h.my} de ${h.mn} modelos en lluvia` : `${h.mn} modelos: seco`}</b></span>` : ''}`;
+  return `<span>Modelo <b>${h.src}</b></span>`;
 }
 function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
@@ -7843,7 +7647,7 @@ function tqPaint() {
   const M15 = tq.m && tq.m.minutely_15 ? tq.m.minutely_15 : null;
   const m15 = M15 ? M15.time.map(s => { const p = tqPick('minutely_15', s * 1000); return { t: s * 1000, mm: p ? p.v : 0 }; }).filter(x => x.t + 15 * MIN > t)
     : tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
-  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50 || (h.mn >= 3 && h.my / h.mn >= 0.5), rv = tqLvOk(), raining = rv ? rv.here >= TQ_DBZ : (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
+  const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50, rv = tqLvOk(), raining = rv ? rv.here >= TQ_DBZ : (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
   let big, sub;
   if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = rv && rv.stop ? (tqLvIn(rv, rv.stop) <= 2 ? 'Según el radar, puede parar en cualquier momento' : `Según el radar, puede parar hacia las ${hm(rv.t + rv.stop * MIN)}`) : stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
   else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
@@ -7868,13 +7672,8 @@ function tqPaint() {
     if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
     const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds2] = tqCode(worst.c, 1);
     const pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), cc = Math.round(L.reduce((s, h) => s + h.cc, 0) / L.length), W = L.filter(h => h.mm >= 0.1 || h.pp >= 50);
-    const fe = tq.e && tq.e.fd && tq.e.fd[d.d], ft = fe ? fe.t.filter(x => x >= a && x < b) : [];
-    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : ft.length ? `más probable de ${hm(ft[0])} a ${hm(ft[ft.length - 1] + 3600000)}`
-      : fe && fe.p05 >= 20 ? 'la hora aún es incierta' : 'sin lluvia prevista';
-    const cls = fe ? (fe.p05 >= 50 ? 'bad' : fe.p05 >= 20 ? 'warn' : 'ok') : '';
-    const big = fe ? `<em class="pr ${cls}">${fe.p05} %</em>` : '';
-    const ens = fe ? `<span class="ens">${fe.p05} % de probabilidad de lluvia en el horario del festival (${fe.p2} % de más de 2 mm) · ${fe.n} simulaciones</span>` : '';
-    return `<li>${big || `<span class="e" aria-hidden="true">${e}</span>`}<b>${esc(name)} · ${hm(a)}–${hm(b)}</b>${ens}<span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
+    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sin lluvia prevista';
+    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
   }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
 }
 // Taula per hores (com la de Windy): 48 h, files fixes a l'esquerra, colors de temperatura i vent
@@ -7887,11 +7686,10 @@ function tqTable(H, t) {
     const [e] = tqCode(h.c, h.day), now = h.t <= t && t < h.t + 3600000;
     return `<div class="col${dn && i ? ' dn' : ''}${tqInFest(h.t) ? ' fest' : ''}${now ? ' nowc' : ''}"><span class="dd">${dn ? esc(day) : ''}</span><span class="hh">${hm(h.t).slice(0, 2)}</span><span class="e">${e}</span>`
       + `<span class="mm"${h.mm >= 0.1 ? ` style="background:${tqRgb(tqColor(TQ_RAIN, h.mm))}"` : ''}>${h.mm >= 0.1 ? h.mm.toFixed(1) : ''}</span><span class="pp${h.pp < 20 ? ' z' : ''}">${h.pp}%</span>`
-      + `<span class="md${h.my ? '' : ' z'}"${h.mn ? ` style="--md:${h.my / h.mn}"` : ''}>${h.mn ? `${h.my}/${h.mn}` : ''}</span>`
       + `<span class="cc" style="--cc:${h.cc / 100}">${Math.round(h.cc)}</span><span class="tp2">${tqDeg(h.tp)}</span></div>`;
   }).join('');
   const box = document.getElementById('tqTab'), sc = box.querySelector('.sc'), x = sc ? sc.scrollLeft : 0;
-  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Modelos</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
+  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
   box.querySelector('.sc').scrollLeft = x;
 }
 
@@ -8102,11 +7900,12 @@ function tqLivePaint() {
 // Dades obertes de la Generalitat (Socrata, sense clau, CORS obert): estacions «yqwd-vj5e» (es desen 7 dies) i lectures «nzvn-apee»
 // (variable 35 = precipitació en mm per 30 min, hora UTC; arriben amb ~1 h de retard). 3 estacions a ≤ 20 km. Cada 15 min com a molt.
 const TQ_SOC = 'https://analisi.transparenciacatalunya.cat/resource/', TQPK = 'midnight-tiempo-pluvi-v1', TQEK = 'midnight-xema-est-v1';
-let tqPl = null, tqPlBusy = false;
+let tqPl = null, tqPlBusy = false, tqPlFail = 0;
 try { const v = JSON.parse(localStorage.getItem(TQPK) || 'null'); if (v && v.st) tqPl = v; } catch (e) {}
 async function tqPlFetch(force) {
   const w = tqWhere(), k = tqKey(w);
   if (tqPlBusy || (!force && tqPl && tqPl.k === k && Date.now() - tqPl.at < 15 * MIN)) return;
+  if (!force && Date.now() - tqPlFail < TQ_RETRY) return;
   // fora de Catalunya, ni ho provem
   if (w.lat < 40.4 || w.lat > 42.95 || w.lon < 0.1 || w.lon > 3.4) { tqPl = null; tqPlPaint(); return; }
   tqPlBusy = true;
@@ -8134,7 +7933,8 @@ async function tqPlFetch(force) {
       }).filter(Boolean) };
     }
     try { localStorage.setItem(TQPK, JSON.stringify(tqPl)); } catch (e) {}
-  } catch (e) { if (tqPl) tqPl.err = 1; }
+    tqPlFail = 0;
+  } catch (e) { tqPlFail = Date.now(); if (tqPl) tqPl.err = 1; }
   tqPlBusy = false;
   tqPlPaint();
 }
@@ -8367,7 +8167,9 @@ function tcDraw() {
 function tcFpsPaint() { document.getElementById('tcFps').innerHTML = [25, 24, 30, 50].map(f => `<button type="button" data-fps="${f}" aria-pressed="${f === tcFps}">${f} fps</button>`).join(''); }
 async function tcOpen() {
   const S = document.getElementById('tcS');
-  document.getElementById('tcH').textContent = `${FEST.name}${NDAYS > 1 ? ' · ' + (DAYS[dayAt(Date.now())].name || '') : ''} · ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short' }).format(Date.now())}`;
+  // El dia del festival només si avui ho és de debò (el Timecode va amb l'hora real, no amb el Modo prueba)
+  const td = NDAYS > 1 ? DAYS.find(x => fmtD.format(x.t0) === fmtD.format(Date.now())) : null;
+  document.getElementById('tcH').textContent = `${FEST.name}${td && td.name ? ' · ' + td.name : ''} · ${new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short' }).format(Date.now())}`;
   try { document.getElementById('tcCam').value = localStorage.getItem('midnight-tc-cam') || ''; } catch (e) {}
   document.getElementById('tcC').textContent = document.getElementById('tcCam').value;
   tcFpsPaint();
@@ -8601,8 +8403,6 @@ function liveParts() {
   if (MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
   if ((taskOn() && YO && YO !== '-') || tgTeam || !document.getElementById('pGlobal').hidden) p.push('done');
   if (!document.getElementById('mkList').hidden) p.push('mk');
-  // Fotos de perfil: només { persona: hora } (unes desenes de bytes) i només quan ja es pregunta per una altra cosa
-  if (p.length && TASKS.people.length) p.push('av');
   return p.join(',');
 }
 async function livePull(force) {
@@ -8623,7 +8423,6 @@ async function livePull(force) {
     else if (p.includes('mc')) { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } }
     if (d.done) { doneApply(d.done); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
     if (d.mk) mkApply(d.mk);
-    if (d.av) avApply(d.av);
   } catch (e) {
     liveV = '';
     if (p.includes('mc')) { mcErr = 'Sense connexió: potser no és l’últim.'; mcPaint(); }

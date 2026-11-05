@@ -1,4 +1,4 @@
-const VERSION = 'bitp-82cd550f';
+const VERSION = 'bitp-faec0fd4';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/duro-black-hangar-2026/Anybody.woff2", "img/duro-black-hangar-2026/MartianMono.woff2", "img/duro-black-hangar-2026/NimbusSanL-Bold.woff2", "img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2", "img/duro-black-hangar-2026/NimbusSanL-Regu.woff2", "img/duro-black-hangar-2026/banner.jpg", "img/duro-black-hangar-2026/carpa-3d.webp", "img/duro-black-hangar-2026/deco-dome-light.webp", "img/duro-black-hangar-2026/deco-dome.webp", "img/duro-black-hangar-2026/deco-floor-light.webp", "img/duro-black-hangar-2026/deco-floor.webp", "img/duro-black-hangar-2026/hangar.png", "img/duro-black-hangar-2026/logo-240.png", "img/duro-black-hangar-2026/logo-blackhangar.png", "img/duro-black-hangar-2026/logo-duro.png", "img/duro-black-hangar-2026/logo-makina.png", "vendor/three-0.170.0.module.min.js"];
 
@@ -26,7 +26,7 @@ self.addEventListener('push', e => {
     // Prova demanada des de Configuración (la pàgina hi deixa la marca abans de demanar-la)
     const test = await metaGet('test', 0);
     if (test && Date.now() - test < 3 * 60000) {
-      items.push({ title: 'Midnight · prova', body: 'Les notificacions arriben també amb el mòbil bloquejat ✓', tag: 'prueba-' + test });
+      items.push({ title: 'Midnight · prueba', body: 'Las notificaciones llegan también con el móvil bloqueado ✓', tag: 'prueba-' + test });
       await metaPut('test', 0);
     }
     try {
@@ -41,7 +41,7 @@ self.addEventListener('push', e => {
     await metaPut('shown', [...shown, ...fresh.map(i => i.tag)].slice(-200));
     // L'iPhone obliga a mostrar sempre alguna cosa quan arriba un push
     if (!fresh.length) fresh = [items.length ? items[items.length - 1]
-      : { title: 'Midnight', body: got ? 'Obre l’app per veure el teu horari.' : 'Sense connexió: obre l’app per veure el teu horari.', tag: 'midnight' }];
+      : { title: 'Midnight', body: got ? 'Abre la app para ver tu horario.' : 'Sin conexión: abre la app para ver tu horario.', tag: 'midnight' }];
     await Promise.all(fresh.slice(0, 4).map(i => self.registration.showNotification(i.title, { body: i.body, tag: i.tag, icon: 'icon-192.png', badge: 'icon-192.png' })));
   })());
 });
