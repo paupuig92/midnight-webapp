@@ -15,7 +15,9 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 |---|---|
 | `index.html` | Tota l'app (HTML+CSS+JS, format artifact sense `<html>/<head>`). Font única. |
 | `build_web.py` | Genera `docs/`: HTML complet, manifest, `sw.js` (offline + push), `cartel.json`, token xifrat de l'editor, config de push. |
-| `publica-web.sh` | Build + commit + `pull --rebase` + push amb el token. **Així es publica.** |
+| `publica-web.sh` | Build + **prova** (`prova/sintaxi.py`; i `prova/prova.js` si el Mac té node+Playwright) + commit + `pull --rebase` + push amb el token. **Així es publica.** Si la prova falla, no publica. |
+| `prova/prova.js` | Prova a Chromium (iPhone, sense xarxa externa): arrencada, rellotge, graella i totes les pestanyes sense errors. `--trenca=<part>` (`--sintaxi`) trenca una app a propòsit i comprova que el nucli continua; `--trenca=nucli` comprova la pantalla «Reparar»; `--pagina=ca`; `--captures=dir`. **Passar-la (i les `--trenca`) abans de demanar publicar.** |
+| `.github/workflows/prova-app.yml` | GitHub torna a fer la prova cada cop que canvia la web publicada; si falla, correu a en Pau. |
 | `docs/changes.json` | Canvis de l'organització (horari complet + «Aviso para todos»). L'escriu l'editor de l'app via API de GitHub. |
 | `push/worker.js` | Servidor: Durable Object SQLite (`Store`) amb els mòbils; cron cada minut; enviament en lots de 40 (`SELF` + `SEND_KEY`). S'atura sol després del 25-10 6:00 (`END`). |
 | `push/instala.sh` | Instal·la/actualitza el servidor via API de Cloudflare (sense wrangler). |
@@ -43,6 +45,12 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - Notificacions amb el mòbil bloquejat (iOS 16.4+, app a la pantalla d'inici): push sense contingut; el SW demana `/now`. Textos dels avisos (worker i sw.js) en castellà, com la UI (05-11). Avisos dels meus artistes (X min abans) i dels canvis/avisos de l'organització. Provat i funcionant el 22-10.
 - On viu (revisat 06-11): GitHub = codi + web (Pages, `main` /docs). Cloudflare = només el domini (CNAME visualcrew → paupuig92.github.io, núvol gris) i el servidor d'avisos. El pla B del servidor si l'API de GitHub falla és la mateixa web (`PAGES` = visualcrew), ja no el worker `midnight-app`. Ja no hi ha `docs/_headers` (GitHub Pages l'ignora).
 - Estat del servidor: `curl https://midnight-push.midnightgroup.workers.dev/` (nombre de mòbils). Detall: `/debug` amb capçalera `x-send-key` (llegir la clau des del fitxer amb un script, mai mostrar-la).
+
+## Robustesa (06-11-2026, fil «Valorar estructura de l'app i fer-la robusta»)
+- **Compartiments**: `build_web.py` talla el `<script>` gran per les marques `// ==== NOM ====` … `// ==== /NOM ====` i posa cada app en un `<script data-part>` propi (sol, multi, momentos, tiempo, timecode, incidencias). Si una peta en arrencar, només s'atura aquella. Les marques no es poden treure ni duplicar (el build s'atura). `index.html` continua sent la font única (l'artifact el fa servir tal qual).
+- Cada part acaba amb `PART_OK.add('<nom>')`. **El nucli mai crida una app directament**: `safe('<nom>', () => …)` o `part('<nom>') && …` (showTab, appsPaint, apTick, livePull). Codi que necessiten dues apps va al nucli (p. ex. `mkHMS`). Una app nova = marques noves a `PARTS` de build_web.py + `PART_OK.add` + crides amb `safe`.
+- **Xarxa de seguretat** (`<script>` propi abans del principal): `appErr()` desa els errors al mòbil (`midnight-err-v1`, 30 últims, res al servidor) → Ajustes «Errores de la app» (captura + «Reparar la app»). Vigilant: si el rellotge (`APP_BEAT` a `tick()`) no batega en 10 s → pantalla «La app no ha arrancado bien · Reparar la app» (`appFix`: desregistra el SW, esborra les caches menys `midnight-meta` i recarrega; localStorage es manté) i «Seguir igualmente».
+- `livePull` amb `finally` (abans, un error deixava `liveBusy` encallat i /live parava per a tothom).
 
 ## Regles
 - **Abans de publicar (`publica-web.sh` o `push/instala.sh`) SEMPRE preguntar a en Pau** (28-10-2026).

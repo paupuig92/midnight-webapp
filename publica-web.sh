@@ -13,6 +13,13 @@ TOKEN_FILE=~/.config/midnight-webapp/github-token
 [[ -r $TOKEN_FILE ]] || TOKEN_FILE=~/.config/midnight-suite/github-token
 
 python3 -I build_web.py
+# Abans de publicar (06-11-2026): si el JavaScript té un error d'escriptura, no es publica (un sol error deixaria l'app en blanc per a tothom).
+# Si el Mac té node + Playwright, també s'obre l'app sencera a Chromium (prova/prova.js) i ha de passar per totes les pestanyes sense errors.
+python3 -I prova/sintaxi.py || { echo "No s'ha publicat res. Arregla l'error i torna-ho a provar."; exit 1; }
+if command -v node >/dev/null && NODE_PATH="$(npm root -g 2>/dev/null)" node -e "require('playwright')" 2>/dev/null; then
+  rc=0; NODE_PATH="$(npm root -g)" node prova/prova.js || rc=$?   # 1 = l'app falla; 2 = no s'ha pogut fer la prova (falta Chromium): es continua
+  [[ $rc == 1 ]] && { echo "No s'ha publicat res: l'app no ha passat la prova."; exit 1; }
+fi
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -q -m "Actualitza la web app" && echo "ok commit"

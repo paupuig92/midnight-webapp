@@ -1,0 +1,31 @@
+# Prova de l'app publicada (06-11-2026). Cada vegada que es publica una versió nova de la web (docs/index.html, ca.html o sw.js),
+# GitHub obre l'app a Chromium com un iPhone i passa per totes les pestanyes (prova/prova.js).
+# Si falla, GitHub envia un correu a en Pau: és el senyal per tornar a la versió anterior.
+# No es dispara amb els canvis d'horari o tasques de l'organització (changes.json / tasks.json). Gratuït (repositori públic).
+name: Prova de l'app
+on:
+  push:
+    branches: [main]
+    paths: ['docs/index.html', 'docs/ca.html', 'docs/sw.js', 'prova/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prova:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instal·la Playwright i Chromium
+        run: npm i --no-save --no-package-lock playwright@1.48.2 && npx playwright install --with-deps chromium
+      - name: Sintaxi
+        run: python3 -I prova/sintaxi.py
+      - name: L'app arrenca i totes les pestanyes s'obren (castellà)
+        run: node prova/prova.js
+      - name: El mateix en català
+        run: node prova/prova.js --pagina=ca
+      - name: Si una app peta, la resta continua
+        run: for t in sol multi momentos tiempo timecode incidencias; do node prova/prova.js --trenca=$t || exit 1; done

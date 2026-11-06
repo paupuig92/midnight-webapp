@@ -57,6 +57,16 @@ if push_f2.is_file():
 src = src.replace("const BUILD = '';", "const BUILD = '" + datetime.datetime.fromtimestamp(stamp_t).strftime("%d/%m %H:%M") + "';")
 head, body = src.split("</style>", 1)
 head += "</style>"
+# Compartiments (06-11-2026): cada app (Sol, Multicams, Momentos, Tiempo, Timecode, Incidencias) va en un <script> propi.
+# Si una peta en arrencar, el navegador només atura aquell bloc: rellotge, horaris, canvis i avisos (el nucli) continuen.
+# El codi és el mateix (comparteixen variables com abans); només es talla per les marques «// ==== NOM ====» i «// ==== /NOM ====».
+PARTS = [("SOL", "sol"), ("MULTICÁMARA", "multi"), ("MOMENTOS", "momentos"), ("TIEMPO", "tiempo"), ("CLAQUETA", "timecode"), ("INCIDENCIAS", "incidencias")]
+for marca, nom in PARTS:
+    a, z = "\n// ==== " + marca + " ====", "\n// ==== /" + marca + " ===="
+    if body.count(a) != 1 or body.count(z) != 1:
+        sys.exit(f"ERROR: no trobo les marques de «{marca}» a index.html (// ==== {marca} ==== … // ==== /{marca} ====). No s'ha generat res.")
+    i = body.index(a); j = body.index("\n", body.index(z) + 1)
+    body = body[:i] + f'\n</script>\n<script data-part="{nom}">' + body[i:j] + "\n</script>\n<script>" + body[j:]
 # Treu la meta pròpia de l'artifact i el viewport (es posen a sota)
 head = "\n".join(l for l in head.splitlines()
                  if 'name="claude:viewport-fit-sides"' not in l and 'name="viewport"' not in l)

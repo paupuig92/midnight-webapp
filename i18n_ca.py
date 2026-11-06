@@ -12,6 +12,18 @@ PAIRS = [
     ("const LOC = 'es-ES';", "const LOC = 'ca-ES';"),
     ("const LANG = 'es';", "const LANG = 'ca';"),
 
+    # --- Xarxa de seguretat (06-11-2026) ---
+    ("La app no ha arrancado bien", "L’app no ha arrencat bé"),
+    ("Toca «Reparar»: borra la copia guardada en el móvil y baja la última versión (necesita cobertura). Tus artistas y ajustes no se pierden.",
+     "Toca «Reparar»: esborra la còpia desada al mòbil i baixa l’última versió (cal cobertura). Els teus artistes i ajustos no es perden."),
+    ("Seguir igualmente", "Continuar igualment"),
+    ("Reparando…", "Reparant…"),
+    ("Errores de la app", "Errors de l’app"),
+    ("Se guardan solo en este móvil. Si algo no funciona, haz una captura de esta lista y envíala a audiovisuales.",
+     "Només es desen en aquest mòbil. Si alguna cosa no funciona, fes una captura d’aquesta llista i envia-la a audiovisuals."),
+    ("Borrar la lista", "Esborrar la llista"),
+    ("Reparar la app", "Reparar l’app"),
+
     # --- Capçalera i estat ---
     ("MODO PRUEBA ✕ Salir", "MODE PROVA ✕ Sortir"),
     ("PRUEBA ✕", "PROVA ✕"),

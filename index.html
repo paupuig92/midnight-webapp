@@ -2107,6 +2107,12 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <div class="hint" id="updMsg" hidden></div>
         <p class="note" id="appVer" style="margin:0"></p>
       </div>
+      <details class="howto" id="errBox" hidden>
+        <summary>Errores de la app <span id="errN"></span></summary>
+        <p class="note">Se guardan solo en este móvil. Si algo no funciona, haz una captura de esta lista y envíala a audiovisuales.</p>
+        <ul id="errList" class="note" style="margin:0 0 10px;padding-left:18px;word-break:break-word"></ul>
+        <button class="btn" type="button" id="errFix">Reparar la app</button> <button class="btn" type="button" id="errClear">Borrar la lista</button>
+      </details>
     </div>
     <div class="cgrp">
       <h3 class="ch">Pruebas</h3>
@@ -2275,6 +2281,63 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 <div class="isl" id="isl" role="status" aria-live="polite" hidden><div class="ib"><span class="dot"></span><span class="it">Aviso</span><span class="is"></span><span class="in"></span></div><div class="ix"><ul></ul><button type="button" class="ic">Entendido</button></div></div>
 <div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div>
 
+<script>
+/* ==== XARXA DE SEGURETAT (06-11-2026) ==== */
+// Va en un <script> a part i abans de tot: encara que el codi de l'app tingui un error, això funciona.
+// · Cada app (Sol, Multicams, Momentos, Tiempo, Timecode, Incidencias) s'apunta a PART_OK quan ha arrencat bé.
+//   El nucli (rellotge, horaris, canvis, avisos) només crida una app amb part()/safe(): si una peta, la resta continua.
+// · Els errors es desen al mòbil (Ajustes → «Errores de la app»), sense enviar res al servidor (pla gratuït).
+// · Si el nucli no arrenca (el rellotge no batega), surt una pantalla amb «Reparar la app»: esborra la còpia guardada i torna a baixar l'última versió.
+var PART_OK = new Set(), APP_ERRS = [], APP_BEAT = 0;
+var ERRK = 'midnight-err-v1';
+function appErr(e, where) {
+  try {
+    var m = String((e && (e.message || e.reason && e.reason.message || e.reason)) || e || 'Error').slice(0, 200);
+    if (/^Script error\.?$|ResizeObserver loop/.test(m)) return;
+    var it = { t: Date.now(), m: m, w: where || (e && e.lineno ? 'línea ' + e.lineno : '') };
+    APP_ERRS.push(it);
+    var a = []; try { a = JSON.parse(localStorage.getItem(ERRK) || '[]'); } catch (x) {}
+    a.push(it); localStorage.setItem(ERRK, JSON.stringify(a.slice(-30)));
+  } catch (x) {}
+}
+function part(n) { return PART_OK.has(n); }
+function safe(n, fn) {
+  if (!PART_OK.has(n)) return;
+  try { return fn(); } catch (e) { appErr(e, n); }
+}
+addEventListener('error', function (e) { if (!e.target || e.target === window) appErr(e); }, true);
+addEventListener('unhandledrejection', function (e) { appErr(e, 'promesa'); });
+function appFix() {
+  var b = document.getElementById('dead'); if (b) b.querySelector('p').textContent = 'Reparando…';
+  var go = function () { location.replace(location.pathname + '?t=' + Date.now()); };
+  try {
+    Promise.all([
+      'serviceWorker' in navigator ? navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }) : 0,
+      self.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== 'midnight-meta'; }).map(function (k) { return caches.delete(k); })); }) : 0
+    ]).then(go, go);
+  } catch (e) { go(); }
+}
+// Vigilant: si 10 s després d'obrir (o en tornar a l'app) el rellotge no ha bategat, el nucli està trencat.
+// Dues comprovacions seguides (cada 2 s): si el mòbil s'ha encallat uns segons, el rellotge torna a bategar entremig i no surt res.
+(function () {
+  var t0 = Date.now(), stale = 0;
+  setInterval(function () {
+    if (document.hidden) { t0 = Date.now(); stale = 0; return; }
+    if (document.getElementById('dead') || Date.now() - t0 < 10000 || Date.now() - APP_BEAT < 8000) { stale = 0; return; }
+    if (++stale < 2) return;
+    var d = document.createElement('div'); d.id = 'dead';
+    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#0b0b0b;color:#fff;font:16px/1.4 -apple-system,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center');
+    d.innerHTML = '<b style="font-size:22px">La app no ha arrancado bien</b><p style="margin:0;opacity:.75;max-width:320px">Toca «Reparar»: borra la copia guardada en el móvil y baja la última versión (necesita cobertura). Tus artistas y ajustes no se pierden.</p>'
+      + '<button type="button" style="font:inherit;font-weight:700;padding:14px 28px;border-radius:14px;border:0;background:#fff;color:#000">Reparar la app</button>'
+      + '<a href="#" style="color:#fff;opacity:.6;font-size:14px">Seguir igualmente</a>'
+      + '<small style="opacity:.5;max-width:320px;word-break:break-word"></small>';
+    d.querySelector('small').textContent = APP_ERRS.length ? APP_ERRS[0].m : '';
+    d.querySelector('button').onclick = appFix;
+    d.querySelector('a').onclick = function (e) { e.preventDefault(); d.remove(); t0 = Date.now() + 600000; };
+    document.body.appendChild(d);
+  }, 2000);
+})();
+</script>
 <script>
 document.documentElement.lang = 'es';
 
@@ -3799,6 +3862,17 @@ document.addEventListener('change', e => { if (e.target.name === 'prof') setTime
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
 const BUILD = '';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
+// Errores de la app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
+function errPaint() {
+  let a = []; try { a = JSON.parse(localStorage.getItem(ERRK) || '[]'); } catch (e) {}
+  const box = document.getElementById('errBox'); box.hidden = !a.length;
+  document.getElementById('errN').textContent = a.length ? `(${a.length})` : '';
+  const fd = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  document.getElementById('errList').innerHTML = a.slice().reverse().map(x => `<li>${fd.format(x.t)} · ${esc(x.w || '')} · ${esc(x.m)}</li>`).join('');
+}
+document.getElementById('errFix').addEventListener('click', appFix);
+document.getElementById('errClear').addEventListener('click', () => { try { localStorage.removeItem(ERRK); } catch (e) {} errPaint(); });
+errPaint();
 document.getElementById('appUpdate').addEventListener('click', async () => {
   const msg = document.getElementById('updMsg');
   if (!ONLINE) return location.reload();
@@ -4758,6 +4832,7 @@ document.addEventListener('visibilitychange', () => { if (TAB === 'sol') solShow
 setInterval(() => { if (TAB === 'sol' && !document.hidden && Math.floor(now() / MIN) !== solMin) solPaint(); }, 1000);
 document.getElementById('simRange').addEventListener('input', () => setTimeout(() => { if (TAB === 'sol') solPaint(); }, 0));
 document.getElementById('simOn').addEventListener('change', () => setTimeout(() => { if (TAB === 'sol') solPaint(); }, 0));
+PART_OK.add('sol');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /SOL ====
 // Logo a la barra fina (per defecte, el títol del banner animat)
 { const ml = FEST.miniLogo || (FEST.bannerAnim && FEST.bannerAnim.title), mi = document.getElementById('mlogo');
@@ -7463,8 +7538,12 @@ document.getElementById('multi').addEventListener('click', e => {
   if (c) { mcOpenSheet(c.dataset.mcid); return; }
 });
 document.getElementById('multi').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('li[data-mcid]')) { e.preventDefault(); e.target.click(); } });
+PART_OK.add('multi');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /MULTICÁMARA ====
 
+// Hora amb segons (Madrid): la fan servir Momentos i Timecode, per això és fora de les dues apps (XARXA DE SEGURETAT)
+const mkFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+const mkHMS = t => mkFmt.format(t);
 // ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
 // Botó «Marcar momento» dins de l'app Momentos (05-11: a Horarios es tocava sense voler): guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
 // Es comparteixen per al servidor d'avisos (POST/GET /mk) i s'exporten amb timecode d'hora del dia per a DaVinci (EDL),
@@ -7479,8 +7558,6 @@ if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + Math.random().toString(36).sli
 let mkMine = [], mkDel = [], mkSrv = null, mkCur = null, mkPopT = 0, mkDayF = -1, mkWho = 'all', mkPulling = false;
 try { const v = JSON.parse(localStorage.getItem(MKK) || 'null'); if (v && Array.isArray(v.m)) { mkMine = v.m.filter(m => m && typeof m.id === 'string' && Number.isFinite(m.t)); mkDel = Array.isArray(v.del) ? v.del : []; } } catch (e) {}
 const mkSave = () => { try { localStorage.setItem(MKK, JSON.stringify({ m: mkMine, del: mkDel })); } catch (e) {} };
-const mkFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
-const mkHMS = t => mkFmt.format(t);
 // Què sona ara a cada escenari (pot ser més d'un)
 const mkLive = t => STAGES.map(s => ({ s, x: (SETS[s.id] || []).find(x => t >= x.a && t < x.b) })).filter(o => o.x);
 const mkStageName = id => { const s = STAGES.find(s => s.id === id); return s ? s.name : ''; };
@@ -7673,6 +7750,7 @@ mkFlush();
 setInterval(() => { if (!document.hidden) mkFlush(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) mkFlush(); });
 addEventListener('online', mkFlush);
+PART_OK.add('momentos');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /MOMENTOS ====
 
 // ==== TIEMPO ==== (des del 04-11-2026; estil Windy des de les 22:00, i NOMÉS PLUJA I NÚVOLS: és el que interessa a en Pau per als festivals)
@@ -7689,7 +7767,7 @@ try { const v = JSON.parse(localStorage.getItem(TQGK) || 'null'); if (v && v.pts
 try { const v = localStorage.getItem(TQLK); if (['radar', 'clouds', 'windy'].includes(v)) tqLy = v; } catch (e) {}
 document.getElementById('tqFestN').textContent = FEST.name;
 const tqFmtW = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday: 'short' });
-const tqWhere = () => typeof solWhere === 'function' ? solWhere() : { lat: 41.5536, lon: 2.2492 };
+const tqWhere = () => part('sol') ? solWhere() : { lat: 41.5536, lon: 2.2492 };  // sense l'app Sol (XARXA DE SEGURETAT): Montmeló
 const tqKey = w => `${w.lat.toFixed(3)},${w.lon.toFixed(3)}`;
 function tqCode(c, day = 1) {
   if (c === 0) return [day ? '☀️' : '🌙', 'Despejado'];
@@ -8308,6 +8386,7 @@ document.addEventListener('visibilitychange', () => { if (tqOn && !document.hidd
 // Canvi de tema (Ajustes → Tema): el mapa de fons i la previsió es tornen a pintar amb els colors nous
 new MutationObserver(() => { if (tqOn) { tqBaseDraw(); tqHeat(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 addEventListener('resize', () => { if (tqOn) { clearTimeout(tqShow.r); tqShow.r = setTimeout(tqRedraw, 300); } });
+PART_OK.add('tiempo');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /TIEMPO ====
 
 // ==== APPS ==== (hub, des del 04-11-2026: a baix només Horarios · Tareas · Apps · Ajustes)
@@ -8317,25 +8396,29 @@ document.addEventListener('click', e => { if (e.target.closest('.appback')) show
 document.getElementById('apps').addEventListener('click', e => {
   const b = e.target.closest('.apptile'); if (!b) return;
   if (b.dataset.tab) showTab(b.dataset.tab);
-  else if (b.dataset.app === 'mk') mkOpenList();
-  else if (b.dataset.app === 'tc') tcOpen();
+  else if (b.dataset.app === 'mk') safe('momentos', () => mkOpenList());
+  else if (b.dataset.app === 'tc') safe('timecode', () => tcOpen());
 });
 let apRaf = 0;
 function apTick() {
   if (TAB !== 'apps' || document.hidden) { apRaf = 0; return; }
-  const t = Date.now(), f = Math.floor((t % 1000) / 1000 * (tcFps || 25));
-  const el = document.getElementById('ap-tc-big'); if (el) el.innerHTML = `${mkHMS(t)}<small>:${String(f).padStart(2, '0')}</small>`;
+  safe('timecode', () => { const t = Date.now(), f = Math.floor((t % 1000) / 1000 * (tcFps || 25));
+    const el = document.getElementById('ap-tc-big'); if (el) el.innerHTML = `${mkHMS(t)}<small>:${String(f).padStart(2, '0')}</small>`; });
   apRaf = requestAnimationFrame(apTick);
 }
 let apSolK = '', apSolD = null;
 function appsPaint() {
   const t = now();
   document.getElementById('apSub').textContent = `${FEST.name} · ${hm(t)}`;
+  // Cada fitxa amb safe(): si una app no ha arrencat, la seva fitxa es queda quieta i la resta es pinta (XARXA DE SEGURETAT)
   // Momentos
+  safe('momentos', () => {
   const L = mkList(), n = L.length, last = L[L.length - 1];
   document.getElementById('ap-mk-big').textContent = String(n);
   document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Marcas para la edición';
+  });
   // Multicams: quantes graven i un punt per càmera
+  safe('multi', () => {
   if (mcDefSig === null) { if (NDAYS > 1 && !mcDayPicked) mcDay = mcToday(); mcMerge(); }
   const cams = MC.flatMap(sx => sx.cams || []);
   if (cams.length) {
@@ -8345,21 +8428,24 @@ function appsPaint() {
     document.getElementById('ap-multi').textContent = rec ? `${rec} grabando · ${up} montadas` : 'montadas';
     document.getElementById('ap-multi-dots').innerHTML = cams.map(c => `<i class="${st(c)}" title="${esc(c.pos || c.cam || '')}"></i>`).join('');
   }
+  });
   // Tiempo
+  safe('tiempo', () => {
   if (tq && tq.d && tq.d.current) { const c = tq.d.current, [e, ds] = tqCode(c.weather_code, c.is_day);
     const rv = tqLvOk(), wet = rv ? rv.here >= TQ_DBZ : (c.precipitation || 0) >= 0.1;
     document.getElementById('ap-tiempo-big').textContent = `${wet ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
     const nx = tqHours().find(h => h.t > Date.now() && h.t < Date.now() + 6 * 3600000 && h.pp >= 50);
     document.getElementById('ap-tiempo').textContent = rv && rv.here >= TQ_DBZ ? 'Llueve ahora (radar)' : rv && rv.eta ? (tqLvIn(rv, rv.eta) <= 2 ? 'Lluvia inminente (radar)' : `Lluvia en ~${tqLvIn(rv, rv.eta)} min (radar)`) : nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
   else if (!tqBusy) tqFetch();
+  });
   // Sol: el proper canvi de llum
-  if (typeof solDay === 'function' && typeof SOL_EV === 'object') {
+  if (part('tiempo')) safe('sol', () => {
     const w = tqWhere(), k = tqKey(w) + Math.floor(t / 86400000);
     if (k !== apSolK) { apSolK = k; apSolD = solDay(t, w.lat, w.lon); }
     let nx = apSolD.X.find(x => x.t > t);
     if (!nx) nx = solDay(apSolD.b + 3600000, w.lat, w.lon).X.find(x => x.t > t);
     if (nx) { document.getElementById('ap-sol-big').textContent = hm(nx.t); document.getElementById('ap-sol').textContent = `${SOL_EV[nx.h + (nx.up ? 'u' : 'd')]} · ${inDur(nx.t - t)}`; }
-  }
+  });
   if (!apRaf) apTick();
 }
 setInterval(() => { if (TAB === 'apps' && !document.hidden) appsPaint(); }, 30000);
@@ -8415,6 +8501,7 @@ document.getElementById('tcGo').addEventListener('click', () => {
   setTimeout(() => { tcBusy = false; }, first + 2300 - t0);
   try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
 });
+PART_OK.add('timecode');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /CLAQUETA ====
 
 // --- Pestanyes de baix: Horarios · Tareas · Sol · (Mapa) · Organización (contrasenya) · Ajustes ---
@@ -8430,12 +8517,13 @@ function showTab(t, top = true) {
   try { sessionStorage.setItem(TABK, t); } catch (e) {}
   if (t !== 'equipo' && holaForce) { holaForce = false; holaPaint(); }
   if (t !== 'mapa' && typeof gpsStop === 'function') gpsStop();  // el GPS només mentre mires el mapa (bateria)
-  if (typeof solShow === 'function' && (ch || t === 'sol')) solShow(t === 'sol');  // el sol: la brúixola només amb la pestanya a la vista
+  if (ch || t === 'sol') safe('sol', () => solShow(t === 'sol'));  // el sol: la brúixola només amb la pestanya a la vista
   if (t === 'equipo') { holaPaint(); tgScrolled = false; renderTg(true); }
-  if (typeof mcShow === 'function' && (ch || t === 'multi')) mcShow(t === 'multi');  // estat de les càmeres: es refresca només amb la pestanya a la vista
-  if (typeof tqShow === 'function' && (ch || t === 'tiempo')) tqShow(t === 'tiempo');  // el temps: es baixa i es refresca només amb la pestanya a la vista
-  if (t !== 'ahora' && t !== 'multi' && typeof mkClose === 'function') mkClose();
-  if (t === 'apps' && typeof appsPaint === 'function') { appsPaint(); if (ch) [...document.querySelectorAll('#apps .apptile:not([hidden])')].forEach((el, i) => anim(el, [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: i * 45 })); }
+  if (t === 'ajustes') errPaint();
+  if (ch || t === 'multi') safe('multi', () => mcShow(t === 'multi'));  // estat de les càmeres: es refresca només amb la pestanya a la vista
+  if (ch || t === 'tiempo') safe('tiempo', () => tqShow(t === 'tiempo'));  // el temps: es baixa i es refresca només amb la pestanya a la vista
+  if (t !== 'ahora' && t !== 'multi') safe('momentos', () => mkClose());
+  if (t === 'apps' && typeof appsPaint === 'function') { try { appsPaint(); } catch (e) { appErr(e, 'apps'); } if (ch) [...document.querySelectorAll('#apps .apptile:not([hidden])')].forEach((el, i) => anim(el, [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: i * 45 })); }
   if (t === 'ahora' && ch) requestAnimationFrame(() => { fitBlocks(); scrollToNow(false); });
 }
 function paintBadge() {
@@ -8601,6 +8689,7 @@ incSec.addEventListener('click', async e => {
 });
 document.getElementById('prefIncL').hidden = !INC_LIVE();
 incPaint();
+PART_OK.add('incidencias');  // ha arrencat bé (XARXA DE SEGURETAT)
 // ==== /INCIDENCIAS ====
 
 // ==== LIVE ==== (pla gratuït de Cloudflare, 04-11-2026: 100.000 peticions al dia per a tot el compte)
@@ -8610,8 +8699,8 @@ incPaint();
 let liveV = '', liveP = '', liveSlow = false, liveBusy = false, liveAt = 0, liveTouch = Date.now();
 function liveParts() {
   const p = [];
-  if (INC_LIVE()) p.push('inc');
-  if (MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
+  if (part('incidencias') && INC_LIVE()) p.push('inc');
+  if (part('multi') && MC.length && ['multi', 'apps', 'sol'].includes(TAB)) p.push('mc');
   if ((taskOn() && YO && YO !== '-') || tgTeam || !document.getElementById('pGlobal').hidden) p.push('done');
   if (!document.getElementById('mkList').hidden) p.push('mk');
   return p.join(',');
@@ -8629,16 +8718,15 @@ async function livePull(force) {
     if (!r.ok) throw new Error(r.status);
     const d = await r.json();
     liveSlow = !!d.slow; liveV = d.v || ''; liveP = p;
-    if (d.inc) incApply(d.inc);
-    if (d.mc) mcApply(d.mc, t0);
-    else if (p.includes('mc')) { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } }
+    if (d.inc) safe('incidencias', () => incApply(d.inc));
+    if (d.mc) safe('multi', () => mcApply(d.mc, t0));
+    else if (p.includes('mc')) safe('multi', () => { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } });
     if (d.done) { doneApply(d.done); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
-    if (d.mk) mkApply(d.mk);
+    if (d.mk) safe('momentos', () => mkApply(d.mk));
   } catch (e) {
     liveV = '';
-    if (p.includes('mc')) { mcErr = 'Sin conexión: puede que no sea lo último.'; mcPaint(); }
-  }
-  liveBusy = false;
+    if (p.includes('mc')) safe('multi', () => { mcErr = 'Sin conexión: puede que no sea lo último.'; mcPaint(); });
+  } finally { liveBusy = false; }  // finally: si alguna cosa falla, /live no es queda bloquejat per sempre
 }
 // Mòbil oblidat amb l'app oberta (5 min sense tocar-lo): cada 3 min. En tornar a tocar, pregunta al moment
 const liveEvery = () => { const idle = Date.now() - liveTouch; return liveSlow ? 5 * MIN : TAB === 'multi' && idle < 2 * MIN ? 30000 : idle > 5 * MIN ? 3 * MIN : 60000; };
@@ -8648,7 +8736,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) retur
 livePull();
 // ==== /LIVE ====
 
-setInterval(() => { if (!document.hidden) tick(); }, 1000);
+// APP_BEAT: el vigilant de la XARXA DE SEGURETAT. Només si tick() ha anat bé (si llança un error, no batega)
+setInterval(() => { if (!document.hidden) { tick(); APP_BEAT = Date.now(); } }, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
