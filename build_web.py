@@ -195,31 +195,7 @@ _imgref = re.compile(r"""(?<=["'(`])img/""")
 page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 (OUT / "index.html").write_text(page, encoding="utf-8")
 (OUT / "ca.html").write_text(page_ca, encoding="utf-8")
-# Cloudflare Pages: la pàgina, el service worker i els canvis sempre es comproven (versions noves a l'instant); GitHub Pages ho ignora
-(OUT / "_headers").write_text("""/*
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(self), microphone=(), geolocation=(self)
-/
-  Cache-Control: no-cache
-/ca
-  Cache-Control: no-cache
-/*.html
-  Cache-Control: no-cache
-/sw.js
-  Cache-Control: no-cache
-/changes.json
-  Cache-Control: no-store
-/tasks.json
-  Cache-Control: no-store
-/cartel.json
-  Cache-Control: no-cache
-/manifest.webmanifest
-  Cache-Control: no-cache
-/img/*
-  Cache-Control: no-cache
-""", encoding="utf-8")
+# (06-11) Ja no es genera docs/_headers: GitHub Pages l'ignora. La CSP va amb <meta> i l'app demana changes/tasks amb ?t= i no-store.
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))

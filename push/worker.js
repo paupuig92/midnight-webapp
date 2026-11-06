@@ -26,8 +26,10 @@
 // diu als mòbils que preguntin cada 5 min (els avisos push continuen igual).
 
 const CARTEL = /*CARTEL*/null/*CARTEL*/;
-const PAGES = 'https://midnight-app.midnightgroup.workers.dev/';
-// L'adreça antiga (GitHub Pages) es manté perquè els mòbils que la tenien encara puguin parlar amb el servidor
+// La web de debò (GitHub Pages amb el domini propi): pla B si l'API de GitHub falla, i «sub» dels avisos.
+// (Abans era el worker midnight-app, una còpia vella del Bass que ja ningú actualitzava: retirat el 06-11 amb retira-web-vella.sh.)
+const PAGES = 'https://visualcrew.midnightgroup.app/';
+// Les adreces antigues (github.io i midnight-app) es mantenen perquè els mòbils que la tenien encara puguin parlar amb el servidor
 const ORIGINS = ['https://visualcrew.midnightgroup.app', 'https://midnight-app.midnightgroup.workers.dev', 'https://paupuig92.github.io', 'http://localhost:8765'];
 const PUSH_HOSTS = /(^|\.)(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)$/;
 const MIN = 60000;
