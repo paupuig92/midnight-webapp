@@ -6497,7 +6497,8 @@ const MC = Array.isArray(FEST.multicam) ? FEST.multicam : [];
 const MC_ST = [['montada', 'Montada'], ['grabando', 'Grabando'], ['parada', 'Parada'], ['recogida', 'Recogida']];
 const MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
 const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
+// Seguretat (06-11): el color pot venir del servidor (càmeres afegides des de l'app) → només #hex o rgb(…) de números
+const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#[0-9a-f]{3,8}$|^rgba?\([\d.,\s%]{5,40}\)$/i.test(String(c)) ? c : 'var(--muted)'})` : '';
 // Un id per càmera: festival + `uid` fix de les dades (així canviar el nom de la posició no perd l'estat ni el lloc).
 // Sense `uid`: escenari + posició (si es repeteix, amb número)
 for (const s of MC) {
@@ -7554,7 +7555,13 @@ const MK_TAGS = [['drop', 'Drop', '#ff3b3b', 'Red'], ['publico', 'Público', '#3
 const mkTag = k => MK_TAGS.find(x => x[0] === k);
 let mkUid = '';
 try { mkUid = localStorage.getItem('midnight-mk-uid') || ''; } catch (e) {}
-if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + Math.random().toString(36).slice(2, 12); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+// Seguretat (06-11): mkUid és la clau secreta del mòbil (el servidor només en guarda un resum); els ids de les marques
+// porten un prefix públic diferent (mkPub), perquè ningú pugui fer-se passar per un altre mòbil i esborrar-li les marques
+let mkPub = '';
+try { mkPub = localStorage.getItem('midnight-mk-pub') || ''; } catch (e) {}
+if (!/^p[a-z0-9]{8,20}$/.test(mkPub)) { mkPub = 'p' + [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 12); try { localStorage.setItem('midnight-mk-pub', mkPub); } catch (e) {} }
+const mkIsMine = m => m.uid === mkUid || String(m.id).startsWith(mkPub + '-');
 let mkMine = [], mkDel = [], mkSrv = null, mkCur = null, mkPopT = 0, mkDayF = -1, mkWho = 'all', mkPulling = false;
 try { const v = JSON.parse(localStorage.getItem(MKK) || 'null'); if (v && Array.isArray(v.m)) { mkMine = v.m.filter(m => m && typeof m.id === 'string' && Number.isFinite(m.t)); mkDel = Array.isArray(v.del) ? v.del : []; } } catch (e) {}
 const mkSave = () => { try { localStorage.setItem(MKK, JSON.stringify({ m: mkMine, del: mkDel })); } catch (e) {} };
@@ -7600,7 +7607,7 @@ function mkPaint() {
 }
 function mkTap() {
   const t = now(), live = mkLive(t), pick = live[0];
-  const m = { id: mkUid + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
+  const m = { id: mkPub + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
     who: typeof mcWho === 'function' ? mcWho() : '', v: 1, sent: false };
   mkMine.push(m); mkSave(); mkPaint();
   try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
@@ -7659,7 +7666,7 @@ document.getElementById('mkPopAll').addEventListener('click', () => { mkClose();
 
 // Llista i exportació
 function mkFiltered() {
-  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || m.uid === mkUid));
+  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || mkIsMine(m)));
 }
 function mkRenderList() {
   const all = mkList();
@@ -7667,14 +7674,14 @@ function mkRenderList() {
   days.hidden = NDAYS < 2;
   if (NDAYS > 1) days.innerHTML = [`<button type="button" role="tab" data-mkd="-1" aria-selected="${mkDayF < 0}">Todos</button>`]
     .concat(DAYS.map(d => `<button type="button" role="tab" data-mkd="${d.d}" aria-selected="${mkDayF === d.d}">${esc(d.name || 'Día ' + (d.d + 1))} <span>${all.filter(m => dayAt(m.t) === d.d).length}</span></button>`)).join('');
-  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(m => m.uid === mkUid).length]]
+  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(mkIsMine).length]]
     .map(([k, l, n]) => `<button type="button" role="tab" data-mkw="${k}" aria-selected="${mkWho === k}">${l} <span>${n}</span></button>`).join('');
   const L = mkFiltered();
   const pend = mkMine.filter(m => !m.sent).length + mkDel.length;
   document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Solo en este móvil (esta versión no tiene servidor).'
     : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
   document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
-    const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
+    const tg = mkTag(m.k), mine = mkIsMine(m), ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
     return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${avBy(m.who)}${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
   }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Marcar momento» justo cuando pase algo.</li>';
   for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;

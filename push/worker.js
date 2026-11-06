@@ -80,7 +80,8 @@ const MAX_DONE = 5000;
 // Multicámara (pestanya «Cámaras»): estat de cada càmera, compartit per tot l'equip (sense contrasenya, com les ✓)
 const MC_ST = ['', 'montada', 'grabando', 'parada', 'recogida'];
 const okMcId = id => typeof id === 'string' && /^[\w-]{1,80}$/.test(id);
-const mcText = (s, n) => typeof s === 'string' ? s.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n) : '';
+// Seguretat (06-11): també fora « " » i « ` » (un color de càmera amb cometes podia injectar codi a l'app)
+const mcText = (s, n) => typeof s === 'string' ? s.replace(/[\u0000-\u001f<>"`]/g, '').trim().slice(0, n) : '';
 const MAX_MC = 400;
 // Momentos (marques per a l'edició): qualsevol de l'equip toca «Momento» i queda l'hora, l'escenari i l'artista.
 // Tots les veuen i les exporten per a DaVinci / Final Cut. Cadascú només esborra les seves (per «uid» del mòbil)
@@ -90,7 +91,7 @@ const MAX_MK = 4000;
 // Incidències («Avisar a producción», des del 04-11-2026): qualsevol de l'equip n'envia una (text + foto opcional);
 // tothom les veu a la pestanya Tareas i les poden donar per resoltes. Avís push als mòbils amb «Avisarme de incidencias».
 const MAX_INC = 300, INC_IMG = 260000;
-const okIncImg = s => typeof s === 'string' && s.length <= INC_IMG && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s);
+const okIncImg = s => typeof s === 'string' && s.length <= INC_IMG && /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/=]+$/.test(s); // /9j/ = un JPEG de veritat (FF D8 FF)
 function dueInc(sub, list, from, to) {
   if (!sub.inc || !list) return [];
   return list.filter(x => x.at > from && x.at <= to && !x.st).map(x => ({
@@ -99,8 +100,8 @@ function dueInc(sub, list, from, to) {
 }
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
-  sub: ['sub', 40, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 800, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 600, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 600, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  sub: ['sub', 20, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 300, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 200, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const SLOW_AT = 70000;   // peticions al dia (de les 100.000 del pla gratuït) a partir de les quals els mòbils van a poc a poc
 const LIVE_PARTS = ['inc', 'mc', 'done', 'mk'];
@@ -511,14 +512,16 @@ export class Store {
     // Un Momento: es crea o es canvia (etiqueta, nota). del = s'esborra (només el mòbil que el va fer)
     if (url.pathname === '/mk') {
       if (!okMkId(b.id) || !okMkId(b.uid)) return json({ error: 'bad' }, 400);
+      // Seguretat (06-11): uid és la clau secreta del mòbil; es guarda (i es mostra) només el seu resum
+      const hid = 'h' + (await hmacHex('mk', b.uid)).slice(0, 24);
       const old = this.sql.exec('SELECT uid FROM mk WHERE id = ?', b.id).toArray()[0];
-      if (old && old.uid !== b.uid) return json({ error: 'bad' }, 400);
+      if (old && old.uid !== hid && old.uid !== b.uid) return json({ error: 'bad' }, 400);
       if (b.del) { this.sql.exec('DELETE FROM mk WHERE id = ?', b.id); this.touch('mk'); return json({ ok: true }); }
       const t = +b.t;
       if (!Number.isFinite(t) || Math.abs(t - Date.now()) > 400 * 86400000) return json({ error: 'bad' }, 400);
       if (!old && this.full('mk', MAX_MK)) return json({ error: 'full' }, 429);
       this.sql.exec('INSERT INTO mk (id, uid, t, s, n, k, note, who, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET t = excluded.t, s = excluded.s, n = excluded.n, k = excluded.k, note = excluded.note, who = excluded.who, at = excluded.at',
-        b.id, b.uid, Math.round(t), mcText(b.s, 40), mcText(b.n, 120), MK_TAG.includes(b.k) ? b.k : '', mcText(b.note, 140), mcText(b.who, 30), Date.now());
+        b.id, hid, Math.round(t), mcText(b.s, 40), mcText(b.n, 120), MK_TAG.includes(b.k) ? b.k : '', mcText(b.note, 140), mcText(b.who, 30), Date.now());
       this.touch('mk');
       return json({ ok: true });
     }
@@ -564,7 +567,7 @@ export class Store {
       if (!r || !r.img) return new Response('', { status: 404 });
       const bin = atob(r.img.slice(r.img.indexOf(',') + 1)), bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return new Response(bytes, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=31536000, immutable' } });
+      return new Response(bytes, { headers: { 'content-type': 'image/jpeg', 'x-content-type-options': 'nosniff', 'cache-control': 'private, max-age=31536000, immutable' } });
     }
     // Vista global: totes les ✓ ({ qui: { tasca: hora } })
     if (url.pathname === '/doneall') return json({ done: this.part('done') });
@@ -637,7 +640,9 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url), origin = req.headers.get('origin') || '';
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
-    const ip = req.headers.get('cf-connecting-ip') || 'x';
+    // Seguretat (06-11): amb IPv6 cada mòbil/servidor té milers d'adreces; el límit es compta per bloc /64
+    const ip0 = req.headers.get('cf-connecting-ip') || 'x';
+    const ip = ip0.includes(':') ? ip0.split(':').slice(0, 4).join(':') + '::/64' : ip0;
     const lim = name => ({ _rl: [`${LIM[name][0]}:${ip}`, LIM[name][1], LIM[name][2]] });
     // Les crides de l'app no poden ser enormes
     const body = async () => {
@@ -723,6 +728,9 @@ export default {
         if (url.pathname === '/admin/login') {
           const rl = await callStore(env, '/rl', lim('login'));
           if (rl.error) return json(rl, 429, origin);
+          // A més del límit per IP, un límit global: 100 intents/hora entre tothom (frena qui canvia d'IP)
+          const rlg = await callStore(env, '/rl', { _rl: ['login:all', 100, 60 * MIN] });
+          if (rlg.error) return json(rlg, 429, origin);
           if (!(await sameText(b.pw || '', env.ADMIN_PW))) return json({ error: 'pw' }, 401, origin);
           const exp = Date.now() + SESSION;
           return json({ session: `${exp}.${await sign(env, exp)}`, exp }, 200, origin);
