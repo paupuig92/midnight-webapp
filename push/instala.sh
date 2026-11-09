@@ -42,6 +42,7 @@ python3 -I -c 'import sys; sys.exit(0 if len(open(sys.argv[1], "rb").read().stri
 
 # Codi d'equip (opcional, 09-11-2026): només obre l'app fora de dates, no deixa editar. Mínim 6 caràcters i diferent de la contrasenya d'admin.
 APPC=$CONF/app-code
+[[ -s $APPC ]] || APPC=$CONF/access-code   # (el mateix codi, amb l'altre nom que es va fer servir el 09-11)
 if [[ -s $APPC ]]; then
   python3 -I -c 'import sys; a=open(sys.argv[1],"rb").read().strip(); b=open(sys.argv[2],"rb").read().strip(); sys.exit(0 if len(a) >= 6 and a != b else 1)' $APPC $CONF/admin-password || {
     echo "ATURAT: el codi d'equip ha de tenir 6 caràcters o més i ha de ser DIFERENT de la contrasenya d'admin."
