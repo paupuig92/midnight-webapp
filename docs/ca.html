@@ -3913,7 +3913,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '09/11 10:49';
+const BUILD = '09/11 17:30';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 // Errors de l’app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {
@@ -5054,9 +5054,15 @@ function applyChanges(d, quiet) {
 // Sessió d'admin (09-11): a més de l'editor, obre l'app fora de les dates del festival. El servidor també la demana (x-s)
 let ADM_S = null;
 const admOk = () => !!ADM_S && +String(ADM_S).split('.')[0] > Date.now();
+// Codi d'equip (09-11): sessió que només obre l'app fora de dates (no edita). Es desa al mòbil (14 dies), per festival
+const GATEK = FEST.key + '-gate-v1';
+let APP_S = null;
+try { APP_S = localStorage.getItem(GATEK); } catch (e) {}
+const appSOk = () => !!APP_S && /^c\.\d+\./.test(APP_S) && +String(APP_S).split('.')[1] > Date.now();
+const gateS = () => admOk() ? ADM_S : appSOk() ? APP_S : '';
 function fetchT(url, opts = {}, ms = 10000) {
-  if (admOk() && typeof PUSH !== 'undefined' && PUSH && PUSH.url && String(url).startsWith(PUSH.url) && !String(url).includes('/admin/'))
-    opts = { ...opts, headers: { ...(opts.headers || {}), 'x-s': ADM_S } };
+  if (gateS() && typeof PUSH !== 'undefined' && PUSH && PUSH.url && String(url).startsWith(PUSH.url) && !String(url).includes('/admin/'))
+    opts = { ...opts, headers: { ...(opts.headers || {}), 'x-s': gateS() } };
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ms);
   return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
@@ -5133,7 +5139,7 @@ const OPEN = (() => {
   return [day(Y, M, D - 7), day(Y, M, D + n + 1)];
 })();
 const appOpen = () => Date.now() >= OPEN[0] && Date.now() < OPEN[1];
-const gated = () => !!(ADMIN && PUSH && PUSH.url) && !appOpen() && !admOk();
+const gated = () => !!(ADMIN && PUSH && PUSH.url) && !appOpen() && !gateS();
 function gatePaint() {
   let g = document.getElementById('gate');
   if (!gated()) { if (g) { g.remove(); livePull(true); } return; }
@@ -5142,16 +5148,23 @@ function gatePaint() {
   const before = Date.now() < OPEN[0];
   const when = new Date(OPEN[0]).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
   g.innerHTML = `<div class="gate-in"><p class="gate-k">Midnight App</p><h1>${html(FEST.name)}</h1>
-    <p class="gate-m">${before ? `L’app s’obre el <b>${html(when)}</b>.` : 'El festival ha acabat. L’app està tancada.'}</p>
-    <form id="gateForm" autocomplete="on"><input type="text" name="username" autocomplete="username" value="Midnight · Organización" class="kc-user" tabindex="-1" aria-hidden="true" readonly><input type="password" id="gatePw" name="password" placeholder="Contrasenya d’organització" autocomplete="current-password" required>
+    <p class="gate-m">${before ? `L’app s’obre el <b>${html(when)}</b>.<br>Si tens el codi de l’equip, hi pots entrar abans.` : 'El festival ha acabat. L’app està tancada.'}</p>
+    <form id="gateForm" autocomplete="on"><input type="text" name="username" autocomplete="username" value="Midnight · Código" class="kc-user" tabindex="-1" aria-hidden="true" readonly><input type="password" id="gatePw" name="password" placeholder="Codi d’accés" autocomplete="current-password" required>
     <button type="submit">Entrar</button></form><p class="gate-e" id="gateErr" hidden></p></div>`;
   document.body.appendChild(g);
   g.querySelector('#gateForm').addEventListener('submit', async e => {
     e.preventDefault();
     const err = g.querySelector('#gateErr'), bt = g.querySelector('button');
     bt.disabled = true; err.hidden = false; err.textContent = 'Comprovant…';
-    try { ADM_S = await unlock(g.querySelector('#gatePw').value); gatePaint(); }
-    catch (x) { err.textContent = x.code === 'pw' ? 'Contrasenya incorrecta.' : 'No s’ha pogut entrar: ' + x.message; }
+    try {
+      // Un sol camp: el codi d'equip o la contrasenya d'admin (el servidor diu quin és)
+      const r = await fetchT(PUSH.url + '/gate/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pw: g.querySelector('#gatePw').value }), cache: 'no-store' }, 15000);
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { err.textContent = d.error === 'pw' ? 'Codi incorrecte.' : r.status === 429 ? 'Massa intents, espera uns minuts.' : 'No s’ha pogut entrar (servidor ' + r.status + ').'; return; }
+      if (d.role === 'admin') ADM_S = d.session;
+      else { APP_S = d.session; try { localStorage.setItem(GATEK, APP_S); } catch (e) {} }
+      gatePaint();
+    } catch (x) { err.textContent = 'Sense connexió: no s’ha pogut entrar.'; }
     finally { bt.disabled = false; }
   });
 }
@@ -8809,7 +8822,7 @@ incSec.addEventListener('click', async e => {
     img.onload = () => { b.closest('.ia').before(img); b.remove(); };
     img.onerror = () => { b.disabled = false; b.textContent = 'Veure la foto'; };
     // Fora de dates (només admin): una <img> no porta la capçalera de la sessió, va a l'adreça
-    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}` + (!appOpen() && admOk() ? '&s=' + encodeURIComponent(ADM_S) : '');
+    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}` + (!appOpen() && gateS() ? '&s=' + encodeURIComponent(gateS()) : '');
   }
 });
 document.getElementById('prefIncL').hidden = !INC_LIVE();
