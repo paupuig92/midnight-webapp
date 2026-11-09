@@ -667,7 +667,7 @@ export default {
     };
     try {
       // Fora de les dates del festival: només l'admin
-      if (GATED.includes(url.pathname) && !isOpen() && !(await okSession(env, req.headers.get('x-s'))))
+      if (GATED.includes(url.pathname) && !isOpen() && !(await okSession(env, req.headers.get('x-s') || (url.pathname === '/incimg' && url.searchParams.get('s')))))  // una <img> no pot portar capçaleres: la foto, amb ?s=
         return json({ error: 'closed', open: OPEN[0] }, 403, origin);
       // Lot d'enviament (només el pot cridar el mateix servidor)
       if (req.method === 'POST' && url.pathname === '/send') {

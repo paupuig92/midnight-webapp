@@ -1702,6 +1702,8 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 #gate input { font: inherit; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); text-align: center; }
 #gate button { font: inherit; font-weight: 700; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
 #gate .gate-e { margin: 0; font-size: 14px; color: var(--muted); }
+/* Usuari invisible perquè el Llavero desi la contrasenya (no pot ser display:none: Safari l'ignoraria) */
+.kc-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -1953,7 +1955,9 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <form id="pwForm" class="pwform">
       <label for="pw">Cambios de última hora (solo organización)</label>
       <div class="pwrow">
-        <input type="password" id="pw" autocomplete="current-password" placeholder="Contraseña" required>
+        <!-- Usuari fix i invisible (09-11): així el Llavero / iCloud reconeix el formulari i ofereix desar la contrasenya -->
+        <input type="text" name="username" autocomplete="username" value="Midnight · Organización" class="kc-user" tabindex="-1" aria-hidden="true" readonly>
+        <input type="password" id="pw" name="password" autocomplete="current-password" placeholder="Contraseña" required>
         <button type="submit" class="btn">Entrar</button>
       </div>
       <div class="hint" id="pwMsg" hidden></div>
@@ -5098,7 +5102,7 @@ function gatePaint() {
   const when = new Date(OPEN[0]).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
   g.innerHTML = `<div class="gate-in"><p class="gate-k">Midnight App</p><h1>${html(FEST.name)}</h1>
     <p class="gate-m">${before ? `La app se abre el <b>${html(when)}</b>.` : 'El festival ha terminado. La app está cerrada.'}</p>
-    <form id="gateForm" autocomplete="on"><input type="password" id="gatePw" placeholder="Contraseña de organización" autocomplete="current-password" required>
+    <form id="gateForm" autocomplete="on"><input type="text" name="username" autocomplete="username" value="Midnight · Organización" class="kc-user" tabindex="-1" aria-hidden="true" readonly><input type="password" id="gatePw" name="password" placeholder="Contraseña de organización" autocomplete="current-password" required>
     <button type="submit">Entrar</button></form><p class="gate-e" id="gateErr" hidden></p></div>`;
   document.body.appendChild(g);
   g.querySelector('#gateForm').addEventListener('submit', async e => {
@@ -8745,7 +8749,8 @@ incSec.addEventListener('click', async e => {
     const img = document.createElement('img'); img.alt = 'Foto de la incidencia';
     img.onload = () => { b.closest('.ia').before(img); b.remove(); };
     img.onerror = () => { b.disabled = false; b.textContent = 'Ver foto'; };
-    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}`;
+    // Fora de dates (només admin): una <img> no porta la capçalera de la sessió, va a l'adreça
+    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}` + (!appOpen() && admOk() ? '&s=' + encodeURIComponent(ADM_S) : '');
   }
 });
 document.getElementById('prefIncL').hidden = !INC_LIVE();
