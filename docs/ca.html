@@ -1715,6 +1715,19 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 .tcs .tcn { max-width: 560px; margin: 0; font-size: var(--fs-s); line-height: 1.4; opacity: .65; }
 .tcs.flash .tcr, .tcs.flash .tcn, .tcs.flash .tcgo { visibility: hidden; }
 @media (orientation: landscape) and (max-height: 500px) { .tcs { gap: 6px; } .tcs .tcn { display: none; } }
+/* App tancada fora de les dates del festival (09-11) */
+#gate { position: fixed; inset: 0; z-index: 9000; background: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+#gate .gate-in { max-width: 340px; width: 100%; display: flex; flex-direction: column; gap: 14px; }
+#gate .gate-k { margin: 0; font: 700 12px/1 var(--mono, var(--body)); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+#gate h1 { margin: 0; font: 800 34px/1.05 var(--title, var(--display)); }
+#gate .gate-m { margin: 0 0 10px; color: var(--muted); }
+#gate .gate-m b { color: var(--ink); }
+#gate form { display: flex; flex-direction: column; gap: 10px; }
+#gate input { font: inherit; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); text-align: center; }
+#gate button { font: inherit; font-weight: 700; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
+#gate .gate-e { margin: 0; font-size: 14px; color: var(--muted); }
+/* Usuari invisible perquè el Llavero desi la contrasenya (no pot ser display:none: Safari l'ignoraria) */
+.kc-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
@@ -1976,7 +1989,9 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <form id="pwForm" class="pwform">
       <label for="pw">Canvis d’última hora (només organització)</label>
       <div class="pwrow">
-        <input type="password" id="pw" autocomplete="current-password" placeholder="Contrasenya" required>
+        <!-- Usuari fix i invisible (09-11): així el Llavero / iCloud reconeix el formulari i ofereix desar la contrasenya -->
+        <input type="text" name="username" autocomplete="username" value="Midnight · Organización" class="kc-user" tabindex="-1" aria-hidden="true" readonly>
+        <input type="password" id="pw" name="password" autocomplete="current-password" placeholder="Contrasenya" required>
         <button type="submit" class="btn">Entrar</button>
       </div>
       <div class="hint" id="pwMsg" hidden></div>
@@ -2386,6 +2401,10 @@ const FEST = {
   banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
   bannerVideo: 'img/duro-black-hangar-2026/banner.mp4',  // la cúpula del cartell animat (black-hangar-cartell-anim.mov) que s'encén, 2 s en bucle; img/banner.jpg n'és el pòster
   date: [2026, 12, 5],          // primer dia
+  // App oberta per a l'equip (09-11): del primer a l'últim dia (inclosos). Fora d'aquestes dates, només l'admin.
+  // Sense «open»: 7 dies abans → l'endemà de l'últim dia
+  open: ['2026-11-30', '2026-12-08'],
+  geo: [41.5536, 2.2492],       // on és el recinte (Sol i Tiempo, si no hi ha mapa): Espai Can Guitet, Montmeló
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
   start: '11:00', end: '23:00',
@@ -3894,7 +3913,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '06/11 12:12';
+const BUILD = '09/11 10:49';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 // Errors de l’app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {
@@ -4260,13 +4279,15 @@ function solDay(t, lat, lon) {
   return { a, b, S, X, noon, max: alt(noon), up, dn, gold: band(-4, 6), blue: band(-6, -4), lat, lon };
 }
 document.getElementById('solFest').textContent = FEST.name;
-const SOLK = 'midnight-sol-v1';  // la ubicació: només en aquest mòbil (no és d'un festival, serveix per a tots)
+const SOLK = 'midnight-sol-v1';  // la ubicació: només en aquest mòbil
+// (09-11) Es desa amb el festival: la d'un festival anterior (un altre recinte) no s'aplica, el sol i el temps serien d'un altre lloc
 let solLoc = null;
-try { const v = JSON.parse(localStorage.getItem(SOLK) || 'null'); if (v && Math.abs(v.lat) <= 90 && Math.abs(v.lon) <= 180) solLoc = v; } catch (e) {}
+try { const v = JSON.parse(localStorage.getItem(SOLK) || 'null'); if (v && v.fest === FEST.id && Math.abs(v.lat) <= 90 && Math.abs(v.lon) <= 180) solLoc = v; } catch (e) {}
 function solWhere() {
   if (solLoc) return { lat: solLoc.lat, lon: solLoc.lon, mine: true };
   const g = (FEST.maps || []).find(m => m.geo && m.geo.length);
   if (g) return { lat: g.geo.reduce((s, p) => s + p[0], 0) / g.geo.length, lon: g.geo.reduce((s, p) => s + p[1], 0) / g.geo.length, fest: true };
+  if (Array.isArray(FEST.geo) && FEST.geo.length === 2) return { lat: +FEST.geo[0], lon: +FEST.geo[1], fest: true };  // (09-11) recinte del festival sense mapa
   return { lat: 41.5536, lon: 2.2492 };  // Montmeló (Espai Can Guitet)
 }
 const SOL16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
@@ -4547,7 +4568,7 @@ document.getElementById('solLoc').addEventListener('click', () => {
   if (!('geolocation' in navigator)) { msg.textContent = 'Aquest mòbil no dona la ubicació.'; return; }
   msg.textContent = 'Buscant…';
   navigator.geolocation.getCurrentPosition(p => {
-    solLoc = { lat: +p.coords.latitude.toFixed(4), lon: +p.coords.longitude.toFixed(4), acc: Math.round(p.coords.accuracy || 0) };
+    solLoc = { lat: +p.coords.latitude.toFixed(4), lon: +p.coords.longitude.toFixed(4), acc: Math.round(p.coords.accuracy || 0), fest: FEST.id };
     try { localStorage.setItem(SOLK, JSON.stringify(solLoc)); } catch (e) {}
     msg.textContent = ''; solPaint(true);
   }, err => {
@@ -5030,7 +5051,12 @@ function applyChanges(d, quiet) {
     if (moved.length) toast(`★ Canvi d’hora: <b>${moved.map(o => `${html(o.n)} → ${lbl(BYID[o.id].a)}`).join(', ')}</b>`, 'mine', null, 30000);
   }
 }
+// Sessió d'admin (09-11): a més de l'editor, obre l'app fora de les dates del festival. El servidor també la demana (x-s)
+let ADM_S = null;
+const admOk = () => !!ADM_S && +String(ADM_S).split('.')[0] > Date.now();
 function fetchT(url, opts = {}, ms = 10000) {
+  if (admOk() && typeof PUSH !== 'undefined' && PUSH && PUSH.url && String(url).startsWith(PUSH.url) && !String(url).includes('/admin/'))
+    opts = { ...opts, headers: { ...(opts.headers || {}), 'x-s': ADM_S } };
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ms);
   return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
@@ -5095,6 +5121,40 @@ async function unlock(pw) {
   return (await adm('login', { pw })).session;
 }
 let token = null, draft = null, edStage = STAGES[0].id;
+// --- App tancada fora del festival (09-11-2026, en Pau) ---
+// FEST.open = [primer dia, últim dia] (inclosos). Fora d'aquestes dates surt «La app se abre el…» i només hi entra l'admin.
+// Això és la cortina; el pany de veritat és al servidor (no accepta res sense sessió d'admin fora de dates).
+// Les hores són les reals (no les del Modo prueba). A l'artifact (sense servidor) no hi ha cortina.
+const OPEN = (() => {
+  const day = (y, m, d) => new Date(y, m - 1, d).getTime();
+  const ymd = s => String(s).split('-').map(Number);
+  if (Array.isArray(FEST.open) && FEST.open.length === 2) { const [a, b] = FEST.open.map(ymd); return [day(...a), day(b[0], b[1], b[2] + 1)]; }
+  const [Y, M, D] = FEST.date, n = Math.max(1, (FEST.days || []).length);
+  return [day(Y, M, D - 7), day(Y, M, D + n + 1)];
+})();
+const appOpen = () => Date.now() >= OPEN[0] && Date.now() < OPEN[1];
+const gated = () => !!(ADMIN && PUSH && PUSH.url) && !appOpen() && !admOk();
+function gatePaint() {
+  let g = document.getElementById('gate');
+  if (!gated()) { if (g) { g.remove(); livePull(true); } return; }
+  if (g) return;
+  g = document.createElement('div'); g.id = 'gate';
+  const before = Date.now() < OPEN[0];
+  const when = new Date(OPEN[0]).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
+  g.innerHTML = `<div class="gate-in"><p class="gate-k">Midnight App</p><h1>${html(FEST.name)}</h1>
+    <p class="gate-m">${before ? `L’app s’obre el <b>${html(when)}</b>.` : 'El festival ha acabat. L’app està tancada.'}</p>
+    <form id="gateForm" autocomplete="on"><input type="text" name="username" autocomplete="username" value="Midnight · Organización" class="kc-user" tabindex="-1" aria-hidden="true" readonly><input type="password" id="gatePw" name="password" placeholder="Contrasenya d’organització" autocomplete="current-password" required>
+    <button type="submit">Entrar</button></form><p class="gate-e" id="gateErr" hidden></p></div>`;
+  document.body.appendChild(g);
+  g.querySelector('#gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = g.querySelector('#gateErr'), bt = g.querySelector('button');
+    bt.disabled = true; err.hidden = false; err.textContent = 'Comprovant…';
+    try { ADM_S = await unlock(g.querySelector('#gatePw').value); gatePaint(); }
+    catch (x) { err.textContent = x.code === 'pw' ? 'Contrasenya incorrecta.' : 'No s’ha pogut entrar: ' + x.message; }
+    finally { bt.disabled = false; }
+  });
+}
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
 const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
@@ -5224,6 +5284,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
   go.disabled = true;
   try {
     token = await unlock(document.getElementById('pw').value);
+    ADM_S = token;
     document.getElementById('pw').value = '';
     msg.hidden = true;
     msg.hidden = false; msg.textContent = 'Carregant l’últim horari publicat…';
@@ -6537,7 +6598,8 @@ const MC = Array.isArray(FEST.multicam) ? FEST.multicam : [];
 const MC_ST = [['montada', 'Muntada'], ['grabando', 'Gravant'], ['parada', 'Parada'], ['recogida', 'Recollida']];
 const MC_SK = FEST.key + '-mc-st-v1', MC_FK = FEST.key + '-mc-esc-v1';
 const mcSlug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#|^rgb/.test(c) ? c : 'var(--muted)'})` : '';
+// Seguretat (06-11): el color pot venir del servidor (càmeres afegides des de l'app) → només #hex o rgb(…) de números
+const mcCol = c => c ? `var(--mc-${mcSlug(c)}, ${/^#[0-9a-f]{3,8}$|^rgba?\([\d.,\s%]{5,40}\)$/i.test(String(c)) ? c : 'var(--muted)'})` : '';
 // Un id per càmera: festival + `uid` fix de les dades (així canviar el nom de la posició no perd l'estat ni el lloc).
 // Sense `uid`: escenari + posició (si es repeteix, amb número)
 for (const s of MC) {
@@ -7598,7 +7660,13 @@ const MK_TAGS = [['drop', 'Drop', '#ff3b3b', 'Red'], ['publico', 'Público', '#3
 const mkTag = k => MK_TAGS.find(x => x[0] === k);
 let mkUid = '';
 try { mkUid = localStorage.getItem('midnight-mk-uid') || ''; } catch (e) {}
-if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + Math.random().toString(36).slice(2, 12); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+if (!/^[\w-]{4,40}$/.test(mkUid)) { mkUid = 'u' + [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); try { localStorage.setItem('midnight-mk-uid', mkUid); } catch (e) {} }
+// Seguretat (06-11): mkUid és la clau secreta del mòbil (el servidor només en guarda un resum); els ids de les marques
+// porten un prefix públic diferent (mkPub), perquè ningú pugui fer-se passar per un altre mòbil i esborrar-li les marques
+let mkPub = '';
+try { mkPub = localStorage.getItem('midnight-mk-pub') || ''; } catch (e) {}
+if (!/^p[a-z0-9]{8,20}$/.test(mkPub)) { mkPub = 'p' + [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 12); try { localStorage.setItem('midnight-mk-pub', mkPub); } catch (e) {} }
+const mkIsMine = m => m.uid === mkUid || String(m.id).startsWith(mkPub + '-');
 let mkMine = [], mkDel = [], mkSrv = null, mkCur = null, mkPopT = 0, mkDayF = -1, mkWho = 'all', mkPulling = false;
 try { const v = JSON.parse(localStorage.getItem(MKK) || 'null'); if (v && Array.isArray(v.m)) { mkMine = v.m.filter(m => m && typeof m.id === 'string' && Number.isFinite(m.t)); mkDel = Array.isArray(v.del) ? v.del : []; } } catch (e) {}
 const mkSave = () => { try { localStorage.setItem(MKK, JSON.stringify({ m: mkMine, del: mkDel })); } catch (e) {} };
@@ -7644,7 +7712,7 @@ function mkPaint() {
 }
 function mkTap() {
   const t = now(), live = mkLive(t), pick = live[0];
-  const m = { id: mkUid + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
+  const m = { id: mkPub + '-' + t.toString(36), t, s: pick ? pick.s.id : (STAGES.length === 1 ? STAGES[0].id : ''), n: pick ? pick.x.n : '', k: '', note: '',
     who: typeof mcWho === 'function' ? mcWho() : '', v: 1, sent: false };
   mkMine.push(m); mkSave(); mkPaint();
   try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
@@ -7703,7 +7771,7 @@ document.getElementById('mkPopAll').addEventListener('click', () => { mkClose();
 
 // Llista i exportació
 function mkFiltered() {
-  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || m.uid === mkUid));
+  return mkList().filter(m => (mkDayF < 0 || NDAYS < 2 || dayAt(m.t) === mkDayF) && (mkWho === 'all' || mkIsMine(m)));
 }
 function mkRenderList() {
   const all = mkList();
@@ -7711,14 +7779,14 @@ function mkRenderList() {
   days.hidden = NDAYS < 2;
   if (NDAYS > 1) days.innerHTML = [`<button type="button" role="tab" data-mkd="-1" aria-selected="${mkDayF < 0}">Todos</button>`]
     .concat(DAYS.map(d => `<button type="button" role="tab" data-mkd="${d.d}" aria-selected="${mkDayF === d.d}">${esc(d.name || 'Día ' + (d.d + 1))} <span>${all.filter(m => dayAt(m.t) === d.d).length}</span></button>`)).join('');
-  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(m => m.uid === mkUid).length]]
+  document.getElementById('mkWhoF').innerHTML = [['all', 'De todo el equipo', all.length], ['mine', 'Solo míos', all.filter(mkIsMine).length]]
     .map(([k, l, n]) => `<button type="button" role="tab" data-mkw="${k}" aria-selected="${mkWho === k}">${l} <span>${n}</span></button>`).join('');
   const L = mkFiltered();
   const pend = mkMine.filter(m => !m.sent).length + mkDel.length;
   document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Solo en este móvil (esta versión no tiene servidor).'
     : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
   document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
-    const tg = mkTag(m.k), mine = m.uid === mkUid, ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
+    const tg = mkTag(m.k), mine = mkIsMine(m), ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
     return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${avBy(m.who)}${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
   }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Marcar momento» justo cuando pase algo.</li>';
   for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
@@ -8740,7 +8808,8 @@ incSec.addEventListener('click', async e => {
     const img = document.createElement('img'); img.alt = 'Foto de la incidència';
     img.onload = () => { b.closest('.ia').before(img); b.remove(); };
     img.onerror = () => { b.disabled = false; b.textContent = 'Veure la foto'; };
-    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}`;
+    // Fora de dates (només admin): una <img> no porta la capçalera de la sessió, va a l'adreça
+    img.src = `${PUSH.url}/incimg?n=${encodeURIComponent(n)}` + (!appOpen() && admOk() ? '&s=' + encodeURIComponent(ADM_S) : '');
   }
 });
 document.getElementById('prefIncL').hidden = !INC_LIVE();
@@ -8764,7 +8833,7 @@ function liveParts() {
   return p.join(',');
 }
 async function livePull(force) {
-  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden) return;
+  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden || gated()) return;
   const p = liveParts();
   if (!p) return;
   liveBusy = true; liveAt = Date.now();
@@ -8775,6 +8844,8 @@ async function livePull(force) {
     const r = await fetchT(`${PUSH.url}/live?p=${p}${v}`, { cache: 'no-store' }, 8000);
     if (!r.ok) throw new Error(r.status);
     const d = await r.json();
+    // (09-11) Si el servidor encara és d'un altre festival (s'ha publicat la web però no instala.sh), no se'n fa cas
+    if (d.fest && d.fest !== FEST.id) { liveV = ''; return; }
     liveSlow = !!d.slow; liveV = d.v || ''; liveP = p;
     if (d.inc) safe('incidencias', () => incApply(d.inc));
     if (d.mc) safe('multi', () => mcApply(d.mc, t0));
@@ -8796,6 +8867,8 @@ livePull();
 
 // APP_BEAT: el vigilant de la XARXA DE SEGURETAT. Només si tick() ha anat bé (si llança un error, no batega)
 setInterval(() => { if (!document.hidden) { tick(); APP_BEAT = Date.now(); } }, 1000);
+// App tancada fora de dates: es comprova en arrencar i cada 30 s (s'obre sola a les 0:00 del primer dia)
+gatePaint(); setInterval(gatePaint, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
