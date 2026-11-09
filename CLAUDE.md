@@ -57,6 +57,7 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 - Fora de dates l'app mostra «La app se abre el…» (`gatePaint`, `#gate`) amb la contrasenya d'organització; amb sessió d'admin (`ADM_S`, 12 h, només a la memòria) s'obre. És la cortina: el pany és al servidor (`GATED` a worker.js: /sub, /test, /done, /mc, /mk, /inc, /incst, /live, /mclog, /incimg tornen 403 `closed` sense capçalera `x-s` amb sessió vàlida). L'horari (changes.json a Pages) continua sent públic.
 - `fetchT` afegeix `x-s` a les crides al servidor si hi ha sessió. Les fotos d'incidència (`<img>`) no poden portar capçalera: fora de dates hi va `?s=` (només /incimg). Desar al Llavero: usuari invisible fix «Midnight · Organización» (`.kc-user`) als dos formularis de contrasenya.
 - `prova/prova.js` posa el rellotge al 1r dia del festival; `--tancat` comprova la cortina.
+- Separació entre festivals (09-11): build_web s'atura si el `key` ja és d'un altre festival de `festivals/`; `/live` porta `fest` i l'app ignora un servidor d'un altre festival (web publicada sense `instala.sh`); la ubicació del Sol/Tiempo (`midnight-sol-v1`) es desa amb `fest` i no passa d'un festival a un altre; `FEST.geo = [lat, lon]` opcional = recinte si no hi ha mapa (abans de Montmeló).
 - Auditoria de seguretat 06-11: https://claude.ai/artifact/LsT9yW1puobBf8VnMS8W1a (color de càmera sense injecció, clau secreta de Momentos `mkUid` + prefix públic `mkPub`, límits per IP més baixos i IPv6 per /64, límit global de login).
 
 ## Regles

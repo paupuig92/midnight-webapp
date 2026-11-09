@@ -12,6 +12,7 @@ const FEST = {
   // App oberta per a l'equip (09-11): del primer a l'últim dia (inclosos). Fora d'aquestes dates, només l'admin.
   // Sense «open»: 7 dies abans → l'endemà de l'últim dia
   open: ['2026-11-30', '2026-12-08'],
+  geo: [41.5536, 2.2492],       // on és el recinte (Sol i Tiempo, si no hi ha mapa): Espai Can Guitet, Montmeló
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
   start: '11:00', end: '23:00',

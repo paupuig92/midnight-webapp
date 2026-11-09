@@ -84,6 +84,12 @@ def js_to_json(block):
 fb = src[src.index("/* ==== FESTIVAL ==== */"):src.index("/* ==== /FESTIVAL ==== */")]
 fb = fb[fb.index("const FEST = ") + len("const FEST = "):fb.rindex("};") + 1]
 FEST = js_to_json(fb)
+# (09-11-2026) Cada festival ha de tenir un «key» propi: el mòbil hi desa preferits, tasques, avisos, marques…
+# Si dos festivals (p. ex. el Duro 2026 i el Duro 2027) en comparteixen un, les dades del vell sortirien al nou.
+for _f in sorted((ROOT / "festivals").glob("*/festival.js")):
+    _m = re.search(r"^\s*id:\s*'([^']+)'[\s\S]*?^\s*key:\s*'([^']+)'", _f.read_text(encoding="utf-8"), re.M)
+    if _m and _m.group(1) != FEST["id"] and _m.group(2) == FEST["key"]:
+        sys.exit(f"ERROR: el festival «{FEST['id']}» fa servir key: '{FEST['key']}', que ja és de «{_m.group(1)}» ({_f.parent.name}). Posa-li un key nou (p. ex. '{FEST['key']}27'). No s'ha generat res.")
 # Logos, banner i fonts: a festivals/<id>/img/ (cada festival a la seva carpeta, des del 03-11). Si no hi és, img/ (com abans)
 IMG = ROOT / "festivals" / FEST["id"] / "img"
 if not IMG.is_dir():

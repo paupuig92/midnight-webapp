@@ -546,7 +546,7 @@ export class Store {
     // Si no ha canviat res, només torna { v } (sense llegir la base de dades)
     if (url.pathname === '/live') {
       const want = String(b.p || '').split(',').filter(x => LIVE_PARTS.includes(x));
-      const v = `${this.boot}.${this.ver}`, out = { v };
+      const v = `${this.boot}.${this.ver}`, out = { v, fest: CARTEL.fest };  // fest: l'app ignora un servidor d'un altre festival
       if (used > SLOW_AT) out.slow = 1;
       if (b.v === v) return json(out);
       for (const k of want) out[k] = this.part(k);
