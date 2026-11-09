@@ -5,6 +5,8 @@
 //   node prova/prova.js --trenca=sol --sintaxi → el mateix amb un error d'escriptura (el pitjor cas: no s'arriba a llegir res de l'app)
 //   node prova/prova.js --trenca=nucli  → trenca el nucli: ha de sortir la pantalla «La app no ha arrancado bien · Reparar»
 //   node prova/prova.js --captures=dir  → desa captures de cada pestanya
+//   node prova/prova.js --tancat        → fora de les dates del festival: ha de sortir «La app se abre el…» (09-11-2026)
+// El rellotge del navegador es posa al primer dia del festival a les 12:00 (fora de dates l'app està tancada)
 // Sense xarxa externa (tot el que no és la web es talla): així la prova sempre dona el mateix.
 const http = require('http'), fs = require('fs'), path = require('path');
 let chromium, devices;
@@ -25,6 +27,11 @@ const srv = http.createServer((q, r) => {
   const fails = [], errs = [];
   const c = await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', locale: 'es-ES', timezoneId: 'Europe/Madrid' });
   await c.route('**/*', r => r.request().url().startsWith(base) ? r.continue() : r.abort());
+  // Dia del festival (de docs/cartel.json), o 20 dies abans amb --tancat
+  const cart = JSON.parse(fs.readFileSync(path.join(ROOT, 'cartel.json'), 'utf8'));
+  const TANCAT = process.argv.includes('--tancat');
+  const [Y, M, D] = cart.date;
+  await c.clock.install({ time: new Date(Date.UTC(Y, M - 1, D - (TANCAT ? 20 : 0), 11, 0)) });
   const p = await c.newPage();
   p.on('pageerror', e => errs.push(e.message));
   p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource|net::ERR/.test(m.text())) errs.push('console: ' + m.text()); });
@@ -37,6 +44,13 @@ const srv = http.createServer((q, r) => {
   });
   await p.goto(base + PAGE, { waitUntil: 'load' });
   await p.waitForTimeout(2500);
+  if (TANCAT) {
+    const g = await p.$('#gate'), txt = g ? await g.textContent() : '';
+    if (CAPS) { fs.mkdirSync(CAPS, { recursive: true }); await p.screenshot({ path: path.join(CAPS, 'tancat.png') }); }
+    await b.close(); srv.close();
+    if (!g || !/se abre|s’obre/.test(txt) || errs.length) { console.log('FALLA: fora de dates no surt «La app se abre el…»', errs); process.exit(1); }
+    console.log('OK: fora de dates surt «La app se abre el…» i no hi ha errors'); return;
+  }
   if (TRENCA === 'nucli') {
     await p.waitForTimeout(16000);
     const dead = await p.$('#dead');

@@ -56,6 +56,21 @@ function T(s) {
   return ok.length ? (f === 'a' ? ok[0] : ok[ok.length - 1]) : wall - 3600000;
 }
 const END = T((NDAYS > 1 ? NDAYS + '/' : '') + CARTEL.end) + 60 * MIN;   // una hora després del final ja no s'envia res
+// App tancada fora del festival (09-11-2026): CARTEL.open = [primer dia, últim dia] (inclosos, hora de Madrid).
+// Sense «open»: 7 dies abans → l'endemà de l'últim dia. Fora d'aquestes dates, l'equip no pot llegir ni escriure res
+// (incidències, ✓, càmeres, marques, avisos): només qui porta una sessió d'admin (capçalera x-s). Mateixa regla que l'app.
+function wallDay(Y, M, D) {   // les 0:00 (hora de Madrid) d'aquell dia
+  const w = Date.UTC(Y, M - 1, D), ok = [w - 2 * 3600000, w - 3600000].filter(c => wallOf(c) === w);
+  return ok.length ? ok[0] : w - 3600000;
+}
+const OPEN = (() => {
+  const ymd = s => String(s).split('-').map(Number);
+  if (Array.isArray(CARTEL.open) && CARTEL.open.length === 2) { const [a, b] = CARTEL.open.map(ymd); return [wallDay(...a), wallDay(b[0], b[1], b[2] + 1)]; }
+  const [Y, M, D] = CARTEL.date;
+  return [wallDay(Y, M, D - 7), wallDay(Y, M, D + NDAYS + 1)];
+})();
+const isOpen = () => Date.now() >= OPEN[0] && Date.now() < OPEN[1];
+const GATED = ['/sub', '/test', '/done', '/mc', '/mk', '/inc', '/incst', '/live', '/mclog', '/incimg'];
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = c => (c.fest || 'bass-in-the-park-2026') === CARTEL.fest;
 
@@ -63,7 +78,7 @@ const REPO = 'paupuig92/midnight-webapp';
 const ADMIN_FILES = ['docs/changes.json', 'docs/tasks.json'];
 const SESSION = 12 * 3600000;
 const cors = origin => ORIGINS.includes(origin)
-  ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'vary': 'origin' }
+  ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-s', 'vary': 'origin' }
   : {};
 const json = (data, status = 200, origin = '') => new Response(JSON.stringify(data), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors(origin) },
@@ -651,6 +666,9 @@ export default {
       return JSON.parse(t || '{}');
     };
     try {
+      // Fora de les dates del festival: només l'admin
+      if (GATED.includes(url.pathname) && !isOpen() && !(await okSession(env, req.headers.get('x-s'))))
+        return json({ error: 'closed', open: OPEN[0] }, 403, origin);
       // Lot d'enviament (només el pot cridar el mateix servidor)
       if (req.method === 'POST' && url.pathname === '/send') {
         if (!env.SEND_KEY || !(await sameText(req.headers.get('x-send-key') || '', env.SEND_KEY))) return json({ error: 'forbidden' }, 403);

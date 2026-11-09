@@ -266,6 +266,7 @@ defaults = {sid: [{"id": f"{sid}-{j}", "a": a, "b": b, "n": n} for j, (a, b, n, 
     "days": max(1, len(FEST.get("days") or [])),  # festivals de diversos dies: les hores «2/11:00» són del 2n dia
     "stages": [{"id": st["id"], "name": st["name"]} for st in FEST["stages"]],
     "sets": defaults,
+    "open": FEST.get("open"),  # dates en què l'app és oberta per a l'equip (fora, només admin); None = 7 dies abans → l'endemà
     "sol": sol_alerts(FEST)}, ensure_ascii=False), encoding="utf-8")
 print("Festival:", FEST["name"], "·", "-".join(str(x) for x in FEST["date"]), FEST["start"], "→", FEST["end"], f"· {len(FEST.get('days') or [])} dies" if FEST.get("days") else "")
 

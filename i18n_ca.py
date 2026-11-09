@@ -24,6 +24,13 @@ PAIRS = [
     ("Borrar la lista", "Esborrar la llista"),
     ("Reparar la app", "Reparar l’app"),
 
+    # --- App tancada fora de dates (09-11-2026) ---
+    ("La app se abre el ", "L’app s’obre el "),
+    ("El festival ha terminado. La app está cerrada.", "El festival ha acabat. L’app està tancada."),
+    ("Contraseña de organización", "Contrasenya d’organització"),
+    ("Contraseña incorrecta.", "Contrasenya incorrecta."),
+    ("No se ha podido entrar: ", "No s’ha pogut entrar: "),
+
     # --- Capçalera i estat ---
     ("MODO PRUEBA ✕ Salir", "MODE PROVA ✕ Sortir"),
     ("PRUEBA ✕", "PROVA ✕"),

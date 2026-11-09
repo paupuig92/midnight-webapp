@@ -1691,6 +1691,17 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 .tcs .tcn { max-width: 560px; margin: 0; font-size: var(--fs-s); line-height: 1.4; opacity: .65; }
 .tcs.flash .tcr, .tcs.flash .tcn, .tcs.flash .tcgo { visibility: hidden; }
 @media (orientation: landscape) and (max-height: 500px) { .tcs { gap: 6px; } .tcs .tcn { display: none; } }
+/* App tancada fora de les dates del festival (09-11) */
+#gate { position: fixed; inset: 0; z-index: 9000; background: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+#gate .gate-in { max-width: 340px; width: 100%; display: flex; flex-direction: column; gap: 14px; }
+#gate .gate-k { margin: 0; font: 700 12px/1 var(--mono, var(--body)); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+#gate h1 { margin: 0; font: 800 34px/1.05 var(--title, var(--display)); }
+#gate .gate-m { margin: 0 0 10px; color: var(--muted); }
+#gate .gate-m b { color: var(--ink); }
+#gate form { display: flex; flex-direction: column; gap: 10px; }
+#gate input { font: inherit; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); text-align: center; }
+#gate button { font: inherit; font-weight: 700; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
+#gate .gate-e { margin: 0; font-size: 14px; color: var(--muted); }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -2352,6 +2363,9 @@ const FEST = {
   banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
   bannerVideo: 'img/banner.mp4',  // la cúpula del cartell animat (black-hangar-cartell-anim.mov) que s'encén, 2 s en bucle; img/banner.jpg n'és el pòster
   date: [2026, 12, 5],          // primer dia
+  // App oberta per a l'equip (09-11): del primer a l'últim dia (inclosos). Fora d'aquestes dates, només l'admin.
+  // Sense «open»: 7 dies abans → l'endemà de l'últim dia
+  open: ['2026-11-30', '2026-12-08'],
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
   start: '11:00', end: '23:00',
@@ -4992,7 +5006,12 @@ function applyChanges(d, quiet) {
     if (moved.length) toast(`★ Cambio de hora: <b>${moved.map(o => `${html(o.n)} → ${lbl(BYID[o.id].a)}`).join(', ')}</b>`, 'mine', null, 30000);
   }
 }
+// Sessió d'admin (09-11): a més de l'editor, obre l'app fora de les dates del festival. El servidor també la demana (x-s)
+let ADM_S = null;
+const admOk = () => !!ADM_S && +String(ADM_S).split('.')[0] > Date.now();
 function fetchT(url, opts = {}, ms = 10000) {
+  if (admOk() && typeof PUSH !== 'undefined' && PUSH && PUSH.url && String(url).startsWith(PUSH.url) && !String(url).includes('/admin/'))
+    opts = { ...opts, headers: { ...(opts.headers || {}), 'x-s': ADM_S } };
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ms);
   return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
@@ -5057,6 +5076,40 @@ async function unlock(pw) {
   return (await adm('login', { pw })).session;
 }
 let token = null, draft = null, edStage = STAGES[0].id;
+// --- App tancada fora del festival (09-11-2026, en Pau) ---
+// FEST.open = [primer dia, últim dia] (inclosos). Fora d'aquestes dates surt «La app se abre el…» i només hi entra l'admin.
+// Això és la cortina; el pany de veritat és al servidor (no accepta res sense sessió d'admin fora de dates).
+// Les hores són les reals (no les del Modo prueba). A l'artifact (sense servidor) no hi ha cortina.
+const OPEN = (() => {
+  const day = (y, m, d) => new Date(y, m - 1, d).getTime();
+  const ymd = s => String(s).split('-').map(Number);
+  if (Array.isArray(FEST.open) && FEST.open.length === 2) { const [a, b] = FEST.open.map(ymd); return [day(...a), day(b[0], b[1], b[2] + 1)]; }
+  const [Y, M, D] = FEST.date, n = Math.max(1, (FEST.days || []).length);
+  return [day(Y, M, D - 7), day(Y, M, D + n + 1)];
+})();
+const appOpen = () => Date.now() >= OPEN[0] && Date.now() < OPEN[1];
+const gated = () => !!(ADMIN && PUSH && PUSH.url) && !appOpen() && !admOk();
+function gatePaint() {
+  let g = document.getElementById('gate');
+  if (!gated()) { if (g) { g.remove(); livePull(true); } return; }
+  if (g) return;
+  g = document.createElement('div'); g.id = 'gate';
+  const before = Date.now() < OPEN[0];
+  const when = new Date(OPEN[0]).toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' });
+  g.innerHTML = `<div class="gate-in"><p class="gate-k">Midnight App</p><h1>${html(FEST.name)}</h1>
+    <p class="gate-m">${before ? `La app se abre el <b>${html(when)}</b>.` : 'El festival ha terminado. La app está cerrada.'}</p>
+    <form id="gateForm" autocomplete="on"><input type="password" id="gatePw" placeholder="Contraseña de organización" autocomplete="current-password" required>
+    <button type="submit">Entrar</button></form><p class="gate-e" id="gateErr" hidden></p></div>`;
+  document.body.appendChild(g);
+  g.querySelector('#gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = g.querySelector('#gateErr'), bt = g.querySelector('button');
+    bt.disabled = true; err.hidden = false; err.textContent = 'Comprobando…';
+    try { ADM_S = await unlock(g.querySelector('#gatePw').value); gatePaint(); }
+    catch (x) { err.textContent = x.code === 'pw' ? 'Contraseña incorrecta.' : 'No se ha podido entrar: ' + x.message; }
+    finally { bt.disabled = false; }
+  });
+}
 // Qui publica (mateixa contrasenya, però els canvis diuen d'on vénen)
 const whoNow = () => PROF || 'prod';
 const adminEl = document.getElementById('admin');
@@ -5186,6 +5239,7 @@ document.getElementById('pwForm').addEventListener('submit', async e => {
   go.disabled = true;
   try {
     token = await unlock(document.getElementById('pw').value);
+    ADM_S = token;
     document.getElementById('pw').value = '';
     msg.hidden = true;
     msg.hidden = false; msg.textContent = 'Cargando el último horario publicado…';
@@ -8713,7 +8767,7 @@ function liveParts() {
   return p.join(',');
 }
 async function livePull(force) {
-  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden) return;
+  if (!ONLINE || !PUSH || !PUSH.url || liveBusy || document.hidden || gated()) return;
   const p = liveParts();
   if (!p) return;
   liveBusy = true; liveAt = Date.now();
@@ -8745,6 +8799,8 @@ livePull();
 
 // APP_BEAT: el vigilant de la XARXA DE SEGURETAT. Només si tick() ha anat bé (si llança un error, no batega)
 setInterval(() => { if (!document.hidden) { tick(); APP_BEAT = Date.now(); } }, 1000);
+// App tancada fora de dates: es comprova en arrencar i cada 30 s (s'obre sola a les 0:00 del primer dia)
+gatePaint(); setInterval(gatePaint, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(true); pullChanges(); } });
 pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut

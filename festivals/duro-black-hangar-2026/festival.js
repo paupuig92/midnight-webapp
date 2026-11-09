@@ -9,6 +9,9 @@ const FEST = {
   banner: 'Black Hangar x Duro · 5 + 6 dic · Can Guitet, Montmeló',  // text alternatiu de img/banner.jpg
   bannerVideo: 'img/banner.mp4',  // la cúpula del cartell animat (black-hangar-cartell-anim.mov) que s'encén, 2 s en bucle; img/banner.jpg n'és el pòster
   date: [2026, 12, 5],          // primer dia
+  // App oberta per a l'equip (09-11): del primer a l'últim dia (inclosos). Fora d'aquestes dates, només l'admin.
+  // Sense «open»: 7 dies abans → l'endemà de l'últim dia
+  open: ['2026-11-30', '2026-12-08'],
   // Diversos dies (opcional): un nom per dia, seguits a partir de «date». Cada dia de «start» a «end». A l'horari, «2/11:00» = 2n dia
   days: ['Sábado 5', 'Domingo 6'],
   start: '11:00', end: '23:00',
