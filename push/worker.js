@@ -132,6 +132,17 @@ async function hmacHex(key, msg) {
 // Comparació que no depèn de quantes lletres coincideixen (es comparen els HMAC, no el text)
 const sameText = async (a, b) => (await hmacHex('cmp', String(a))) === (await hmacHex('cmp', String(b)));
 const sign = (env, exp) => hmacHex(env.SEND_KEY, `adm|${exp}|${env.ADMIN_PW}`);
+// Codi d'equip (09-11-2026, en Pau): un codi a part de la contrasenya d'admin, que NOMÉS obre l'app fora de dates
+// (no deixa editar res). Sessió «c.caducitat.signatura», 14 dies. Si es canvia el codi (APP_CODE), totes deixen de valer.
+const APP_SESSION = 14 * 24 * 3600000;
+const signApp = (env, exp) => hmacHex(env.SEND_KEY, `app|${exp}|${env.APP_CODE}`);
+async function okAppSession(env, s) {
+  const m = typeof s === 'string' && s.match(/^c\.(\d{10,16})\.([0-9a-f]{64})$/);
+  if (!m || !env.APP_CODE || !env.SEND_KEY) return false;
+  const exp = +m[1];
+  if (exp < Date.now() || exp > Date.now() + APP_SESSION + MIN) return false;
+  return sameText(m[2], await signApp(env, exp));
+}
 async function okSession(env, s) {
   const m = typeof s === 'string' && s.match(/^(\d{10,16})\.([0-9a-f]{64})$/);
   if (!m || !env.ADMIN_PW || !env.SEND_KEY) return false;
@@ -667,8 +678,22 @@ export default {
     };
     try {
       // Fora de les dates del festival: només l'admin
-      if (GATED.includes(url.pathname) && !isOpen() && !(await okSession(env, req.headers.get('x-s') || (url.pathname === '/incimg' && url.searchParams.get('s')))))  // una <img> no pot portar capçaleres: la foto, amb ?s=
-        return json({ error: 'closed', open: OPEN[0] }, 403, origin);
+      if (GATED.includes(url.pathname) && !isOpen()) {
+        const s = req.headers.get('x-s') || (url.pathname === '/incimg' && url.searchParams.get('s'));  // una <img> no pot portar capçaleres: la foto, amb ?s=
+        if (!(await okSession(env, s)) && !(await okAppSession(env, s))) return json({ error: 'closed', open: OPEN[0] }, 403, origin);
+      }
+      // Pantalla «La app se abre el…»: un sol camp. El codi d'equip dona una sessió que només obre l'app;
+      // la contrasenya d'admin, la sessió d'admin de sempre. Mateixos límits que el login d'admin (per IP + global)
+      if (req.method === 'POST' && url.pathname === '/gate/login') {
+        const b = await body(), pw = String(b.pw || '');
+        const rl = await callStore(env, '/rl', lim('login'));
+        if (rl.error) return json(rl, 429, origin);
+        const rlg = await callStore(env, '/rl', { _rl: ['login:all', 100, 60 * MIN] });
+        if (rlg.error) return json(rlg, 429, origin);
+        if (env.APP_CODE && await sameText(pw, env.APP_CODE)) { const exp = Date.now() + APP_SESSION; return json({ session: `c.${exp}.${await signApp(env, exp)}`, role: 'team', exp }, 200, origin); }
+        if (env.ADMIN_PW && await sameText(pw, env.ADMIN_PW)) { const exp = Date.now() + SESSION; return json({ session: `${exp}.${await sign(env, exp)}`, role: 'admin', exp }, 200, origin); }
+        return json({ error: 'pw' }, 401, origin);
+      }
       // Lot d'enviament (només el pot cridar el mateix servidor)
       if (req.method === 'POST' && url.pathname === '/send') {
         if (!env.SEND_KEY || !(await sameText(req.headers.get('x-send-key') || '', env.SEND_KEY))) return json({ error: 'forbidden' }, 403);

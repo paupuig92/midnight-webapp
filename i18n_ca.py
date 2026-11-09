@@ -27,9 +27,12 @@ PAIRS = [
     # --- App tancada fora de dates (09-11-2026) ---
     ("La app se abre el ", "L’app s’obre el "),
     ("El festival ha terminado. La app está cerrada.", "El festival ha acabat. L’app està tancada."),
-    ("Contraseña de organización", "Contrasenya d’organització"),
-    ("Contraseña incorrecta.", "Contrasenya incorrecta."),
-    ("No se ha podido entrar: ", "No s’ha pogut entrar: "),
+    ("Si tienes el código del equipo, puedes entrar antes.", "Si tens el codi de l’equip, hi pots entrar abans."),
+    ("Código de acceso", "Codi d’accés"),
+    ("Código incorrecto.", "Codi incorrecte."),
+    ("Demasiados intentos, espera unos minutos.", "Massa intents, espera uns minuts."),
+    ("No se ha podido entrar (servidor ", "No s’ha pogut entrar (servidor "),
+    ("Sin conexión: no se ha podido entrar.", "Sense connexió: no s’ha pogut entrar."),
 
     # --- Capçalera i estat ---
     ("MODO PRUEBA ✕ Salir", "MODE PROVA ✕ Sortir"),

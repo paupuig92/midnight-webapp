@@ -40,8 +40,19 @@ python3 -I -c 'import sys; sys.exit(0 if len(open(sys.argv[1], "rb").read().stri
   echo "Canvia-la amb:  read -rs 'p?Contrasenya nova: ' && print -rn -- \"\$p\" > $CONF/admin-password && chmod 600 $CONF/admin-password"
   exit 1; }
 
+# Codi d'equip (opcional, 09-11-2026): només obre l'app fora de dates, no deixa editar. Mínim 6 caràcters i diferent de la contrasenya d'admin.
+APPC=$CONF/app-code
+if [[ -s $APPC ]]; then
+  python3 -I -c 'import sys; a=open(sys.argv[1],"rb").read().strip(); b=open(sys.argv[2],"rb").read().strip(); sys.exit(0 if len(a) >= 6 and a != b else 1)' $APPC $CONF/admin-password || {
+    echo "ATURAT: el codi d'equip ha de tenir 6 caràcters o més i ha de ser DIFERENT de la contrasenya d'admin."
+    echo "Canvia'l amb:  read -rs 'c?Codi nou: ' && print -rn -- \"\$c\" > $APPC && chmod 600 $APPC"
+    exit 1; }
+else
+  APPC=""   # sense codi d'equip: fora de dates només hi entra l'admin
+fi
+
 # Codi (amb el cartell a dins) + enllaços. La clau privada va com a secret; mai surt per pantalla
-python3 -I - $CONF/vapid.json $KV $PRIV/meta.json $CONF/send-key ../docs/cartel.json worker.js $PRIV/worker.js $CONF/admin-password $EDTOK <<'PY'
+python3 -I - $CONF/vapid.json $KV $PRIV/meta.json $CONF/send-key ../docs/cartel.json worker.js $PRIV/worker.js $CONF/admin-password $EDTOK "$APPC" <<'PY'
 import sys, json
 v = json.load(open(sys.argv[1]))
 cartel = json.load(open(sys.argv[5]))
@@ -55,7 +66,8 @@ meta = {"main_module": "worker.js", "compatibility_date": "2024-09-23", "binding
   {"type": "secret_text", "name": "SEND_KEY", "text": open(sys.argv[4]).read().strip()},
   {"type": "secret_text", "name": "ADMIN_PW", "text": open(sys.argv[8], encoding="utf-8").read().strip()},
   {"type": "secret_text", "name": "GH_TOKEN", "text": open(sys.argv[9]).read().strip()},
-  {"type": "plain_text", "name": "VAPID_PUBLIC", "text": v["public"]}],
+  {"type": "plain_text", "name": "VAPID_PUBLIC", "text": v["public"]}]
+  + ([{"type": "secret_text", "name": "APP_CODE", "text": open(sys.argv[10], encoding="utf-8").read().strip()}] if sys.argv[10] else []),
   "migrations": {"new_tag": "v1", "new_sqlite_classes": ["Store"]}}
 open(sys.argv[3], "w").write(json.dumps(meta))
 json.dump({k: v for k, v in meta.items() if k != "migrations"}, open(sys.argv[3] + ".nomig", "w"))
