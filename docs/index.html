@@ -3913,7 +3913,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '09/11 17:30';
+const BUILD = '11/11 09:35';
 document.getElementById('appVer').textContent = BUILD ? `Versión del ${BUILD}.` : '';
 // Errores de la app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {
