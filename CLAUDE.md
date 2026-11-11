@@ -120,6 +120,12 @@ Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Gui
 - ✓ al mòbil + servidor d'avisos (`POST/GET /done`, taula `done`) → **Vista global** a Organización (persona × hora, verd fet / vermell tard).
 - Avisos de tasques: `subs.yo` + `subs.tb` (Configuración → «Avisarme de mis tareas»); el cron llegeix `tasks.json`. Cal `push/instala.sh` després de publicar el worker.
 
+## Repassada de l'11-11-2026 (fil «Revisar tota l'app amb Fable 5.2»)
+- **Tasques amb diversos dies**: cada fila de la taula d'Organización → Tareas té dia (`r.d`; el dona el títol «# Domingo» o el prefix «2/10:30»). Pestanyes de dia a la taula (`#tkDayTabs`, `tkDay`); «+ Añadir tarea» crea al dia que es mira. `tkFromRows` escriu «2/» només quan el dia de la fila no és el del títol de dalt. L'Excel porta columna **DÍA** en baixar i en pujar (`HD.d`; «Domingo 6», «Domingo», «Día 2» o «2»). Abans, baixar i pujar l'Excel passava les tasques del 2n dia al 1r.
+- `tkDayOf(t)` = dia d'una tasca (el muntatge des de les 6:00 ja és d'aquell dia). «Mis tareas» i «Vista global» escriuen «Domingo · 11 h» quan la tasca no és del dia d'avui (`grpOf`).
+- Modo pantalla: el dia surt petit a sobre de l'hora i només si no és avui (`lblTv`). Avís: «De Vídeo: …» (qui l'envia). Tiempo, fitxes d'Apps i Momentos ja tenen català (queden les instruccions llargues de Momentos i Timecode).
+- `prova/prova.js` té el pas `excel-dies` (només festivals de 2+ dies): baixa l'Excel, el puja i comprova que cap tasca canvia de dia.
+
 ## Fotos de perfil
 - Fetes el 05-11 al matí i **tretes el mateix dia** (en Pau: «ens les petem»): el worker fa `DROP TABLE av`; a l'app queda només la inicial dins la rodona (`faceIn`). No tornar-ho a proposar.
 

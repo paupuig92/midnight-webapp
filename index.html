@@ -726,6 +726,7 @@ body.tvon { overflow: hidden; }
 .tvnext ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; min-height: 0; }
 .tvnext li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); column-gap: .8em; align-items: baseline; padding: .55em 0; border-bottom: 1px solid var(--rule); }
 .tvnext li .tt { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
+.tvnext li .tt small { display: block; font-size: .62em; line-height: 1; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
 .tvnext li .tn { font: 900 1.25em/1.1 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
 .tvnext li .tw { grid-column: 2; font-size: .85em; font-weight: 700; color: var(--sc, var(--muted)); }
 .tvnext li .tw span { color: var(--muted); font-weight: 600; }
@@ -838,6 +839,7 @@ li.tk.free .tkt { color: var(--muted); }
 .tkrow input[type="time"] { font-variant-numeric: tabular-nums; padding: 0 4px; }
 .tkrow .tkx { min-height: 40px; padding: 0; font-size: 18px; color: var(--now); background: none; }
 .tkrow.bad { box-shadow: inset 3px 0 0 var(--now); }
+.tkdays { margin: 0 0 8px; } .tkdays small { opacity: .6; font-weight: 600; }
 .tkcols { padding: 0 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
 .tkcols span:nth-child(3) { display: none; }
 .tkimp .btn { min-height: 48px; margin: 0; }
@@ -1703,7 +1705,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 #gate button { font: inherit; font-weight: 700; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
 #gate .gate-e { margin: 0; font-size: 14px; color: var(--muted); }
 /* Usuari invisible perquè el Llavero desi la contrasenya (no pot ser display:none: Safari l'ignoraria) */
-.kc-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
+.kc-user, .pwrow input.kc-user { position: absolute; flex: none; width: 1px; min-width: 0; max-width: 1px; height: 1px; clip-path: inset(50%); opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
 </style>
 
 <div class="topedge" aria-hidden="true"></div>
@@ -1916,7 +1918,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (carreteras) y <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> (sin conexión). La ubicación es la misma que la de la pestaña Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
-    <h2 id="mcH">Multi<span>cámara</span></h2>
+    <h2 id="mcH">Multi<span>cams</span></h2>
     <p class="note">Toca una cámara para marcar si está montada o grabando y qué SSD lleva. Lo ve todo el equipo.</p>
     <div class="edtabs gdays" id="mcDays" role="tablist" aria-label="Día" hidden></div>
     <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenario" hidden></div>
@@ -2002,6 +2004,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <div class="tkimp"><label class="btn primary" for="tkFile">Subir Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><button type="button" class="btn" id="tkXls">Descargar Excel</button></div>
         <p class="note edhelp">Para cambiar muchas: «Descargar Excel», edítalo (Excel, Numbers o Google Sheets) y vuelve a «Subir Excel». También vale el Excel por pestañas, una por persona («LAIA», «MARTÍ / CALVINS»).</p>
         <div class="tkbar"><select id="tkWhoF" aria-label="Ver tareas de"></select><span class="note" id="tkCount"></span></div>
+        <div class="edtabs tkdays" id="tkDayTabs" role="tablist" aria-label="Día" hidden></div>
         <div class="tkcols" aria-hidden="true"><span>Hora</span><span>Hasta</span><span>Tarea</span><span>Quién</span></div>
         <div id="tkRows" class="tkrows"></div>
         <button type="button" class="btn" id="tkAdd">+ Añadir tarea</button>
@@ -2781,6 +2784,8 @@ const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
 // Amb diversos dies, davant el nom curt del dia («Domingo 14:00»)
 // (el dia de calendari: les 00:30 de la nit de dissabte ja són diumenge)
+// Modo pantalla: «Dom» petit a sobre de l'hora, només si no és el dia d'ara (al costat trepitjava el nom de l'artista)
+const lblTv = (a, ref) => NDAYS > 1 && fmtD.format(a) !== fmtD.format(ref) ? `<small>${html(lblD(a).split(' ')[0].slice(0, 3))}</small>${lbl(a)}` : lbl(a);
 const lblD = t => {
   if (NDAYS < 2) return lbl(t);
   const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
@@ -4021,8 +4026,8 @@ function tvRender(t) {
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
   const up = [...ALL, ...GONE].filter(x => x.a > t && (tvStage ? x.s.id === tvStage : inNext(x))).sort((x, y) => x.a - y.a).slice(0, 12);
-  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblD(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
-    : `<li><span class="tt">${lblD(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
+  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblTv(x.a, t)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancelado</span></span></li>`
+    : `<li><span class="tt">${lblTv(x.a, t)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Cambio</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No quedan más actuaciones.</li>';
   // Només els que hi caben sencers (en una tele no es pot fer scroll)
   const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
@@ -4898,7 +4903,7 @@ const CKEY = FEST.key + '-changes-v1';
 let stamp = '', notice = '', noticeBy = '', noticeById = '', noticeTeam = '';
 // Un aviso pot ser només per a un equip: els altres no el veuen (ni la notificació)
 const noticeMine = () => notice && (!noticeTeam || noticeTeam === PROF) ? notice : '';
-const noticeHead = () => `${html(noticeBy || 'Organización')}${noticeTeam ? ` <i class="nteam">· para ${html(WHO_L[noticeTeam])}</i>` : ''}`;
+const noticeHead = () => `${noticeBy ? 'De ' : ''}${html(noticeBy || 'Organización')}${noticeTeam ? ` <i class="nteam">· para ${html(WHO_L[noticeTeam])}</i>` : ''}`;
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
 const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}|${x.note}`).join('~');
@@ -4920,7 +4925,7 @@ function paintFeed() {
   const newest = Math.max(0, ...hist.map(f => f.t));
   const open = !!hist.length && (feedAll || newest >= feedSeen);
   const list = open ? (feedAll ? hist : hist.slice(0, 3)) : [];
-  const pin = mine ? `<span class="fpt">${ICO.pin}Aviso${noticeTeam ? ' para ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${html(noticeBy || 'Organización')}:</b> ${html(mine)}</span>` : '';
+  const pin = mine ? `<span class="fpt">${ICO.pin}Aviso${noticeTeam ? ' para ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${noticeBy ? 'De ' : ''}${html(noticeBy || 'Organización')}:</b> ${html(mine)}</span>` : '';
   const key = [pin, list.map(f => f.t + f.m).join(), open, feedAll, hist.length].join('|');
   if (key === feedKey) return;
   const was = el.hidden;
@@ -5165,7 +5170,8 @@ const edBase = r => { const l = baseRaw && baseRaw[edStage]; const o = Array.isA
 const lblOf = c => (times().find(([k]) => k === c) || [c, c])[1];
 function edHead(r, i) {
   const fx = normFx(r.fx);
-  return `<span class="edt">${lblOf(r.a)}–${lblOf(r.b)}</span><span class="edn">${r.n ? html(r.n) : '<i>Sin nombre</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sin publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
+  const la = String(lblOf(r.a)), lb = String(lblOf(r.b)), sameDay = NDAYS > 1 && /\s/.test(la) && la.split(' ')[0] === lb.split(' ')[0];
+  return `<span class="edt">${la}–${sameDay ? lb.split(' ').slice(1).join(' ') : lb}</span><span class="edn">${r.n ? html(r.n) : '<i>Sin nombre</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sin publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
 }
 function edFx(r) {
   const fx = normFx(r.fx), own = fx.filter(f => !FX.includes(f));
@@ -5611,6 +5617,7 @@ function parseTasks(src, people) {
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (NDAYS > 1 && c.length > 4 && !tmNorm(c[0]) && (!c[0] || headDay(c[0]) >= 0)) { if (c[0]) ld = headDay(c[0]); c.shift(); }  // enganxat de l'Excel amb la columna DÍA
       if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [ta, tb] = c[0].split(/\s*[-–]\s*/);
       text = c[1] || '';
@@ -5685,7 +5692,10 @@ let planAll = false, planLate = false, planKey = '';
 const taskOn = () => !!PROF;
 const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
 const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
-const grpOf = t => t === null ? 'Durante el día' : `${hourOf(t)} h`;
+// Amb diversos dies: el dia d'una tasca (el muntatge del matí, des de les 6:00, ja és d'aquell dia) i el títol amb el dia si no és el d'avui
+const tkDayOf = t => DAYS.reduce((a, x) => t >= x.t0 - Math.max(0, START_M - 6 * 60) * MIN ? x.d : a, 0);
+const dayWord = d => ((DAYS[d] || {}).name || `Día ${d + 1}`).split(' ')[0];
+const grpOf = t => t === null ? 'Durante el día' : `${NDAYS > 1 && tkDayOf(t) !== tkDayOf(now()) ? dayWord(tkDayOf(t)) + ' · ' : ''}${hourOf(t)} h`;
 const tkWhen = x => x.a === null ? '<span class="tkt"></span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
 // «Cue»: tasca de menys de 5 min (una cançó d'un setlist, un tall): quan passa, passa (no va «tarde», no avisa, no compta)
 const tkCue = x => x.a !== null && x.b > x.a && x.b - x.a < 5 * MIN;
@@ -6090,14 +6100,18 @@ let tkRowsData = [];
 const hhmm = tmNorm;
 function tkToRows(src, ppl = parseTeam(tkTeam.value).people) {
   const rows = [], TOK = /@([^\s@,;]+)/g;
-  let h = '', group = [];
+  let h = '', group = [], tday = 0;
   for (let line of String(src).split('\n')) {
     line = line.trim();
     if (!line) continue;
-    if (line.startsWith('#')) { h = line; continue; }  // com parseTasks: el «@grup» de dalt continua
-    let a = '', b = '', t = '', who = [], ok = true;
+    if (line.startsWith('#')) { h = line; if (headDay(line) >= 0) tday = headDay(line); continue; }  // com parseTasks: el «@grup» de dalt continua
+    let a = '', b = '', t = '', who = [], ok = true, d = tday;
+    // «2/10:30 Tasca» = dia 2 (com parseTasks)
+    const dm = NDAYS > 1 && line.match(/^([1-9])\/(?=\d)/);
+    if (dm && +dm[1] <= NDAYS) { d = +dm[1] - 1; line = line.slice(dm[0].length); }
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (NDAYS > 1 && c.length > 4 && !tmNorm(c[0]) && (!c[0] || headDay(c[0]) >= 0)) { if (c[0]) d = headDay(c[0]); c.shift(); }  // enganxat de l'Excel amb la columna DÍA
       if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [a, b = ''] = c[0].split(/\s*[-–]\s*/);
       t = c[1] || ''; who = whoToks(c.slice(2).join(', '), ppl);
@@ -6114,22 +6128,24 @@ function tkToRows(src, ppl = parseTeam(tkTeam.value).people) {
       }
     }
     // El que parseTasks no entén (o el final que no entén) es queda tal com està i en vermell: si no, en tocar qualsevol fila es tornava una tasca «durante el día» i l'avís desapareixia
-    if (!ok || !t || (a && !hhmm(a)) || (b && !hhmm(b))) { rows.push({ h, a: '', b: '', t: line, w: '', raw: true }); continue; }
-    rows.push({ h, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
+    if (!ok || !t || (a && !hhmm(a)) || (b && !hhmm(b))) { rows.push({ h, d, a: '', b: '', t: (dm && d !== tday ? dm[0] : '') + line, w: '', raw: true }); continue; }
+    rows.push({ h, d, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
   }
   return rows;
 }
 function tkFromRows() {
   const out = [], ppl = parseTeam(tkTeam.value).people;
+  let cd = 0;  // el dia que entendrà parseTasks en aquest punt del text
   for (const h of [...new Set(tkRowsData.map(r => r.h))]) {
     if (h) out.push('', h);
+    if (headDay(h) >= 0) cd = headDay(h);
     for (const r of tkRowsData.filter(r => r.h === h)) {
       // Línia que no s'entenia: tal qual (continua l'avís) fins que se li posa hora; llavors els «@» del text compten
       if (r.raw && !r.a) { const l = r.t.replace(/\n/g, ' ').trim(); if (l) out.push(l); continue; }
       const t = r.t.replace(r.raw ? /[\n\t]/g : /[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
       if (!t) continue;
       const w = whoToks(r.w, ppl).map(x => '@' + x).join(' ');
-      out.push(`${r.a ? r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+      out.push(`${r.a ? (NDAYS > 1 && (r.d || 0) !== cd ? `${(r.d || 0) + 1}/` : '') + r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
     }
   }
   return out.join('\n').trim();
@@ -6141,10 +6157,12 @@ function tkRowsRender() {
   tkWhoF.innerHTML = `<option value="">Todas las tareas</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
   tkWhoF.value = ppl.some(p => p.k === f) ? f : '';
   const fk = tkWhoF.value;
-  const hd = {}; let cd = 0;
-  for (const h of new Set(tkRowsData.map(r => r.h))) { if (headDay(h) >= 0) cd = headDay(h); hd[h] = cd; }  // el dia de cada títol (com parseTasks)
-  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, hd[r.h]) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
-  const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
+  // Diversos dies: una pestanya per dia (les tasques sense hora surten a totes). Abans sortien barrejats i sense dir de quin dia eren
+  const dt = document.getElementById('tkDayTabs');
+  dt.hidden = NDAYS < 2;
+  if (NDAYS > 1) dt.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-tkday="${x.d}" aria-selected="${x.d === tkDay}">${html(x.name || `Día ${x.d + 1}`)} <small>${tkRowsData.filter(r => r.a && (r.d || 0) === x.d).length}</small></button>`).join('');
+  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, r.d || 0) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
+  const idx = tkRowsData.map((r, i) => i).filter(i => { const r = tkRowsData[i]; return (NDAYS < 2 || !r.a || (r.d || 0) === tkDay) && (!fk || tkRowWho(r, ppl).has(fk) || r.nw); }).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
   tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = tkRowBad(r, ppl); return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}"${r.raw && !r.a ? ' title="No se entiende: ponle hora o bórrala"' : ''}>
     <input type="time" class="tka" value="${r.a}" aria-label="Hora (vacía = durante el día)">
     <input type="time" class="tkb" value="${r.b}" aria-label="Hasta (opcional)">
@@ -6154,6 +6172,8 @@ function tkRowsRender() {
   for (const t of tkRowsEl.querySelectorAll('.tkt')) tkGrow(t);
   document.getElementById('tkCount').textContent = fk ? `${idx.length} de ${tkRowsData.filter(r => r.t).length}` : '';
 }
+let tkDay = NDAYS > 1 ? tkDayOf(now()) : 0;
+document.getElementById('tkDayTabs').addEventListener('click', e => { const b = e.target.closest('[data-tkday]'); if (!b) return; tkDay = +b.dataset.tkday; for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
 const tkGrow = t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };  // el text llarg es veu sencer
 function tkRowsSync() { tkRowsData = tkToRows(tkList.value); tkRowsRender(); }
 function tkRowsWrite() { tkList.value = tkFromRows(); tkDraft(); tkPreview(); }
@@ -6162,7 +6182,7 @@ tkRowsEl.addEventListener('input', e => {
   if (!row) return;
   const r = tkRowsData[+row.dataset.i], c = e.target.classList;
   if (c.contains('tkt')) tkGrow(e.target);
-  if (c.contains('tka')) r.a = e.target.value; else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
+  if (c.contains('tka')) { if (!r.a && e.target.value) r.d = tkDay; r.a = e.target.value; } else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
   tkRowsWrite();
   row.classList.toggle('bad', tkRowBad(r, parseTeam(tkTeam.value).people));
 });
@@ -6175,7 +6195,7 @@ tkRowsEl.addEventListener('click', e => {
 tkWhoF.addEventListener('change', () => { for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
 document.getElementById('tkAdd').addEventListener('click', () => {
   const p = person(tkWhoF.value);
-  tkRowsData.push({ h: '', a: '', b: '', t: '', w: p ? p.n : '', nw: true });
+  tkRowsData.push({ h: '', d: tkDay, a: '', b: '', t: '', w: p ? p.n : '', nw: true });
   tkRowsRender();
   tkRowsEl.querySelector(`[data-i="${tkRowsData.length - 1}"] .tkt`)?.focus();
 });
@@ -6183,9 +6203,11 @@ document.getElementById('tkAdd').addEventListener('click', () => {
 document.getElementById('tkXls').addEventListener('click', async () => {
   try {
     const X = await loadXlsx();
-    const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a) : -Infinity) - (q.a ? taskTime(q.a) : -Infinity));
-    const ws = X.utils.aoa_to_sheet([['HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [r.raw && !r.a ? '¿?' : r.a, r.b, r.t.replace(/\t/g, ' '), r.w])]);
-    ws['!cols'] = [{ wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
+    const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a, p.d || 0) : -Infinity) - (q.a ? taskTime(q.a, q.d || 0) : -Infinity));
+    // Diversos dies: una columna DÍA (abans, en baixar i tornar a pujar, les tasques del segon dia passaven al primer)
+    const md = NDAYS > 1, dn = r => r.a ? (DAYS[r.d || 0] || {}).name || `Día ${(r.d || 0) + 1}` : '';
+    const ws = X.utils.aoa_to_sheet([[...(md ? ['DÍA'] : []), 'HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [...(md ? [dn(r)] : []), r.raw && !r.a ? '¿?' : r.a, r.b, r.t.replace(/\t/g, ' '), r.w])]);
+    ws['!cols'] = [...(md ? [{ wch: 12 }] : []), { wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
     const wb = X.utils.book_new();
     X.utils.book_append_sheet(wb, ws, 'TAREAS');
     X.writeFile(wb, `tareas-${FEST.id}.xlsx`);
@@ -6298,7 +6320,7 @@ function fuzzyTime(s) {
 }
 const isBool = v => /^(true|false|verdadero|falso|vertader|fals)$/i.test(String(v).trim());
 // Títols de columna: «HORA», «HORA INICIO», «INICIO», «HORA:», «FIN», «HASTA», «RESPONSABLE», «QUIÉN/QUI», «DESCRIPCIÓN»… (també en català)
-const HD = { a: ['hora', 'horainicio', 'inicio', 'horainici', 'inici', 'desde', 'comienzo', 'start', 'time'], b: ['hasta', 'fins', 'fin', 'fi', 'final', 'horafin', 'horafinal', 'horafi', 'end'], t: ['tarea', 'tareas', 'tasca', 'tasques', 'descripcion', 'descripcio', 'actividad', 'activitat', 'task'], w: ['quien', 'qui', 'quienes', 'responsable', 'responsables', 'persona', 'personas', 'encargado', 'who'] };
+const HD = { d: ['dia', 'day', 'jornada'], a: ['hora', 'horainicio', 'inicio', 'horainici', 'inici', 'desde', 'comienzo', 'start', 'time'], b: ['hasta', 'fins', 'fin', 'fi', 'final', 'horafin', 'horafinal', 'horafi', 'end'], t: ['tarea', 'tareas', 'tasca', 'tasques', 'descripcion', 'descripcio', 'actividad', 'activitat', 'task'], w: ['quien', 'qui', 'quienes', 'responsable', 'responsables', 'persona', 'personas', 'encargado', 'who'] };
 const isHd = (v, k) => String(v || '').split(/[\/|]/).some(x => HD[k].includes(nk(x)));
 function sheetTasks(name, rows, team) {
   const parts = name.split(/\s*[\/,&+_]\s*|\s+-\s+|\s+(?:i|y)\s+/).map(x => x.trim()).filter(Boolean);
@@ -6339,10 +6361,12 @@ function fullSheet(rows, ppl) {
   const hi = rows.findIndex(r => cells(r).some(v => isHd(v, 'w')));
   if (hi < 0) return null;
   const hd = cells(rows[hi]), col = k => hd.findIndex(v => isHd(v, k));
-  const ca = col('a'), cb = col('b'), ct = col('t'), cw = col('w');
+  const ca = col('a'), cb = col('b'), ct = col('t'), cw = col('w'), cdy = NDAYS > 1 ? col('d') : -1;
   if (ct < 0) return null;
   const out = [];
   let up = null, inh = 0;
+  // Columna DÍA: «Domingo 6», «Domingo», «Día 2» o «2». Buida o que no s'entén = primer dia
+  const dpx = v => { const n = String(v || '').trim().match(/^(\d)$/), d = n && +n[1] >= 1 && +n[1] <= NDAYS ? +n[1] - 1 : headDay(String(v || '')); return d > 0 ? `${d + 1}/` : ''; };
   for (const raw of rows.slice(hi + 1)) {
     const r = cells(raw), t = (r[ct] || '').replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
     if (!t) { up = null; continue; }
@@ -6354,9 +6378,10 @@ function fullSheet(rows, ppl) {
     const fb = a && bv ? fuzzyTime(bv) : null, b = a ? (bv ? (fb && fb.a ? hhmm(fb.a) : '') : ft.b ? hhmm(ft.b) : '') : '';
     const wr = cw >= 0 ? r[cw] : '', w = whoToks(wr, ppl).map(x => '@' + x).join(' ');
     // Una hora (o un final) que no s'entén no es converteix en «durante el día»: la fila queda tal qual i en vermell
+    const dp = cdy >= 0 && a ? dpx(r[cdy]) : '';
     if (hv && !a) out.push(`${hv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
-    else if (bv && !b) out.push(`${a}-${bv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
-    else out.push(`${a ? a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+    else if (bv && !b) out.push(`${dp}${a}-${bv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
+    else out.push(`${a ? dp + a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
   }
   out.inh = inh;
   return out;
@@ -6493,7 +6518,7 @@ function holaPaint() {
     return;
   }
   document.getElementById('holaT').textContent = '¿Quién eres?';
-  document.getElementById('holaSub').textContent = 'Elige tu departamento y toca tu cara.';
+  document.getElementById('holaSub').textContent = 'Elige tu departamento y toca tu nombre.';
   const depts = [...TEAMS, ...(ppl.some(p => !p.e) ? [['-', 'Otros']] : [])].map(([e, t]) => [e, t, ppl.filter(p => (p.e || '-') === e)]);
   if (!depts.some(d => d[0] === holaDept)) holaDept = PROF && depts.some(d => d[0] === PROF) ? PROF : (depts.find(d => d[2].length) || depts[0])[0];
   const [dv, dt, dp] = depts.find(d => d[0] === holaDept);
@@ -7160,7 +7185,7 @@ async function mcLog() {
     const names = {};
     for (const [, c] of mcAll()) { names[c.id] = c.pos || c.cam; for (let d = 0; d < NDAYS; d++) names[c.id + '-d' + (d + 1)] = (c.pos || c.cam) + (NDAYS > 1 ? ' · ' + (DAYS[d].name || `Día ${d + 1}`) : ''); }
     const log = ((await r.json()).log || []).filter(x => names[x.id]);
-    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sin montar')}</b>${x.ssd ? ` <small>· SSD ${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Alguien')}</span></li>`).join('') : '<li class="note">Aún no hay cambios.</li>';
+    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sin montar')}</b>${x.ssd ? ` <small>· ${/^\s*ssd\b/i.test(x.ssd) ? '' : 'SSD '}${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Alguien')}</span></li>`).join('') : '<li class="note">Aún no hay cambios.</li>';
     btn.textContent = 'Actualizar historial';
   } catch (e) { box.innerHTML = '<li class="note">Sin conexión: no se ha podido cargar.</li>'; }
   btn.disabled = false;
@@ -7663,6 +7688,7 @@ async function mkFlush() {
   for (const m of mkMine.filter(m => !m.sent)) { const v = m.v; if (await mkSend(m)) { if (m.v === v) m.sent = true; } else break; }
   for (const id of mkDel.slice()) if (await mkSend({ id, del: 1 })) mkDel = mkDel.filter(x => x !== id); else break;
   mkSave(); mkPaint();
+  if (!document.getElementById('mkList').hidden) mkRenderList();  // si no, «1 sin enviar» es quedava escrit fins al minut següent
 }
 async function mkPull() {
   if (!PUSH || !PUSH.url || mkPulling) return;

@@ -79,6 +79,27 @@ const srv = http.createServer((q, r) => {
   // Timecode i Momentos: s'obren a sobre (com en tocar la fitxa) i es tanquen
   await step('app-timecode', async () => { await tab('apps'); await p.click('#apps [data-app="tc"]', { timeout: 3000 }); await p.waitForTimeout(600); await p.evaluate(() => safe('timecode', () => tcClose())); });
   await step('app-momentos', async () => { await tab('apps'); await p.click('#apps [data-app="mk"]', { timeout: 3000 }); await p.waitForTimeout(600); await p.evaluate(() => safe('momentos', () => mkCloseList())); });
+  // (11-11-2026) Festival de diversos dies: baixar l'Excel de tasques i tornar-lo a pujar no pot canviar cap tasca de dia
+  // (abans les del segon dia passaven al primer). També la taula de files: afegir una tasca al dia 2 s'hi queda
+  await step('excel-dies', async () => {
+    if (!(await p.evaluate(() => NDAYS > 1))) return;
+    p.on('dialog', d => d.accept());
+    const dies = () => p.evaluate(() => JSON.stringify(parseTasks(tkList.value, parseTeam(tkTeam.value).people).list.map(x => [x.t, x.a === null ? -1 : tkDayOf(x.a), x.a]).sort()));
+    await p.evaluate(() => { tkTeam.value = 'Ana: vídeo\nBea: foto'; tkList.value = '# ' + DAYS[0].name + '\n10:00 Montar @Ana\n18:00-18:30 Baterías @Ana @Bea\n- Acreditaciones @Bea\n# ' + DAYS[1].name + '\n10:00 Montar @Ana\n2/12:30 Puertas @Bea\n1/13:00 Comida @todos'; tkRowsSync(); });
+    const abans = await dies();
+    if ((JSON.parse(abans).filter(x => x[1] === 1).length) !== 2) throw new Error('la llista de prova no té 2 tasques al dia 2: ' + abans);
+    if (await p.$('#tkRows .tkrow.bad')) throw new Error('la taula marca en vermell una tasca que sí que s\'entén («2/12:30»)');
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 8000 }), p.evaluate(() => document.getElementById('tkXls').click())]);
+    const f = path.join(require('os').tmpdir(), 'prova-tareas-' + process.pid + '.xlsx'); await dl.saveAs(f);
+    await p.setInputFiles('#tkFile', f); await p.waitForTimeout(1200); fs.unlinkSync(f);
+    const despres = await dies();
+    if (abans !== despres) throw new Error('l\'Excel canvia tasques de dia o d\'hora:\n  abans   ' + abans + '\n  després ' + despres);
+    // la taula: una tasca nova al dia 2
+    await p.evaluate(() => { document.querySelector('#tkDayTabs [data-tkday="1"]').click(); document.getElementById('tkAdd').click(); const r = document.querySelector('#tkRows .tkrow:last-child'); const set = (c, v) => { const e = r.querySelector(c); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); }; set('.tkt', 'Nueva del día 2'); set('.tkw', 'Ana'); set('.tka', '16:00'); });
+    const nova = JSON.parse(await dies()).find(x => x[0] === 'Nueva del día 2');
+    if (!nova || nova[1] !== 1) throw new Error('una tasca afegida a la pestanya del dia 2 no queda al dia 2: ' + JSON.stringify(nova));
+    await p.evaluate(() => { tkTeam.value = ''; tkList.value = ''; tkRowsSync(); });
+  });
   await step('9-final', async () => {
     const a = await clock(); await p.waitForTimeout(1200);
     if (a === await clock()) throw new Error('el rellotge s\'ha aturat');
