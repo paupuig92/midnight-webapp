@@ -750,6 +750,7 @@ body.tvon { overflow: hidden; }
 .tvnext ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; min-height: 0; }
 .tvnext li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); column-gap: .8em; align-items: baseline; padding: .55em 0; border-bottom: 1px solid var(--rule); }
 .tvnext li .tt { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
+.tvnext li .tt small { display: block; font-size: .62em; line-height: 1; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
 .tvnext li .tn { font: 900 1.25em/1.1 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
 .tvnext li .tw { grid-column: 2; font-size: .85em; font-weight: 700; color: var(--sc, var(--muted)); }
 .tvnext li .tw span { color: var(--muted); font-weight: 600; }
@@ -862,6 +863,7 @@ li.tk.free .tkt { color: var(--muted); }
 .tkrow input[type="time"] { font-variant-numeric: tabular-nums; padding: 0 4px; }
 .tkrow .tkx { min-height: 40px; padding: 0; font-size: 18px; color: var(--now); background: none; }
 .tkrow.bad { box-shadow: inset 3px 0 0 var(--now); }
+.tkdays { margin: 0 0 8px; } .tkdays small { opacity: .6; font-weight: 600; }
 .tkcols { padding: 0 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
 .tkcols span:nth-child(3) { display: none; }
 .tkimp .btn { min-height: 48px; margin: 0; }
@@ -1485,7 +1487,7 @@ li.tk.ck .tkt { opacity: .45; transition: opacity .3s; }
 .ptr.go svg { animation: ptrspin .8s linear infinite; }
 @keyframes ptrspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { li.tk.ck .tkchk svg path, li.tk.ck .tkn, .ptr.go svg { animation: none; } li.tk.ck .tkn { background-size: 100% 2px; } }
-/* ==== MOMENTOS (04-11-2026): botó «Marcar momento» dins de l'app Momentos (des del 05-11; abans flotava a Horarios), marques per a l'edició ==== */
+/* ==== MOMENTOS (04-11-2026): botó «Marcar moment» dins de l'app Momentos (des del 05-11; abans flotava a Horarios), marques per a l'edició ==== */
 .mkfab { position: fixed; z-index: 12; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0;
   background: var(--accent); color: var(--accent-ink); font: 800 var(--fs-m)/1 var(--body); letter-spacing: .01em; cursor: pointer;
@@ -1727,7 +1729,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
 #gate button { font: inherit; font-weight: 700; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
 #gate .gate-e { margin: 0; font-size: 14px; color: var(--muted); }
 /* Usuari invisible perquè el Llavero desi la contrasenya (no pot ser display:none: Safari l'ignoraria) */
-.kc-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
+.kc-user, .pwrow input.kc-user { position: absolute; flex: none; width: 1px; min-width: 0; max-width: 1px; height: 1px; clip-path: inset(50%); opacity: 0; pointer-events: none; overflow: hidden; border: 0; padding: 0; }
 </style>
 <style data-fest>/* colors i lletres del festival */
 @font-face{font-family:"Nimbus";src:url("img/duro-black-hangar-2026/NimbusSanL-Regu.woff2");font-weight:300 500;font-display:swap}
@@ -1901,17 +1903,17 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   <section id="apps" aria-labelledby="appsH">
     <div class="aphead"><h2 id="appsH">Apps</h2><span class="apsub" id="apSub"></span></div>
     <div class="appgrid">
-      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real con fotogramas, destello y pitido para sincronizar cámaras</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile w tc" data-app="tc" style="--ac:#f5f5f5"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 10h17v9.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5z M3.2 9.6l-.6-3a1.5 1.5 0 011.2-1.8l13.6-2.6a1.5 1.5 0 011.8 1.2l.6 3z M7.5 4.6l2.6 4 M12.5 3.6l2.6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Timecode</b><span class="big mono" id="ap-tc-big">00:00:00<small>:00</small></span><small>Hora real amb fotogrames, flaix i xiulet per sincronitzar càmeres</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-tab="tiempo" id="tabTiempo" style="--ac:#4b9bff"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 18.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 11a3.8 3.8 0 00.6 7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Tiempo</b><span class="big" id="ap-tiempo-big">—</span><small id="ap-tiempo">Lluvia: radar y previsión</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-tab="sol" id="tabSol" style="--ac:#f2a93b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>Sol</b><span class="big" id="ap-sol-big">—</span><small id="ap-sol">Luz, hora dorada y brújula</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button type="button" class="apptile" data-app="mk" style="--ac:#ffd23b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Momentos</b><span class="big" id="ap-mk-big">0</span><small id="ap-mk">Marcas para la edición</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button type="button" class="apptile" data-app="mk" style="--ac:#ffd23b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Momentos</b><span class="big" id="ap-mk-big">0</span><small id="ap-mk">Marques per a l’edició</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile" data-tab="multi" id="tabMulti" hidden style="--ac:#ff3b3b"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 10.5l5.5-3v9l-5.5-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Multicams</b><span class="big" id="ap-multi-big">—</span><small id="ap-multi">Dónde va cada cámara y quién graba</small><span class="dots" id="ap-multi-dots" aria-hidden="true"></span><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
       <button type="button" class="apptile w" data-tab="mapa" id="tabMapa" hidden style="--ac:#3ddc97"><span class="ai"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4.5L3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z M9 4.5v13M15 6.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><b>Mapa</b><span class="big" id="ap-mapa-big">GPS</span><small>El recinto y dónde estás</small><span class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
     </div>
   </section>
   <section id="tiempo" aria-labelledby="tqH">
     <div class="tqhero">
-      <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de lluvia y nubes alrededor del festival">
+      <div class="tqmap" id="tqMap" role="img" aria-label="Mapa de pluja i núvols al voltant del festival">
         <canvas class="ly" id="tqBase" aria-hidden="true"></canvas>
         <div class="ly" id="tqOsm" aria-hidden="true"></div>
         <canvas class="ly tqheat" id="tqHeat" aria-hidden="true"></canvas>
@@ -1920,37 +1922,37 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <div class="ly tqwin" id="tqWin" hidden></div>
         <div class="tqtop"><span class="tqpill"><b id="tqPillT">—</b><span id="tqPillN"></span></span></div>
         <div class="tqlayers" id="tqLayers" role="tablist" aria-label="Capa">
-          <button type="button" role="tab" data-ly="radar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 9a3.8 3.8 0 00.6 7.5zM9 19l-1 2M13 19l-1 2M17 19l-1 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Lluvia</span></button>
-          <button type="button" role="tab" data-ly="clouds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 18h11a3.8 3.8 0 00.5-7.6A5.5 5.5 0 007.4 9.8 4.1 4.1 0 006.5 18z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.2A4 4 0 0121 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Nubes</span></button>
+          <button type="button" role="tab" data-ly="radar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16.5h10.2a4.3 4.3 0 00.6-8.6A6 6 0 006.4 9a3.8 3.8 0 00.6 7.5zM9 19l-1 2M13 19l-1 2M17 19l-1 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Pluja</span></button>
+          <button type="button" role="tab" data-ly="clouds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 18h11a3.8 3.8 0 00.5-7.6A5.5 5.5 0 007.4 9.8 4.1 4.1 0 006.5 18z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 6.2A4 4 0 0121 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Núvols</span></button>
           <button type="button" role="tab" data-ly="windy"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Windy</span></button>
         </div>
         <button type="button" class="tqnow" id="tqNowBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ara</button>
-        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Acercar">+</button><button type="button" id="tqZout" aria-label="Alejar">−</button><button type="button" id="tqRoads" class="tqroads" aria-label="Carreteras" aria-pressed="true" title="Carreteras"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20L9 4h6l5 16M12 6v2.5M12 11v2.5M12 16v2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="tqzoom"><button type="button" id="tqZin" aria-label="Apropar">+</button><button type="button" id="tqZout" aria-label="Allunyar">−</button><button type="button" id="tqRoads" class="tqroads" aria-label="Carreteres" aria-pressed="true" title="Carreteres"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20L9 4h6l5 16M12 6v2.5M12 11v2.5M12 16v2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
         <span class="tqosmattr" id="tqOsmAttr">© OpenStreetMap</span>
         <div class="tqleg" id="tqLeg" aria-hidden="true"></div>
         <div class="tqbar" id="tqBar">
-          <button type="button" id="tqPlay" aria-label="Reproducir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+          <button type="button" id="tqPlay" aria-label="Reproduir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
           <div class="tqtl"><input type="range" id="tqSlide" min="0" max="0" value="0" aria-label="Hora"><div class="tqticks" id="tqTicks" aria-hidden="true"></div></div>
           <span class="tqts" id="tqTs"></span>
         </div>
         <p class="msg" id="tqMsg" hidden></p>
       </div>
     </div>
-    <h2 id="tqH">El tiempo en <span id="tqFestN"></span></h2>
-    <p class="note tqsrc" id="tqSrc">Cargando la previsión…</p>
+    <h2 id="tqH">El temps a <span id="tqFestN"></span></h2>
+    <p class="note tqsrc" id="tqSrc">Carregant la previsió…</p>
     <div class="tqlive" id="tqLive" hidden></div>
     <div class="tqpl" id="tqPl" hidden></div>
     <div class="tqnow" id="tqNow" hidden></div>
     <ul class="tqal" id="tqAl"></ul>
-    <h3>Previsión por horas</h3>
+    <h3>Previsió per hores</h3>
     <div class="tqtab" id="tqTab"></div>
-    <h3>Días del festival</h3>
+    <h3>Dies del festival</h3>
     <ul class="tqfest" id="tqFest"></ul>
-    <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Abrir en Windy ↗</a>
-    <p class="note tqattr">Previsión: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: lluvia del modelo más fino que cubre el lugar (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (carreteras) y <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> (sin conexión). La ubicación es la misma que la de la pestaña Sol.</p>
+    <a class="btn tqwindy" id="tqWindy" href="https://www.windy.com/" target="_blank" rel="noopener">Obrir a Windy ↗</a>
+    <p class="note tqattr">Previsió: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>: pluja del model més fi que cobreix el lloc (AROME 1,3 km de Météo-France, HARMONIE, ICON, ECMWF…) · Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> · Capa Windy: <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a> · Mapa: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> (carreteras) y <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> (sense connexió). La ubicació és la mateixa que la de la pestanya Sol.</p>
   </section>
   <section id="multi" hidden aria-labelledby="mcH">
-    <h2 id="mcH">Multi<span>càmera</span></h2>
+    <h2 id="mcH">Multi<span>cams</span></h2>
     <p class="note">Toca una càmera per marcar si està muntada o gravant i quin SSD porta. Ho veu tot l’equip.</p>
     <div class="edtabs gdays" id="mcDays" role="tablist" aria-label="Dia" hidden></div>
     <div class="edtabs" id="mcChips" role="tablist" aria-label="Escenari" hidden></div>
@@ -2036,6 +2038,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
         <div class="tkimp"><label class="btn primary" for="tkFile">Pujar Excel</label><input type="file" id="tkFile" accept=".xlsx,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><button type="button" class="btn" id="tkXls">Baixar Excel</button></div>
         <p class="note edhelp">Per canviar-ne moltes: «Baixar Excel», edita’l (Excel, Numbers o Google Sheets) i torna a «Pujar Excel». També val l’Excel per pestanyes, una per persona («LAIA», «MARTÍ / CALVINS»).</p>
         <div class="tkbar"><select id="tkWhoF" aria-label="Veure les tasques de"></select><span class="note" id="tkCount"></span></div>
+        <div class="edtabs tkdays" id="tkDayTabs" role="tablist" aria-label="Dia" hidden></div>
         <div class="tkcols" aria-hidden="true"><span>Hora</span><span>Fins</span><span>Tasca</span><span>Qui</span></div>
         <div id="tkRows" class="tkrows"></div>
         <button type="button" class="btn" id="tkAdd">+ Afegir tasca</button>
@@ -2280,7 +2283,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
   </div>
   <div class="arrow" aria-hidden="true"><svg viewBox="0 0 40 60" width="40" height="60"><path d="M20 4v48M8 40l12 14 12-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 </div>
-<button class="mkfab" id="mkFab" type="button" aria-label="Marcar momento para la edición"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg><span>Momento</span><span class="mkn" id="mkN"></span></button>
+<button class="mkfab" id="mkFab" type="button" aria-label="Marcar un moment per a l’edició"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg><span>Momento</span><span class="mkn" id="mkN"></span></button>
 <div class="mkpop" id="mkPop" role="dialog" aria-labelledby="mkPopH" hidden>
   <button type="button" class="mkx" id="mkPopX" aria-label="Cerrar">✕</button>
   <p class="mkh" id="mkPopH"></p>
@@ -2296,12 +2299,12 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <button class="btn" id="mkListX2" type="button">Fet</button>
   </header>
   <div class="body">
-    <button type="button" class="btn primary mkbig" id="mkBig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg>Marcar momento</button>
+    <button type="button" class="btn primary mkbig" id="mkBig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg>Marcar moment</button>
     <p class="note" id="mkListInfo"></p>
     <div class="edtabs" id="mkDays" role="tablist" aria-label="Dia" hidden></div>
     <div class="edtabs" id="mkWhoF" role="tablist" aria-label="De quién"></div>
     <ul class="mkl" id="mkL"></ul>
-    <h3>Exportar para la edición</h3>
+    <h3>Exportar per a l’edició</h3>
     <div class="mkopts">
       <label>Fotogramas <select id="mkFps"><option>25</option><option>24</option><option>30</option><option>50</option></select></label>
       <label>Ajuste <input type="number" id="mkOff" value="0" step="1" min="-600" max="600" inputmode="numeric"> s</label>
@@ -2309,7 +2312,7 @@ body[data-tab="apps"] .wrap { padding-top: calc(env(safe-area-inset-top, 0px) + 
     <div class="mkexp">
       <button type="button" class="btn primary" data-mkexp="edl">DaVinci Resolve (.edl)</button>
       <button type="button" class="btn" data-mkexp="fcpxml">Final Cut Pro (.fcpxml)</button>
-      <button type="button" class="btn" data-mkexp="csv">Lista (.csv para Excel)</button>
+      <button type="button" class="btn" data-mkexp="csv">Llista (.csv per a Excel)</button>
     </div>
     <p class="note" style="margin-top:14px">Las marcas van a la <b>hora real</b> (timecode de hora del día). Solo encajan si las cámaras graban con el timecode en hora del día y bien sincronizado. «Ajuste» corrige un reloj adelantado o retrasado (o el tiempo que tardas en tocar: −5 s pone la marca 5 s antes).</p>
     <p class="note"><b>DaVinci:</b> en la línea de tiempo, clic derecho › <i>Timelines › Import › Timeline Markers from EDL</i>. La línea de tiempo debe empezar en la hora real de los clips.<br><b>Final Cut:</b> Archivo › Importar › XML. Crea un proyecto «Momentos» con las marcas en su hora: pon encima el multicam o los clips sincronizados.</p>
@@ -2815,6 +2818,8 @@ const pass = t => t >= W0 && t < W1 ? (t < DUP ? '1ª' : '2ª') : '';
 const lbl = t => pass(t) ? `${hm(t)} (${pass(t)})` : hm(t);
 // Amb diversos dies, davant el nom curt del dia («Domingo 14:00»)
 // (el dia de calendari: les 00:30 de la nit de dissabte ja són diumenge)
+// Modo pantalla: «Dom» petit a sobre de l'hora, només si no és el dia d'ara (al costat trepitjava el nom de l'artista)
+const lblTv = (a, ref) => NDAYS > 1 && fmtD.format(a) !== fmtD.format(ref) ? `<small>${html(lblD(a).split(' ')[0].slice(0, 3))}</small>${lbl(a)}` : lbl(a);
 const lblD = t => {
   if (NDAYS < 2) return lbl(t);
   const x = DAYS.find(x => fmtD.format(x.t0) === fmtD.format(t));
@@ -3913,7 +3918,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '11/11 09:35';
+const BUILD = '11/11 10:23';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 // Errors de l’app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {
@@ -4055,8 +4060,8 @@ function tvRender(t) {
   tvEl.classList.toggle('alert', !!msgs.length);
   al.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
   const up = [...ALL, ...GONE].filter(x => x.a > t && (tvStage ? x.s.id === tvStage : inNext(x))).sort((x, y) => x.a - y.a).slice(0, 12);
-  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblD(x.a)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancel·lat</span></span></li>`
-    : `<li><span class="tt">${lblD(x.a)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Canvi</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
+  document.getElementById('tvNext').innerHTML = up.map(x => x.gone ? `<li class="gone"><span class="tt">${lblTv(x.a, t)}</span><span class="tn">${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span class="tvchg">Cancel·lat</span></span></li>`
+    : `<li><span class="tt">${lblTv(x.a, t)}</span><span class="tn">${imp(x.t)}${deco(x.n)}</span><span class="tw"${stc(x.s)}>${html(x.s.name)} <span>· ${inDur(x.a - t)}</span>${x.chg ? ' <span class="tvchg">Canvi</span>' : ''}</span>${x.fx.length ? `<span class="tfx">${fxTags(x)}</span>` : ''}</li>`).join('')
     || '<li class="empty">No queden més actuacions.</li>';
   // Només els que hi caben sencers (en una tele no es pot fer scroll)
   const ol = document.getElementById('tvNext'), bot = ol.parentElement.getBoundingClientRect().bottom;
@@ -4936,7 +4941,7 @@ const CKEY = FEST.key + '-changes-v1';
 let stamp = '', notice = '', noticeBy = '', noticeById = '', noticeTeam = '';
 // Un aviso pot ser només per a un equip: els altres no el veuen (ni la notificació)
 const noticeMine = () => notice && (!noticeTeam || noticeTeam === PROF) ? notice : '';
-const noticeHead = () => `${html(noticeBy || 'Organització')}${noticeTeam ? ` <i class="nteam">· per a ${html(WHO_L[noticeTeam])}</i>` : ''}`;
+const noticeHead = () => `${noticeBy ? 'De ' : ''}${html(noticeBy || 'Organització')}${noticeTeam ? ` <i class="nteam">· per a ${html(WHO_L[noticeTeam])}</i>` : ''}`;
 // Els changes.json d'abans no portaven «fest»: eren del Bass in the Park
 const sameFest = d => (d.fest || 'bass-in-the-park-2026') === FEST.id;
 const setsKey = () => ALL.map(x => `${x.id}|${x.a}|${x.b}|${x.n}|${x.t}|${x.sub}|${x.fx}|${x.note}`).join('~');
@@ -4958,7 +4963,7 @@ function paintFeed() {
   const newest = Math.max(0, ...hist.map(f => f.t));
   const open = !!hist.length && (feedAll || newest >= feedSeen);
   const list = open ? (feedAll ? hist : hist.slice(0, 3)) : [];
-  const pin = mine ? `<span class="fpt">${ICO.pin}Avís${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${html(noticeBy || 'Organització')}:</b> ${html(mine)}</span>` : '';
+  const pin = mine ? `<span class="fpt">${ICO.pin}Avís${noticeTeam ? ' per a ' + html(WHO_L[noticeTeam]) : ''}</span><span><b>${noticeBy ? 'De ' : ''}${html(noticeBy || 'Organització')}:</b> ${html(mine)}</span>` : '';
   const key = [pin, list.map(f => f.t + f.m).join(), open, feedAll, hist.length].join('|');
   if (key === feedKey) return;
   const was = el.hidden;
@@ -5203,7 +5208,8 @@ const edBase = r => { const l = baseRaw && baseRaw[edStage]; const o = Array.isA
 const lblOf = c => (times().find(([k]) => k === c) || [c, c])[1];
 function edHead(r, i) {
   const fx = normFx(r.fx);
-  return `<span class="edt">${lblOf(r.a)}–${lblOf(r.b)}</span><span class="edn">${r.n ? html(r.n) : '<i>Sense nom</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sense publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
+  const la = String(lblOf(r.a)), lb = String(lblOf(r.b)), sameDay = NDAYS > 1 && /\s/.test(la) && la.split(' ')[0] === lb.split(' ')[0];
+  return `<span class="edt">${la}–${sameDay ? lb.split(' ').slice(1).join(' ') : lb}</span><span class="edn">${r.n ? html(r.n) : '<i>Sense nom</i>'}${fx.length ? `<span class="fxs">${fx.map(fxPill).join('')}</span>` : ''}</span>${edBase(r) ? '<span class="eddot" title="Sense publicar"></span>' : ''}<span class="edchev" aria-hidden="true">${i === edOpen ? '−' : '+'}</span>`;
 }
 function edFx(r) {
   const fx = normFx(r.fx), own = fx.filter(f => !FX.includes(f));
@@ -5649,6 +5655,7 @@ function parseTasks(src, people) {
     let ta, tb, text, toks;
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (NDAYS > 1 && c.length > 4 && !tmNorm(c[0]) && (!c[0] || headDay(c[0]) >= 0)) { if (c[0]) ld = headDay(c[0]); c.shift(); }  // enganxat de l'Excel amb la columna DÍA
       if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [ta, tb] = c[0].split(/\s*[-–]\s*/);
       text = c[1] || '';
@@ -5723,7 +5730,10 @@ let planAll = false, planLate = false, planKey = '';
 const taskOn = () => !!PROF;
 const mineTasks = () => taskOn() && YO && YO !== '-' ? TASKS.list.filter(x => x.p.includes(YO)) : [];
 const hourOf = t => t === null ? '' : hm(t).slice(0, 2);
-const grpOf = t => t === null ? 'Durant el dia' : `${hourOf(t)} h`;
+// Amb diversos dies: el dia d'una tasca (el muntatge del matí, des de les 6:00, ja és d'aquell dia) i el títol amb el dia si no és el d'avui
+const tkDayOf = t => DAYS.reduce((a, x) => t >= x.t0 - Math.max(0, START_M - 6 * 60) * MIN ? x.d : a, 0);
+const dayWord = d => ((DAYS[d] || {}).name || `Día ${d + 1}`).split(' ')[0];
+const grpOf = t => t === null ? 'Durant el dia' : `${NDAYS > 1 && tkDayOf(t) !== tkDayOf(now()) ? dayWord(tkDayOf(t)) + ' · ' : ''}${hourOf(t)} h`;
 const tkWhen = x => x.a === null ? '<span class="tkt"></span>' : `<span class="tkt">${lbl(x.a)}${x.b ? `<small>–${lbl(x.b)}</small>` : ''}</span>`;
 // «Cue»: tasca de menys de 5 min (una cançó d'un setlist, un tall): quan passa, passa (no va «tarde», no avisa, no compta)
 const tkCue = x => x.a !== null && x.b > x.a && x.b - x.a < 5 * MIN;
@@ -6128,14 +6138,18 @@ let tkRowsData = [];
 const hhmm = tmNorm;
 function tkToRows(src, ppl = parseTeam(tkTeam.value).people) {
   const rows = [], TOK = /@([^\s@,;]+)/g;
-  let h = '', group = [];
+  let h = '', group = [], tday = 0;
   for (let line of String(src).split('\n')) {
     line = line.trim();
     if (!line) continue;
-    if (line.startsWith('#')) { h = line; continue; }  // com parseTasks: el «@grup» de dalt continua
-    let a = '', b = '', t = '', who = [], ok = true;
+    if (line.startsWith('#')) { h = line; if (headDay(line) >= 0) tday = headDay(line); continue; }  // com parseTasks: el «@grup» de dalt continua
+    let a = '', b = '', t = '', who = [], ok = true, d = tday;
+    // «2/10:30 Tasca» = dia 2 (com parseTasks)
+    const dm = NDAYS > 1 && line.match(/^([1-9])\/(?=\d)/);
+    if (dm && +dm[1] <= NDAYS) { d = +dm[1] - 1; line = line.slice(dm[0].length); }
     if (line.includes('\t')) {
       const c = line.split('\t').map(x => x.trim());
+      if (NDAYS > 1 && c.length > 4 && !tmNorm(c[0]) && (!c[0] || headDay(c[0]) >= 0)) { if (c[0]) d = headDay(c[0]); c.shift(); }  // enganxat de l'Excel amb la columna DÍA
       if (c.length > 3 && !/[-–]/.test(c[0]) && (!c[1] || tmNorm(c[1]))) c.splice(0, 2, c[0] + (c[1] ? '-' + c[1] : ''));  // enganxat del «Descargar Excel»: HORA ⇥ HASTA ⇥ TAREA ⇥ QUIÉN
       [a, b = ''] = c[0].split(/\s*[-–]\s*/);
       t = c[1] || ''; who = whoToks(c.slice(2).join(', '), ppl);
@@ -6152,22 +6166,24 @@ function tkToRows(src, ppl = parseTeam(tkTeam.value).people) {
       }
     }
     // El que parseTasks no entén (o el final que no entén) es queda tal com està i en vermell: si no, en tocar qualsevol fila es tornava una tasca «durante el día» i l'avís desapareixia
-    if (!ok || !t || (a && !hhmm(a)) || (b && !hhmm(b))) { rows.push({ h, a: '', b: '', t: line, w: '', raw: true }); continue; }
-    rows.push({ h, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
+    if (!ok || !t || (a && !hhmm(a)) || (b && !hhmm(b))) { rows.push({ h, d, a: '', b: '', t: (dm && d !== tday ? dm[0] : '') + line, w: '', raw: true }); continue; }
+    rows.push({ h, d, a: hhmm(a), b: hhmm(b), t, w: (who.length ? who : group).join(', ') });
   }
   return rows;
 }
 function tkFromRows() {
   const out = [], ppl = parseTeam(tkTeam.value).people;
+  let cd = 0;  // el dia que entendrà parseTasks en aquest punt del text
   for (const h of [...new Set(tkRowsData.map(r => r.h))]) {
     if (h) out.push('', h);
+    if (headDay(h) >= 0) cd = headDay(h);
     for (const r of tkRowsData.filter(r => r.h === h)) {
       // Línia que no s'entenia: tal qual (continua l'avís) fins que se li posa hora; llavors els «@» del text compten
       if (r.raw && !r.a) { const l = r.t.replace(/\n/g, ' ').trim(); if (l) out.push(l); continue; }
       const t = r.t.replace(r.raw ? /[\n\t]/g : /[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
       if (!t) continue;
       const w = whoToks(r.w, ppl).map(x => '@' + x).join(' ');
-      out.push(`${r.a ? r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+      out.push(`${r.a ? (NDAYS > 1 && (r.d || 0) !== cd ? `${(r.d || 0) + 1}/` : '') + r.a + (r.b ? '-' + r.b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
     }
   }
   return out.join('\n').trim();
@@ -6179,10 +6195,12 @@ function tkRowsRender() {
   tkWhoF.innerHTML = `<option value="">Totes les tasques</option>${ppl.map(p => `<option value="${p.k}">De ${html(p.n)}</option>`).join('')}`;
   tkWhoF.value = ppl.some(p => p.k === f) ? f : '';
   const fk = tkWhoF.value;
-  const hd = {}; let cd = 0;
-  for (const h of new Set(tkRowsData.map(r => r.h))) { if (headDay(h) >= 0) cd = headDay(h); hd[h] = cd; }  // el dia de cada títol (com parseTasks)
-  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, hd[r.h]) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
-  const idx = tkRowsData.map((r, i) => i).filter(i => !fk || tkRowWho(tkRowsData[i], ppl).has(fk) || tkRowsData[i].nw).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
+  // Diversos dies: una pestanya per dia (les tasques sense hora surten a totes). Abans sortien barrejats i sense dir de quin dia eren
+  const dt = document.getElementById('tkDayTabs');
+  dt.hidden = NDAYS < 2;
+  if (NDAYS > 1) dt.innerHTML = DAYS.map(x => `<button type="button" role="tab" data-tkday="${x.d}" aria-selected="${x.d === tkDay}">${html(x.name || `Dia ${x.d + 1}`)} <small>${tkRowsData.filter(r => r.a && (r.d || 0) === x.d).length}</small></button>`).join('');
+  const key = r => r.nw ? Infinity : r.a ? taskTime(r.a, r.d || 0) : -Infinity;  // sense hora (durant el dia) a dalt, les noves a baix
+  const idx = tkRowsData.map((r, i) => i).filter(i => { const r = tkRowsData[i]; return (NDAYS < 2 || !r.a || (r.d || 0) === tkDay) && (!fk || tkRowWho(r, ppl).has(fk) || r.nw); }).sort((i, j) => key(tkRowsData[i]) - key(tkRowsData[j]) || i - j);
   tkRowsEl.innerHTML = idx.map(i => { const r = tkRowsData[i], bad = tkRowBad(r, ppl); return `<div class="tkrow${bad ? ' bad' : ''}" data-i="${i}"${r.raw && !r.a ? ' title="No s’entén: posa-hi hora o esborra-la"' : ''}>
     <input type="time" class="tka" value="${r.a}" aria-label="Hora (buida = durant el dia)">
     <input type="time" class="tkb" value="${r.b}" aria-label="Fins (opcional)">
@@ -6192,6 +6210,8 @@ function tkRowsRender() {
   for (const t of tkRowsEl.querySelectorAll('.tkt')) tkGrow(t);
   document.getElementById('tkCount').textContent = fk ? `${idx.length} de ${tkRowsData.filter(r => r.t).length}` : '';
 }
+let tkDay = NDAYS > 1 ? tkDayOf(now()) : 0;
+document.getElementById('tkDayTabs').addEventListener('click', e => { const b = e.target.closest('[data-tkday]'); if (!b) return; tkDay = +b.dataset.tkday; for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
 const tkGrow = t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };  // el text llarg es veu sencer
 function tkRowsSync() { tkRowsData = tkToRows(tkList.value); tkRowsRender(); }
 function tkRowsWrite() { tkList.value = tkFromRows(); tkDraft(); tkPreview(); }
@@ -6200,7 +6220,7 @@ tkRowsEl.addEventListener('input', e => {
   if (!row) return;
   const r = tkRowsData[+row.dataset.i], c = e.target.classList;
   if (c.contains('tkt')) tkGrow(e.target);
-  if (c.contains('tka')) r.a = e.target.value; else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
+  if (c.contains('tka')) { if (!r.a && e.target.value) r.d = tkDay; r.a = e.target.value; } else if (c.contains('tkb')) r.b = e.target.value; else if (c.contains('tkt')) r.t = e.target.value; else if (c.contains('tkw')) r.w = e.target.value;
   tkRowsWrite();
   row.classList.toggle('bad', tkRowBad(r, parseTeam(tkTeam.value).people));
 });
@@ -6213,7 +6233,7 @@ tkRowsEl.addEventListener('click', e => {
 tkWhoF.addEventListener('change', () => { for (const r of tkRowsData) delete r.nw; tkRowsRender(); });
 document.getElementById('tkAdd').addEventListener('click', () => {
   const p = person(tkWhoF.value);
-  tkRowsData.push({ h: '', a: '', b: '', t: '', w: p ? p.n : '', nw: true });
+  tkRowsData.push({ h: '', d: tkDay, a: '', b: '', t: '', w: p ? p.n : '', nw: true });
   tkRowsRender();
   tkRowsEl.querySelector(`[data-i="${tkRowsData.length - 1}"] .tkt`)?.focus();
 });
@@ -6221,9 +6241,11 @@ document.getElementById('tkAdd').addEventListener('click', () => {
 document.getElementById('tkXls').addEventListener('click', async () => {
   try {
     const X = await loadXlsx();
-    const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a) : -Infinity) - (q.a ? taskTime(q.a) : -Infinity));
-    const ws = X.utils.aoa_to_sheet([['HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [r.raw && !r.a ? '?' : r.a, r.b, r.t.replace(/\t/g, ' '), r.w])]);
-    ws['!cols'] = [{ wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
+    const rows = tkToRows(tkList.value).filter(r => r.t).sort((p, q) => (p.a ? taskTime(p.a, p.d || 0) : -Infinity) - (q.a ? taskTime(q.a, q.d || 0) : -Infinity));
+    // Diversos dies: una columna DÍA (abans, en baixar i tornar a pujar, les tasques del segon dia passaven al primer)
+    const md = NDAYS > 1, dn = r => r.a ? (DAYS[r.d || 0] || {}).name || `Día ${(r.d || 0) + 1}` : '';
+    const ws = X.utils.aoa_to_sheet([[...(md ? ['DÍA'] : []), 'HORA', 'HASTA', 'TAREA', 'QUIÉN'], ...rows.map(r => [...(md ? [dn(r)] : []), r.raw && !r.a ? '?' : r.a, r.b, r.t.replace(/\t/g, ' '), r.w])]);
+    ws['!cols'] = [...(md ? [{ wch: 12 }] : []), { wch: 8 }, { wch: 8 }, { wch: 70 }, { wch: 24 }];
     const wb = X.utils.book_new();
     X.utils.book_append_sheet(wb, ws, 'TAREAS');
     X.writeFile(wb, `tareas-${FEST.id}.xlsx`);
@@ -6336,7 +6358,7 @@ function fuzzyTime(s) {
 }
 const isBool = v => /^(true|false|verdadero|falso|vertader|fals)$/i.test(String(v).trim());
 // Títols de columna: «HORA», «HORA INICIO», «INICIO», «HORA:», «FIN», «HASTA», «RESPONSABLE», «QUIÉN/QUI», «DESCRIPCIÓN»… (també en català)
-const HD = { a: ['hora', 'horainicio', 'inicio', 'horainici', 'inici', 'desde', 'comienzo', 'start', 'time'], b: ['hasta', 'fins', 'fin', 'fi', 'final', 'horafin', 'horafinal', 'horafi', 'end'], t: ['tarea', 'tareas', 'tasca', 'tasques', 'descripcion', 'descripcio', 'actividad', 'activitat', 'task'], w: ['quien', 'qui', 'quienes', 'responsable', 'responsables', 'persona', 'personas', 'encargado', 'who'] };
+const HD = { d: ['dia', 'day', 'jornada'], a: ['hora', 'horainicio', 'inicio', 'horainici', 'inici', 'desde', 'comienzo', 'start', 'time'], b: ['hasta', 'fins', 'fin', 'fi', 'final', 'horafin', 'horafinal', 'horafi', 'end'], t: ['tarea', 'tareas', 'tasca', 'tasques', 'descripcion', 'descripcio', 'actividad', 'activitat', 'task'], w: ['quien', 'qui', 'quienes', 'responsable', 'responsables', 'persona', 'personas', 'encargado', 'who'] };
 const isHd = (v, k) => String(v || '').split(/[\/|]/).some(x => HD[k].includes(nk(x)));
 function sheetTasks(name, rows, team) {
   const parts = name.split(/\s*[\/,&+_]\s*|\s+-\s+|\s+(?:i|y)\s+/).map(x => x.trim()).filter(Boolean);
@@ -6377,10 +6399,12 @@ function fullSheet(rows, ppl) {
   const hi = rows.findIndex(r => cells(r).some(v => isHd(v, 'w')));
   if (hi < 0) return null;
   const hd = cells(rows[hi]), col = k => hd.findIndex(v => isHd(v, k));
-  const ca = col('a'), cb = col('b'), ct = col('t'), cw = col('w');
+  const ca = col('a'), cb = col('b'), ct = col('t'), cw = col('w'), cdy = NDAYS > 1 ? col('d') : -1;
   if (ct < 0) return null;
   const out = [];
   let up = null, inh = 0;
+  // Columna DÍA: «Domingo 6», «Domingo», «Día 2» o «2». Buida o que no s'entén = primer dia
+  const dpx = v => { const n = String(v || '').trim().match(/^(\d)$/), d = n && +n[1] >= 1 && +n[1] <= NDAYS ? +n[1] - 1 : headDay(String(v || '')); return d > 0 ? `${d + 1}/` : ''; };
   for (const raw of rows.slice(hi + 1)) {
     const r = cells(raw), t = (r[ct] || '').replace(/[@\n\t]/g, ' ').replace(/\s{2,}/g, ' ').trim();
     if (!t) { up = null; continue; }
@@ -6392,9 +6416,10 @@ function fullSheet(rows, ppl) {
     const fb = a && bv ? fuzzyTime(bv) : null, b = a ? (bv ? (fb && fb.a ? hhmm(fb.a) : '') : ft.b ? hhmm(ft.b) : '') : '';
     const wr = cw >= 0 ? r[cw] : '', w = whoToks(wr, ppl).map(x => '@' + x).join(' ');
     // Una hora (o un final) que no s'entén no es converteix en «durante el día»: la fila queda tal qual i en vermell
+    const dp = cdy >= 0 && a ? dpx(r[cdy]) : '';
     if (hv && !a) out.push(`${hv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
-    else if (bv && !b) out.push(`${a}-${bv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
-    else out.push(`${a ? a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
+    else if (bv && !b) out.push(`${dp}${a}-${bv.replace(/\s+/g, ' ')}\t${t}\t${wr}`);
+    else out.push(`${a ? dp + a + (b ? '-' + b : '') : '-'} ${t}${w ? ' ' + w : ''}`);
   }
   out.inh = inh;
   return out;
@@ -6531,7 +6556,7 @@ function holaPaint() {
     return;
   }
   document.getElementById('holaT').textContent = 'Qui ets?';
-  document.getElementById('holaSub').textContent = 'Tria el teu departament i toca la teva cara.';
+  document.getElementById('holaSub').textContent = 'Tria el teu departament i toca el teu nom.';
   const depts = [...TEAMS, ...(ppl.some(p => !p.e) ? [['-', 'Altres']] : [])].map(([e, t]) => [e, t, ppl.filter(p => (p.e || '-') === e)]);
   if (!depts.some(d => d[0] === holaDept)) holaDept = PROF && depts.some(d => d[0] === PROF) ? PROF : (depts.find(d => d[2].length) || depts[0])[0];
   const [dv, dt, dp] = depts.find(d => d[0] === holaDept);
@@ -7200,7 +7225,7 @@ async function mcLog() {
     const names = {};
     for (const [, c] of mcAll()) { names[c.id] = c.pos || c.cam; for (let d = 0; d < NDAYS; d++) names[c.id + '-d' + (d + 1)] = (c.pos || c.cam) + (NDAYS > 1 ? ' · ' + (DAYS[d].name || `Dia ${d + 1}`) : ''); }
     const log = ((await r.json()).log || []).filter(x => names[x.id]);
-    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sense muntar')}</b>${x.ssd ? ` <small>· SSD ${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Algú')}</span></li>`).join('') : '<li class="note">Encara no hi ha canvis.</li>';
+    box.innerHTML = log.length ? log.map(x => `<li><span class="n">${new Date(x.at).toLocaleTimeString(LOC, { hour: '2-digit', minute: '2-digit' })}</span><span>${html(names[x.id])} → <b>${x.st === 'grabando' ? 'REC' : html(mcStName(x.st) || 'Sense muntar')}</b>${x.ssd ? ` <small>· ${/^\s*ssd\b/i.test(x.ssd) ? '' : 'SSD '}${html(x.ssd)}</small>` : ''}</span><span class="who">${html(x.who || 'Algú')}</span></li>`).join('') : '<li class="note">Encara no hi ha canvis.</li>';
     btn.textContent = 'Actualitzar l\'historial';
   } catch (e) { box.innerHTML = '<li class="note">Sense connexió: no s\'ha pogut carregar.</li>'; }
   btn.disabled = false;
@@ -7664,7 +7689,7 @@ const mkHMS = t => mkFmt.format(t);
 </script>
 <script data-part="momentos">
 // ==== MOMENTOS ==== (marques per a l'edició, des del 04-11-2026)
-// Botó «Marcar momento» dins de l'app Momentos (05-11: a Horarios es tocava sense voler): guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
+// Botó «Marcar moment» dins de l'app Momentos (05-11: a Horarios es tocava sense voler): guarda l'hora exacta, l'escenari i l'artista que sona. Etiqueta i nota opcionals.
 // Es comparteixen per al servidor d'avisos (POST/GET /mk) i s'exporten amb timecode d'hora del dia per a DaVinci (EDL),
 // Final Cut (FCPXML) o Excel (CSV). Sense servidor (artifact) o sense cobertura: queden al mòbil i s'envien després.
 const MKK = FEST.key + '-mk-v1';
@@ -7707,6 +7732,7 @@ async function mkFlush() {
   for (const m of mkMine.filter(m => !m.sent)) { const v = m.v; if (await mkSend(m)) { if (m.v === v) m.sent = true; } else break; }
   for (const id of mkDel.slice()) if (await mkSend({ id, del: 1 })) mkDel = mkDel.filter(x => x !== id); else break;
   mkSave(); mkPaint();
+  if (!document.getElementById('mkList').hidden) mkRenderList();  // si no, «1 sin enviar» es quedava escrit fins al minut següent
 }
 async function mkPull() {
   if (!PUSH || !PUSH.url || mkPulling) return;
@@ -7796,12 +7822,12 @@ function mkRenderList() {
     .map(([k, l, n]) => `<button type="button" role="tab" data-mkw="${k}" aria-selected="${mkWho === k}">${l} <span>${n}</span></button>`).join('');
   const L = mkFiltered();
   const pend = mkMine.filter(m => !m.sent).length + mkDel.length;
-  document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Solo en este móvil (esta versión no tiene servidor).'
-    : (mkSrv === null ? 'Cargando los del equipo… ' : '') + (pend ? `${pend} sin enviar: se envían solos al volver la cobertura.` : 'Lo ve todo el equipo.');
+  document.getElementById('mkListInfo').textContent = !PUSH || !PUSH.url ? 'Només en aquest mòbil (aquesta versió no té servidor).'
+    : (mkSrv === null ? 'Carregant els de l’equip… ' : '') + (pend ? `${pend} sense enviar: s’envien sols quan torni la cobertura.` : 'Ho veu tot l’equip.');
   document.getElementById('mkL').innerHTML = L.length ? L.slice().reverse().map(m => {
     const tg = mkTag(m.k), mine = mkIsMine(m), ns = mine && mkMine.some(x => x.id === m.id && !x.sent);
     return `<li style="--mkc:${tg ? tg[2] : 'var(--muted)'}"><span class="tm">${mkHMS(m.t)}</span><span class="tx"><b>${tg ? `<span class="tg">${tg[1]}</span>` : ''}${esc(m.n || mkStageName(m.s) || 'Sin artista')}</b><small>${avBy(m.who)}${esc([STAGES.length > 1 ? mkStageName(m.s) : '', m.note, m.who || (mine ? 'Yo' : '')].filter(Boolean).join(' · '))}${ns ? '<i class="ns" title="Sin enviar"></i>' : ''}</small></span>${mine ? `<button type="button" class="del" data-mkdel="${esc(m.id)}" aria-label="Borrar momento de las ${mkHMS(m.t)}">✕</button>` : '<span></span>'}</li>`;
-  }).join('') : '<li class="mkempty">Aún no hay momentos. Toca «Marcar momento» justo cuando pase algo.</li>';
+  }).join('') : '<li class="mkempty">Encara no hi ha moments. Toca «Marcar moment» just quan passi alguna cosa.</li>';
   for (const b of document.querySelectorAll('[data-mkexp]')) b.disabled = !L.length;
 }
 function mkOpenList() {
@@ -7899,18 +7925,18 @@ const tqFmtW = new Intl.DateTimeFormat(LOC, { timeZone: 'Europe/Madrid', weekday
 const tqWhere = () => part('sol') ? solWhere() : { lat: 41.5536, lon: 2.2492 };  // sense l'app Sol (XARXA DE SEGURETAT): Montmeló
 const tqKey = w => `${w.lat.toFixed(3)},${w.lon.toFixed(3)}`;
 function tqCode(c, day = 1) {
-  if (c === 0) return [day ? '☀️' : '🌙', 'Despejado'];
-  if (c === 1) return [day ? '🌤️' : '🌙', 'Casi despejado'];
-  if (c === 2) return [day ? '⛅' : '☁️', 'Nubes y claros'];
-  if (c === 3) return ['☁️', 'Nublado'];
-  if (c === 45 || c === 48) return ['🌫️', 'Niebla'];
-  if (c >= 51 && c <= 57) return ['🌦️', 'Llovizna'];
-  if (c === 61 || c === 80) return ['🌦️', c === 80 ? 'Chubascos débiles' : 'Lluvia débil'];
-  if (c === 63 || c === 81) return ['🌧️', c === 81 ? 'Chubascos' : 'Lluvia'];
-  if (c === 65 || c === 82) return ['🌧️', 'Lluvia fuerte'];
-  if (c === 66 || c === 67) return ['🌧️', 'Lluvia helada'];
-  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return ['🌨️', 'Nieve'];
-  if (c >= 95) return ['⛈️', c > 95 ? 'Tormenta con granizo' : 'Tormenta'];
+  if (c === 0) return [day ? '☀️' : '🌙', 'Serè'];
+  if (c === 1) return [day ? '🌤️' : '🌙', 'Gairebé serè'];
+  if (c === 2) return [day ? '⛅' : '☁️', 'Núvols i clarianes'];
+  if (c === 3) return ['☁️', 'Ennuvolat'];
+  if (c === 45 || c === 48) return ['🌫️', 'Boira'];
+  if (c >= 51 && c <= 57) return ['🌦️', 'Plugim'];
+  if (c === 61 || c === 80) return ['🌦️', c === 80 ? 'Ruixats febles' : 'Pluja feble'];
+  if (c === 63 || c === 81) return ['🌧️', c === 81 ? 'Ruixats' : 'Pluja'];
+  if (c === 65 || c === 82) return ['🌧️', 'Pluja forta'];
+  if (c === 66 || c === 67) return ['🌧️', 'Pluja gelant'];
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return ['🌨️', 'Neu'];
+  if (c >= 95) return ['⛈️', c > 95 ? 'Tempesta amb calamarsa' : 'Tempesta'];
   return ['☁️', ''];
 }
 const TQ16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
@@ -7986,16 +8012,16 @@ const tqInFest = t => DAYS.some(d => t >= d.t0 && t < tqFestEnd(d));
 function tqSrcTxt(H, t) {
   const h = H.find(x => x.t <= t && t < x.t + 3600000) || H.find(x => x.t > t);
   if (!h || !h.src) return '';
-  return `<span>Modelo <b>${h.src}</b></span>`;
+  return `<span>Model <b>${h.src}</b></span>`;
 }
 function tqPaint() {
   const src = document.getElementById('tqSrc'), nowEl = document.getElementById('tqNow');
-  const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinto del festival' : 'Montmeló';
+  const w = tqWhere(), where = w.mine ? 'tu ubicación' : w.fest ? 'el recinte del festival' : 'Montmeló';
   document.getElementById('tqPillN').textContent = where === 'tu ubicación' ? 'Tu ubicación' : FEST.name;
   tqLivePaint(); tqPlPaint();
-  if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sin conexión: no hay previsión guardada todavía.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
+  if (!tq || !tq.d) { src.textContent = tq && tq.err ? 'Sense connexió: encara no hi ha cap previsió desada.' : 'Cargando la previsión…'; nowEl.hidden = true; return; }
   const ago = Math.round((Date.now() - tq.at) / MIN);
-  src.textContent = `Para ${where} · ${tq.err ? 'sin conexión, datos de las ' + hm(tq.at) : ago < 1 ? 'actualizado ahora' : `actualizado hace ${ago} min`}`;
+  src.textContent = `Para ${where} · ${tq.err ? 'sense connexió, dades de les ' + hm(tq.at) : ago < 1 ? 'actualitzat ara' : `actualitzat fa ${ago} min`}`;
   const c = tq.d.current || {}, H = tqHours(), t = Date.now();
   const [ic, ds] = tqCode(c.weather_code, c.is_day);
   document.getElementById('tqPillT').textContent = `${ic} ${tqDeg(c.temperature_2m)}`;
@@ -8006,18 +8032,18 @@ function tqPaint() {
     : tq.d.minutely_15 ? tq.d.minutely_15.time.map((s, i) => ({ t: s * 1000, mm: tq.d.minutely_15.precipitation[i] || 0 })).filter(x => x.t + 15 * MIN > t) : [];
   const fut = H.filter(h => h.t + 3600000 > t), wet = h => h.mm >= 0.1 || h.pp >= 50, rv = tqLvOk(), raining = rv ? rv.here >= TQ_DBZ : (m15.length && m15[0].mm >= 0.1) || (c.precipitation || 0) >= 0.1;
   let big, sub;
-  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Está lloviendo'; sub = rv && rv.stop ? (tqLvIn(rv, rv.stop) <= 2 ? 'Según el radar, puede parar en cualquier momento' : `Según el radar, puede parar hacia las ${hm(rv.t + rv.stop * MIN)}`) : stop ? `Para hacia las ${hm(stop.t)}` : 'Sin pausa en las próximas horas'; }
+  if (raining) { const stop = fut.find(h => h.t > t && !wet(h)); big = 'Està plovent'; sub = rv && rv.stop ? (tqLvIn(rv, rv.stop) <= 2 ? 'Segons el radar, pot parar en qualsevol moment' : `Segons el radar, pot parar cap a les ${hm(rv.t + rv.stop * MIN)}`) : stop ? `Para cap a les ${hm(stop.t)}` : 'Sense pausa en les pròximes hores'; }
   else { const r15 = m15.find(x => x.mm >= 0.1), rh = fut.find(h => h.t > t && wet(h));
-    if (rv && rv.eta) { const m = tqLvIn(rv, rv.eta); if (m <= 2) { big = 'Lluvia inminente'; sub = 'Según el radar, puede empezar en cualquier momento'; } else { big = `Lluvia en ~${Math.max(5, Math.round(m / 5) * 5)} min`; sub = `Según el radar · hacia las ${hm(rv.t + rv.eta * MIN)}`; } }
-    else if (r15) { big = `Lluvia en ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Hacia las ${hm(r15.t)}`; }
-    else if (rh && rh.t - t < 48 * 3600000) { big = `Lluvia a las ${hm(rh.t)}`; sub = `${rh.pp} % de probabilidad${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.mn ? ` · ${rh.my} de ${rh.mn} modelos` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
-    else { big = 'Sin lluvia'; sub = rv && rv.near && rv.near.km <= 25 ? `según los modelos · el radar ve lluvia a ${Math.max(1, Math.round(rv.near.km))} km` : 'en las próximas 48 h'; } }
+    if (rv && rv.eta) { const m = tqLvIn(rv, rv.eta); if (m <= 2) { big = 'Pluja imminent'; sub = 'Segons el radar, pot començar en qualsevol moment'; } else { big = `Pluja d’aquí a ~${Math.max(5, Math.round(m / 5) * 5)} min`; sub = `Segons el radar · cap a les ${hm(rv.t + rv.eta * MIN)}`; } }
+    else if (r15) { big = `Pluja d’aquí a ~${Math.max(5, Math.round((r15.t - t) / MIN / 5) * 5)} min`; sub = `Cap a les ${hm(r15.t)}`; }
+    else if (rh && rh.t - t < 48 * 3600000) { big = `Pluja a les ${hm(rh.t)}`; sub = `${rh.pp} % de probabilitat${rh.mm >= 0.1 ? ` · ${rh.mm.toFixed(1)} mm` : ''}${rh.mn ? ` · ${rh.my} de ${rh.mn} models` : ''}${rh.t - t > 20 * 3600000 ? ' · ' + tqFmtW.format(rh.t) : ''}`; }
+    else { big = 'Sense pluja'; sub = rv && rv.near && rv.near.km <= 25 ? `segons els models · el radar veu pluja a ${Math.max(1, Math.round(rv.near.km))} km` : 'en les pròximes 48 h'; } }
   nowEl.innerHTML = `<span class="ic" aria-hidden="true">${raining ? '🌧️' : ic}</span><span class="tp rain">${big}</span><span class="ds">${sub}</span>`
-    + `<div class="kv"><span>Ahora <b>${ds}</b></span>${tqSrcTxt(H, t)}<span>Nubes <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
+    + `<div class="kv"><span>Ara <b>${ds}</b></span>${tqSrcTxt(H, t)}<span>Núvols <b>${Math.round(c.cloud_cover ?? 0)} %</b></span><span>Temperatura <b>${tqDeg(c.temperature_2m)}</b></span></div>`;
   const al = [], next = H.filter(h => h.t > t && h.t < t + 12 * 3600000), soon = m15.some(x => x.mm >= 0.1) || !!(rv && rv.eta && rv.eta <= 60);
-  if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilidad de lluvia del ${r.pp} % a las ${hm(r.t)}. Ten a mano fundas y bolsas.`]); }
-  if (raining || soon) al.push(['bad', '🎥', 'Protege cámaras, brazos y material: fundas, bolsas y toallas.']);
-  const tot = next.reduce((s2, h) => s2 + h.mm, 0); if (tot >= 5) al.push(['bad', '🌧️', `${tot.toFixed(0)} mm previstos en 12 h: lluvia fuerte.`]);
+  if (!raining && !soon) { const r = next.find(h => h.pp >= 50); if (r) al.push(['warn', '☔', `Probabilitat de pluja del ${r.pp} % a les ${hm(r.t)}. Tingues a mà fundes i bosses.`]); }
+  if (raining || soon) al.push(['bad', '🎥', 'Protegeix càmeres, braços i material: fundes, bosses i tovalloles.']);
+  const tot = next.reduce((s2, h) => s2 + h.mm, 0); if (tot >= 5) al.push(['bad', '🌧️', `${tot.toFixed(0)} mm previstos en 12 h: pluja forta.`]);
   document.getElementById('tqAl').innerHTML = al.map(([k, e, x]) => `<li class="${k}"><span class="e" aria-hidden="true">${e}</span><span>${x}</span></li>`).join('');
   tqTable(H, t);
   // Dies del festival (la previsió arriba fins a 16 dies)
@@ -8026,12 +8052,12 @@ function tqPaint() {
     const a = d.t0, b = tqFestEnd(d), name = d.name || fd.format(a);
     if (b < t) return '';
     const L = H.filter(h => h.t >= a && h.t < b);
-    if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsión llega unos 15 días antes (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
+    if (!L.length || a > last) return `<li><span class="e" aria-hidden="true">🗓️</span><b>${esc(name)}</b><span>La previsió arriba uns 15 dies abans (a partir del ${fd.format(a - 15 * 86400000)}).</span></li>`;
     const worst = L.reduce((x, h) => h.c > x.c ? h : x, L[0]), [e, ds2] = tqCode(worst.c, 1);
     const pp = Math.max(...L.map(h => h.pp)), mm = L.reduce((s, h) => s + h.mm, 0), cc = Math.round(L.reduce((s, h) => s + h.cc, 0) / L.length), W = L.filter(h => h.mm >= 0.1 || h.pp >= 50);
-    const when = W.length ? `lluvia de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sin lluvia prevista';
-    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · nubes ${cc} %</span></li>`;
-  }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ya ha terminado</b><span></span></li>';
+    const when = W.length ? `pluja de ${hm(W[0].t)} a ${hm(W[W.length - 1].t + 3600000)}` : 'sense pluja prevista';
+    return `<li><span class="e" aria-hidden="true">${e}</span><b>${esc(name)} · ${hm(a)}–${hm(b)}</b><span>${when} · máx. ${pp} %${mm >= 0.1 ? ` · ${mm.toFixed(1)} mm` : ''} · núvols ${cc} %</span></li>`;
+  }).join('') || '<li><span class="e" aria-hidden="true">🏁</span><b>El festival ja ha acabat</b><span></span></li>';
 }
 // Taula per hores (com la de Windy): 48 h, files fixes a l'esquerra, colors de temperatura i vent
 function tqTable(H, t) {
@@ -8046,7 +8072,7 @@ function tqTable(H, t) {
       + `<span class="cc" style="--cc:${h.cc / 100}">${Math.round(h.cc)}</span><span class="tp2">${tqDeg(h.tp)}</span></div>`;
   }).join('');
   const box = document.getElementById('tqTab'), sc = box.querySelector('.sc'), x = sc ? sc.scrollLeft : 0;
-  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Lluvia mm</span><span>Prob.</span><span>Nubes %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
+  box.innerHTML = `<div class="lab"><span></span><span>Hora</span><span></span><span>Pluja mm</span><span>Prob.</span><span>Núvols %</span><span>Temp.</span></div><div class="sc"><div class="cols">${cols}</div></div>`;
   box.querySelector('.sc').scrollLeft = x;
 }
 
@@ -8145,7 +8171,7 @@ async function tqRadar(force) {
       const j = await r.json();
       if (!j.host || !j.radar || !Array.isArray(j.radar.past) || !j.radar.past.length) throw new Error('mal');
       tqRad = j; tqRadAt = Date.now(); tqI = j.radar.past.length - 1;
-    } catch (e) { if (!tqRad) { if (tqLy === 'radar') { msg.hidden = false; msg.textContent = 'Sin conexión: el radar necesita internet.'; } return; } }
+    } catch (e) { if (!tqRad) { if (tqLy === 'radar') { msg.hidden = false; msg.textContent = 'Sense connexió: el radar necessita internet.'; } return; } }
   }
   if (tqLy === 'radar') msg.hidden = true;
   tqLive();
@@ -8173,7 +8199,7 @@ function tqDbz(r, g, b, a) {
   return v;
 }
 const tqMmh = z => z < 10 ? 0 : Math.pow(Math.pow(10, z / 10) / 200, 1 / 1.6);
-const tqInt = z => z >= 45 ? 'Tormenta / lluvia muy fuerte' : z >= 35 ? 'Lluvia fuerte' : z >= 25 ? 'Lluvia moderada' : 'Lluvia débil';
+const tqInt = z => z >= 45 ? 'Tempesta / pluja molt forta' : z >= 35 ? 'Pluja forta' : z >= 25 ? 'Pluja moderada' : 'Lluvia débil';
 const tqImg = u => new Promise((ok, ko) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = () => ko(new Error('img')); i.src = u; });
 let tqLv = null, tqLvBusy = false;
 async function tqLvGrid(f, w) {
@@ -8242,19 +8268,19 @@ function tqLivePaint() {
   const ago = Math.round((Date.now() - v.t) / MIN), rain = v.here >= TQ_DBZ, dn = d => tqDir(d), lines = [];
   let big;
   if (rain) {
-    big = 'Llueve ahora en el recinto';
+    big = 'Ara plou al recinte';
     lines.push(`${tqInt(v.here)} · ~${v.mm < 1 ? v.mm.toFixed(1).replace('.', ',') : Math.round(v.mm)} mm/h`);
-    if (v.stop) { const m = tqLvIn(v, v.stop); lines.push(['eta', m <= 2 ? 'Puede parar en cualquier momento' : `Puede parar en ~${m} min (hacia las ${hm(v.t + v.stop * MIN)})`]); }
+    if (v.stop) { const m = tqLvIn(v, v.stop); lines.push(['eta', m <= 2 ? 'Pot parar en qualsevol moment' : `Pot parar d’aquí a ~${m} min (cap a les ${hm(v.t + v.stop * MIN)})`]); }
   } else if (v.near && v.near.km <= 55) {
-    big = v.near.km < 4 ? 'Lluvia muy cerca' : `Lluvia a ${Math.round(v.near.km)} km al ${dn(v.near.dir)}`;
+    big = v.near.km < 4 ? 'Pluja molt a prop' : `Pluja a ${Math.round(v.near.km)} km al ${dn(v.near.dir)}`;
     lines.push(tqInt(v.near.z));
-    if (v.eta) { const m = tqLvIn(v, v.eta); lines.push(['eta', m <= 2 ? 'Puede llegar en cualquier momento' : `Llega en ~${m} min (hacia las ${hm(v.t + v.eta * MIN)})`]); }
-    else if (v.mv) lines.push('Por ahora no viene hacia el recinto');
-  } else big = 'Sin lluvia en 50 km';
-  if (!rain && v.here >= 10) lines.push('Ecos muy débiles encima: quizá llovizna');
-  if (v.mv && v.mv.kmh >= 3 && (rain || (v.near && v.near.km <= 55))) lines.push(`Se mueve hacia el ${dn(v.mv.dir)} a ${Math.round(v.mv.kmh)} km/h`);
+    if (v.eta) { const m = tqLvIn(v, v.eta); lines.push(['eta', m <= 2 ? 'Pot arribar en qualsevol moment' : `Arriba d’aquí a ~${m} min (cap a les ${hm(v.t + v.eta * MIN)})`]); }
+    else if (v.mv) lines.push('De moment no ve cap al recinte');
+  } else big = 'Sense pluja en 50 km';
+  if (!rain && v.here >= 10) lines.push('Ecos molt febles a sobre: potser plugim');
+  if (v.mv && v.mv.kmh >= 3 && (rain || (v.near && v.near.km <= 55))) lines.push(`Es mou cap al ${dn(v.mv.dir)} a ${Math.round(v.mv.kmh)} km/h`);
   el.hidden = false; el.classList.toggle('rain', rain || !!v.eta);
-  el.innerHTML = `<canvas width="${v.S}" height="${v.S}" aria-hidden="true"></canvas><div class="tx"><span class="k"><i></i>Radar · ${ago < 1 ? 'ahora' : `hace ${ago} min`}${v.err ? ' · sin conexión' : ''}</span><b>${big}</b>`
+  el.innerHTML = `<canvas width="${v.S}" height="${v.S}" aria-hidden="true"></canvas><div class="tx"><span class="k"><i></i>Radar · ${ago < 1 ? 'ara' : `hace ${ago} min`}${v.err ? ' · sense connexió' : ''}</span><b>${big}</b>`
     + lines.map(l => Array.isArray(l) ? `<span class="s ${l[0]}">${l[1]}</span>` : `<span class="s">${l}</span>`).join('') + '</div>';
   // mini radar: pluja real al voltant, anells de 10 i 25 km, el recinte i la fletxa del moviment
   const cv = el.querySelector('canvas'), g = cv.getContext('2d'), S = v.S, c = TQ_LR, cs = getComputedStyle(document.documentElement);
@@ -8321,8 +8347,8 @@ function tqPlPaint() {
   if (!P || !P.st || !P.st.length || P.k !== tqKey(tqWhere())) { el.hidden = true; return; }
   const end = Math.max(...P.st.map(s => s.end)), mm = v => v < 0.05 ? '0' : v.toFixed(1).replace('.', ',');
   el.hidden = false;
-  el.innerHTML = `<span class="k">Pluviómetros Meteocat · lluvia medida hasta las ${hm(end)}${P.err ? ' · sin conexión' : ''}</span><ul>`
-    + P.st.map(s => `<li><div>${esc(s.n)} <span>${s.km < 1 ? '<1' : Math.round(s.km)} km</span></div><b class="${s.h1 >= 0.1 ? 'wet' : ''}">${mm(s.h1)} mm <span>última hora</span></b><b class="${s.day >= 0.1 ? 'wet' : ''}">${mm(s.day)} mm <span>hoy</span></b></li>`).join('') + '</ul>';
+  el.innerHTML = `<span class="k">Pluviòmetres Meteocat · pluja mesurada fins a les ${hm(end)}${P.err ? ' · sense connexió' : ''}</span><ul>`
+    + P.st.map(s => `<li><div>${esc(s.n)} <span>${s.km < 1 ? '<1' : Math.round(s.km)} km</span></div><b class="${s.h1 >= 0.1 ? 'wet' : ''}">${mm(s.h1)} mm <span>última hora</span></b><b class="${s.day >= 0.1 ? 'wet' : ''}">${mm(s.day)} mm <span>avui</span></b></li>`).join('') + '</ul>';
 }
 
 // --- Previsió al mapa: graella de 7×7 punts d'Open-Meteo (pluja i núvols, 48 h) interpolada
@@ -8347,7 +8373,7 @@ async function tqGridFetch(force) {
       P: d.map(x => tqMix2(x.hourly, 'precipitation')), C: d.map(x => tqMix2(x.hourly, 'cloud_cover')) };
     try { localStorage.setItem(TQGK, JSON.stringify(tqGrid)); } catch (e) {}
     const now0 = Date.now(); tqH = Math.max(0, tqGrid.time.findIndex(x => x + 3600000 > now0));
-  } catch (e) { if (!tqGrid && tqLy === 'clouds') { const msg = document.getElementById('tqMsg'); msg.hidden = false; msg.textContent = 'Sin conexión: la previsión del mapa necesita internet.'; } }
+  } catch (e) { if (!tqGrid && tqLy === 'clouds') { const msg = document.getElementById('tqMsg'); msg.hidden = false; msg.textContent = 'Sense connexió: la previsió del mapa necessita internet.'; } }
   tqGridBusy = false;
   if (tqGrid && tqLy !== 'windy') { if (tqLy === 'clouds') document.getElementById('tqMsg').hidden = true; tqBarSetup(); }
 }
@@ -8409,7 +8435,7 @@ function tqGo(i) {
   for (const d of document.querySelectorAll('#tqRad .rd')) { const on = tqLy === 'radar' && x.r !== undefined && +d.dataset.i === x.r; d.classList.toggle('on', on); if (on || (x.r !== undefined && +d.dataset.i === x.r + 1)) for (const im of d.querySelectorAll('img[loading="lazy"]')) im.loading = 'eager'; }
   if (x.h !== undefined) { tqH = x.h; tqFieldBuild(); } else tqHeat();
   const d = Math.round((x.t - Date.now()) / MIN);
-  document.getElementById('tqTs').innerHTML = `${hm(x.t)}<small>${x.r !== undefined ? (d >= -10 ? 'radar · ahora' : `radar · hace ${-d} min`) : `previsión · ${d < 60 ? 'ahora' : '+' + Math.round(d / 60) + ' h'}`}</small>`;
+  document.getElementById('tqTs').innerHTML = `${hm(x.t)}<small>${x.r !== undefined ? (d >= -10 ? 'radar · ara' : `radar · hace ${-d} min`) : `previsió · ${d < 60 ? 'ara' : '+' + Math.round(d / 60) + ' h'}`}</small>`;
 }
 function tqStop() { clearInterval(tqPlayT); tqPlayT = 0; const b = document.getElementById('tqPlay'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>'; b.setAttribute('aria-label', 'Reproducir'); }
 function tqPlay() {
@@ -8427,7 +8453,7 @@ document.getElementById('tqSlide').addEventListener('input', e => { tqStop(); tq
 function tqLegend() {
   const el = document.getElementById('tqLeg');
   el.innerHTML = tqLy === 'clouds'
-    ? `<div class="bar">${[0, 25, 50, 75, 100].map(v => `<span style="background:rgba(235,235,235,${Math.pow(v / 100, 1.3) * .8 + .1});color:#111">${v}</span>`).join('')}</div><span class="u">% nubes</span>`
+    ? `<div class="bar">${[0, 25, 50, 75, 100].map(v => `<span style="background:rgba(235,235,235,${Math.pow(v / 100, 1.3) * .8 + .1});color:#111">${v}</span>`).join('')}</div><span class="u">% núvols</span>`
     : `<div class="bar">${[0.1, 0.5, 1, 2, 4, 8, 15].map(v => `<span style="background:${tqRgb(tqColor(TQ_RAIN, v))}">${v}</span>`).join('')}</div><span class="u">mm/h</span>`;
 }
 function tqWindy(on) {
@@ -8435,7 +8461,7 @@ function tqWindy(on) {
   box.hidden = !on;
   document.getElementById('tqMap').classList.toggle('windy', on);
   if (!on) return;
-  if (!navigator.onLine) { box.innerHTML = '<p class="msg">Sin conexión: la capa de Windy necesita internet.</p>'; return; }
+  if (!navigator.onLine) { box.innerHTML = '<p class="msg">Sense connexió: la capa de Windy necessita internet.</p>'; return; }
   const src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=${tqZ}&overlay=radar&product=ecmwf&level=surface&lat=${w.lat.toFixed(3)}&lon=${w.lon.toFixed(3)}&detailLat=${w.lat.toFixed(3)}&detailLon=${w.lon.toFixed(3)}&marker=true&message=true`;
   if (box.dataset.src !== src) { box.dataset.src = src; box.innerHTML = `<iframe title="Windy" src="${src}" loading="lazy" allow="fullscreen"></iframe>`; }
 }
@@ -8546,7 +8572,7 @@ function appsPaint() {
   safe('momentos', () => {
   const L = mkList(), n = L.length, last = L[L.length - 1];
   document.getElementById('ap-mk-big').textContent = String(n);
-  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Marcas para la edición';
+  document.getElementById('ap-mk').textContent = n ? `Última a las ${hm(last.t)}${last.n ? ' · ' + last.n : ''}` : 'Marques per a l’edició';
   });
   // Multicams: quantes graven i un punt per càmera
   safe('multi', () => {
@@ -8566,7 +8592,7 @@ function appsPaint() {
     const rv = tqLvOk(), wet = rv ? rv.here >= TQ_DBZ : (c.precipitation || 0) >= 0.1;
     document.getElementById('ap-tiempo-big').textContent = `${wet ? '🌧️' : e} ${tqDeg(c.temperature_2m)}`;
     const nx = tqHours().find(h => h.t > Date.now() && h.t < Date.now() + 6 * 3600000 && h.pp >= 50);
-    document.getElementById('ap-tiempo').textContent = rv && rv.here >= TQ_DBZ ? 'Llueve ahora (radar)' : rv && rv.eta ? (tqLvIn(rv, rv.eta) <= 2 ? 'Lluvia inminente (radar)' : `Lluvia en ~${tqLvIn(rv, rv.eta)} min (radar)`) : nx ? `Lluvia ${nx.pp} % a las ${hm(nx.t)}` : `${ds} · sin lluvia en 6 h`; }
+    document.getElementById('ap-tiempo').textContent = rv && rv.here >= TQ_DBZ ? 'Ara plou (radar)' : rv && rv.eta ? (tqLvIn(rv, rv.eta) <= 2 ? 'Pluja imminent (radar)' : `Pluja d’aquí a ~${tqLvIn(rv, rv.eta)} min (radar)`) : nx ? `Pluja ${nx.pp} % a les ${hm(nx.t)}` : `${ds} · sense pluja en 6 h`; }
   else if (!tqBusy) tqFetch();
   });
   // Sol: el proper canvi de llum
