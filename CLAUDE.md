@@ -1,12 +1,13 @@
-# Midnight App · Bass in the Park (web app d'horari en directe)
+# Midnight App (web app interna de l'equip als festivals de Midnight Group)
 
 Parla en català amb en Pau, curt i clar. **La UI de l'app és en castellà.**
 
 Web app per a iPhone (s'afegeix a la pantalla d'inici) que mostra qui punxa ara a cada escenari, l'hora en gran i una línia d'«ara» a la graella.
-Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05:00. Midnight Group en fa uns 12 l'any: l'app ha de poder servir per a altres festivals (el verd és només d'aquest; color a l'objecte `FEST`).
+Midnight Group fa uns 12 festivals l'any: l'app és genèrica i cada festival viu a `festivals/<id>/` (colors, escenaris i horari a l'objecte `FEST`).
+Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Guitet (Montmeló), 11:00–23:00, oberta a l'equip del 30-11 al 8-12. Anteriors: Bass in the Park (24-10), La Castanyada (31-10). `python3 festival.py` diu quin hi ha.
 
 ## On és
-- Web: https://paupuig92.github.io/midnight-webapp/ (repo `paupuig92/midnight-webapp`, Pages = `main` /docs)
+- Web: https://visualcrew.midnightgroup.app (repo `paupuig92/midnight-webapp`, públic; Pages = `main` /docs; l'adreça github.io vella redirigeix)
 - Artifact de Claude: https://claude.ai/artifact/Pkv7ffjrYcHsyXCdvwwvdd (republicar amb l'Artifact tool sobre `index.html`)
 - Servidor d'avisos: https://midnight-push.midnightgroup.workers.dev (Cloudflare Workers, pla GRATUÏT; en Pau no vol pagar)
 
@@ -14,19 +15,23 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
 | Fitxer | Què és |
 |---|---|
 | `index.html` | Tota l'app (HTML+CSS+JS, format artifact sense `<html>/<head>`). Font única. |
-| `build_web.py` | Genera `docs/`: HTML complet, manifest, `sw.js` (offline + push), `cartel.json`, token xifrat de l'editor, config de push. |
+| `build_web.py` | Genera `docs/`: HTML complet, manifest, `sw.js` (offline + push), `cartel.json` (dades del festival per al servidor), CSP i config de push. Talla l'app en compartiments (vegeu Robustesa). |
 | `publica-web.sh` | Build + **prova** (`prova/sintaxi.py`; i `prova/prova.js` si el Mac té node+Playwright) + commit + `pull --rebase` + push amb el token. **Així es publica.** Si la prova falla, no publica. |
+| `publica-commit.sh` | Publica des del Mac una versió preparada al núvol: baixa `index.html`, `i18n_ca.py` i el `festival.js` d'un commit i fa `publica-web.sh`. Només per a canvis que no toquen build_web/worker/vendor. |
+| `festival.py` | Llista els festivals, posa un festival a l'app (`festival.py <id>`) o desa l'actual (`--desa`). |
+| `i18n_ca.py` | Textos en català → `docs/ca.html`. |
+| `prova/sintaxi.py` | Comprova que tot el JavaScript es pot llegir (al Mac, amb el motor de Safari). |
 | `prova/prova.js` | Prova a Chromium (iPhone, sense xarxa externa): arrencada, rellotge, graella i totes les pestanyes sense errors. `--trenca=<part>` (`--sintaxi`) trenca una app a propòsit i comprova que el nucli continua; `--trenca=nucli` comprova la pantalla «Reparar»; `--pagina=ca`; `--captures=dir`. **Passar-la (i les `--trenca`) abans de demanar publicar.** |
 | `.github/workflows/prova-app.yml` | GitHub torna a fer la prova cada cop que canvia la web publicada; si falla, correu a en Pau. |
-| `docs/changes.json` | Canvis de l'organització (horari complet + «Aviso para todos»). L'escriu l'editor de l'app via API de GitHub. |
-| `push/worker.js` | Servidor: Durable Object SQLite (`Store`) amb els mòbils; cron cada minut; enviament en lots de 40 (`SELF` + `SEND_KEY`). S'atura sol després del 25-10 6:00 (`END`). |
+| `docs/changes.json` / `docs/tasks.json` | Canvis de l'organització (horari complet + «Aviso para todos»). L'escriu l'editor de l'app via API de GitHub. |
+| `push/worker.js` | Servidor: Durable Object SQLite (`Store`) amb els mòbils; cron cada minut; enviament en lots de 40 (`SELF` + `SEND_KEY`). S'atura sol una hora després del final de l'últim dia (`END`, calculat de `cartel.json`). |
 | `push/instala.sh` | Instal·la/actualitza el servidor via API de Cloudflare (sense wrangler). |
 | `push/claus.sh` | Claus VAPID (ja fetes). |
 | `push/retira-web-vella.sh` | (06-11) Retira el worker vell `midnight-app` (còpia del Bass): redirigeix a visualcrew i esborra el service worker dels mòbils que el tenien. Un sol cop, amb l'OK d'en Pau. |
 | `icons/make_icon.swift` | Icona vermella «MIDNIGHT APP» (com la de Midnight Suite). |
 | `festivals/<id>/` | Un festival per carpeta: `festival.js` (bloc FEST) + `img/` (banner, logos, fonts, il·lustracions). Ja no hi ha `img/` general. |
 
-## Dades
+## Dades (exemple: Bass in the Park, octubre 2026)
 - Noms i ordre: el cartell (definitiu). Hores exactes i importància: el full de Google https://docs.google.com/spreadsheets/d/1AVNK52llp2q5DbKVEEyUgZIkpxYmw-UW20bCTzUQI48
 - Importància per colors: vermell 5 > taronja 4 > groc/ocre 3 > verd 2 > blau 1. Sound System sense color.
 - Escenaris: No Es Ruido, Toxik Parties, Pont Aeri, Misa Psicodélika, Migats Sound System + Atracciones (12:00–01:00).
@@ -43,7 +48,7 @@ Festival: Bass in the Park, 24.10.2026, Montmeló (Espai Can Guitet), 12:00–05
   - «Ver con la cámara» (AR): càmera de darrere + camí del sol dibuixat (projecció estenopeica; camp de visió sobre el costat llarg de la imatge de la càmera tal com es veu amb object-fit: cover; per defecte 68° = càmera principal de l'iPhone, lliscador 60–140°, desat a `midnight-sol-fov-v2`; els 90–120° d'abans quadraven pel retard). Instruccions s'amaguen soles als 7 s (botó «i»); les hores que xoquen amb sortida/posta no s'escriuen, lliscador d'hora. Càmera i sensors s'aturen en tancar, canviar de pestanya o anar a fons. Sense càmera: cel dibuixat; sense sensors: vista fixa cap al sol (arrossegar). No ha calgut tocar la CSP (`srcObject` no hi passa).
 - **Microanimacions** (04-11, inspirades en bencho.dev; només transform/opacitat, res amb «Reducir movimiento»): `flap()` = el nom de l'artista gira i remena lletres en canviar de set; `roll()` = xifres que rodolen als «quedan» (files, targeta Quedan, Sol); ✓ de Mi plan es dibuixa i ratlla abans de marxar (`planHold`); avisos de l'organització (`toast(…,'org')`) van a la píndola negra de dalt (`island()`); «Guardar y publicar» de l'editor = llisca per publicar (`slideFor`, el botó real queda amagat); estirar avall a dalt de tot = recarregar canvis/tasques. Barra de «quedan» del que sona s'omple cada segon (`liveBars`/`setBar`, scaleX amb transició d'1 s); la graella llisca suau fins a la línia d'«ara» quan entra a la vista (`glideToNow`, IntersectionObserver).
 - Notificacions amb el mòbil bloquejat (iOS 16.4+, app a la pantalla d'inici): push sense contingut; el SW demana `/now`. Textos dels avisos (worker i sw.js) en castellà, com la UI (05-11). Avisos dels meus artistes (X min abans) i dels canvis/avisos de l'organització. Provat i funcionant el 22-10.
-- On viu (revisat 06-11): GitHub = codi + web (Pages, `main` /docs). Cloudflare = només el domini (CNAME visualcrew → paupuig92.github.io, núvol gris) i el servidor d'avisos. El pla B del servidor si l'API de GitHub falla és la mateixa web (`PAGES` = visualcrew), ja no el worker `midnight-app`. Ja no hi ha `docs/_headers` (GitHub Pages l'ignora).
+- On viu (revisat 06-11): GitHub = codi + web (Pages, `main` /docs). Cloudflare = només el domini (CNAME visualcrew → paupuig92.github.io, núvol gris) i el servidor d'avisos. El pla B del servidor si l'API de GitHub falla és la mateixa web (`PAGES` = visualcrew), ja no el worker `midnight-app`. Ja no hi ha `docs/_headers` (GitHub Pages l'ignora). Orígens acceptats pel servidor (11-11): només visualcrew i github.io (fora midnight-app i localhost). La prova de GitHub va amb Node 22.
 - Estat del servidor: `curl https://midnight-push.midnightgroup.workers.dev/` (nombre de mòbils). Detall: `/debug` amb capçalera `x-send-key` (llegir la clau des del fitxer amb un script, mai mostrar-la).
 
 ## Robustesa (06-11-2026, fil «Valorar estructura de l'app i fer-la robusta»)

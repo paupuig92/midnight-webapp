@@ -98,7 +98,6 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .sn, .mascot .mk, .upnext li.grp, .upnext .where, .blk .t, .legend { font-family: var(--mono); }
 .row .sn { font-size: 10px; font-weight: 500; letter-spacing: .06em; }
 .mascot .mk { font-size: 10px; font-weight: 500; letter-spacing: .08em; color: var(--ink); }
-.mascot .mk::after { content: " ↓"; color: var(--muted); }
 .upnext li.grp b { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .upnext li.grp span { color: var(--muted); font-size: 11px; }
 /* «Ahora suena»: targeta quadrada amb vora blanca fina, creus i una mica de llum des de dalt (el feix del cartell) */
@@ -148,6 +147,8 @@ body { background-image: radial-gradient(circle, rgba(255, 255, 255, .075) .8px,
 .row .dj { font-family: var(--title); font-stretch: 112%; letter-spacing: -.01em; }
 .clock, .minibar .mclock { font-stretch: 112%; }
 h2 { font-stretch: 115%; }
+/* (04-11, UI, punt entremig d'en Pau) creus i fletxes només a les seccions; les targetes (artista d'ara i «Quedan») van netes. Per tornar-les-hi, treure aquesta regla */
+.row.live, .mascot { --plus: none; --plus-dim: none; --plus-w: none; }
 `;
 // Mode clar (FEST.lightCss, només amb FEST.light): el mateix cartell en blanc. Creus i punts negres, logos blancs invertits a negre,
 // el banner invertit (fons clar, logo negre), la cúpula i el terra en versió fosca (img/deco-*-light.webp). El dissabte segueix blau
