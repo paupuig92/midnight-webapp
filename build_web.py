@@ -215,6 +215,10 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 # (18-11) Torna docs/_headers, ara per a Cloudflare Pages (GitHub Pages l'ignora i no fa cap mal): capçaleres de seguretat
 # que amb <meta> no es poden posar. Ningú pot ficar l'app dins d'una altra pàgina (X-Frame-Options) ni fer passar un fitxer per un altre tipus.
 (OUT / "_headers").write_text("/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n", encoding="utf-8")
+# (18-11) docs/404.html: sense aquest fitxer, Cloudflare Pages respon amb la pàgina de l'app (200) a QUALSEVOL adreça que no existeix
+# (una imatge que falta, un .json esborrat…). Amb ell, el que no existeix torna 404 de veritat, com a GitHub Pages.
+(OUT / "404.html").write_text('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>No encontrado</title>'
+    '<body style="font:16px system-ui;background:#0b0b0d;color:#eee;display:grid;place-items:center;min-height:100vh;margin:0"><p>Esta página no existe. <a href="./" style="color:#fff">Abrir la app</a></p></body></html>\n', encoding="utf-8")
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))
