@@ -23,6 +23,7 @@ Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Gui
 | `festival.py` | Llista els festivals, posa un festival a l'app (`festival.py <id>`) o desa l'actual (`--desa`). |
 | `i18n_ca.py` | Textos en català → `docs/ca.html`. |
 | `prova/sintaxi.py` | Comprova que tot el JavaScript es pot llegir (al Mac, amb el motor de Safari). |
+| `prova/servidor.mjs` | Prova del servidor d'avisos en un Cloudflare simulat (miniflare): login, passi del mòbil, mòbils falsos, fotos. |
 | `prova/prova.js` | Prova a Chromium (iPhone, sense xarxa externa): arrencada, rellotge, graella i totes les pestanyes sense errors. `--trenca=<part>` (`--sintaxi`) trenca una app a propòsit i comprova que el nucli continua; `--trenca=nucli` comprova la pantalla «Reparar»; `--pagina=ca`; `--captures=dir`. **Passar-la (i les `--trenca`) abans de demanar publicar.** |
 | `.github/workflows/prova-app.yml` | GitHub torna a fer la prova cada cop que canvia la web publicada; si falla, correu a en Pau. |
 | `docs/changes.json` / `docs/tasks.json` | Canvis de l'organització (horari complet + «Aviso para todos»). L'escriu l'editor de l'app via API de GitHub. |
@@ -55,6 +56,16 @@ Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Gui
 - **Codi d'equip** (09-11, en Pau): codi a part de la contrasenya d'admin que NOMÉS obre l'app fora de dates (no edita res). Secret `APP_CODE` del fitxer `~/.config/midnight-webapp/app-code` (opcional, ≥ 6 caràcters, diferent de l'admin; `instala.sh` s'atura si no). La pantalla fa `POST /gate/login` (mateixos límits que el login d'admin): codi d'equip → sessió `c.<exp>.<sig>` de 14 dies, desada al mòbil (`<key>-gate-v1`); contrasenya d'admin → sessió d'admin de 12 h (només a la memòria). Canviar el codi invalida totes les sessions d'equip. Una sessió d'equip mai serveix per a `/admin/*`.
 - Separació entre festivals (09-11): build_web s'atura si el `key` ja és d'un altre festival de `festivals/`; `/live` porta `fest` i l'app ignora un servidor d'un altre festival (web publicada sense `instala.sh`); la ubicació del Sol/Tiempo (`midnight-sol-v1`) es desa amb `fest` i no passa d'un festival a un altre; `FEST.geo = [lat, lon]` opcional = recinte si no hi ha mapa (abans de Montmeló).
 - Auditoria de seguretat 06-11: https://claude.ai/artifact/LsT9yW1puobBf8VnMS8W1a (color de càmera sense injecció, clau secreta de Momentos `mkUid` + prefix públic `mkPub`, límits per IP més baixos i IPv6 per /64, límit global de login).
+
+## Auditoria de ciberseguretat (18-11-2026, fil «Auditar ciberseguretat de l'app»)
+- Informe: https://claude.ai/artifact/PsnW6XTqyviXzyRnHw9fYr
+- **Passi del mòbil**: en entrar bé un cop (`/admin/login` o `/gate/login`) el servidor torna `k` i l'app el desa (`midnight-dev-v1`) i l'envia als logins següents. Amb passi, el mòbil no depèn del límit global (100 intents FALLATS/hora, `login:all`); el límit per adreça (10/15 min) continua. El passi no obre res. Canviar la contrasenya o el codi l'invalida.
+- **Mòbils falsos**: `subs.ok = 1` quan el servei de push ha acceptat algun avís (cron o `/test`). Amb la taula plena (600), un mòbil nou fa fora el més vell sense verificar; els verificats no es toquen.
+- `/incimg` torna `nosniff` i memòria cau privada. `instala.sh` ja no enllaça el KV vell `midnight-push-subs` (es pot esborrar).
+- `publica-web.sh` s'atura si a la carpeta hi ha fitxers nous que no són de l'app o documents/arxius/claus (el repositori és públic); `.gitignore` els exclou. `publica-commit.sh` comprova que el commit és d'una branca del repositori (GitHub també serveix commits de forks).
+- `prova/servidor.mjs`: prova del servidor en un Cloudflare simulat (`npm i --no-save miniflare@3 && node prova/servidor.mjs`). **Passar-la si es toca `push/worker.js`.**
+- Riscos acceptats per en Pau (no reobrir sense motiu nou): amb l'app oberta el servidor accepta qualsevol que en sàpiga l'adreça (fotos d'incidència per número, incidències falses); noms i tasques públics a `tasks.json`.
+- Pendent de decisió: posar el servidor sota domini propi + regla gratuïta de límit de peticions de Cloudflare (workers.dev no en té).
 
 ## Regles
 - **Abans de publicar (`publica-web.sh` o `push/instala.sh`) SEMPRE preguntar a en Pau** (28-10-2026).

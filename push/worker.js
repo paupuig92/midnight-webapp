@@ -144,6 +144,20 @@ async function okAppSession(env, s) {
   if (exp < Date.now() || exp > Date.now() + APP_SESSION + MIN) return false;
   return sameText(m[2], await signApp(env, exp));
 }
+// Passi del mòbil (18-11-2026): un mòbil que ja ha entrat bé un cop rep un passi i ja no depèn del límit global d'intents.
+// Abans, amb 3 adreces algú podia gastar els 100 intents/hora de tothom i ningú podia entrar a Organización.
+// El passi NO obre res: només salta el límit global (el límit per adreça continua). Canviar la contrasenya o el codi l'invalida.
+const devPass = async env => 'k.' + (await hmacHex(env.SEND_KEY, `dev|${env.ADMIN_PW || ''}|${env.APP_CODE || ''}`)).slice(0, 40);
+const LOGIN_ALL = ['login:all', 100, 60 * MIN];
+// Abans de mirar la contrasenya: límit per adreça (sempre) i, sense passi, que el límit global no estigui gastat
+async function loginGuard(env, ipLim, k) {
+  const rl = await callStore(env, '/rl', ipLim);
+  if (rl.error) return rl;
+  if (env.SEND_KEY && typeof k === 'string' && k.length < 80 && await sameText(k, await devPass(env))) return {};
+  return callStore(env, '/rl', { _rl: LOGIN_ALL, _peek: 1 });
+}
+// Només els intents fallats gasten el límit global
+const loginFail = env => callStore(env, '/rl', { _rl: LOGIN_ALL });
 async function okSession(env, s) {
   const m = typeof s === 'string' && s.match(/^(\d{10,16})\.([0-9a-f]{64})$/);
   if (!m || !env.ADMIN_PW || !env.SEND_KEY) return false;
@@ -324,16 +338,16 @@ const callStore = async (env, path, body) => {
 
 // Envia un lot (s'executa en una crida pròpia per tenir el seu propi límit de peticions)
 async function sendBatch(env, list) {
-  const gone = [];
+  const gone = [], good = [];   // good = mòbils que reben el seu primer avís (queden verificats)
   let ok = 0, ko = 0;
   await Promise.all(list.map(async t => {
     try {
       const st = await sendPush(env, t.endpoint);
       if (st === 404 || st === 410) gone.push(t.id);
-      else if (st >= 200 && st < 300) ok++; else ko++;
+      else if (st >= 200 && st < 300) { ok++; if (!t.v) good.push(t.id); } else ko++;
     } catch (e) { ko++; }
   }));
-  if (gone.length) await callStore(env, '/gone', { ids: gone });
+  if (gone.length || good.length) await callStore(env, '/gone', { ids: gone, ok: good });
   return { ok, ko, gone: gone.length };
 }
 
@@ -383,6 +397,9 @@ export class Store {
     // Vol rebre les incidències (per defecte, Producció)
     if (!cols.includes('inc')) this.sql.exec('ALTER TABLE subs ADD COLUMN inc INTEGER NOT NULL DEFAULT 0');
     if (!cols.includes('sol')) this.sql.exec('ALTER TABLE subs ADD COLUMN sol INTEGER NOT NULL DEFAULT 0');
+    // (18-11) ok = 1 quan el servei de push (Apple, Google…) ha acceptat algun avís per a aquest mòbil: és un mòbil de veritat.
+    // Si la taula s'omple (algú registrant mòbils falsos), un mòbil nou fa fora el més vell SENSE verificar; els de veritat no es toquen
+    if (!cols.includes('ok')) this.sql.exec('ALTER TABLE subs ADD COLUMN ok INTEGER NOT NULL DEFAULT 0');
     // Festival nou: s'esborren els mòbils i l'horari del festival anterior (els preferits d'un no valen per a l'altre)
     if (this.get('fest') !== CARTEL.fest) {
       this.sql.exec('DELETE FROM subs');
@@ -474,14 +491,17 @@ export class Store {
     const used = this.quota();
     if (Array.isArray(b._rl)) {
       const [k, max, win] = b._rl;
+      // _peek: només mira si el límit ja està gastat (no compta)
+      if (b._peek) { const r = this.rl.get(String(k).slice(0, 80)); return json(r && r.reset > Date.now() && r.n >= +max ? { error: 'slow' } : { ok: true }, 200); }
       if (!this.hit(String(k).slice(0, 80), +max, +win)) return json({ error: 'slow' }, 429);
       if (url.pathname === '/rl') return json({ ok: true });
     }
     if (url.pathname === '/sub') {
       const id = await idOf(b.endpoint);
-      let { favs, before, changes, yo, tb, team, inc, sol } = b;
+      let { favs, before, changes, yo, tb, team, inc, sol } = b, wasOk = 0;
       if (b.old && b.old !== b.endpoint) {
         const oldId = await idOf(b.old), prev = this.row(oldId);
+        if (prev && prev.ok) wasOk = 1;   // la renovació d'un mòbil ja verificat continua verificada
         // Renovació de la subscripció (pushsubscriptionchange): conserva les preferències del registre vell
         if (prev && favs === undefined) ({ favs, before, changes, yo, tb, team, inc, sol } = prev);
         this.sql.exec('DELETE FROM subs WHERE id = ?', oldId);
@@ -495,13 +515,22 @@ export class Store {
       const ni = inc === undefined ? (cur ? cur.inc || 0 : ne === 'prod' ? 1 : 0) : inc ? 1 : 0;
       const ns = sol === undefined ? (cur ? cur.sol || 0 : 0) : cleanSol(sol);
       if (cur && cur.endpoint === b.endpoint && JSON.stringify(cur.favs) === JSON.stringify(nf) && cur.before === nb && cur.changes === nc && cur.yo === ny && cur.tb === nt && (cur.team || '') === ne && (cur.inc || 0) === ni && (cur.sol || 0) === ns) return json({ ok: true, id, same: true });
-      if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) return json({ error: 'full' }, 429);
+      if (!cur && this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n >= MAX_SUBS) {
+        const out = this.sql.exec('SELECT id FROM subs WHERE ok = 0 ORDER BY at LIMIT 1').toArray()[0];
+        if (!out) return json({ error: 'full' }, 429);
+        this.sql.exec('DELETE FROM subs WHERE id = ?', out.id);
+      }
       this.upsert(id, b.endpoint, nf, nb, nc, Date.now(), ny, nt, ne, ni, ns);
+      if (wasOk) this.sql.exec('UPDATE subs SET ok = 1 WHERE id = ?', id);
       return json({ ok: true, id });
     }
     if (url.pathname === '/unsub') { this.sql.exec('DELETE FROM subs WHERE id = ?', await idOf(b.endpoint)); return json({ ok: true }); }
-    if (url.pathname === '/gone') { for (const id of b.ids || []) this.sql.exec('DELETE FROM subs WHERE id = ?', id); return json({ ok: true }); }
-    if (url.pathname === '/endpoint') { const r = this.row(b.id); return json({ endpoint: r ? r.endpoint : null }); }
+    if (url.pathname === '/gone') {
+      for (const id of b.ids || []) this.sql.exec('DELETE FROM subs WHERE id = ?', id);
+      for (const id of b.ok || []) this.sql.exec('UPDATE subs SET ok = 1 WHERE id = ? AND ok = 0', id);
+      return json({ ok: true });
+    }
+    if (url.pathname === '/endpoint') { const r = this.row(b.id); return json({ endpoint: r ? r.endpoint : null, v: r ? r.ok : 0 }); }
     if (url.pathname === '/count') return json({ n: this.sql.exec('SELECT COUNT(*) AS n FROM subs').one().n });
     if (url.pathname === '/debug') return json({ last: this.get('last'), sets: (this.get('sets') || {}).stamp || null, sent: this.get('sent'),
       subs: this.sql.exec('SELECT id, before, changes, at, favs FROM subs').toArray() });
@@ -623,7 +652,7 @@ export class Store {
       const incs = this.incSince(now - MIN);
       for (const sub of this.sql.exec('SELECT * FROM subs').toArray()) {
         const s = { ...sub, favs: JSON.parse(sub.favs), changes: !!sub.changes };
-        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length || dueInc(s, incs, now - MIN, now).length || dueSol(s, now - MIN, now).length) targets.set(s.id, s.endpoint);
+        if (dueFor(s, sch.all, now - MIN, now).length || dueTasks(s, tasks, now - MIN, now).length || dueInc(s, incs, now - MIN, now).length || dueSol(s, now - MIN, now).length) targets.set(s.id, s);
       }
       // Canvi de l'organització: només si l'horari publicat és més nou que el que ja s'havia vist
       if (fresh) {
@@ -640,10 +669,10 @@ export class Store {
             body: newNotice ? sch.notice.slice(0, 180) : 'La organización ha cambiado el horario.',
           };
           this.put('last', ev);
-          if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint, team FROM subs WHERE changes = 1').toArray()) if (!team || sub.team === team || schedChanged) targets.set(sub.id, sub.endpoint);
+          if (!ev.silent) for (const sub of this.sql.exec('SELECT id, endpoint, team, ok FROM subs WHERE changes = 1').toArray()) if (!team || sub.team === team || schedChanged) targets.set(sub.id, sub);
         }
       }
-      return json({ targets: [...targets].map(([id, endpoint]) => ({ id, endpoint })) });
+      return json({ targets: [...targets].map(([id, s]) => ({ id, endpoint: s.endpoint, v: s.ok ? 1 : 0 })) });
     }
 
     if (url.pathname === '/now') {
@@ -687,12 +716,11 @@ export default {
       // la contrasenya d'admin, la sessió d'admin de sempre. Mateixos límits que el login d'admin (per IP + global)
       if (req.method === 'POST' && url.pathname === '/gate/login') {
         const b = await body(), pw = String(b.pw || '');
-        const rl = await callStore(env, '/rl', lim('login'));
+        const rl = await loginGuard(env, lim('login'), b.k);
         if (rl.error) return json(rl, 429, origin);
-        const rlg = await callStore(env, '/rl', { _rl: ['login:all', 100, 60 * MIN] });
-        if (rlg.error) return json(rlg, 429, origin);
-        if (env.APP_CODE && await sameText(pw, env.APP_CODE)) { const exp = Date.now() + APP_SESSION; return json({ session: `c.${exp}.${await signApp(env, exp)}`, role: 'team', exp }, 200, origin); }
-        if (env.ADMIN_PW && await sameText(pw, env.ADMIN_PW)) { const exp = Date.now() + SESSION; return json({ session: `${exp}.${await sign(env, exp)}`, role: 'admin', exp }, 200, origin); }
+        if (env.APP_CODE && await sameText(pw, env.APP_CODE)) { const exp = Date.now() + APP_SESSION; return json({ session: `c.${exp}.${await signApp(env, exp)}`, role: 'team', exp, k: await devPass(env) }, 200, origin); }
+        if (env.ADMIN_PW && await sameText(pw, env.ADMIN_PW)) { const exp = Date.now() + SESSION; return json({ session: `${exp}.${await sign(env, exp)}`, role: 'admin', exp, k: await devPass(env) }, 200, origin); }
+        await loginFail(env);
         return json({ error: 'pw' }, 401, origin);
       }
       // Lot d'enviament (només el pot cridar el mateix servidor)
@@ -730,7 +758,7 @@ export default {
         const rl = await callStore(env, '/rl', lim('incimg'));
         if (rl.error) return json(rl, 429, origin);
         const r = await store(env).fetch('https://store/incimg?n=' + encodeURIComponent(String(url.searchParams.get('n') || '').slice(0, 12)));
-        return new Response(r.body, { status: r.status, headers: { 'content-type': 'image/jpeg', 'cache-control': r.status === 200 ? 'public, max-age=31536000, immutable' : 'no-store', ...cors(origin) } });
+        return new Response(r.body, { status: r.status, headers: { 'content-type': 'image/jpeg', 'x-content-type-options': 'nosniff', 'cache-control': r.status === 200 ? 'private, max-age=31536000, immutable' : 'no-store', ...cors(origin) } });
       }
       // Una sola pregunta periòdica (incidències, càmeres, ✓, momentos)
       if (req.method === 'GET' && url.pathname === '/live') {
@@ -752,6 +780,7 @@ export default {
         if (r.error) return json(r, errStatus(r), origin);
         if (!r.endpoint) return json({ error: 'nosub' }, 404, origin);
         const st = await sendPush(env, r.endpoint);
+        if (st >= 200 && st < 300 && !r.v) await callStore(env, '/gone', { ids: [], ok: [await idOf(b.endpoint)] });
         return json({ ok: st >= 200 && st < 300, status: st }, 200, origin);
       }
       // El service worker del mòbil pregunta què ha de mostrar
@@ -770,14 +799,13 @@ export default {
         if (!env.ADMIN_PW || !env.GH_TOKEN) return json({ error: 'off' }, 503, origin);
         const b = await body();
         if (url.pathname === '/admin/login') {
-          const rl = await callStore(env, '/rl', lim('login'));
+          // Límit per IP + límit global de 100 intents FALLATS/hora entre tothom (frena qui canvia d'IP);
+          // un mòbil amb passi (ja ha entrat bé abans) no depèn del global: ningú el pot deixar fora
+          const rl = await loginGuard(env, lim('login'), b.k);
           if (rl.error) return json(rl, 429, origin);
-          // A més del límit per IP, un límit global: 100 intents/hora entre tothom (frena qui canvia d'IP)
-          const rlg = await callStore(env, '/rl', { _rl: ['login:all', 100, 60 * MIN] });
-          if (rlg.error) return json(rlg, 429, origin);
-          if (!(await sameText(b.pw || '', env.ADMIN_PW))) return json({ error: 'pw' }, 401, origin);
+          if (!(await sameText(b.pw || '', env.ADMIN_PW))) { await loginFail(env); return json({ error: 'pw' }, 401, origin); }
           const exp = Date.now() + SESSION;
-          return json({ session: `${exp}.${await sign(env, exp)}`, exp }, 200, origin);
+          return json({ session: `${exp}.${await sign(env, exp)}`, exp, k: await devPass(env) }, 200, origin);
         }
         const rl = await callStore(env, '/rl', lim('admin'));
         if (rl.error) return json(rl, 429, origin);

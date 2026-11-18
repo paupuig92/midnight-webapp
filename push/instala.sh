@@ -20,12 +20,9 @@ ACCT=$(cf $API/accounts | val 'd["result"][0]["id"] if d.get("result") else ""')
 [[ -n $ACCT ]] || { echo "El token no veu cap compte. Revisa els permisos del token."; exit 1; }
 echo "ok compte"
 
-# Espai de dades (KV)
-KV=$(cf "$API/accounts/$ACCT/storage/kv/namespaces?per_page=100" | val 'next((n["id"] for n in d["result"] if n["title"]=="midnight-push-subs"), "")')
-if [[ -z $KV ]]; then
-  KV=$(cf -X POST -H 'content-type: application/json' --data '{"title":"midnight-push-subs"}' $API/accounts/$ACCT/storage/kv/namespaces | val 'd["result"]["id"]')
-  echo "ok dades creades"
-fi
+# (18-11-2026) L'espai de dades antic (KV «midnight-push-subs», del Bass in the Park) ja no s'enllaça ni es crea:
+# les dades viuen al Durable Object. En Pau el pot esborrar del tauler de Cloudflare quan vulgui.
+KV=-
 
 # Clau secreta dels lots d'enviament (el servidor es crida a si mateix; ningú més pot fer servir /send)
 [[ -s $CONF/send-key ]] || { openssl rand -hex 24 > $CONF/send-key; chmod 600 $CONF/send-key; }
@@ -60,7 +57,6 @@ cartel = json.load(open(sys.argv[5]))
 code = open(sys.argv[6]).read().replace("/*CARTEL*/null/*CARTEL*/", json.dumps(cartel, ensure_ascii=False))
 open(sys.argv[7], "w").write(code)
 meta = {"main_module": "worker.js", "compatibility_date": "2024-09-23", "bindings": [
-  {"type": "kv_namespace", "name": "SUBS", "namespace_id": sys.argv[2]},
   {"type": "durable_object_namespace", "name": "STORE", "class_name": "Store"},
   {"type": "service", "name": "SELF", "service": "midnight-push"},
   {"type": "secret_text", "name": "VAPID_JWK", "text": json.dumps(v["jwk"])},

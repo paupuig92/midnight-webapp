@@ -20,6 +20,18 @@ if command -v node >/dev/null && NODE_PATH="$(npm root -g 2>/dev/null)" node -e 
   rc=0; NODE_PATH="$(npm root -g)" node prova/prova.js || rc=$?   # 1 = l'app falla; 2 = no s'ha pogut fer la prova (falta Chromium): es continua
   [[ $rc == 1 ]] && { echo "No s'ha publicat res: l'app no ha passat la prova."; exit 1; }
 fi
+# Seguretat (18-11-2026): el repositori és PÚBLIC i el que s'hi puja queda a l'historial per sempre. Abans, «git add -A»
+# publicava qualsevol fitxer que hi hagués a la carpeta (un Excel amb telèfons, un PDF, una còpia…). Ara, si hi ha un
+# fitxer nou que no és de l'app (o un document/arxiu a qualsevol lloc), s'atura i no publica res.
+NOUS=$(git ls-files --others --exclude-standard)
+ESTRANYS=$(print -r -- "$NOUS" | grep -vE '^(docs/|festivals/[^/]+/(festival\.js$|img/)|vendor/|prova/|push/|icons/|\.github/|[^/]+\.(py|sh|md|html)$)' || true)
+DOCS=$(print -r -- "$NOUS" | grep -iE '\.(xlsx?|ods|csv|numbers|pdf|docx?|pages|zip|tar|gz|tgz|7z|pem|key|p12|env|sqlite|db)$|(^|/)\.env|token|secret|password|contrasenya' || true)
+if [[ -n "$ESTRANYS$DOCS" ]]; then
+  echo "ATURAT: a la carpeta hi ha fitxers nous que no són de l'app. No s'ha publicat res (el repositori és públic)."
+  print -r -- "$ESTRANYS" "$DOCS" | grep . | sort -u | sed 's/^/   · /'
+  echo "Treu-los de la carpeta (o digues-li a Claude que són de l'app) i torna-ho a provar."
+  exit 1
+fi
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -q -m "Actualitza la web app" && echo "ok commit"

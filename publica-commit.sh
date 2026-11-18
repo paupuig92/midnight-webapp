@@ -8,6 +8,12 @@ set -e
 cd "$(dirname "$0")"
 C=${1:?"Falta el commit: ./publica-commit.sh <commit>"}; shift
 [[ $C =~ ^[0-9a-f]{7,40}$ ]] || { echo "Commit no vàlid: $C"; exit 1; }
+# Seguretat (18-11-2026): GitHub també serveix, sota l'adreça d'aquest repositori, commits fets en còpies (forks) d'altra gent.
+# Per això es comprova que el commit és de veritat d'una branca del repositori abans de baixar-ne res.
+git fetch -q https://github.com/paupuig92/midnight-webapp.git '+refs/heads/*:refs/remotes/publica-check/*' || { echo "ERROR: no s'ha pogut consultar GitHub. No s'ha publicat res."; exit 1; }
+FULL=$(git rev-parse --verify -q "$C^{commit}") || { echo "ATURAT: el commit $C no és de cap branca del repositori. No s'ha publicat res."; exit 1; }
+[[ -n "$(git branch -r --contains "$FULL" --list 'publica-check/*')" ]] || { echo "ATURAT: el commit $C no és de cap branca del repositori. No s'ha publicat res."; exit 1; }
+C=$FULL
 B=https://raw.githubusercontent.com/paupuig92/midnight-webapp/$C
 FEST=$(python3 -I -c "import re;s=open('index.html').read();print(re.search(r\"id: '([^']+)'\",s[s.index('==== FESTIVAL ===='):]).group(1))")
 files=(index.html i18n_ca.py "festivals/$FEST/festival.js" "$@")

@@ -1,3 +1,23 @@
 .DS_Store
 __pycache__/
 .claude/
+# Seguretat (18-11): el repositori és públic. Documents, arxius i claus no s'hi pugen mai.
+*.xlsx
+*.xls
+*.ods
+*.csv
+*.numbers
+*.pdf
+*.doc
+*.docx
+*.zip
+*.tar
+*.gz
+*.tgz
+*.pem
+*.key
+*.p12
+.env
+.env.*
+_copia-seguretat/
+node_modules/
