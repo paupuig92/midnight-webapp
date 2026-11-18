@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tilecache.rainviewer.com https://tile.openstreetmap.org https://midnight-push.midnightgroup.workers.dev; media-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com https://midnight-push.midnightgroup.workers.dev; frame-src https://embed.windy.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tilecache.rainviewer.com https://tile.openstreetmap.org https://push.midnightgroup.app; media-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://analisi.transparenciacatalunya.cat https://api.rainviewer.com https://push.midnightgroup.app; frame-src https://embed.windy.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#050608">
@@ -3393,7 +3393,7 @@ try {
 const yoPush = () => !!PROF && YO && YO !== '-' ? YO : '';
 function savePrefs() { try { localStorage.setItem(PKEY, JSON.stringify(prefs)); } catch (e) {} }
 // Amb el servidor de notificacions actiu, els avisos els envia ell (així no surten repetits)
-const PUSH = {"url": "https://midnight-push.midnightgroup.workers.dev", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
+const PUSH = {"url": "https://push.midnightgroup.app", "public": "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU"};
 let pushActive = false;
 async function sysNotify(title, body, tag) {
   if (sim !== null || !canNotify() || pushActive) return;
@@ -3918,7 +3918,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '18/11 13:41';
+const BUILD = '18/11 14:09';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 // Errors de l’app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {

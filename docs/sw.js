@@ -1,4 +1,4 @@
-const VERSION = 'bitp-9006cf74';
+const VERSION = 'bitp-80f6daea';
 const FILES = ['./', 'ca', 'manifest.webmanifest', 'icon-32.png', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   "img/duro-black-hangar-2026/Anybody.woff2", "img/duro-black-hangar-2026/MartianMono.woff2", "img/duro-black-hangar-2026/NimbusSanL-Bold.woff2", "img/duro-black-hangar-2026/NimbusSanL-BoldCond.woff2", "img/duro-black-hangar-2026/NimbusSanL-Regu.woff2", "img/duro-black-hangar-2026/banner.jpg", "img/duro-black-hangar-2026/carpa-3d.webp", "img/duro-black-hangar-2026/deco-dome-light.webp", "img/duro-black-hangar-2026/deco-dome.webp", "img/duro-black-hangar-2026/deco-floor-light.webp", "img/duro-black-hangar-2026/deco-floor.webp", "img/duro-black-hangar-2026/hangar.png", "img/duro-black-hangar-2026/logo-240.png", "img/duro-black-hangar-2026/logo-blackhangar.png", "img/duro-black-hangar-2026/logo-duro.png", "img/duro-black-hangar-2026/logo-makina.png", "vendor/three-0.170.0.module.min.js"];
 
@@ -9,7 +9,7 @@ self.addEventListener('install', e => {
 
 // Notificacions del servidor (també amb el mòbil bloquejat). El push arriba buit: es demana a PUSH_URL/now què mostrar.
 // 'midnight-meta' (no s'esborra en actualitzar l'app): què s'ha mostrat ja (per no repetir) i si s'ha demanat una prova.
-const PUSH_URL = "https://midnight-push.midnightgroup.workers.dev";
+const PUSH_URL = "https://push.midnightgroup.app";
 const PUSH_KEY = "BCFdLY7tYu_Ok-tS6wa2SMcfLgMAqNiA_rodGIhm8AOJSiIU7AJ5Q02TWbs-Sc6ZTD5ITQ3nHhNFUvbyMxKuGTU";
 const META = 'midnight-meta';
 async function metaGet(k, d) { try { const r = await (await caches.open(META)).match(k); return r ? await r.json() : d; } catch (e) { return d; } }
