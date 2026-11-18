@@ -5,7 +5,9 @@
 #   1. regenera docs/ i fa commit si hi ha canvis
 #   2. crea el repositori si encara no existeix
 #   3. puja la branca main
-#   4. activa GitHub Pages (main, /docs) si no ho està
+#   4. activa GitHub Pages (main, /docs) si no ho està (només mentre el repositori és públic)
+# (18-11-2026) Amb la web a Cloudflare Pages, el pas 3 ja la publica: Cloudflare veu el push i desplega docs/ en ~1 min.
+# Quan el repositori sigui privat, el pas 4 se salta sol (GitHub gratuït no té Pages per a repositoris privats).
 set -e
 cd "${0:A:h}"
 REPO=paupuig92/midnight-webapp
@@ -49,6 +51,7 @@ if [[ $code == 404 ]]; then
 elif [[ $code != 200 ]]; then
   echo "No s'ha pogut consultar el repositori (HTTP $code)"; exit 1
 fi
+PRIVAT=$(python3 -I -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("private") else "")' $PRIV/out 2>/dev/null || true)
 
 # El token va per variable d'entorn (no surt a la línia d'ordres ni es guarda a .git/config)
 BASIC=$(print -rn -- "x-access-token:$(<$TOKEN_FILE)" | base64)
@@ -62,7 +65,7 @@ echo "ok sincronitzat"
 g push -q https://github.com/$REPO.git main || { echo "ERROR: GitHub ha rebutjat la pujada (potser l'organització acaba de publicar). Torna a executar l'script."; exit 1; }
 echo "ok push"
 
-code=$(api https://api.github.com/repos/$REPO/pages)
+[[ -n $PRIVAT ]] && code=privat || code=$(api https://api.github.com/repos/$REPO/pages)
 if [[ $code == 404 ]]; then
   code=$(api -X POST https://api.github.com/repos/$REPO/pages -d '{"source":{"branch":"main","path":"/docs"}}')
   [[ $code == 201 ]] && echo "ok Pages activat" || echo "No s'ha pogut activar Pages (HTTP $code): fes-ho a Settings → Pages"

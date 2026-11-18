@@ -24,6 +24,11 @@
 // escriuen). El cron llegeix changes.json i tasks.json de l'API de GitHub amb ETag (no gasta peticions de Cloudflare) i
 // fora dels dies del festival només treballa cada 5 min. Fre d'emergència: passades SLOW_AT peticions en un dia, /live
 // diu als mòbils que preguntin cada 5 min (els avisos push continuen igual).
+//
+// Horari i tasques servits des d'aquí (18-11-2026, per moure la web a Cloudflare Pages i fer privat el repositori):
+// GET /doc/changes.json i /doc/tasks.json tornen l'última còpia (es guarda al Durable Object; es refresca de GitHub com a
+// molt cada DOC_FRESH, i a l'instant quan l'organització publica). /live porta «d» (una empremta de cada fitxer): l'app
+// només els torna a baixar quan l'empremta canvia. Així un canvi arriba en ~1 min i no depèn de cap reconstrucció de la web.
 
 const CARTEL = /*CARTEL*/null/*CARTEL*/;
 // La web de debò (GitHub Pages amb el domini propi): pla B si l'API de GitHub falla, i «sub» dels avisos.
@@ -31,7 +36,8 @@ const CARTEL = /*CARTEL*/null/*CARTEL*/;
 const PAGES = 'https://visualcrew.midnightgroup.app/';
 // github.io es manté perquè els mòbils que tenien l'adreça antiga encara puguin parlar amb el servidor.
 // (11-11) Fora midnight-app (ara només redirigeix a visualcrew) i localhost de proves.
-const ORIGINS = ['https://visualcrew.midnightgroup.app', 'https://paupuig92.github.io'];
+// (18-11) + l'adreça de proves de Cloudflare Pages (abans de passar-hi el domini de debò)
+const ORIGINS = ['https://visualcrew.midnightgroup.app', 'https://paupuig92.github.io', 'https://midnight-webapp.pages.dev'];
 const PUSH_HOSTS = /(^|\.)(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)$/;
 const MIN = 60000;
 const BATCH = 40, MAX_SUBS = 600;
@@ -77,9 +83,14 @@ const sameFest = c => (c.fest || 'bass-in-the-park-2026') === CARTEL.fest;
 
 const REPO = 'paupuig92/midnight-webapp';
 const ADMIN_FILES = ['docs/changes.json', 'docs/tasks.json'];
+// Els dos fitxers que l'app llegeix del servidor (GET /doc/<nom>) i la lletra amb què surten a /live («d»)
+const DOCS = { 'changes.json': 'c', 'tasks.json': 't' };
+const DOC_FRESH = 90000;      // si fa més d'això que no es mira GitHub, es torna a mirar (amb ETag: si no ha canviat, no costa res)
+const DOC_HOLD = 2 * MIN;     // després de publicar des de l'editor, GitHub encara pot tornar el fitxer d'abans: no se'n fa cas
+const DOC_MAX = 400000;
 const SESSION = 12 * 3600000;
 const cors = origin => ORIGINS.includes(origin)
-  ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-s', 'vary': 'origin' }
+  ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-s', 'access-control-expose-headers': 'x-doc', 'vary': 'origin' }
   : {};
 const json = (data, status = 200, origin = '') => new Response(JSON.stringify(data), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...cors(origin) },
@@ -117,7 +128,7 @@ function dueInc(sub, list, from, to) {
 // Límits per IP: [nom, peticions, finestra]. Generosos: a la festa molts mòbils poden compartir IP (4G).
 const LIM = {
   sub: ['sub', 20, 10 * MIN], test: ['test', 10, 10 * MIN], now: ['now', 400, 10 * MIN], done: ['done', 200, 10 * MIN],
-  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 300, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 200, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
+  doneall: ['doneall', 1500, 10 * MIN], mc: ['mc', 300, 10 * MIN], mcall: ['mcall', 1500, 10 * MIN], mclog: ['mclog', 300, 10 * MIN], inc: ['inc', 20, 10 * MIN], incst: ['incst', 200, 10 * MIN], incall: ['incall', 1500, 10 * MIN], mk: ['mk', 200, 10 * MIN], mkall: ['mkall', 600, 10 * MIN], incimg: ['incimg', 300, 10 * MIN], live: ['live', 600, 10 * MIN], doc: ['doc', 300, 10 * MIN], count: ['count', 60, 10 * MIN], login: ['login', 10, 15 * MIN], admin: ['admin', 200, 10 * MIN],
 };
 const SLOW_AT = 70000;   // peticions al dia (de les 100.000 del pla gratuït) a partir de les quals els mòbils van a poc a poc
 const LIVE_PARTS = ['inc', 'mc', 'done', 'mk'];
@@ -240,10 +251,23 @@ async function readDoc(env, name) {
     return r.ok ? { status: 200, data: await r.json() } : { status: r.status };
   } catch (e) { return { status: 0 }; }
 }
+// El text tal com el rebrà l'app ('' = el fitxer no existeix). null = no s'ha pogut llegir
+const docText = r => r.status === 200 ? JSON.stringify(r.data) : r.status === 404 ? '' : null;
+// GET /doc/<nom>: la còpia del Durable Object si és recent; si no, es mira GitHub i es desa
+async function serveDoc(env, name, rl) {
+  let d = await callStore(env, '/docget', { name, ...rl });
+  if (d.error) return d;
+  if (!d.fresh) {
+    const text = docText(await readDoc(env, name));
+    if (text !== null && text.length <= DOC_MAX) d = await callStore(env, '/docput', { docs: { [name]: text } }).then(r => r.docs[name]);
+  }
+  return d;
+}
 // Llegeix changes.json. Si GitHub no respon bé, torna null (s'usarà l'últim horari bo i no s'avisarà de cap canvi)
-async function fetchSchedule(env) {
+async function fetchSchedule(env, raw) {
   try {
     const r = await readDoc(env, 'changes.json');
+    if (raw) raw['changes.json'] = docText(r);
     if (r.status !== 200) return null;
     const c = r.data;
     if (!c || typeof c !== 'object' || typeof c.updated !== 'string') return null;
@@ -253,9 +277,10 @@ async function fetchSchedule(env) {
 }
 
 // Tasques: { list: [{ id, a, b, t, p: [qui] }] } (a i b ja en ms; p = les persones a qui toca, ja resoltes per l'app)
-async function fetchTasks(env) {
+async function fetchTasks(env, raw) {
   try {
     const r = await readDoc(env, 'tasks.json');
+    if (raw) raw['tasks.json'] = docText(r);
     if (r.status === 404) return { list: [], stamp: 'none' };
     if (r.status !== 200) return null;
     const c = r.data;
@@ -357,8 +382,9 @@ const BUSY_FROM = T(CARTEL.start) - 18 * 3600000;
 async function everyMinute(env, now) {
   if (now > END) return;
   if (now < BUSY_FROM && Math.floor(now / MIN) % 5) return;
-  const [fresh, tasks] = await Promise.all([fetchSchedule(env), fetchTasks(env)]);
-  const res = await callStore(env, '/tick', { now, fresh, tasks });
+  const raw = {};   // els mateixos fitxers, tal com els llegirà l'app (GET /doc/…): es desen de pas, sense cap crida més
+  const [fresh, tasks] = await Promise.all([fetchSchedule(env, raw), fetchTasks(env, raw)]);
+  const res = await callStore(env, '/tick', { now, fresh, tasks, docs: raw });
   const targets = res.targets || [];
   if (!targets.length) return;
   const chunks = [];
@@ -417,12 +443,34 @@ export class Store {
     this.rl = new Map();
     // /live: «ver» canvia amb cada canvi de dades; «cache» guarda la resposta de cada part fins que canvia
     this.boot = Date.now().toString(36); this.ver = 0; this.cache = {};
+    // Còpia de changes.json i tasks.json per a l'app: { text, h (empremta), at (quan s'ha mirat GitHub), hold }
+    this.docs = {};
     // Comptador de peticions del dia (UTC, com el pla gratuït). Es desa cada 100 per no gastar escriptures
     const q = this.get('quota') || {};
     this.qDay = q.day || ''; this.qN = q.n || 0;
     this.ready = state.blockConcurrencyWhile(() => this.importOld());
   }
   touch(part) { this.ver++; delete this.cache[part]; }
+  doc(name) {
+    if (!this.docs[name]) { const s = this.get('doc:' + name); this.docs[name] = s ? { text: s.text, h: s.h, at: 0, hold: 0 } : { text: null, h: '', at: 0, hold: 0 }; }
+    return this.docs[name];
+  }
+  // Desa els fitxers que han canviat (només llavors s'escriu a la base de dades). own = ve de l'editor (acabat de publicar)
+  async docPut(docs, own) {
+    const now = Date.now();
+    for (const [name, text] of Object.entries(docs || {})) {
+      if (!DOCS[name] || typeof text !== 'string' || text.length > DOC_MAX) continue;
+      const d = this.doc(name);
+      d.at = now;
+      if (!own && d.hold > now && text !== d.text) continue;   // GitHub encara torna el d'abans de la publicació
+      if (own) d.hold = now + DOC_HOLD;
+      if (text === d.text) continue;
+      d.text = text;
+      d.h = hex(await crypto.subtle.digest('SHA-256', te.encode(text))).slice(0, 12);
+      this.put('doc:' + name, { text, h: d.h });
+    }
+  }
+  docOut(name) { const d = this.doc(name); return { text: d.text, h: d.h, fresh: d.text !== null && Date.now() - d.at < DOC_FRESH }; }
   // Límit d'una taula sense llegir-la sencera: MAX(rowid) és una sola fila i mai és més petit que el nombre de files
   full(table, max) {
     if (this.sql.exec(`SELECT MAX(rowid) AS m FROM ${table}`).one().m < max) return false;
@@ -585,9 +633,18 @@ export class Store {
     if (url.pathname === '/mcall') return json({ mc: this.part('mc') });
     // Una sola pregunta periòdica de l'app: p = les parts que vol (inc, mc, done, mk), v = la versió que ja té.
     // Si no ha canviat res, només torna { v } (sense llegir la base de dades)
+    if (url.pathname === '/docget') return json(DOCS[b.name] ? this.docOut(b.name) : { error: 'bad' });
+    if (url.pathname === '/docput') {
+      await this.docPut(b.docs, !!b.own);
+      return json({ ok: true, docs: Object.fromEntries(Object.keys(b.docs || {}).filter(n => DOCS[n]).map(n => [n, this.docOut(n)])) });
+    }
     if (url.pathname === '/live') {
       const want = String(b.p || '').split(',').filter(x => LIVE_PARTS.includes(x));
       const v = `${this.boot}.${this.ver}`, out = { v, fest: CARTEL.fest };  // fest: l'app ignora un servidor d'un altre festival
+      // d = empremta de changes.json i tasks.json: quan canvia, l'app els torna a baixar (GET /doc/…)
+      const dd = {};
+      for (const [name, k] of Object.entries(DOCS)) { const h = this.doc(name).h; if (h) dd[k] = h; }
+      if (Object.keys(dd).length) out.d = dd;
       if (used > SLOW_AT) out.slow = 1;
       if (b.v === v) return json(out);
       for (const k of want) out[k] = this.part(k);
@@ -637,6 +694,7 @@ export class Store {
 
     if (url.pathname === '/tick') {
       const { now, fresh } = b;
+      if (b.docs) await this.docPut(Object.fromEntries(Object.entries(b.docs).filter(([, t]) => typeof t === 'string')));
       const sch = current(fresh);
       // Tasques: les fresques si n'hi ha; si GitHub falla, les últimes bones
       if (b.tasks) {
@@ -765,6 +823,18 @@ export default {
         const r = await callStore(env, '/live', { p: String(url.searchParams.get('p') || '').slice(0, 40), v: String(url.searchParams.get('v') || '').slice(0, 40), ...lim('live') });
         return json(r, errStatus(r), origin);
       }
+      // Horari i tasques per a l'app (públics, com quan eren a la web). 404 «nodoc» = el fitxer no existeix
+      if (req.method === 'GET' && url.pathname.startsWith('/doc/')) {
+        const name = url.pathname.slice(5);
+        if (!DOCS[name]) return json({ error: 'not found' }, 404, origin);
+        const d = await serveDoc(env, name, lim('doc'));
+        if (d.error) return json(d, errStatus(d), origin);
+        if (d.text === null) return json({ error: 'github' }, 502, origin);
+        // x-doc = l'empremta (la mateixa de /live): l'app sap quina versió té i no la torna a demanar
+        const dh = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'x-doc': d.h || '', ...cors(origin) };
+        if (d.text === '') return new Response(JSON.stringify({ error: 'nodoc' }), { status: 404, headers: dh });
+        return new Response(d.text, { headers: dh });
+      }
       if (req.method === 'GET' && url.pathname === '/done') { const r = await callStore(env, '/doneall', lim('doneall')); return json(r, errStatus(r), origin); }
       if (req.method === 'POST' && (url.pathname === '/sub' || url.pathname === '/unsub')) {
         const b = await body();
@@ -821,6 +891,8 @@ export default {
             if (!ok) return json({ error: 'files' }, 400, origin);
             const msg = String(b.message || 'Cambios de la organización').replace(/[\r\n]+/g, ' ').slice(0, 200);
             const r = await ghCommit(env, files.map(f => ({ path: f.path, content: f.content })), msg);
+            // Publicat: els mòbils el veuen a la pregunta següent (/live), sense esperar GitHub ni la web
+            if (!r.error) await callStore(env, '/docput', { own: 1, docs: Object.fromEntries(files.map(f => [f.path.slice(5), JSON.stringify(JSON.parse(f.content))])) }).catch(() => {});
             return json(r, r.error ? 409 : 200, origin);
           }
         } catch (e) {

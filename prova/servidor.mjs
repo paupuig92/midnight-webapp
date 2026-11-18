@@ -12,7 +12,25 @@ const jwk = await c.subtle.exportKey('jwk', kp.privateKey);
 const mf = new Miniflare({ modules: true, script: code, compatibilityDate: '2024-09-23',
   durableObjects: { STORE: { className: 'Store', useSQLite: true } },
   bindings: { SEND_KEY: 'k'.repeat(48), ADMIN_PW: 'admin-secret-123', APP_CODE: '424242', GH_TOKEN: 'x', VAPID_JWK: JSON.stringify(jwk), VAPID_PUBLIC: 'pub' },
-  outboundService: req => new Response('', { status: req.url.includes('real') ? 201 : 400 }) });
+  outboundService: req => github(req) || new Response('', { status: req.url.includes('real') ? 201 : 400 }) });
+// GitHub de mentida: docs/changes.json i docs/tasks.json (amb ETag) i un commit que sempre va bé
+const GH = { 'changes.json': null, 'tasks.json': null, reads: 0, down: false };
+function github(req) {
+  const u = new URL(req.url);
+  if (u.hostname === 'visualcrew.midnightgroup.app') return new Response('', { status: 503 });
+  if (u.hostname !== 'api.github.com') return null;
+  if (GH.down) return new Response('', { status: 500 });
+  const m = u.pathname.match(/contents\/docs\/(.+)$/);
+  if (m && req.method === 'GET') {
+    GH.reads++;
+    const t = GH[m[1]];
+    if (t == null) return new Response('{}', { status: 404 });
+    const etag = '"' + t.length + '-' + t.slice(-30).replace(/\W/g, '') + '"';
+    if (req.headers.get('if-none-match') === etag) return new Response(null, { status: 304 });
+    return new Response(t, { headers: { etag, 'content-type': 'application/json' } });
+  }
+  return Response.json({ object: { sha: 'a' }, tree: { sha: 'b' }, sha: 'c' });
+}
 let n = 0, fail = 0;
 const ok = (c, m) => { n++; if (!c) { fail++; console.log('FALLA:', m); } else console.log('ok   ', m); };
 const call = (path, body, ip = '1.1.1.1', method) => mf.dispatchFetch('http://x' + path, { method: method || (body ? 'POST' : 'GET'), headers: { 'cf-connecting-ip': ip, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
@@ -58,5 +76,37 @@ r = await J(await call('/inc', { txt: 'prova', who: 'Pau', img }, '4.4.4.9')); o
 let f = await call('/incimg?n=1', null, '4.4.4.9'); ok(f.status === 200 && f.headers.get('x-content-type-options') === 'nosniff' && /private/.test(f.headers.get('cache-control')) && f.headers.get('content-type') === 'image/jpeg', 'foto: image/jpeg + nosniff + private');
 r = await J(await call('/inc', { txt: 'x', img: 'data:text/html;base64,PHNjcmlwdD4=' }, '4.4.4.9')); f = await call('/incimg?n=2', null, '4.4.4.9'); ok(f.status === 404, 'un fitxer que no és JPEG no es guarda');
 r = await J(await call('/live?p=inc,mc,done,mk', null, '4.4.4.9')); ok(r.s === 200 && r.inc.length === 2, '/live respon');
+
+// 4. Horari i tasques servits pel servidor (GET /doc/…) i empremta a /live
+const T = async r => ({ s: r.status, t: await r.text() });
+const cron = async () => (await mf.dispatchFetch('http://x/cdn-cgi/mf/scheduled?time=' + Math.floor(Date.now() / 300000) * 300000)).text();   // abans del festival el cron només treballa cada 5 min
+r = await J(await call('/doc/secret.json', null, '4.5.0.1')); ok(r.s === 404 && r.error === 'not found', '/doc només serveix els 2 fitxers');
+r = await J(await call('/doc/changes.json', null, '4.5.0.1')); ok(r.s === 404 && r.error === 'nodoc', 'sense fitxer a GitHub: 404 nodoc');
+const ch = u => JSON.stringify({ v: 1, fest: cartel.fest, updated: u, notice: 'hola ' + u, sets: null }, null, 1);
+GH['changes.json'] = ch('2026-12-05T10:00:00.000Z');
+r = await T(await call('/doc/changes.json', null, '4.5.0.1')); ok(r.s === 404, 'dins dels 90 s no es torna a mirar GitHub');
+await cron();   // el cron de cada minut
+r = await T(await call('/doc/changes.json', null, '4.5.0.1')); ok(r.s === 200 && JSON.parse(r.t).updated === '2026-12-05T10:00:00.000Z', 'després del cron, /doc torna l\'horari de GitHub');
+let live = await J(await call('/live?p=inc', null, '4.5.0.2')); const h1 = live.d && live.d.c; ok(/^[0-9a-f]{12}$/.test(h1 || ''), '/live porta l\'empremta de l\'horari');
+live = await J(await call('/live?p=inc&v=' + live.v, null, '4.5.0.2')); ok(live.d && live.d.c === h1 && !live.inc, '/live sense canvis: resposta mínima amb la mateixa empremta');
+const reads = GH.reads;
+for (let i = 0; i < 20; i++) await call('/doc/changes.json', null, '4.5.1.' + i);
+ok(GH.reads === reads, '20 mòbils demanant l\'horari: cap lectura més a GitHub');
+// L'organització publica: els mòbils ho veuen a l'instant, encara que GitHub torni el fitxer d'abans
+const nou = ch('2026-12-05T11:00:00.000Z');
+r = await J(await call('/admin/commit', { s: sess, files: [{ path: 'docs/changes.json', content: nou }], message: 'prova' }, '9.9.9.1')); ok(r.s === 200 && r.ok, 'l\'editor publica');
+r = await T(await call('/doc/changes.json', null, '4.5.0.3')); ok(JSON.parse(r.t).updated === '2026-12-05T11:00:00.000Z', '/doc ja torna l\'horari nou');
+live = await J(await call('/live?p=inc', null, '4.5.0.2')); ok(live.d.c && live.d.c !== h1, '/live canvia d\'empremta');
+await cron();   // GitHub encara diu el d'abans
+r = await T(await call('/doc/changes.json', null, '4.5.0.3')); ok(JSON.parse(r.t).updated === '2026-12-05T11:00:00.000Z', 'GitHub endarrerit no fa tornar enrere l\'horari');
+GH.down = true;
+await cron();
+r = await T(await call('/doc/changes.json', null, '4.5.0.4')); ok(r.s === 200 && JSON.parse(r.t).updated === '2026-12-05T11:00:00.000Z', 'amb GitHub caigut, /doc torna l\'última còpia bona');
+GH.down = false;
+r = await call('/doc/changes.json', null, '4.5.0.4'); ok(r.headers.get('cache-control') === 'no-store' && /json/.test(r.headers.get('content-type')), '/doc: JSON i sense memòria cau');
+live = await J(await call('/live?p=inc', null, '4.5.0.2')); ok(r.headers.get('x-doc') === live.d.c && live.d.t, '/doc porta la mateixa empremta que /live (x-doc)');
+r = await mf.dispatchFetch('http://x/doc/tasks.json', { headers: { origin: 'https://visualcrew.midnightgroup.app', 'cf-connecting-ip': '4.5.0.5' } }); ok(r.headers.get('access-control-allow-origin') === 'https://visualcrew.midnightgroup.app', '/doc accepta la web de l\'app (CORS)'); await r.text();
+let s429 = 0; for (let i = 0; i < 320; i++) { const x = await call('/doc/changes.json', null, '4.5.9.9'); if (x.status === 429) s429++; await x.text(); }
+ok(s429 >= 15 && s429 <= 25, `/doc té límit per adreça (${s429} de 320 frenades)`);
 console.log(`\n${n - fail}/${n} proves bé`);
 await mf.dispose(); process.exit(fail ? 1 : 0);

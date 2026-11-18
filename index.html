@@ -5039,7 +5039,28 @@ function fetchT(url, opts = {}, ms = 10000) {
   const timer = setTimeout(() => ac.abort(), ms);
   return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(timer));
 }
-// Després de publicar, durant uns minuts GitHub encara pot servir el changes.json d'abans: no s'ha d'aplicar
+// Horari i tasques (18-11-2026): l'app els demana al servidor d'avisos (GET /doc/changes.json i /doc/tasks.json), que en té
+// sempre l'última còpia (també amb el repositori privat). /live porta una empremta de cada fitxer («d»): mentre no canvia,
+// no es tornen a baixar. Si el servidor no respon (o encara no té la versió nova), es llegeix la còpia de la mateixa web
+// com abans, però una còpia MÉS VELLA que la que ja es té no s'aplica mai (la web pot anar uns minuts endarrerida).
+const docLive = { c: '', t: '' }, docGot = { c: '', t: '' }, docAt = { c: 0, t: 0 };
+let liveOk = 0;
+// true = /live està viu i diu que aquest fitxer no ha canviat: no cal tornar-lo a baixar (igualment, un cop cada 15 min)
+const docQuiet = k => !!docLive[k] && docLive[k] === docGot[k] && Date.now() - liveOk < 6 * MIN && Date.now() - docAt[k] < 15 * MIN;
+const docOlder = (a, b) => { const x = Date.parse(a), y = Date.parse(b); return x < y; };   // dates ISO; 'cartel' o buit = no se sap (false)
+async function fetchDoc(name, k) {
+  if (PUSH && PUSH.url) {
+    const seen = docLive[k];
+    try {
+      const r = await fetchT(`${PUSH.url}/doc/${name}`, { cache: 'no-store' }, 8000);
+      let nodoc = false;
+      if (r.status === 404) try { nodoc = (await r.clone().json()).error === 'nodoc'; } catch (e) {}
+      if (r.ok || nodoc) { docGot[k] = r.headers.get('x-doc') || seen; docAt[k] = Date.now(); return { r, web: false }; }
+    } catch (e) {}
+  }
+  return { r: await fetchT(`${name}?t=${Date.now()}`, { cache: 'no-store' }), web: true };
+}
+// Després de publicar, durant uns minuts la còpia de la web encara pot ser la d'abans: no s'ha d'aplicar
 let pubStamp = '', pubUntil = 0;
 let pulling = false, pullFails = 0;
 // Quan s'ha llegit changes.json per últim cop (hora real, no la del Modo prueba): surt a la línia d'estat
@@ -5057,13 +5078,14 @@ async function pullChanges() {
   if (!ONLINE || pulling) return;
   pulling = true;
   try {
-    const r = await fetchT(`changes.json?t=${Date.now()}`, { cache: 'no-store' });
+    const { r, web } = await fetchDoc('changes.json', 'c');
     pullFails = r.ok || r.status === 404 ? 0 : pullFails + 1;
     if (r.ok || r.status === 404) { lastSync = Date.now(); try { localStorage.setItem(SYNCK, String(lastSync)); } catch (e) {} }
     if (r.ok) {
       const d = await r.json();
       const st = d && String(d.updated || '');
       if (pubStamp && Date.now() < pubUntil && st !== pubStamp) { /* encara és el d'abans */ }
+      else if (web && docOlder(st, stamp)) { /* la còpia de la web va endarrerida: es queda el que ja es té */ }
       else {
         if (st === pubStamp) pubStamp = '';
         applyChanges(d);
@@ -6019,10 +6041,10 @@ let tkPub = '', tkPubUntil = 0;
 async function pullTasks() {
   if (!ONLINE) return;
   try {
-    const r = await fetchT(`tasks.json?t=${Date.now()}`, { cache: 'no-store' });
+    const { r, web } = await fetchDoc('tasks.json', 't');
     if (r.ok) {
       const d = await r.json();
-      if (okTasks(d) && !(tkPub && Date.now() < tkPubUntil && d.updated !== tkPub) && d.updated !== TASKS.updated) {
+      if (okTasks(d) && !(tkPub && Date.now() < tkPubUntil && d.updated !== tkPub) && d.updated !== TASKS.updated && !(web && docOlder(d.updated, TASKS.updated))) {
         applyTasks(d);
         try { localStorage.setItem(TKK, JSON.stringify(d)); } catch (e) {}
       }
@@ -6039,7 +6061,7 @@ setInterval(() => {
   if (m !== tkMin) { tkMin = m; if (sim === null) checkTaskAlerts(t); if (!document.getElementById('pGlobal').hidden) renderGlobal(); }
 }, 1000);
 let tkN = 0;
-setInterval(() => { if (!document.hidden && ++tkN % 2 === 0) pullTasks(); }, 60000);
+setInterval(() => { if (!document.hidden && ++tkN % 2 === 0 && !docQuiet('t')) pullTasks(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pullTasks(); });
 try { const c = JSON.parse(localStorage.getItem(TKK) || 'null'); if (okTasks(c)) applyTasks(c); } catch (e) {}
 paintYo();
@@ -8836,6 +8858,13 @@ async function livePull(force) {
     // (09-11) Si el servidor encara és d'un altre festival (s'ha publicat la web però no instala.sh), no se'n fa cas
     if (d.fest && d.fest !== FEST.id) { liveV = ''; return; }
     liveSlow = !!d.slow; liveV = d.v || ''; liveP = p;
+    // Horari i tasques: només es tornen a baixar si el servidor diu que han canviat
+    liveOk = Date.now();
+    if (d.d) {
+      docLive.c = String(d.d.c || ''); docLive.t = String(d.d.t || '');
+      if (docLive.c !== docGot.c) pullChanges();
+      if (docLive.t !== docGot.t) pullTasks();
+    }
     if (d.inc) safe('incidencias', () => incApply(d.inc));
     if (d.mc) safe('multi', () => mcApply(d.mc, t0));
     else if (p.includes('mc')) safe('multi', () => { mcAt = Date.now(); if (!Object.keys(mcOut).length && mcErr) { mcErr = ''; mcPaint(); } });
@@ -8847,7 +8876,8 @@ async function livePull(force) {
   } finally { liveBusy = false; }  // finally: si alguna cosa falla, /live no es queda bloquejat per sempre
 }
 // Mòbil oblidat amb l'app oberta (5 min sense tocar-lo): cada 3 min. En tornar a tocar, pregunta al moment
-const liveEvery = () => { const idle = Date.now() - liveTouch; return liveSlow ? 5 * MIN : TAB === 'multi' && idle < 2 * MIN ? 30000 : idle > 5 * MIN ? 3 * MIN : 60000; };
+// (18-11) En mode pantalla ningú toca res, però l'horari hi ha d'arribar al minut: no s'alenteix
+const liveEvery = () => { const idle = Date.now() - liveTouch; return liveSlow ? 5 * MIN : TAB === 'multi' && idle < 2 * MIN ? 30000 : idle > 5 * MIN && !tvOn ? 3 * MIN : 60000; };
 addEventListener('pointerdown', () => { const was = Date.now() - liveTouch; liveTouch = Date.now(); if (was > 5 * MIN && Date.now() - liveAt > 10000) livePull(); }, { capture: true, passive: true });
 setInterval(() => { if (!document.hidden && Date.now() - liveAt >= liveEvery() - 1000) livePull(); }, 5000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) return; liveTouch = Date.now(); if (Date.now() - liveAt > 10000) livePull(); });
@@ -8862,7 +8892,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { ti
 pullChanges();
 // Canvis: cada 3 min (els avisos ja arriben per push i en tornar a l'app es miren); en mode pantalla, cada minut
 let pullN = 0;
-setInterval(() => { if (!document.hidden && (tvOn || ++pullN % 3 === 0)) pullChanges(); }, 60000);
+// (18-11) Si /live està viu i diu que l'horari no ha canviat, no es torna a baixar
+setInterval(() => { if (!document.hidden && (tvOn || ++pullN % 3 === 0) && !docQuiet('c')) pullChanges(); }, 60000);
 
 // ==== Llisca per publicar (04-11-2026) ====
 // Els «Guardar y publicar» de l'editor es fan lliscant fins al final: un toc sense voler ja no publica (Pages: ~10 publicacions/hora).

@@ -96,8 +96,33 @@ URL="https://$NAME.$SUB.workers.dev"
 python3 -I -c 'import json,sys; v=json.load(open(sys.argv[1])); json.dump({"url": sys.argv[2], "public": v["public"]}, open(sys.argv[3], "w"))' $CONF/vapid.json $URL $CONF/push.json
 chmod 600 $CONF/push.json
 echo "ok adreça: $URL"
+resp=""
 for i in {1..12}; do
-  if curl -sS "$URL/" 2>/dev/null | grep -q midnight-push; then echo "ok el servidor respon"; exit 0; fi
+  if curl -sS "$URL/" 2>/dev/null | grep -q midnight-push; then echo "ok el servidor respon"; resp=1; break; fi
   sleep 5
 done
-echo "Instal·lat, però encara no respon (pot trigar un minut)."
+[[ -n $resp ]] || echo "Instal·lat, però encara no respon (pot trigar un minut)."
+
+# Domini propi (18-11-2026): https://push.midnightgroup.app. Sota el domini propi Cloudflare hi pot posar una regla
+# gratuïta de límit de peticions (a *.workers.dev no es pot). L'adreça de workers.dev continua funcionant: els mòbils
+# que encara tenen la versió d'abans de l'app hi segueixen parlant.
+# Només es fa servir a la web si respon de veritat: si no (falta el permís al token, o el certificat encara s'està fent),
+# tot queda com abans amb workers.dev i n'hi ha prou de tornar a executar aquest script més tard.
+DOM=push.midnightgroup.app
+ZONE=$(cf "$API/zones?name=midnightgroup.app" 2>/dev/null | val 'd["result"][0]["id"] if d.get("result") else ""' 2>/dev/null || true)
+if [[ -n $ZONE ]]; then
+  cf -X PUT -H 'content-type: application/json' --data "{\"hostname\":\"$DOM\",\"service\":\"$NAME\",\"environment\":\"production\",\"zone_id\":\"$ZONE\"}" "$API/accounts/$ACCT/workers/domains" > $PRIV/dom.json 2>/dev/null || true
+  ok < $PRIV/dom.json >/dev/null 2>&1 && echo "ok domini propi enllaçat: $DOM" || echo "avís: el token no ha pogut enllaçar $DOM (si ja està enllaçat des del tauler, no passa res)"
+else
+  echo "avís: el token no veu el domini midnightgroup.app (si $DOM ja està enllaçat des del tauler, no passa res)"
+fi
+for i in {1..6}; do
+  if curl -sS --max-time 8 "https://$DOM/" 2>/dev/null | grep -q midnight-push; then
+    python3 -I -c 'import json,sys; v=json.load(open(sys.argv[1])); json.dump({"url": sys.argv[2], "public": v["public"]}, open(sys.argv[3], "w"))' $CONF/vapid.json "https://$DOM" $CONF/push.json
+    chmod 600 $CONF/push.json
+    echo "ok l'app farà servir https://$DOM"
+    exit 0
+  fi
+  sleep 5
+done
+echo "El domini propi encara no respon: l'app continua amb $URL (res trencat)."
