@@ -1,7 +1,8 @@
 # Prova de l'app publicada (06-11-2026). Cada vegada que es publica una versió nova de la web (docs/index.html, ca.html o sw.js),
 # GitHub obre l'app a Chromium com un iPhone i passa per totes les pestanyes (prova/prova.js).
 # Si falla, GitHub envia un correu a en Pau: és el senyal per tornar a la versió anterior.
-# No es dispara amb els canvis d'horari o tasques de l'organització (changes.json / tasks.json). Gratuït (repositori públic).
+# No es dispara amb els canvis d'horari o tasques de l'organització (changes.json / tasks.json).
+# Gratuït: amb el repositori públic no té límit; amb el repositori privat, GitHub dona 2.000 minuts al mes i cada prova en gasta uns 5.
 name: Prova de l'app
 on:
   push:

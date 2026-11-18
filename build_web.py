@@ -212,6 +212,9 @@ page, page_ca = _imgref.sub(IMGURL, page), _imgref.sub(IMGURL, page_ca)
 (OUT / "index.html").write_text(page, encoding="utf-8")
 (OUT / "ca.html").write_text(page_ca, encoding="utf-8")
 # (06-11) Ja no es genera docs/_headers: GitHub Pages l'ignora. La CSP va amb <meta> i l'app demana changes/tasks amb ?t= i no-store.
+# (18-11) Torna docs/_headers, ara per a Cloudflare Pages (GitHub Pages l'ignora i no fa cap mal): capçaleres de seguretat
+# que amb <meta> no es poden posar. Ningú pot ficar l'app dins d'una altra pàgina (X-Frame-Options) ni fer passar un fitxer per un altre tipus.
+(OUT / "_headers").write_text("/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n", encoding="utf-8")
 if (OUT / "img").exists():
     shutil.rmtree(OUT / "img")
 shutil.copytree(IMG, OUT / "img" / FEST["id"], ignore=shutil.ignore_patterns(".*"))

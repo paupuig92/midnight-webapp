@@ -24,6 +24,7 @@ Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Gui
 | `i18n_ca.py` | Textos en català → `docs/ca.html`. |
 | `prova/sintaxi.py` | Comprova que tot el JavaScript es pot llegir (al Mac, amb el motor de Safari). |
 | `prova/servidor.mjs` | Prova del servidor d'avisos en un Cloudflare simulat (miniflare): login, passi del mòbil, mòbils falsos, fotos. |
+| `prova/horari.mjs` | Prova de punta a punta: l'app a Chromium parlant amb el servidor simulat (horari i tasques pel servidor, canvi en 1 min, servidor caigut). `npm i --no-save miniflare@3 playwright` + `python3 -I build_web.py` abans. |
 | `prova/prova.js` | Prova a Chromium (iPhone, sense xarxa externa): arrencada, rellotge, graella i totes les pestanyes sense errors. `--trenca=<part>` (`--sintaxi`) trenca una app a propòsit i comprova que el nucli continua; `--trenca=nucli` comprova la pantalla «Reparar»; `--pagina=ca`; `--captures=dir`. **Passar-la (i les `--trenca`) abans de demanar publicar.** |
 | `.github/workflows/prova-app.yml` | GitHub torna a fer la prova cada cop que canvia la web publicada; si falla, correu a en Pau. |
 | `docs/changes.json` / `docs/tasks.json` | Canvis de l'organització (horari complet + «Aviso para todos»). L'escriu l'editor de l'app via API de GitHub. |
@@ -66,6 +67,16 @@ Festival actual a l'app: **Duro / Black Hangar**, 5–6 des. 2026, Espai Can Gui
 - `prova/servidor.mjs`: prova del servidor en un Cloudflare simulat (`npm i --no-save miniflare@3 && node prova/servidor.mjs`). **Passar-la si es toca `push/worker.js`.**
 - Riscos acceptats per en Pau (no reobrir sense motiu nou): amb l'app oberta el servidor accepta qualsevol que en sàpiga l'adreça (fotos d'incidència per número, incidències falses); noms i tasques públics a `tasks.json`.
 - Pendent de decisió: posar el servidor sota domini propi + regla gratuïta de límit de peticions de Cloudflare (workers.dev no en té).
+
+## Web a Cloudflare Pages + repositori privat (18-11-2026, fil «Moure la web a Cloudflare Pages») — EN CURS
+Decisió d'en Pau (18-11): fer-ho abans del Duro, per fases, cadascuna amb el seu OK. Estat: **fase 1 (codi) feta i provada, NO publicada.**
+- **Horari i tasques pel servidor**: l'app demana `GET <servidor>/doc/changes.json` i `/doc/tasks.json` (públics, límit per IP). El servidor en guarda una còpia al Durable Object: la refresca de GitHub (amb token i ETag) com a molt cada 90 s (`DOC_FRESH`), de pas a cada cron, i **a l'instant** quan l'editor publica (`/admin/commit`; durant 2 min no fa cas de GitHub si encara torna el d'abans, `DOC_HOLD`). `/live` porta `d: { c, t }` (empremta de cada fitxer; `/doc` la porta a la capçalera `x-doc`): l'app només torna a baixar un fitxer quan l'empremta canvia (`docQuiet`), i igualment un cop cada 15 min. Sense `/live` (app tancada, sense parts) continua mirant cada 3 / 2 min.
+- **Pla B**: si el servidor no respon (o és la versió vella: 404 que no és `nodoc`), l'app llegeix `changes.json`/`tasks.json` de la mateixa web com abans, però no aplica mai una còpia MÉS VELLA que la que ja té (`docOlder`). Per això **Cloudflare Pages ha de continuar reconstruint també amb els commits de l'editor** (no excloure'ls a «build watch paths»; límit gratuït 500 builds/mes).
+- `publica-commit.sh` baixa amb `git` i el token (ja no de raw.githubusercontent, que no serveix repos privats). `publica-web.sh` salta sol el pas «activa GitHub Pages» si el repo és privat. `build_web.py` torna a generar `docs/_headers` (Cloudflare Pages: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`).
+- **Domini propi del servidor**: `instala.sh` intenta enllaçar `push.midnightgroup.app` i només el posa a `push.json` si respon; si no, tot segueix amb workers.dev. workers.dev es manté (mòbils amb la versió vella); la regla gratuïta de límit de peticions (1 regla, 10 s, per IP) només protegeix del tot quan workers.dev s'apagui (després del Duro).
+- Fases que falten: (1) publicar això a GitHub Pages: fusionar a main + `push/instala.sh` + `./publica-web.sh`; (2) projecte de Cloudflare Pages connectat al repo (carpeta `docs/`, sense build), provar a `midnight-webapp.pages.dev` (ja és a `ORIGINS`; si el nom surt diferent, canviar-lo) i passar-hi `visualcrew` (núvol taronja); (3) repo privat uns dies després; (4) regla de límit de peticions.
+- **Tornada enrere**: abans de fer privat el repo, tornar el CNAME `visualcrew` a `paupuig92.github.io` (núvol gris). Després: repo públic + reactivar Pages + CNAME (15–60 min pel certificat). No treure `docs/CNAME`.
+- No provat de veritat (només sintaxi/lògica): `instala.sh` (zsh + Cloudflare) i `publica-commit.sh` amb token. `~/.local/bin/publica-midnight` del Mac (fora del repo) baixa de raw.githubusercontent: deixarà de funcionar amb el repo privat → fer servir `./publica-commit.sh`.
 
 ## Regles
 - **Abans de publicar (`publica-web.sh` o `push/instala.sh`) SEMPRE preguntar a en Pau** (28-10-2026).
