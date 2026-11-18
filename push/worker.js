@@ -88,6 +88,8 @@ const DOCS = { 'changes.json': 'c', 'tasks.json': 't' };
 const DOC_FRESH = 90000;      // si fa més d'això que no es mira GitHub, es torna a mirar (amb ETag: si no ha canviat, no costa res)
 const DOC_HOLD = 2 * MIN;     // després de publicar des de l'editor, GitHub encara pot tornar el fitxer d'abans: no se'n fa cas
 const DOC_MAX = 400000;
+const DOC_RETRY = 30000;      // si no s'ha pogut llegir, no es torna a provar abans d'això
+const docStamp = t => { try { return Date.parse(JSON.parse(t).updated); } catch (e) { return NaN; } };
 const SESSION = 12 * 3600000;
 const cors = origin => ORIGINS.includes(origin)
   ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-s', 'access-control-expose-headers': 'x-doc', 'vary': 'origin' }
@@ -248,18 +250,22 @@ async function readDoc(env, name) {
   }
   try {
     const r = await fetch(`${PAGES}${name}?t=${Date.now()}`, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(6000) });
-    return r.ok ? { status: 200, data: await r.json() } : { status: r.status };
+    // web: true = ve de la web (pla B), que pot anar endarrerida: mai ha de trepitjar una còpia més nova (docPut)
+    return r.ok ? { status: 200, data: await r.json(), web: true } : { status: r.status };
   } catch (e) { return { status: 0 }; }
 }
 // El text tal com el rebrà l'app ('' = el fitxer no existeix). null = no s'ha pogut llegir
 const docText = r => r.status === 200 ? JSON.stringify(r.data) : r.status === 404 ? '' : null;
 // GET /doc/<nom>: la còpia del Durable Object si és recent; si no, es mira GitHub i es desa
+// Si GitHub i la web fallen, no es torna a provar a cada petició (gastaria el pla gratuït): s'espera DOC_RETRY
+const docFail = new Map();
 async function serveDoc(env, name, rl) {
   let d = await callStore(env, '/docget', { name, ...rl });
   if (d.error) return d;
-  if (!d.fresh) {
-    const text = docText(await readDoc(env, name));
-    if (text !== null && text.length <= DOC_MAX) d = await callStore(env, '/docput', { docs: { [name]: text } }).then(r => r.docs[name]);
+  if (!d.fresh && !(Date.now() - (docFail.get(name) || 0) < DOC_RETRY)) {
+    const r = await readDoc(env, name), text = docText(r);
+    if (text !== null && text.length <= DOC_MAX) { docFail.delete(name); d = await callStore(env, '/docput', { docs: { [name]: text }, web: r.web ? [name] : [] }).then(x => x.docs[name]); }
+    else docFail.set(name, Date.now());
   }
   return d;
 }
@@ -267,7 +273,7 @@ async function serveDoc(env, name, rl) {
 async function fetchSchedule(env, raw) {
   try {
     const r = await readDoc(env, 'changes.json');
-    if (raw) raw['changes.json'] = docText(r);
+    if (raw) { raw['changes.json'] = docText(r); if (r.web) raw.web.push('changes.json'); }
     if (r.status !== 200) return null;
     const c = r.data;
     if (!c || typeof c !== 'object' || typeof c.updated !== 'string') return null;
@@ -280,7 +286,7 @@ async function fetchSchedule(env, raw) {
 async function fetchTasks(env, raw) {
   try {
     const r = await readDoc(env, 'tasks.json');
-    if (raw) raw['tasks.json'] = docText(r);
+    if (raw) { raw['tasks.json'] = docText(r); if (r.web) raw.web.push('tasks.json'); }
     if (r.status === 404) return { list: [], stamp: 'none' };
     if (r.status !== 200) return null;
     const c = r.data;
@@ -382,7 +388,7 @@ const BUSY_FROM = T(CARTEL.start) - 18 * 3600000;
 async function everyMinute(env, now) {
   if (now > END) return;
   if (now < BUSY_FROM && Math.floor(now / MIN) % 5) return;
-  const raw = {};   // els mateixos fitxers, tal com els llegirà l'app (GET /doc/…): es desen de pas, sense cap crida més
+  const raw = { web: [] };   // els mateixos fitxers, tal com els llegirà l'app (GET /doc/…): es desen de pas, sense cap crida més
   const [fresh, tasks] = await Promise.all([fetchSchedule(env, raw), fetchTasks(env, raw)]);
   const res = await callStore(env, '/tick', { now, fresh, tasks, docs: raw });
   const targets = res.targets || [];
@@ -456,12 +462,14 @@ export class Store {
     return this.docs[name];
   }
   // Desa els fitxers que han canviat (només llavors s'escriu a la base de dades). own = ve de l'editor (acabat de publicar)
-  async docPut(docs, own) {
+  // web = noms que venen de la còpia de la web (pla B): si és més vella que la que ja es té (o no existeix), no s'aplica
+  async docPut(docs, own, web = []) {
     const now = Date.now();
     for (const [name, text] of Object.entries(docs || {})) {
       if (!DOCS[name] || typeof text !== 'string' || text.length > DOC_MAX) continue;
       const d = this.doc(name);
       d.at = now;
+      if (web.includes(name) && d.text && !(docStamp(text) >= docStamp(d.text))) continue;
       if (!own && d.hold > now && text !== d.text) continue;   // GitHub encara torna el d'abans de la publicació
       if (own) d.hold = now + DOC_HOLD;
       if (text === d.text) continue;
@@ -635,7 +643,7 @@ export class Store {
     // Si no ha canviat res, només torna { v } (sense llegir la base de dades)
     if (url.pathname === '/docget') return json(DOCS[b.name] ? this.docOut(b.name) : { error: 'bad' });
     if (url.pathname === '/docput') {
-      await this.docPut(b.docs, !!b.own);
+      await this.docPut(b.docs, !!b.own, Array.isArray(b.web) ? b.web : []);
       return json({ ok: true, docs: Object.fromEntries(Object.keys(b.docs || {}).filter(n => DOCS[n]).map(n => [n, this.docOut(n)])) });
     }
     if (url.pathname === '/live') {
@@ -694,7 +702,7 @@ export class Store {
 
     if (url.pathname === '/tick') {
       const { now, fresh } = b;
-      if (b.docs) await this.docPut(Object.fromEntries(Object.entries(b.docs).filter(([, t]) => typeof t === 'string')));
+      if (b.docs) await this.docPut(Object.fromEntries(Object.entries(b.docs).filter(([, t]) => typeof t === 'string')), false, Array.isArray(b.docs.web) ? b.docs.web : []);
       const sch = current(fresh);
       // Tasques: les fresques si n'hi ha; si GitHub falla, les últimes bones
       if (b.tasks) {
@@ -889,6 +897,8 @@ export default {
             const files = Array.isArray(b.files) ? b.files : [];
             const ok = files.length >= 1 && files.length <= ADMIN_FILES.length && files.every(f => f && ADMIN_FILES.includes(f.path) && typeof f.content === 'string' && (() => { try { JSON.parse(f.content); return true; } catch (e) { return false; } })());
             if (!ok) return json({ error: 'files' }, 400, origin);
+            // Un fitxer més gran que el que el servidor pot servir no es publica (si no, els mòbils no el rebrien mai)
+            if (files.some(f => JSON.stringify(JSON.parse(f.content)).length > DOC_MAX)) return json({ error: 'big' }, 413, origin);
             const msg = String(b.message || 'Cambios de la organización').replace(/[\r\n]+/g, ' ').slice(0, 200);
             const r = await ghCommit(env, files.map(f => ({ path: f.path, content: f.content })), msg);
             // Publicat: els mòbils el veuen a la pregunta següent (/live), sense esperar GitHub ni la web

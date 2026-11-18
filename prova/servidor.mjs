@@ -14,10 +14,10 @@ const mf = new Miniflare({ modules: true, script: code, compatibilityDate: '2024
   bindings: { SEND_KEY: 'k'.repeat(48), ADMIN_PW: 'admin-secret-123', APP_CODE: '424242', GH_TOKEN: 'x', VAPID_JWK: JSON.stringify(jwk), VAPID_PUBLIC: 'pub' },
   outboundService: req => github(req) || new Response('', { status: req.url.includes('real') ? 201 : 400 }) });
 // GitHub de mentida: docs/changes.json i docs/tasks.json (amb ETag) i un commit que sempre va bé
-const GH = { 'changes.json': null, 'tasks.json': null, reads: 0, down: false };
+const GH = { 'changes.json': null, 'tasks.json': null, reads: 0, down: false, web: null, webReads: 0 };
 function github(req) {
   const u = new URL(req.url);
-  if (u.hostname === 'visualcrew.midnightgroup.app') return new Response('', { status: 503 });
+  if (u.hostname === 'visualcrew.midnightgroup.app') { GH.webReads++; return GH.web ? new Response(GH.web, { headers: { 'content-type': 'application/json' } }) : new Response('', { status: 503 }); }
   if (u.hostname !== 'api.github.com') return null;
   if (GH.down) return new Response('', { status: 500 });
   const m = u.pathname.match(/contents\/docs\/(.+)$/);
@@ -102,7 +102,17 @@ r = await T(await call('/doc/changes.json', null, '4.5.0.3')); ok(JSON.parse(r.t
 GH.down = true;
 await cron();
 r = await T(await call('/doc/changes.json', null, '4.5.0.4')); ok(r.s === 200 && JSON.parse(r.t).updated === '2026-12-05T11:00:00.000Z', 'amb GitHub caigut, /doc torna l\'última còpia bona');
+// (revisió de seguretat 18-11) GitHub caigut i la web amb una còpia MÉS VELLA: no ha de tornar enrere; amb una de més nova, sí
+// (amb tasks.json: l'horari encara està dins dels 2 min de «acabat de publicar»)
+const tk = u => JSON.stringify({ v: 1, fest: cartel.fest, updated: u, people: [], list: [] });
+GH.down = false; GH['tasks.json'] = tk('2026-12-05T11:00:00.000Z'); await cron(); GH.down = true;
+GH.web = tk('2026-12-05T10:30:00.000Z'); await cron();
+r = await T(await call('/doc/tasks.json', null, '4.5.0.4')); ok(JSON.parse(r.t).updated === '2026-12-05T11:00:00.000Z', 'GitHub caigut + web més vella: no es torna enrere');
+GH.web = tk('2026-12-05T11:30:00.000Z'); await cron();
+r = await T(await call('/doc/tasks.json', null, '4.5.0.4')); ok(JSON.parse(r.t).updated === '2026-12-05T11:30:00.000Z', 'GitHub caigut + web més nova: s\'aplica');
+GH.web = null;
 GH.down = false;
+r = await J(await call('/admin/commit', { s: sess, files: [{ path: 'docs/changes.json', content: JSON.stringify({ x: 'a'.repeat(450000) }) }] }, '9.9.9.1')); ok(r.s === 413, 'un horari massa gran no es publica');
 r = await call('/doc/changes.json', null, '4.5.0.4'); ok(r.headers.get('cache-control') === 'no-store' && /json/.test(r.headers.get('content-type')), '/doc: JSON i sense memòria cau');
 live = await J(await call('/live?p=inc', null, '4.5.0.2')); ok(r.headers.get('x-doc') === live.d.c && live.d.t, '/doc porta la mateixa empremta que /live (x-doc)');
 r = await mf.dispatchFetch('http://x/doc/tasks.json', { headers: { origin: 'https://visualcrew.midnightgroup.app', 'cf-connecting-ip': '4.5.0.5' } }); ok(r.headers.get('access-control-allow-origin') === 'https://visualcrew.midnightgroup.app', '/doc accepta la web de l\'app (CORS)'); await r.text();
