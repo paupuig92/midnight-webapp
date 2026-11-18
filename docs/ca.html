@@ -3918,7 +3918,7 @@ prefInc.addEventListener('change', () => { prefs.inc = prefInc.checked; savePref
 document.addEventListener('change', e => { if (e.target.name === 'prof') setTimeout(() => { prefInc.checked = incOn(); syncPush(); }, 0); });
 
 // Actualitzar l'app a mà (des de la pantalla d'inici, l'iPhone la refresca poc)
-const BUILD = '11/11 10:23';
+const BUILD = '18/11 11:50';
 document.getElementById('appVer').textContent = BUILD ? `Versió del ${BUILD}.` : '';
 // Errors de l’app (XARXA DE SEGURETAT, 06-11-2026): els últims 30 d'aquest mòbil, amb data, hora i on
 function errPaint() {
@@ -5065,6 +5065,11 @@ let APP_S = null;
 try { APP_S = localStorage.getItem(GATEK); } catch (e) {}
 const appSOk = () => !!APP_S && /^c\.\d+\./.test(APP_S) && +String(APP_S).split('.')[1] > Date.now();
 const gateS = () => admOk() ? ADM_S : appSOk() ? APP_S : '';
+// Passi del mòbil (18-11): el servidor el dona en entrar bé un cop; amb ell, aquest mòbil no depèn del límit global d'intents
+// (ningú el pot deixar sense poder entrar a força de provar contrasenyes). No obre res per si sol.
+const DEVK = 'midnight-dev-v1';
+const devK = () => { try { return localStorage.getItem(DEVK) || ''; } catch (e) { return ''; } };
+const devKSet = k => { if (typeof k === 'string' && /^k\.[0-9a-f]{20,60}$/.test(k)) try { localStorage.setItem(DEVK, k); } catch (e) {} };
 function fetchT(url, opts = {}, ms = 10000) {
   if (gateS() && typeof PUSH !== 'undefined' && PUSH && PUSH.url && String(url).startsWith(PUSH.url) && !String(url).includes('/admin/'))
     opts = { ...opts, headers: { ...(opts.headers || {}), 'x-s': gateS() } };
@@ -5129,7 +5134,9 @@ async function adm(path, body) {
   return d;
 }
 async function unlock(pw) {
-  return (await adm('login', { pw })).session;
+  const d = await adm('login', { pw, k: devK() });
+  devKSet(d.k);
+  return d.session;
 }
 let token = null, draft = null, edStage = STAGES[0].id;
 // --- App tancada fora del festival (09-11-2026, en Pau) ---
@@ -5163,9 +5170,10 @@ function gatePaint() {
     bt.disabled = true; err.hidden = false; err.textContent = 'Comprovant…';
     try {
       // Un sol camp: el codi d'equip o la contrasenya d'admin (el servidor diu quin és)
-      const r = await fetchT(PUSH.url + '/gate/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pw: g.querySelector('#gatePw').value }), cache: 'no-store' }, 15000);
+      const r = await fetchT(PUSH.url + '/gate/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pw: g.querySelector('#gatePw').value, k: devK() }), cache: 'no-store' }, 15000);
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { err.textContent = d.error === 'pw' ? 'Codi incorrecte.' : r.status === 429 ? 'Massa intents, espera uns minuts.' : 'No s’ha pogut entrar (servidor ' + r.status + ').'; return; }
+      devKSet(d.k);
       if (d.role === 'admin') ADM_S = d.session;
       else { APP_S = d.session; try { localStorage.setItem(GATEK, APP_S); } catch (e) {} }
       gatePaint();
